@@ -459,10 +459,6 @@ const collectSlidePreloadTargets = (slide) => {
       if (media.poster && !media.poster.startsWith("blob:")) {
         targets.push({ kind: "image", src: media.poster });
       }
-      const src = getPrimaryMediaUrl(media);
-      if (src && !src.startsWith("blob:") && isDirectVideoSource(src)) {
-        targets.push({ kind: "video", src });
-      }
     }
   };
 
@@ -474,9 +470,6 @@ const collectSlidePreloadTargets = (slide) => {
   return targets.filter((target, index, list) => list.findIndex((item) => item.kind === target.kind && item.src === target.src) === index);
 };
 
-const preloadedVideoTargets = new Map();
-const PRELOADED_VIDEO_LIMIT = 12;
-
 const preloadMediaTarget = (target) => {
   if (!target?.src) return;
   if (target.kind === "image") {
@@ -484,27 +477,6 @@ const preloadMediaTarget = (target) => {
     image.decoding = "async";
     image.src = target.src;
     return;
-  }
-  if (target.kind !== "video" || typeof document === "undefined") return;
-  if (preloadedVideoTargets.has(target.src)) return;
-
-  const video = document.createElement("video");
-  video.preload = "auto";
-  video.muted = true;
-  video.playsInline = true;
-  video.src = target.src;
-  video.load();
-  preloadedVideoTargets.set(target.src, video);
-
-  if (preloadedVideoTargets.size > PRELOADED_VIDEO_LIMIT) {
-    const oldest = preloadedVideoTargets.keys().next().value;
-    const oldestVideo = preloadedVideoTargets.get(oldest);
-    if (oldestVideo) {
-      oldestVideo.pause();
-      oldestVideo.removeAttribute("src");
-      oldestVideo.load();
-    }
-    preloadedVideoTargets.delete(oldest);
   }
 };
 
@@ -599,6 +571,7 @@ const attemptInlineVideoPlayback = (video, preferredMuted, onMutedChange) => {
   if (playAttempt && typeof playAttempt.catch === "function") {
     playAttempt.catch(() => {
       if (preferredMuted) return;
+      const canRetryAudible = typeof navigator !== "undefined" && (navigator.userActivation?.hasBeenActive || navigator.userActivation?.isActive || hasUnlockedInlineAudio());
       try {
         video.defaultMuted = true;
         video.muted = true;
@@ -606,7 +579,16 @@ const attemptInlineVideoPlayback = (video, preferredMuted, onMutedChange) => {
       } catch (error) {}
       const mutedAttempt = video.play();
       if (mutedAttempt && typeof mutedAttempt.catch === "function") {
-        mutedAttempt.catch(() => {});
+        mutedAttempt.then(() => {
+          if (!canRetryAudible) return;
+          window.setTimeout(() => {
+            try {
+              video.defaultMuted = false;
+              video.muted = false;
+              if (typeof onMutedChange === "function") onMutedChange(false);
+            } catch (error) {}
+          }, 0);
+        }).catch(() => {});
       }
     });
   }
@@ -1194,6 +1176,8 @@ function App() {
   const activeSlideRatiosRef = useRef(new Map());
   const activeSlideFrameRef = useRef(null);
   const currentSlideRef = useRef(0);
+  const inlinePreviewRegistryRef = useRef(new Map());
+  const activeInlinePreviewOwnerRef = useRef("");
   const currentTheme = colorPalettes[currentSlide % colorPalettes.length] || colorPalettes[0];
   const slidesData = portfolioData.slides;
   const casesData = portfolioData.cases;
@@ -1228,6 +1212,40 @@ function App() {
     else slideSectionRefs.current.delete(index);
   };
 
+  const registerInlinePreviewController = (ownerId, stop) => {
+    inlinePreviewRegistryRef.current.set(ownerId, stop);
+    return () => {
+      inlinePreviewRegistryRef.current.delete(ownerId);
+      if (activeInlinePreviewOwnerRef.current === ownerId) {
+        activeInlinePreviewOwnerRef.current = "";
+      }
+    };
+  };
+
+  const stopActiveInlinePreview = (exceptOwnerId = "") => {
+    const activeOwnerId = activeInlinePreviewOwnerRef.current;
+    if (!activeOwnerId || activeOwnerId === exceptOwnerId) return;
+    const stop = inlinePreviewRegistryRef.current.get(activeOwnerId);
+    if (typeof stop === "function") stop();
+    if (activeInlinePreviewOwnerRef.current === activeOwnerId) {
+      activeInlinePreviewOwnerRef.current = "";
+    }
+  };
+
+  const activateInlinePreview = (ownerId) => {
+    if (!ownerId) return;
+    if (activeInlinePreviewOwnerRef.current !== ownerId) {
+      stopActiveInlinePreview(ownerId);
+      activeInlinePreviewOwnerRef.current = ownerId;
+    }
+  };
+
+  const clearActiveInlinePreview = (ownerId) => {
+    if (activeInlinePreviewOwnerRef.current === ownerId) {
+      activeInlinePreviewOwnerRef.current = "";
+    }
+  };
+
   useEffect(() => {
     currentSlideRef.current = currentSlide;
   }, [currentSlide]);
@@ -1235,9 +1253,13 @@ function App() {
   useEffect(() => {
     const unlockInlineAudio = () => markInlineAudioUnlocked();
     window.addEventListener("pointerdown", unlockInlineAudio, { passive: true });
+    window.addEventListener("wheel", unlockInlineAudio, { passive: true });
+    window.addEventListener("touchstart", unlockInlineAudio, { passive: true });
     window.addEventListener("keydown", unlockInlineAudio);
     return () => {
       window.removeEventListener("pointerdown", unlockInlineAudio);
+      window.removeEventListener("wheel", unlockInlineAudio);
+      window.removeEventListener("touchstart", unlockInlineAudio);
       window.removeEventListener("keydown", unlockInlineAudio);
     };
   }, []);
@@ -1994,7 +2016,8 @@ function App() {
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
     const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
     const directVideo = item && item.kind === "video" && isDirectVideoSource(videoSource);
-    const isInlinePlaybackActive = prefersHoverControls && isHovered;
+    const inlinePreviewOwnerId = `free:${slideIndex}:${element.id}`;
+    const shouldInlinePreviewPlay = directVideo && isInViewport && !showEditor && (prefersHoverControls ? isHovered : true);
     const mediaClassName = "relative z-10 h-full w-full object-cover object-center";
 
     const resetInlinePreview = (options = {}) => {
@@ -2010,6 +2033,11 @@ function App() {
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
     };
 
+    const stopOwnInlinePreview = (options = {}) => {
+      clearActiveInlinePreview(inlinePreviewOwnerId);
+      resetInlinePreview(options);
+    };
+
     const clearControlsTimer = () => {
       if (overlayTimerRef.current) {
         window.clearTimeout(overlayTimerRef.current);
@@ -2017,17 +2045,17 @@ function App() {
       }
     };
 
-    const scheduleControlsHide = (delay = 2200) => {
-      if (prefersHoverControls || showEditor) return;
+    const scheduleControlsHide = () => {
       clearControlsTimer();
-      overlayTimerRef.current = window.setTimeout(() => setShowPlaybackOverlay(false), delay);
     };
 
-    const revealControls = (delay = 2200) => {
+    const revealControls = () => {
       if (showEditor) return;
+      clearControlsTimer();
       setShowPlaybackOverlay(true);
-      if (!prefersHoverControls) scheduleControlsHide(delay);
     };
+
+    const resolvePreviewMutedPreference = () => prefersHoverControls ? shouldPreferMutedAutoplay() : true;
 
     const updatePlaybackState = (video) => {
       const safeCurrentTime = Number.isFinite(video?.currentTime) ? video.currentTime : 0;
@@ -2037,6 +2065,20 @@ function App() {
       setPlaybackProgress(safeDuration > 0 ? (safeCurrentTime / safeDuration) * 100 : 0);
     };
 
+    const startInlinePreview = (options = {}) => {
+      const forceDesktop = Boolean(options.forceDesktop);
+      const video = videoRef.current;
+      if (!video || !directVideo || showEditor || !isInViewport) return;
+      if (prefersHoverControls && !forceDesktop && !isHovered) return;
+      if (userPausedRef.current) return;
+      const preferredMuted = resolvePreviewMutedPreference();
+      activateInlinePreview(inlinePreviewOwnerId);
+      hoverPlaybackPendingRef.current = true;
+      setShowPlaybackOverlay(true);
+      setIsMuted(preferredMuted);
+      attemptInlineVideoPlayback(video, preferredMuted, setIsMuted);
+    };
+
     const toggleInlinePlayback = (event) => {
       if (event) event.stopPropagation();
       const video = videoRef.current;
@@ -2044,9 +2086,11 @@ function App() {
       revealControls();
       if (video.paused) {
         userPausedRef.current = false;
+        activateInlinePreview(inlinePreviewOwnerId);
         attemptInlineVideoPlayback(video, isMuted, setIsMuted);
       } else {
         userPausedRef.current = true;
+        clearActiveInlinePreview(inlinePreviewOwnerId);
         stopInlineVideoPlayback(video);
       }
     };
@@ -2055,7 +2099,10 @@ function App() {
       if (event) event.stopPropagation();
       const nextMuted = !isMuted;
       setIsMuted(nextMuted);
-      if (videoRef.current) videoRef.current.muted = nextMuted;
+      if (videoRef.current) {
+        videoRef.current.defaultMuted = nextMuted;
+        videoRef.current.muted = nextMuted;
+      }
       if (!nextMuted) markInlineAudioUnlocked();
       rememberInlineAudioPreference(nextMuted);
       revealControls();
@@ -2065,6 +2112,7 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       hoverPlaybackPendingRef.current = false;
+      clearActiveInlinePreview(inlinePreviewOwnerId);
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       setLightboxData(item);
     };
@@ -2137,7 +2185,15 @@ function App() {
       hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
       clearControlsTimer();
+      clearActiveInlinePreview(inlinePreviewOwnerId);
     }, [item, preferDraftPreview, videoSource]);
+
+    useEffect(() => {
+      if (!directVideo) return undefined;
+      return registerInlinePreviewController(inlinePreviewOwnerId, () => {
+        resetInlinePreview();
+      });
+    }, [directVideo, inlinePreviewOwnerId]);
 
     useEffect(() => {
       const node = rootRef.current;
@@ -2159,70 +2215,30 @@ function App() {
 
     useEffect(() => {
       if (!directVideo || !videoSource || showEditor || !isInViewport) return;
-      const key = `video:${videoSource}`;
-      if (!preloadedMediaRef.current.has(key)) {
-        preloadedMediaRef.current.add(key);
-        preloadMediaTarget({ kind: "video", src: videoSource });
-      }
       const video = videoRef.current;
       if (!video) return;
-      video.preload = "auto";
-      if (video.readyState < 2) {
+      video.preload = prefersHoverControls ? "metadata" : "auto";
+      if (video.readyState < (prefersHoverControls ? 1 : 2)) {
         try {
           video.load();
         } catch (error) {}
       }
-    }, [directVideo, isInViewport, showEditor, videoSource]);
+    }, [directVideo, isInViewport, prefersHoverControls, showEditor, videoSource]);
 
     useEffect(() => {
-      if (!item || item.kind !== "video") return;
-      if (!directVideo) return;
-      const video = videoRef.current;
-      if (!video) return;
-      if (showEditor || !isInViewport || !isInlinePlaybackActive) {
-        resetInlinePreview();
-        return;
+      if (!directVideo) return undefined;
+      if (!shouldInlinePreviewPlay) {
+        stopOwnInlinePreview();
+        return undefined;
       }
-      hoverPlaybackPendingRef.current = true;
-      setShowPlaybackOverlay(true);
-      video.preload = "auto";
-      const preferMutedPreview = shouldPreferMutedAutoplay();
-      setIsMuted(preferMutedPreview);
-      if (!userPausedRef.current) {
-        attemptInlineVideoPlayback(video, preferMutedPreview, setIsMuted);
-      }
-    }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
+      startInlinePreview();
+      return undefined;
+    }, [directVideo, shouldInlinePreviewPlay]);
 
     useEffect(() => () => {
       clearControlsTimer();
+      clearActiveInlinePreview(inlinePreviewOwnerId);
     }, []);
-
-    useEffect(() => {
-      if (currentSlide !== slideIndex && isHovered) {
-        setIsHovered(false);
-      }
-    }, [currentSlide, isHovered, slideIndex]);
-
-    useEffect(() => {
-      if (currentSlide === slideIndex) return;
-      resetInlinePreview();
-    }, [currentSlide, slideIndex]);
-
-    useEffect(() => {
-      if (!isHovered) return undefined;
-
-      const handlePointerMove = (event) => {
-        const rect = rootRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-        if (!inside) {
-          setIsHovered(false);
-        }
-      };
-
-      window.addEventListener("mousemove", handlePointerMove, true);
-      return () => window.removeEventListener("mousemove", handlePointerMove, true);
-    }, [isHovered]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2258,17 +2274,23 @@ function App() {
     return <div
         ref={rootRef}
         className="relative h-full w-full overflow-hidden rounded-[26px] border border-white/10 bg-black/25"
-        onMouseEnter={() => {
+        onPointerEnter={(event) => {
+          if (!prefersHoverControls || event.pointerType === "touch") return;
           setIsHovered(true);
-          if (prefersHoverControls) setShowPlaybackOverlay(true);
+          setShowPlaybackOverlay(true);
+          if (directVideo) startInlinePreview({ forceDesktop: true });
         }}
-      onMouseMove={() => {
-        if (prefersHoverControls) setShowPlaybackOverlay(true);
+      onPointerMove={(event) => {
+        if (!prefersHoverControls || event.pointerType === "touch") return;
+        if (!isHovered) setIsHovered(true);
+        setShowPlaybackOverlay(true);
+        if (directVideo && (videoRef.current?.paused ?? true)) startInlinePreview({ forceDesktop: true });
       }}
-      onMouseLeave={() => {
+      onPointerLeave={(event) => {
+        if (!prefersHoverControls || event.pointerType === "touch") return;
         setIsHovered(false);
-        if (prefersHoverControls) setShowPlaybackOverlay(false);
-        if (directVideo) resetInlinePreview();
+        setShowPlaybackOverlay(false);
+        if (directVideo) stopOwnInlinePreview();
       }}
       onDoubleClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }}
       onDragEnterCapture={handleDragEnter}
@@ -2312,16 +2334,15 @@ function App() {
         </label>
       </div>}
       {hasUsableMedia ? <>
-        {directVideo && item?.poster && !showEditor && !isInlinePlaybackActive && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
+        {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && isInViewport ? "auto" : "metadata"} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo ? (prefersHoverControls ? "metadata" : isInViewport ? "auto" : "metadata") : "metadata"} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) {
-                const preferMutedPreview = shouldPreferMutedAutoplay();
-                attemptInlineVideoPlayback(videoRef.current, preferMutedPreview, setIsMuted);
+              if (hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
+                startInlinePreview();
               }
             }
           }} onMediaError={() => {
@@ -2329,15 +2350,17 @@ function App() {
             setHasMediaError(true);
             setIsVideoReady(false);
             }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
+              hoverPlaybackPendingRef.current = false;
               setIsPlaying(true);
               revealControls();
             }} onVideoPause={() => {
+            hoverPlaybackPendingRef.current = false;
             setIsPlaying(false);
             if (!prefersHoverControls) scheduleControlsHide(2400);
           }} onVideoTimeUpdate={(event) => {
             updatePlaybackState(event.currentTarget);
             if (!prefersHoverControls) scheduleControlsHide(2400);
-          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && isInlinePlaybackActive} showPoster={!directVideo || !isInlinePlaybackActive || !isVideoReady || !prefersHoverControls} />
+          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && shouldInlinePreviewPlay} showPoster={!directVideo || !shouldInlinePreviewPlay || !isVideoReady} />
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
@@ -2411,7 +2434,8 @@ function App() {
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
     const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
     const directVideo = item && item.kind === "video" && isDirectVideoSource(videoSource);
-    const isInlinePlaybackActive = prefersHoverControls && isHovered;
+    const inlinePreviewOwnerId = `slot:${slideIndex}:${slotIndex}`;
+    const shouldInlinePreviewPlay = directVideo && isInViewport && !showEditor && (prefersHoverControls ? isHovered : true);
     const shouldContainMedia = slide?.id === 2 || slide?.title?.includes("个人简介");
     const mediaClassName = shouldContainMedia
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
@@ -2430,6 +2454,11 @@ function App() {
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
     };
 
+    const stopOwnInlinePreview = (options = {}) => {
+      clearActiveInlinePreview(inlinePreviewOwnerId);
+      resetInlinePreview(options);
+    };
+
     const clearControlsTimer = () => {
       if (overlayTimerRef.current) {
         window.clearTimeout(overlayTimerRef.current);
@@ -2437,17 +2466,17 @@ function App() {
       }
     };
 
-    const scheduleControlsHide = (delay = 2200) => {
-      if (prefersHoverControls || showEditor) return;
+    const scheduleControlsHide = () => {
       clearControlsTimer();
-      overlayTimerRef.current = window.setTimeout(() => setShowPlaybackOverlay(false), delay);
     };
 
-    const revealControls = (delay = 2200) => {
+    const revealControls = () => {
       if (showEditor) return;
+      clearControlsTimer();
       setShowPlaybackOverlay(true);
-      if (!prefersHoverControls) scheduleControlsHide(delay);
     };
+
+    const resolvePreviewMutedPreference = () => prefersHoverControls ? shouldPreferMutedAutoplay() : true;
 
     const updatePlaybackState = (video) => {
       const safeCurrentTime = Number.isFinite(video?.currentTime) ? video.currentTime : 0;
@@ -2457,6 +2486,20 @@ function App() {
       setPlaybackProgress(safeDuration > 0 ? (safeCurrentTime / safeDuration) * 100 : 0);
     };
 
+    const startInlinePreview = (options = {}) => {
+      const forceDesktop = Boolean(options.forceDesktop);
+      const video = videoRef.current;
+      if (!video || !directVideo || showEditor || !isInViewport) return;
+      if (prefersHoverControls && !forceDesktop && !isHovered) return;
+      if (userPausedRef.current) return;
+      const preferredMuted = resolvePreviewMutedPreference();
+      activateInlinePreview(inlinePreviewOwnerId);
+      hoverPlaybackPendingRef.current = true;
+      setShowPlaybackOverlay(true);
+      setIsMuted(preferredMuted);
+      attemptInlineVideoPlayback(video, preferredMuted, setIsMuted);
+    };
+
     const toggleInlinePlayback = (event) => {
       if (event) event.stopPropagation();
       const video = videoRef.current;
@@ -2464,9 +2507,11 @@ function App() {
       revealControls();
       if (video.paused) {
         userPausedRef.current = false;
+        activateInlinePreview(inlinePreviewOwnerId);
         attemptInlineVideoPlayback(video, isMuted, setIsMuted);
       } else {
         userPausedRef.current = true;
+        clearActiveInlinePreview(inlinePreviewOwnerId);
         stopInlineVideoPlayback(video);
       }
     };
@@ -2475,7 +2520,10 @@ function App() {
       if (event) event.stopPropagation();
       const nextMuted = !isMuted;
       setIsMuted(nextMuted);
-      if (videoRef.current) videoRef.current.muted = nextMuted;
+      if (videoRef.current) {
+        videoRef.current.defaultMuted = nextMuted;
+        videoRef.current.muted = nextMuted;
+      }
       if (!nextMuted) markInlineAudioUnlocked();
       rememberInlineAudioPreference(nextMuted);
       revealControls();
@@ -2485,6 +2533,7 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       hoverPlaybackPendingRef.current = false;
+      clearActiveInlinePreview(inlinePreviewOwnerId);
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       setLightboxData(item);
     };
@@ -2563,7 +2612,15 @@ function App() {
       hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
       clearControlsTimer();
+      clearActiveInlinePreview(inlinePreviewOwnerId);
     }, [item, preferDraftPreview, videoSource]);
+
+    useEffect(() => {
+      if (!directVideo) return undefined;
+      return registerInlinePreviewController(inlinePreviewOwnerId, () => {
+        resetInlinePreview();
+      });
+    }, [directVideo, inlinePreviewOwnerId]);
 
     useEffect(() => {
       const node = rootRef.current;
@@ -2585,72 +2642,30 @@ function App() {
 
     useEffect(() => {
       if (!directVideo || !videoSource || showEditor || !isInViewport) return;
-      const key = `video:${videoSource}`;
-      if (!preloadedMediaRef.current.has(key)) {
-        preloadedMediaRef.current.add(key);
-        preloadMediaTarget({ kind: "video", src: videoSource });
-      }
       const video = videoRef.current;
       if (!video) return;
-      video.preload = "auto";
-      if (video.readyState < 2) {
+      video.preload = prefersHoverControls ? "metadata" : "auto";
+      if (video.readyState < (prefersHoverControls ? 1 : 2)) {
         try {
           video.load();
         } catch (error) {}
       }
-    }, [directVideo, isInViewport, showEditor, videoSource]);
+    }, [directVideo, isInViewport, prefersHoverControls, showEditor, videoSource]);
 
     useEffect(() => {
-      if (!item || item.kind !== "video") return;
-      if (!directVideo) return;
-      const video = videoRef.current;
-      if (!video) return;
-
-      if (showEditor || !isInViewport || !isInlinePlaybackActive) {
-        resetInlinePreview();
-        return;
+      if (!directVideo) return undefined;
+      if (!shouldInlinePreviewPlay) {
+        stopOwnInlinePreview();
+        return undefined;
       }
-
-      hoverPlaybackPendingRef.current = true;
-      setShowPlaybackOverlay(true);
-      video.preload = "auto";
-      const preferMutedPreview = shouldPreferMutedAutoplay();
-      setIsMuted(preferMutedPreview);
-      if (!userPausedRef.current) {
-        attemptInlineVideoPlayback(video, preferMutedPreview, setIsMuted);
-      }
-    }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
+      startInlinePreview();
+      return undefined;
+    }, [directVideo, shouldInlinePreviewPlay]);
 
     useEffect(() => () => {
       clearControlsTimer();
+      clearActiveInlinePreview(inlinePreviewOwnerId);
     }, []);
-
-    useEffect(() => {
-      if (currentSlide !== slideIndex && isHovered) {
-        setIsHovered(false);
-      }
-    }, [currentSlide, isHovered, slideIndex]);
-
-    useEffect(() => {
-      if (currentSlide === slideIndex) return;
-      resetInlinePreview();
-    }, [currentSlide, slideIndex]);
-
-    useEffect(() => {
-      if (!isHovered) return undefined;
-
-      const handlePointerMove = (event) => {
-        const rect = rootRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-        if (!inside) {
-          setIsHovered(false);
-        }
-      };
-
-      window.addEventListener("mousemove", handlePointerMove, true);
-      return () => window.removeEventListener("mousemove", handlePointerMove, true);
-    }, [isHovered]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2686,17 +2701,23 @@ function App() {
     return <div
       ref={rootRef}
         className={cx("relative w-full h-full overflow-hidden rounded-[26px] border border-white/10 bg-black/25 group cursor-pointer", isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]")}
-        onMouseEnter={() => {
+        onPointerEnter={(event) => {
+          if (!prefersHoverControls || event.pointerType === "touch") return;
           setIsHovered(true);
-          if (prefersHoverControls) setShowPlaybackOverlay(true);
+          setShowPlaybackOverlay(true);
+          if (directVideo) startInlinePreview({ forceDesktop: true });
         }}
-      onMouseMove={() => {
-        if (prefersHoverControls) setShowPlaybackOverlay(true);
+      onPointerMove={(event) => {
+        if (!prefersHoverControls || event.pointerType === "touch") return;
+        if (!isHovered) setIsHovered(true);
+        setShowPlaybackOverlay(true);
+        if (directVideo && (videoRef.current?.paused ?? true)) startInlinePreview({ forceDesktop: true });
       }}
-      onMouseLeave={() => {
+      onPointerLeave={(event) => {
+        if (!prefersHoverControls || event.pointerType === "touch") return;
         setIsHovered(false);
-        if (prefersHoverControls) setShowPlaybackOverlay(false);
-        if (directVideo) resetInlinePreview();
+        setShowPlaybackOverlay(false);
+        if (directVideo) stopOwnInlinePreview();
       }}
       onDragEnterCapture={handleDragEnter}
       onDragOverCapture={handleDragOver}
@@ -2748,16 +2769,15 @@ function App() {
         </label>
       </div>}
       {item ? <>
-        {directVideo && item?.poster && !showEditor && !isInlinePlaybackActive && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
+        {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && isInViewport ? "auto" : "metadata"} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo ? (prefersHoverControls ? "metadata" : isInViewport ? "auto" : "metadata") : "metadata"} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) {
-                const preferMutedPreview = shouldPreferMutedAutoplay();
-                attemptInlineVideoPlayback(videoRef.current, preferMutedPreview, setIsMuted);
+              if (hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
+                startInlinePreview();
               }
             }
             }} onMediaError={() => {
@@ -2765,15 +2785,17 @@ function App() {
               setHasMediaError(true);
               setIsVideoReady(false);
             }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
+              hoverPlaybackPendingRef.current = false;
               setIsPlaying(true);
               revealControls();
             }} onVideoPause={() => {
+            hoverPlaybackPendingRef.current = false;
             setIsPlaying(false);
             if (!prefersHoverControls) scheduleControlsHide(2400);
           }} onVideoTimeUpdate={(event) => {
             updatePlaybackState(event.currentTarget);
             if (!prefersHoverControls) scheduleControlsHide(2400);
-          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && isInlinePlaybackActive} showPoster={!directVideo || !isInlinePlaybackActive || !isVideoReady || !prefersHoverControls} />
+          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && shouldInlinePreviewPlay} showPoster={!directVideo || !shouldInlinePreviewPlay || !isVideoReady} />
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
