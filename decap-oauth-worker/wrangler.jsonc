@@ -1,0 +1,15 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "zhangwei-portfolio-decap-oauth",
+  "main": "src/index.js",
+  "compatibility_date": "2026-04-15",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "https://www.zhangweivisual.cn,https://zhangweivisual.cn",
+    "GITHUB_AUTHORIZE_URL": "https://github.com/login/oauth/authorize",
+    "GITHUB_ACCESS_TOKEN_URL": "https://github.com/login/oauth/access_token"
+  }
+}

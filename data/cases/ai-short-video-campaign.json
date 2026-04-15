@@ -1,0 +1,32 @@
+{
+  "id": "ai-short-video-campaign",
+  "title": "AI 广告短视频与抖音系列内容",
+  "cover": "images/_optimized/微信图片_20260411183234_116_7.webp",
+  "category": "叙事内容",
+  "tags": [
+    "短视频",
+    "广告",
+    "AIGC"
+  ],
+  "description": "用 AI 原生视频和后期剪辑构建电商广告和平台分发内容，形成系列化投放素材。",
+  "results": [
+    {
+      "label": "videoLength",
+      "value": "30s+"
+    },
+    {
+      "label": "outputs",
+      "value": "5 支短视频"
+    }
+  ],
+  "tools": [
+    "Sora",
+    "Kling",
+    "剪映"
+  ],
+  "slideIds": [
+    16,
+    17,
+    18
+  ]
+}

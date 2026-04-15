@@ -1,0 +1,31 @@
+{
+  "id": "controlnet-ecommerce",
+  "title": "ControlNet 电商产品精修",
+  "cover": "images/_optimized/微信图片_20260411183220_100_7.webp",
+  "category": "商业视觉",
+  "tags": [
+    "AIGC",
+    "电商",
+    "ControlNet"
+  ],
+  "description": "围绕产品结构和光影一致性，完成线稿约束到高精渲染的电商主图升级。",
+  "results": [
+    {
+      "label": "clickRate",
+      "value": "+32%"
+    },
+    {
+      "label": "conversion",
+      "value": "+18%"
+    }
+  ],
+  "tools": [
+    "ComfyUI",
+    "ControlNet",
+    "Photoshop"
+  ],
+  "slideIds": [
+    4,
+    5
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "zhangwei-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:portfolio": "node scripts/sync-portfolio-json.mjs",
+    "prepare:static": "node scripts/prepare-static.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.34.4"
+  }
+}

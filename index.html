@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHANG WEI - AIGC Portfolio</title>
+  <meta name="description" content="AIGC 内容创意师作品集，专注商业视觉、短视频分镜与 AIGC 工具链。">
+  <meta name="keywords" content="AIGC,作品集,商业视觉,短视频分镜,ComfyUI,AI广告">
+  <meta name="theme-color" content="#030305">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ZHANG WEI - AIGC Portfolio">
+  <meta property="og:description" content="用 AIGC 重构商业视觉与叙事内容">
+  <meta property="og:image" content="https://www.zhangweivisual.cn/images/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260411183220_100_7.jpg">
+  <meta property="og:url" content="https://www.zhangweivisual.cn/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ZHANG WEI - AIGC Portfolio">
+  <meta name="twitter:description" content="用 AIGC 重构商业视觉与叙事内容">
+  <meta name="twitter:image" content="https://www.zhangweivisual.cn/images/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260411183220_100_7.jpg">
+  <link rel="canonical" href="https://www.zhangweivisual.cn/">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    html {
+      min-height: 100%;
+      background-color: #030305;
+    }
+
+    body {
+      background-color: #030305;
+      color: white;
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      touch-action: pan-y;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    .slider-handle {
+      touch-action: none;
+    }
+
+    [data-editable][contenteditable="true"]:empty::before {
+      content: attr(data-placeholder);
+      color: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="embedded-data.js"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

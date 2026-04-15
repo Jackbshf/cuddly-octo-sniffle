@@ -1,0 +1,23 @@
+{
+  "siteTitle": "ZHANG WEI - AIGC Portfolio",
+  "siteDescription": "AIGC 内容创意师作品集，专注商业视觉、短视频分镜与 AIGC 工具链。",
+  "siteKeywords": [
+    "AIGC",
+    "作品集",
+    "商业视觉",
+    "短视频分镜",
+    "ComfyUI",
+    "AI广告"
+  ],
+  "canonicalUrl": "https://www.zhangweivisual.cn/",
+  "ogTitle": "ZHANG WEI - AIGC Portfolio",
+  "ogDescription": "用 AIGC 重构商业视觉与叙事内容",
+  "ogImage": "images/_optimized/微信图片_20260411183220_100_7.webp",
+  "twitterCard": "summary_large_image",
+  "caseSectionTitle": "精选案例",
+  "caseSectionDesc": "用结构化案例说明创作链路、工具选择和最终结果。",
+  "contactSectionTitle": "合作咨询",
+  "contactSectionDesc": "留下项目类型、预算区间和联系方式，我会根据你的需求给出匹配方案。",
+  "formspreeEndpoint": "",
+  "contactCtaLabel": "提交需求"
+}
