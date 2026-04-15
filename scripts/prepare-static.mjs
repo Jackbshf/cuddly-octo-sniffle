@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 import path from "node:path";
@@ -255,6 +255,23 @@ const transformPortfolioForDist = async (portfolioModel) => {
   };
 };
 
+const resetDistDirectory = async () => {
+  try {
+    await rm(distDir, { recursive: true, force: true });
+  } catch (error) {
+    if (!error || (error.code !== "EBUSY" && error.code !== "EPERM")) throw error;
+    console.warn(`[prepare-static] Dist root is busy (${error.code}), falling back to child cleanup.`);
+    if (existsSync(distDir)) {
+      const entries = await readdir(distDir);
+      for (const entry of entries) {
+        await rm(path.join(distDir, entry), { recursive: true, force: true });
+      }
+    }
+  }
+
+  await mkdir(distDir, { recursive: true });
+};
+
 async function main() {
   await syncPortfolioArtifacts({
     repoRoot: root,
@@ -265,8 +282,7 @@ async function main() {
   });
   await buildAppAssets();
 
-  await rm(distDir, { recursive: true, force: true });
-  await mkdir(distDir, { recursive: true });
+  await resetDistDirectory();
 
   for (const target of copyTargets) {
     const source = path.join(root, target);

@@ -3,11 +3,11 @@ import { createRoot } from "react-dom/client";
 
 const DATA_FILE_PATH = "data/portfolio.json";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
-const THEME_STORAGE_KEY = "zhangwei_portfolio_theme_v1";
 const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
 const IS_EDITOR_MODE = window.location.protocol === "file:" || new URLSearchParams(window.location.search).get("editor") === "1";
 const MOBILE_MODE_QUERY = new URLSearchParams(window.location.search).get("mobile");
 const IS_QR_MOBILE_MODE = MOBILE_MODE_QUERY === "1";
+const CASE_QUERY_PARAM = "case";
 const SLIDE_TRANSITION_OUT_MS = 120;
 const SLIDE_TRANSITION_IN_MS = 180;
 const PORTFOLIO_WARN_BYTES = 500 * 1024;
@@ -50,6 +50,13 @@ const formatBytes = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 const getPortfolioSizeTone = (bytes) => bytes > PORTFOLIO_BLOCK_BYTES ? "danger" : bytes >= PORTFOLIO_WARN_BYTES ? "warning" : "safe";
+const getQueryParamValue = (name) => new URLSearchParams(window.location.search).get(name) || "";
+const setQueryParamValue = (name, value) => {
+  const url = new URL(window.location.href);
+  if (value) url.searchParams.set(name, value);
+  else url.searchParams.delete(name);
+  window.history.replaceState({}, "", url.toString());
+};
 const inferMediaKind = (value = "") => {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized) return "image";
@@ -188,12 +195,6 @@ const buildPublishedAssetPath = (file) => {
 };
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-const getInitialThemeMode = () => {
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-  if (stored === "light" || stored === "dark") return stored;
-  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) return "light";
-  return "dark";
-};
 
 const createFreeLayoutElement = (type) => {
   const base = {
@@ -464,6 +465,10 @@ const collectSlidePreloadTargets = (slide) => {
       if (media.poster && !media.poster.startsWith("blob:")) {
         targets.push({ kind: "image", src: media.poster });
       }
+      const src = getPrimaryMediaUrl(media);
+      if (src && !src.startsWith("blob:") && isDirectVideoSource(src)) {
+        targets.push({ kind: "video", src });
+      }
     }
   };
 
@@ -475,11 +480,38 @@ const collectSlidePreloadTargets = (slide) => {
   return targets.filter((target, index, list) => list.findIndex((item) => item.kind === target.kind && item.src === target.src) === index);
 };
 
+const preloadedVideoTargets = new Map();
+const PRELOADED_VIDEO_LIMIT = 12;
+
 const preloadMediaTarget = (target) => {
-  if (!target?.src || target.kind !== "image") return;
-  const image = new Image();
-  image.decoding = "async";
-  image.src = target.src;
+  if (!target?.src) return;
+  if (target.kind === "image") {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = target.src;
+    return;
+  }
+  if (target.kind !== "video" || typeof document === "undefined") return;
+  if (preloadedVideoTargets.has(target.src)) return;
+
+  const video = document.createElement("video");
+  video.preload = "auto";
+  video.muted = true;
+  video.playsInline = true;
+  video.src = target.src;
+  video.load();
+  preloadedVideoTargets.set(target.src, video);
+
+  if (preloadedVideoTargets.size > PRELOADED_VIDEO_LIMIT) {
+    const oldest = preloadedVideoTargets.keys().next().value;
+    const oldestVideo = preloadedVideoTargets.get(oldest);
+    if (oldestVideo) {
+      oldestVideo.pause();
+      oldestVideo.removeAttribute("src");
+      oldestVideo.load();
+    }
+    preloadedVideoTargets.delete(oldest);
+  }
 };
 
 const scheduleBrowserIdleTask = (callback) => {
@@ -519,6 +551,12 @@ const resolveLayoutMode = () => {
 
 const attemptInlineVideoPlayback = (video, preferredMuted, onMutedChange) => {
   if (!video) return;
+  video.preload = "auto";
+  if (video.readyState < 2) {
+    try {
+      video.load();
+    } catch (error) {}
+  }
   video.muted = preferredMuted;
   if (typeof onMutedChange === "function") onMutedChange(preferredMuted);
   const playAttempt = video.play();
@@ -872,59 +910,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
   return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{icons[name]}</svg>;
 };
 
-const shouldUseInteractiveTilt = () => supportsHoverInteractions() && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-const applyCardTiltFromPointer = (event) => {
-  if (!shouldUseInteractiveTilt()) return;
-  const rect = event.currentTarget.getBoundingClientRect();
-  if (!rect.width || !rect.height) return;
-  const px = (event.clientX - rect.left) / rect.width;
-  const py = (event.clientY - rect.top) / rect.height;
-  const tiltY = (px - 0.5) * 10;
-  const tiltX = (0.5 - py) * 10;
-  event.currentTarget.style.setProperty("--pointer-x", `${(px * 100).toFixed(2)}%`);
-  event.currentTarget.style.setProperty("--pointer-y", `${(py * 100).toFixed(2)}%`);
-  event.currentTarget.style.setProperty("--tilt-x", `${tiltX.toFixed(2)}deg`);
-  event.currentTarget.style.setProperty("--tilt-y", `${tiltY.toFixed(2)}deg`);
-};
-
-const resetCardTilt = (event) => {
-  event.currentTarget.style.setProperty("--pointer-x", "50%");
-  event.currentTarget.style.setProperty("--pointer-y", "50%");
-  event.currentTarget.style.setProperty("--tilt-x", "0deg");
-  event.currentTarget.style.setProperty("--tilt-y", "0deg");
-};
-
-const Card3D = ({ as = "div", className = "", surfaceClassName = "", interactive = false, children, ...props }) => {
-  const Tag = as;
-  const { onPointerMove, onPointerLeave, type, ...restProps } = props;
-  const pointerProps = interactive ? {
-    onPointerMove: (event) => {
-      applyCardTiltFromPointer(event);
-      if (typeof onPointerMove === "function") onPointerMove(event);
-    },
-    onPointerLeave: (event) => {
-      resetCardTilt(event);
-      if (typeof onPointerLeave === "function") onPointerLeave(event);
-    }
-  } : {
-    onPointerMove,
-    onPointerLeave
-  };
-
-  return <Tag
-    {...restProps}
-    {...pointerProps}
-    type={Tag === "button" ? (type || "button") : type}
-    className={cx("card-3d", interactive && "card-3d--interactive", className)}
-  >
-    <div className={cx("card-3d-surface", surfaceClassName)}>
-      {children}
-    </div>
-  </Tag>;
-};
-
-const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, shouldAutoPlay = false, showPoster = true }) => {
+const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, shouldAutoPlay = false, showPoster = true, videoPreloadMode = "metadata" }) => {
   const item = normalizeMediaItem(mediaItem);
   if (!item) return null;
   const handleSurfaceClick = typeof onMediaSurfaceClick === "function" ? onMediaSurfaceClick : stopClick;
@@ -988,7 +974,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
       loop
       muted={muted}
       playsInline
-      preload={shouldAutoPlay ? "metadata" : item.poster && !preferDraftPreview ? "none" : "metadata"}
+      preload={videoPreloadMode}
       poster={showPoster ? item.poster || undefined : undefined}
       className={mediaClassName}
       onLoadedData={onMediaLoad}
@@ -1053,9 +1039,9 @@ const CaseResultPills = ({ results }) => {
   const entries = Object.entries(results || {});
   if (!entries.length) return null;
   return <div className="flex flex-wrap gap-2">
-    {entries.map(([key, value]) => <div key={key} className="card-chip px-3 py-1 text-xs">
-      <span className="mr-2 text-tertiary">{key}</span>
-      <span className="font-medium text-primary">{value}</span>
+    {entries.map(([key, value]) => <div key={key} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/72">
+      <span className="mr-2 text-white/40">{key}</span>
+      <span className="font-medium text-white/88">{value}</span>
     </div>)}
   </div>;
 };
@@ -1067,17 +1053,17 @@ const CaseList = ({ title, description, cases, activeCaseId, onSelectCase }) => 
 
   return <div className="flex flex-col gap-6 px-2 py-4">
     <div className="flex flex-col gap-3 px-2">
-      <div className="accent-text text-xs font-mono uppercase tracking-[0.22em]">Case Library</div>
-      <h2 className="ui-text-shadow text-3xl font-semibold tracking-tight text-primary">{title}</h2>
-      <p className="max-w-3xl text-sm leading-7 text-secondary">{description}</p>
+      <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Case Library</div>
+      <h2 className="text-3xl font-semibold tracking-tight text-white/92">{title}</h2>
+      <p className="max-w-3xl text-sm leading-7 text-white/60">{description}</p>
     </div>
     <div className="flex flex-wrap gap-2 px-2">
-      {categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={cx("card-chip px-3 py-1.5 text-xs", category === item ? "border-cyan-300/30 bg-cyan-500/15 text-cyan-50" : "")}>
+      {categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={`rounded-full border px-3 py-1.5 text-xs transition ${category === item ? "border-cyan-300/30 bg-cyan-500/15 text-cyan-50" : "border-white/10 bg-white/5 text-white/68 hover:bg-white/10"}`}>
         {item}
       </button>)}
     </div>
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {filteredCases.map((item) => <Card3D as="button" key={item.id} onClick={() => onSelectCase(item.id)} interactive className="group text-left" surfaceClassName={cx(activeCaseId === item.id ? "border-cyan-300/35 bg-cyan-500/8" : "")}>
+      {filteredCases.map((item) => <button key={item.id} onClick={() => onSelectCase(item.id)} className={`group overflow-hidden rounded-[28px] border text-left transition ${activeCaseId === item.id ? "border-cyan-300/30 bg-white/[0.08]" : "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"}`}>
         <div className="grid grid-cols-1 gap-0 md:grid-cols-[1.15fr_1fr]">
           <div className="relative min-h-[220px] overflow-hidden bg-black/30">
             {item.cover ? <img src={item.cover} alt={item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : <div className="flex h-full items-center justify-center text-white/25">暂无封面</div>}
@@ -1086,29 +1072,29 @@ const CaseList = ({ title, description, cases, activeCaseId, onSelectCase }) => 
           </div>
           <div className="flex flex-col gap-4 p-5">
             <div className="space-y-2">
-              <div className="text-xs uppercase tracking-[0.18em] text-tertiary">{item.id}</div>
-              <h3 className="text-xl font-semibold leading-tight text-primary">{item.title}</h3>
-              <p className="text-sm leading-7 text-secondary">{item.description}</p>
+              <div className="text-xs uppercase tracking-[0.18em] text-white/40">{item.id}</div>
+              <h3 className="text-xl font-semibold leading-tight text-white/92">{item.title}</h3>
+              <p className="text-sm leading-7 text-white/62">{item.description}</p>
             </div>
             <CaseResultPills results={item.results} />
             <div className="mt-auto flex flex-wrap gap-2">
-              {item.tags.map((tag) => <span key={tag} className="card-chip px-2.5 py-1 text-[11px]">{tag}</span>)}
+              {item.tags.map((tag) => <span key={tag} className="rounded-full bg-white/6 px-2.5 py-1 text-[11px] text-white/60">{tag}</span>)}
             </div>
           </div>
         </div>
-      </Card3D>)}
+      </button>)}
     </div>
   </div>;
 };
 
 const CaseDetail = ({ caseItem, onJumpToSlide, onOpenContact }) => {
   if (!caseItem) {
-    return <div className="surface-panel rounded-[28px] border-dashed p-8 text-center text-sm leading-7 text-secondary">
+    return <div className="rounded-[28px] border border-dashed border-white/10 bg-white/[0.03] p-8 text-center text-sm leading-7 text-white/45">
       从上方案例卡片进入详情，这里会显示项目说明、工具链、结果数据和关联作品跳转。
     </div>;
   }
 
-  return <Card3D className="overflow-hidden rounded-[28px]" surfaceClassName="rounded-[28px]">
+  return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.05]">
     <div className="grid grid-cols-1 gap-0 xl:grid-cols-[1.1fr_0.9fr]">
       <div className="relative min-h-[280px] bg-black/30">
         {caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-white/25">暂无封面</div>}
@@ -1148,12 +1134,12 @@ const CaseDetail = ({ caseItem, onJumpToSlide, onOpenContact }) => {
         </div>
       </div>
     </div>
-  </Card3D>;
+  </div>;
 };
 
 const ContactForm = ({ meta, activeCase, requestContext }) => {
   const hasEndpoint = Boolean(String(meta.formspreeEndpoint || "").trim());
-  return <Card3D className="overflow-hidden rounded-[28px]" surfaceClassName="rounded-[28px]">
+  return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.05]">
     <div className="grid grid-cols-1 gap-0 xl:grid-cols-[0.92fr_1.08fr]">
       <div className="flex flex-col gap-4 p-6">
         <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Contact</div>
@@ -1189,7 +1175,7 @@ const ContactForm = ({ meta, activeCase, requestContext }) => {
         </button>
       </form>
     </div>
-  </Card3D>;
+  </div>;
 };
 
 const ensureMetaTag = (selector, createTag) => {
@@ -1282,18 +1268,18 @@ const applyDocumentMeta = (meta, caseItem) => {
 function App() {
   const [portfolioData, setPortfolioData] = useState(() => createPortfolioModel(EMBEDDED_PORTFOLIO));
   const [publishedPortfolioData, setPublishedPortfolioData] = useState(() => createPortfolioModel(EMBEDDED_PORTFOLIO));
-  const [themeMode, setThemeMode] = useState(() => getInitialThemeMode());
   const [currentSlide, setCurrentSlide] = useState(0);
   const [layoutMode, setLayoutMode] = useState(() => resolveLayoutMode());
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [lightboxData, setLightboxData] = useState(null);
-  const [activePreviewKey, setActivePreviewKey] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadSource, setLoadSource] = useState("loading");
   const [statusMessage, setStatusMessage] = useState("正在载入发布数据...");
   const [isPageJumpEditing, setIsPageJumpEditing] = useState(false);
   const [pageJumpValue, setPageJumpValue] = useState("1");
+  const [activeCaseId, setActiveCaseId] = useState(() => getQueryParamValue(CASE_QUERY_PARAM));
+  const [contactRequestContext, setContactRequestContext] = useState("general");
   const [showStructureEditor, setShowStructureEditor] = useState(false);
   const [metaEditorValue, setMetaEditorValue] = useState("");
   const [metaEditorError, setMetaEditorError] = useState("");
@@ -1308,6 +1294,9 @@ function App() {
   const slideTransitionTimeoutRef = useRef(null);
   const preloadedMediaRef = useRef(new Set());
   const slideSectionRefs = useRef(new Map());
+  const caseListSectionRef = useRef(null);
+  const caseDetailSectionRef = useRef(null);
+  const contactSectionRef = useRef(null);
   const activeSlideRatiosRef = useRef(new Map());
   const activeSlideFrameRef = useRef(null);
   const currentSlideRef = useRef(0);
@@ -1316,6 +1305,7 @@ function App() {
   const casesData = portfolioData.cases;
   const siteMeta = portfolioData.meta;
   const publishedSlidesData = publishedPortfolioData.slides;
+  const activeCase = casesData.find((item) => item.id === activeCaseId) || null;
   const tocSlideIndex = Math.max(0, slidesData.findIndex((slide) => slide && slide.type === "toc"));
   const isMobileFeedMode = true;
   const isMobilePreviewMode = layoutMode !== "desktop-feed";
@@ -1326,7 +1316,6 @@ function App() {
   const portfolioExportModel = sanitizePortfolioModelForExport(portfolioData);
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
-  const isLightTheme = themeMode === "light";
 
   const setSlidesData = (updater) => setPortfolioData((prev) => ({
     ...prev,
@@ -1350,21 +1339,6 @@ function App() {
     currentSlideRef.current = currentSlide;
   }, [currentSlide]);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = themeMode;
-    document.body.classList.toggle("theme-light", themeMode === "light");
-    document.body.classList.toggle("theme-dark", themeMode === "dark");
-    window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
-  }, [themeMode]);
-
-  useEffect(() => {
-    setActivePreviewKey(null);
-  }, [lightboxData, themeMode]);
-
-  useEffect(() => {
-    setActivePreviewKey(null);
-  }, [currentSlide]);
-
   const scrollToElementRef = (targetRef) => {
     const node = targetRef?.current;
     if (!node) return;
@@ -1375,9 +1349,31 @@ function App() {
   const scrollToSlide = (nextIndex) => {
     const target = slideSectionRefs.current.get(nextIndex);
     if (!target) return;
+    target.dataset.revealed = "true";
     const targetTop = window.scrollY + target.getBoundingClientRect().top - sectionScrollOffset;
     window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
     setCurrentSlide(nextIndex);
+  };
+
+  const openCaseDetail = (caseId) => {
+    setActiveCaseId(caseId);
+    setQueryParamValue(CASE_QUERY_PARAM, caseId);
+    window.setTimeout(() => scrollToElementRef(caseDetailSectionRef), 40);
+  };
+
+  const openContactForCase = (caseItem, context) => {
+    if (caseItem?.id) {
+      setActiveCaseId(caseItem.id);
+      setQueryParamValue(CASE_QUERY_PARAM, caseItem.id);
+    }
+    setContactRequestContext(context || "general");
+    setStatusMessage(context === "workflow" ? "已带着“复用此工作流”的上下文跳到合作表单。" : "已带着案例上下文跳到合作表单。");
+    window.setTimeout(() => scrollToElementRef(contactSectionRef), 40);
+  };
+
+  const jumpToSlideById = (slideId) => {
+    const nextIndex = slidesData.findIndex((slide) => Number(slide?.id) === Number(slideId));
+    if (nextIndex >= 0) goToSlide(nextIndex);
   };
 
   const applyMetaEditorValue = () => {
@@ -1441,6 +1437,25 @@ function App() {
   }, [showStructureEditor, siteMeta, casesData]);
 
   useEffect(() => {
+    const handlePopState = () => setActiveCaseId(getQueryParamValue(CASE_QUERY_PARAM));
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (isLoading || !activeCaseId) return;
+    if (activeCase) return;
+    setActiveCaseId("");
+    setQueryParamValue(CASE_QUERY_PARAM, "");
+  }, [isLoading, activeCaseId, activeCase]);
+
+  useEffect(() => {
+    if (isLoading || !activeCaseId || !activeCase) return;
+    const timerId = window.setTimeout(() => scrollToElementRef(caseDetailSectionRef), 80);
+    return () => window.clearTimeout(timerId);
+  }, [isLoading, activeCaseId, activeCase]);
+
+  useEffect(() => {
     const nextUrls = collectDraftPreviewUrls(slidesData);
     draftPreviewUrlsRef.current.forEach((url) => {
       if (!nextUrls.has(url)) URL.revokeObjectURL(url);
@@ -1481,17 +1496,19 @@ function App() {
 
   useEffect(() => {
     if (!slidesData.length) return;
-    const nextSlide = slidesData[currentSlide + 1];
-    if (!nextSlide) return;
+    const preloadSlides = [slidesData[currentSlide], slidesData[currentSlide + 1]].filter(Boolean);
+    if (!preloadSlides.length) return;
 
     let cancelIdleTask = () => {};
     const delayId = window.setTimeout(() => {
       cancelIdleTask = scheduleBrowserIdleTask(() => {
-        collectSlidePreloadTargets(nextSlide).forEach((target) => {
-          const key = `${target.kind}:${target.src}`;
-          if (preloadedMediaRef.current.has(key)) return;
-          preloadedMediaRef.current.add(key);
-          preloadMediaTarget(target);
+        preloadSlides.forEach((slide) => {
+          collectSlidePreloadTargets(slide).forEach((target) => {
+            const key = `${target.kind}:${target.src}`;
+            if (preloadedMediaRef.current.has(key)) return;
+            preloadedMediaRef.current.add(key);
+            preloadMediaTarget(target);
+          });
         });
       });
     }, SLIDE_TRANSITION_IN_MS + 40);
@@ -1572,8 +1589,8 @@ function App() {
   }, [isPageJumpEditing]);
 
   useEffect(() => {
-    applyDocumentMeta(siteMeta);
-  }, [siteMeta]);
+    applyDocumentMeta(siteMeta, activeCase);
+  }, [siteMeta, activeCase]);
 
   useEffect(() => {
     if (isMobileFeedMode) return;
@@ -1916,7 +1933,7 @@ function App() {
     >{text}</Tag>;
   };
 
-  const FreeLayoutElement = ({ slideIndex, element, containerRef, activePreviewKey, setActivePreviewKey }) => {
+  const FreeLayoutElement = ({ slideIndex, element, containerRef }) => {
     const interactionRef = useRef(null);
     const [showTextSettings, setShowTextSettings] = useState(false);
 
@@ -2032,7 +2049,7 @@ function App() {
           duration={element.animationDuration}
           delay={element.animationDelay}
         />}
-      </div> : <FreeLayoutMediaBox slideIndex={slideIndex} element={element} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} />}
+    </div> : <FreeLayoutMediaBox slideIndex={slideIndex} element={element} />}
       {IS_EDITOR_MODE && <button onMouseDown={(event) => beginPointerInteraction("resize", event)} className="absolute bottom-2 right-2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white/75 cursor-se-resize">
         <Icon name="Maximize2" size={12} />
       </button>}
@@ -2095,7 +2112,7 @@ function App() {
     </>;
   };
 
-  const FreeLayoutMediaBox = ({ slideIndex, element, activePreviewKey, setActivePreviewKey }) => {
+  const FreeLayoutMediaBox = ({ slideIndex, element }) => {
     const item = normalizeMediaItem(element.media);
     const bindingInfo = getMediaBindingInfo(item);
     const rootRef = useRef(null);
@@ -2119,10 +2136,9 @@ function App() {
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
-    const previewKey = `free:${slideIndex}:${element.id}`;
-    const directVideo = item && item.kind === "video" && isDirectVideoSource(getPrimaryMediaUrl(item, { preferDraftPreview }));
-    const isPreviewOwner = activePreviewKey === previewKey;
-    const isInlinePlaybackActive = prefersHoverControls && isHovered && isPreviewOwner;
+    const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
+    const directVideo = item && item.kind === "video" && isDirectVideoSource(videoSource);
+    const isInlinePlaybackActive = prefersHoverControls && isHovered;
     const mediaClassName = "relative z-10 h-full w-full object-cover object-center";
     const resetInlinePreview = (options = {}) => {
       const preserveOverlay = Boolean(options.preserveOverlay);
@@ -2190,7 +2206,6 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       hoverPlaybackPendingRef.current = false;
-      if (activePreviewKey === previewKey) setActivePreviewKey(null);
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       setLightboxData(item);
     };
@@ -2246,7 +2261,7 @@ function App() {
         userPausedRef.current = false;
         return;
       }
-      const src = getPrimaryMediaUrl(item, { preferDraftPreview }) || getDisplayUrl(item, { preferDraftPreview });
+      const src = videoSource || getDisplayUrl(item, { preferDraftPreview });
       const directVideoItem = item.kind === "video" && isDirectVideoSource(src);
       const embeddable = item.kind === "youtube" || (item.kind === "video" && !!getVideoEmbedUrl(src));
       const externalLinkOnly = item.kind === "video" && !directVideoItem && !embeddable;
@@ -2263,7 +2278,7 @@ function App() {
       hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
       clearControlsTimer();
-    }, [item, preferDraftPreview]);
+    }, [item, preferDraftPreview, videoSource]);
 
     useEffect(() => {
       const node = rootRef.current;
@@ -2273,33 +2288,48 @@ function App() {
         setIsInViewport(nextInViewport);
         if (!nextInViewport) {
           setIsHovered(false);
-          if (activePreviewKey === previewKey) setActivePreviewKey(null);
         }
       }, {
         root: null,
         threshold: [0, 0.08, 0.22],
-        rootMargin: "12% 0px 12% 0px"
+        rootMargin: "30% 0px 30% 0px"
       });
       observer.observe(node);
       return () => observer.disconnect();
-    }, [activePreviewKey, previewKey, setActivePreviewKey]);
+    }, [element.id, slideIndex]);
+
+    useEffect(() => {
+      if (!directVideo || !videoSource || showEditor || !isInViewport) return;
+      const key = `video:${videoSource}`;
+      if (!preloadedMediaRef.current.has(key)) {
+        preloadedMediaRef.current.add(key);
+        preloadMediaTarget({ kind: "video", src: videoSource });
+      }
+      const video = videoRef.current;
+      if (!video) return;
+      video.preload = "auto";
+      if (video.readyState < 2) {
+        try {
+          video.load();
+        } catch (error) {}
+      }
+    }, [directVideo, isInViewport, showEditor, videoSource]);
 
     useEffect(() => {
       if (!item || item.kind !== "video") return;
-      const src = getPrimaryMediaUrl(item, { preferDraftPreview });
-      if (!isDirectVideoSource(src)) return;
+      if (!directVideo) return;
       const video = videoRef.current;
       if (!video) return;
-      if (showEditor || !isInViewport || !isPreviewOwner) {
+      if (showEditor || !isInViewport || !isInlinePlaybackActive) {
         resetInlinePreview();
         return;
       }
       hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
-      video.preload = "metadata";
+      video.preload = "auto";
       setIsMuted(true);
       if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
-    }, [item, isInViewport, isPreviewOwner, preferDraftPreview, showEditor]);
+    }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
 
     useEffect(() => () => {
       clearControlsTimer();
@@ -2313,9 +2343,8 @@ function App() {
 
     useEffect(() => {
       if (currentSlide === slideIndex) return;
-      if (activePreviewKey === previewKey) setActivePreviewKey(null);
       resetInlinePreview();
-    }, [activePreviewKey, currentSlide, previewKey, setActivePreviewKey, slideIndex]);
+    }, [currentSlide, slideIndex]);
 
     useEffect(() => {
       if (!isHovered) return undefined;
@@ -2326,13 +2355,12 @@ function App() {
         const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
         if (!inside) {
           setIsHovered(false);
-          if (activePreviewKey === previewKey) setActivePreviewKey(null);
         }
       };
 
       window.addEventListener("mousemove", handlePointerMove, true);
       return () => window.removeEventListener("mousemove", handlePointerMove, true);
-    }, [activePreviewKey, isHovered, previewKey, setActivePreviewKey]);
+    }, [isHovered]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2367,19 +2395,16 @@ function App() {
 
     return <div
       ref={rootRef}
-      className="card-3d card-3d--interactive card-3d--media relative h-full w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden rounded-[26px] border border-white/10 bg-black/25"
       onMouseEnter={() => {
         setIsHovered(true);
-        if (directVideo && !showEditor && isInViewport) setActivePreviewKey(previewKey);
         if (prefersHoverControls) setShowPlaybackOverlay(true);
       }}
       onMouseMove={() => {
-        if (directVideo && !showEditor && isInViewport && activePreviewKey !== previewKey) setActivePreviewKey(previewKey);
         if (prefersHoverControls) setShowPlaybackOverlay(true);
       }}
       onMouseLeave={() => {
         setIsHovered(false);
-        if (activePreviewKey === previewKey) setActivePreviewKey(null);
         if (prefersHoverControls) setShowPlaybackOverlay(false);
         if (directVideo) resetInlinePreview();
       }}
@@ -2393,7 +2418,7 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="card-3d-surface h-full w-full">
+      <div className="h-full w-full">
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-xs tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">拖到这里替换媒体</div>}
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && <div className="absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
@@ -2425,15 +2450,14 @@ function App() {
         </label>
       </div>}
       {hasUsableMedia ? <>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_52%),linear-gradient(140deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02)_45%,transparent_78%)] pointer-events-none" />
         {directVideo && item?.poster && !showEditor && !isInlinePlaybackActive && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && isInViewport ? "auto" : "metadata"} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current && activePreviewKey === previewKey) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
+              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2467,7 +2491,7 @@ function App() {
     </div>;
   };
 
-  const FreeLayoutSlide = ({ slide, index, activePreviewKey, setActivePreviewKey }) => {
+  const FreeLayoutSlide = ({ slide, index }) => {
     const surfaceRef = useRef(null);
     const slideTheme = colorPalettes[index % colorPalettes.length] || colorPalettes[0];
     const elements = Array.isArray(slide.freeLayoutElements)
@@ -2481,12 +2505,12 @@ function App() {
       </div>
       <div ref={surfaceRef} className={`relative overflow-hidden rounded-[32px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-2xl ${isMobileFeedMode ? "min-h-[70svh]" : "flex-1"}`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_60%)] pointer-events-none" />
-        {elements.length ? elements.map((element) => <FreeLayoutElement key={element.id} slideIndex={index} element={element} containerRef={surfaceRef} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} />) : <div className="absolute inset-0 flex items-center justify-center text-sm tracking-[0.22em] text-white/35">点击底部 + 添加文本框或媒体框</div>}
+        {elements.length ? elements.map((element) => <FreeLayoutElement key={element.id} slideIndex={index} element={element} containerRef={surfaceRef} />) : <div className="absolute inset-0 flex items-center justify-center text-sm tracking-[0.22em] text-white/35">点击底部 + 添加文本框或媒体框</div>}
       </div>
     </div>;
   };
 
-  const MediaSlot = ({ slideIndex, slotIndex, label, activePreviewKey, setActivePreviewKey }) => {
+  const MediaSlot = ({ slideIndex, slotIndex, label }) => {
     const slide = slidesData[slideIndex];
     const item = normalizeMediaItem(slide.media && slide.media[slotIndex]);
     const bindingInfo = getMediaBindingInfo(item);
@@ -2510,10 +2534,9 @@ function App() {
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
-    const previewKey = `slot:${slide.id}:${slotIndex}`;
-    const directVideo = item && item.kind === "video" && isDirectVideoSource(getPrimaryMediaUrl(item, { preferDraftPreview }));
-    const isPreviewOwner = activePreviewKey === previewKey;
-    const isInlinePlaybackActive = prefersHoverControls && isHovered && isPreviewOwner;
+    const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
+    const directVideo = item && item.kind === "video" && isDirectVideoSource(videoSource);
+    const isInlinePlaybackActive = prefersHoverControls && isHovered;
     const shouldContainMedia = slide?.id === 2 || slide?.title?.includes("个人简介");
     const mediaClassName = shouldContainMedia
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
@@ -2584,7 +2607,6 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       hoverPlaybackPendingRef.current = false;
-      if (activePreviewKey === previewKey) setActivePreviewKey(null);
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       setLightboxData(item);
     };
@@ -2646,7 +2668,7 @@ function App() {
         userPausedRef.current = false;
         return;
       }
-      const src = getPrimaryMediaUrl(item, { preferDraftPreview }) || getDisplayUrl(item, { preferDraftPreview });
+      const src = videoSource || getDisplayUrl(item, { preferDraftPreview });
       const directVideoItem = item.kind === "video" && isDirectVideoSource(src);
       const embeddable = item.kind === "youtube" || (item.kind === "video" && !!getVideoEmbedUrl(src));
       const externalLinkOnly = item.kind === "video" && !directVideoItem && !embeddable;
@@ -2663,7 +2685,7 @@ function App() {
       hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
       clearControlsTimer();
-    }, [item, preferDraftPreview]);
+    }, [item, preferDraftPreview, videoSource]);
 
     useEffect(() => {
       const node = rootRef.current;
@@ -2673,35 +2695,50 @@ function App() {
         setIsInViewport(nextInViewport);
         if (!nextInViewport) {
           setIsHovered(false);
-          if (activePreviewKey === previewKey) setActivePreviewKey(null);
         }
       }, {
         root: null,
         threshold: [0, 0.08, 0.22],
-        rootMargin: "12% 0px 12% 0px"
+        rootMargin: "30% 0px 30% 0px"
       });
       observer.observe(node);
       return () => observer.disconnect();
-    }, [activePreviewKey, previewKey, setActivePreviewKey]);
+    }, [slide.id, slotIndex]);
+
+    useEffect(() => {
+      if (!directVideo || !videoSource || showEditor || !isInViewport) return;
+      const key = `video:${videoSource}`;
+      if (!preloadedMediaRef.current.has(key)) {
+        preloadedMediaRef.current.add(key);
+        preloadMediaTarget({ kind: "video", src: videoSource });
+      }
+      const video = videoRef.current;
+      if (!video) return;
+      video.preload = "auto";
+      if (video.readyState < 2) {
+        try {
+          video.load();
+        } catch (error) {}
+      }
+    }, [directVideo, isInViewport, showEditor, videoSource]);
 
     useEffect(() => {
       if (!item || item.kind !== "video") return;
-      const src = getPrimaryMediaUrl(item, { preferDraftPreview });
-      if (!isDirectVideoSource(src)) return;
+      if (!directVideo) return;
       const video = videoRef.current;
       if (!video) return;
 
-      if (showEditor || !isInViewport || !isPreviewOwner) {
+      if (showEditor || !isInViewport || !isInlinePlaybackActive) {
         resetInlinePreview();
         return;
       }
 
       hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
-      video.preload = "metadata";
+      video.preload = "auto";
       setIsMuted(true);
       if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
-    }, [item, isInViewport, isPreviewOwner, preferDraftPreview, showEditor]);
+    }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
 
     useEffect(() => () => {
       clearControlsTimer();
@@ -2715,9 +2752,8 @@ function App() {
 
     useEffect(() => {
       if (currentSlide === slideIndex) return;
-      if (activePreviewKey === previewKey) setActivePreviewKey(null);
       resetInlinePreview();
-    }, [activePreviewKey, currentSlide, previewKey, setActivePreviewKey, slideIndex]);
+    }, [currentSlide, slideIndex]);
 
     useEffect(() => {
       if (!isHovered) return undefined;
@@ -2728,13 +2764,12 @@ function App() {
         const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
         if (!inside) {
           setIsHovered(false);
-          if (activePreviewKey === previewKey) setActivePreviewKey(null);
         }
       };
 
       window.addEventListener("mousemove", handlePointerMove, true);
       return () => window.removeEventListener("mousemove", handlePointerMove, true);
-    }, [activePreviewKey, isHovered, previewKey, setActivePreviewKey]);
+    }, [isHovered]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2769,19 +2804,16 @@ function App() {
 
     return <div
       ref={rootRef}
-      className={cx("card-3d card-3d--interactive card-3d--media relative w-full h-full overflow-hidden group cursor-pointer transition-all duration-500", isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]")}
+      className={cx("relative w-full h-full overflow-hidden rounded-[26px] border border-white/10 bg-black/25 group cursor-pointer", isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]")}
       onMouseEnter={() => {
         setIsHovered(true);
-        if (directVideo && !showEditor && isInViewport) setActivePreviewKey(previewKey);
         if (prefersHoverControls) setShowPlaybackOverlay(true);
       }}
       onMouseMove={() => {
-        if (directVideo && !showEditor && isInViewport && activePreviewKey !== previewKey) setActivePreviewKey(previewKey);
         if (prefersHoverControls) setShowPlaybackOverlay(true);
       }}
       onMouseLeave={() => {
         setIsHovered(false);
-        if (activePreviewKey === previewKey) setActivePreviewKey(null);
         if (prefersHoverControls) setShowPlaybackOverlay(false);
         if (directVideo) resetInlinePreview();
       }}
@@ -2795,7 +2827,7 @@ function App() {
       onDrop={handleDrop}
       onDoubleClick={(event) => { if (!IS_EDITOR_MODE) return; event.stopPropagation(); openEmptyEditor(); }}
     >
-      <div className="card-3d-surface h-full w-full">
+      <div className="h-full w-full">
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-sm tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">
         拖到这里即可替换当前媒体
       </div>}
@@ -2835,15 +2867,14 @@ function App() {
         </label>
       </div>}
       {item ? <>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_52%),linear-gradient(140deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02)_45%,transparent_78%)] pointer-events-none" />
         {directVideo && item?.poster && !showEditor && !isInlinePlaybackActive && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && isInViewport ? "auto" : "metadata"} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current && activePreviewKey === previewKey) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
+              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2922,7 +2953,7 @@ function App() {
     }
 
     if (slide.type === "free-layout") {
-      return <FreeLayoutSlide slide={slide} index={index} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} />;
+      return <FreeLayoutSlide slide={slide} index={index} />;
     }
 
     if (slide.type === "compare-slider") {
@@ -2953,7 +2984,7 @@ function App() {
       {slide.type !== "split" && <div className={`flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-4 px-4"}`}><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" /><EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} /></div>}
       <div className={slide.type === "split" ? (isFeedLayout ? "flex flex-col gap-5" : "flex-1 flex items-center gap-16 p-4") : `grid ${colsClass} gap-4`}>
         {slide.type === "split" && <div className={`${isFeedLayout ? "w-full flex flex-col relative gap-3 px-2" : "w-1/3 flex flex-col relative gap-4"}`}><div className={`absolute ${isFeedLayout ? "-left-1 top-0 h-14" : "-left-10 top-0 h-20"} w-1 bg-gradient-to-b from-white/40 to-transparent opacity-60`} /><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl md:text-4xl font-light mb-2 md:mb-4 leading-tight tracking-wide text-white/90" /><div className="flex flex-col gap-3">{(Array.isArray(slide.textBlocks) ? slide.textBlocks : [slide.text || ""]).map((block, blockIndex) => <EditableText key={`${slide.id}-text-${blockIndex}`} text={block} field="text" slideIndex={index} tagName="p" placeholder={`文本框 ${blockIndex + 1}`} className="text-base md:text-lg text-white/70 leading-relaxed font-light whitespace-pre-line" onBlurValue={(value) => updateTextBlock(index, blockIndex, value)} />)}</div></div>}
-        <div className={slide.type === "split" ? (isFeedLayout ? "w-full grid grid-cols-1 gap-3" : "w-2/3 h-[80vh] flex gap-6") : "contents"}>{Array.from({ length: slide.slots || 1 }).map((_, slotIndex) => <div key={slotIndex} className={slide.type === "split" ? (isFeedLayout ? "min-h-[320px]" : "flex-1 h-full") : ""}><MediaSlot slideIndex={index} slotIndex={slotIndex} label={slide.customLabels ? slide.customLabels[slotIndex] : `素材 ${String(slotIndex + 1).padStart(2, "0")}`} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} /></div>)}</div>
+            <div className={slide.type === "split" ? (isFeedLayout ? "w-full grid grid-cols-1 gap-3" : "w-2/3 h-[80vh] flex gap-6") : "contents"}>{Array.from({ length: slide.slots || 1 }).map((_, slotIndex) => <div key={slotIndex} className={slide.type === "split" ? (isFeedLayout ? "min-h-[320px]" : "flex-1 h-full") : ""}><MediaSlot slideIndex={index} slotIndex={slotIndex} label={slide.customLabels ? slide.customLabels[slotIndex] : `素材 ${String(slotIndex + 1).padStart(2, "0")}`} /></div>)}</div>
       </div>
     </div>;
   };
@@ -2984,14 +3015,11 @@ function App() {
   };
 
   const publishedSectionStyle = {
-    contentVisibility: "auto",
-    contain: "layout paint style",
-    containIntrinsicSize: isMobileLandscapeMode ? "1280px 780px" : "1120px 860px",
     scrollMarginTop: `${sectionScrollOffset}px`
   };
   const portfolioSizeToneClass = portfolioSizeTone === "danger" ? "text-rose-200 bg-rose-500/15 border-rose-300/20" : portfolioSizeTone === "warning" ? "text-amber-100 bg-amber-500/12 border-amber-300/20" : "text-emerald-100 bg-emerald-500/12 border-emerald-300/20";
 
-  return <div className="app-shell relative min-h-screen w-full font-sans select-none selection:bg-white/20" {...touchHandlers}>
+  return <div className="relative min-h-screen w-full font-sans select-none selection:bg-white/20" {...touchHandlers}>
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       <div className={`absolute -top-[16%] -left-[8%] h-[44%] w-[44%] ${currentTheme.a} rounded-full blur-[120px] opacity-90 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 10s infinite" }} />
       <div className={`absolute top-[24%] -right-[8%] h-[38%] w-[38%] ${currentTheme.b} rounded-full blur-[130px] opacity-85 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 13s infinite 1.8s" }} />
@@ -2999,20 +3027,16 @@ function App() {
     </div>
     <div className="relative z-10">
       <div className="sticky top-3 z-40 px-3">
-        <div className={cx("surface-panel mx-auto flex w-full items-center justify-between gap-3 rounded-full px-4 py-2 text-xs", isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl")}>
+        <div className={`mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"}`}>
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => goToSlide(0)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
             <button onClick={() => goToSlide(tocSlideIndex)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>
+            <button onClick={() => scrollToElementRef(caseListSectionRef)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">案例</button>
+            <button onClick={() => scrollToElementRef(contactSectionRef)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">合作</button>
           </div>
           <div className="hidden items-center gap-2 lg:flex">
-            <span className="text-tertiary">{siteMeta.siteTitle}</span>
-            <span className="font-mono tracking-widest text-secondary">{String(currentSlide + 1).padStart(2, "0")}/{String(slidesData.length).padStart(2, "0")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setThemeMode((value) => value === "dark" ? "light" : "dark")} className="nav-pill theme-toggle px-3 py-1.5 text-[11px] font-medium">
-              <Icon name={isLightTheme ? "Moon" : "Sun"} size={14} />
-              {isLightTheme ? "Dark" : "Light"}
-            </button>
+            <span className="text-white/38">{siteMeta.siteTitle}</span>
+            <span className="font-mono tracking-widest text-white/70">{String(currentSlide + 1).padStart(2, "0")}/{String(slidesData.length).padStart(2, "0")}</span>
           </div>
         </div>
       </div>
@@ -3050,16 +3074,35 @@ function App() {
         </div>
       </div>}
       <div className={`mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
+        <section ref={caseListSectionRef} className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md" style={publishedSectionStyle}>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
+          <CaseList title={siteMeta.caseSectionTitle} description={siteMeta.caseSectionDesc} cases={casesData} activeCaseId={activeCaseId} onSelectCase={openCaseDetail} />
+        </section>
         {slidesData.map((slide, index) => <section
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
           data-slide-index={index}
-          className="section-shell reveal-section"
+          className="reveal-section relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md"
           style={publishedSectionStyle}
         >
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
           {renderSlide(slide, index)}
         </section>)}
+        <section ref={caseDetailSectionRef} className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md" style={publishedSectionStyle}>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
+          <div className="flex flex-col gap-6 px-2 py-4">
+            <div className="flex flex-col gap-3 px-2">
+              <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Case Detail</div>
+              <h2 className="text-3xl font-semibold tracking-tight text-white/92">{activeCase ? activeCase.title : "案例详情"}</h2>
+              <p className="max-w-3xl text-sm leading-7 text-white/60">{activeCase ? "这里会串起案例说明、工具链和现有作品 section。" : "从上方案例卡片进入后，这里会展开更完整的结构化说明。"}</p>
+            </div>
+            <CaseDetail caseItem={activeCase} onJumpToSlide={jumpToSlideById} onOpenContact={openContactForCase} />
+          </div>
+        </section>
+        <section ref={contactSectionRef} className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md" style={publishedSectionStyle}>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
+          <ContactForm meta={siteMeta} activeCase={activeCase} requestContext={contactRequestContext} />
+        </section>
       </div>
     </div>
     {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setLightboxData(null)}>
