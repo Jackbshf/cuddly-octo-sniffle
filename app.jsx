@@ -544,6 +544,12 @@ const supportsHoverInteractions = () => {
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 };
 
+const shouldPreferMutedAutoplay = () => {
+  if (typeof navigator === "undefined") return true;
+  const activation = navigator.userActivation;
+  return !(activation?.hasBeenActive || activation?.isActive);
+};
+
 const resolveLayoutMode = () => {
   if (!IS_QR_MOBILE_MODE) return "desktop-feed";
   return getViewportOrientation() === "landscape" ? "mobile-landscape-feed" : "mobile-portrait-feed";
@@ -1553,7 +1559,7 @@ function App() {
         const nextIndex = Number(entry.target.dataset.slideIndex);
         if (!Number.isFinite(nextIndex)) return;
         activeSlideRatiosRef.current.set(nextIndex, entry.isIntersecting ? entry.intersectionRatio : 0);
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.12) {
+        if (isMobileFeedMode || (entry.isIntersecting && entry.intersectionRatio >= 0.12)) {
           entry.target.dataset.revealed = "true";
         }
       });
@@ -1565,7 +1571,7 @@ function App() {
     });
 
     slideSectionRefs.current.forEach((node) => {
-      if (!node.dataset.revealed) node.dataset.revealed = node.dataset.slideIndex === "0" ? "true" : "false";
+      node.dataset.revealed = isMobileFeedMode ? "true" : (node.dataset.slideIndex === "0" ? "true" : "false");
       observer.observe(node);
     });
     return () => {
@@ -1576,7 +1582,7 @@ function App() {
         activeSlideFrameRef.current = null;
       }
     };
-  }, [slidesData]);
+  }, [isMobileFeedMode, slidesData]);
 
   useEffect(() => {
     setPageJumpValue(String(currentSlide + 1));
@@ -2187,7 +2193,7 @@ function App() {
       revealControls();
       if (video.paused) {
         userPausedRef.current = false;
-        attemptInlineVideoPlayback(video, isMuted);
+        attemptInlineVideoPlayback(video, isMuted, setIsMuted);
       } else {
         userPausedRef.current = true;
         stopInlineVideoPlayback(video);
@@ -2327,8 +2333,9 @@ function App() {
       hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
       video.preload = "auto";
-      setIsMuted(true);
-      if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
+      const preferMutedPreview = shouldPreferMutedAutoplay();
+      setIsMuted(preferMutedPreview);
+      if (!userPausedRef.current) attemptInlineVideoPlayback(video, preferMutedPreview, setIsMuted);
     }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
 
     useEffect(() => () => {
@@ -2457,7 +2464,10 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
+              if (hoverPlaybackPendingRef.current) {
+                const preferMutedPreview = shouldPreferMutedAutoplay();
+                attemptInlineVideoPlayback(videoRef.current, preferMutedPreview, setIsMuted);
+              }
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2476,7 +2486,17 @@ function App() {
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
-        {directVideo && !showEditor && <InlineMediaControls visible={prefersHoverControls ? showPlaybackOverlay : true} onToggleFullscreen={openInlineFullscreen} />}
+        {directVideo && !showEditor && <InlineMediaControls
+          visible={prefersHoverControls ? showPlaybackOverlay : true}
+          showPlayToggle
+          isPlaying={isPlaying}
+          isMuted={isMuted}
+          timeLabel={mediaDuration ? `${currentTimeLabel} / ${mediaDuration}` : currentTimeLabel}
+          progressPercent={playbackProgress}
+          onTogglePlay={toggleInlinePlayback}
+          onToggleMute={toggleInlineMuted}
+          onToggleFullscreen={openInlineFullscreen}
+        />}
       </> : <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-center text-white/35 text-sm">
         <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5"><Icon name="UploadCloud" size={20} className="text-white/45" /></div>
         <div>拖入媒体，或点击右上角上传/填写链接</div>
@@ -2588,7 +2608,7 @@ function App() {
       revealControls();
       if (video.paused) {
         userPausedRef.current = false;
-        attemptInlineVideoPlayback(video, isMuted);
+        attemptInlineVideoPlayback(video, isMuted, setIsMuted);
       } else {
         userPausedRef.current = true;
         stopInlineVideoPlayback(video);
@@ -2736,8 +2756,9 @@ function App() {
       hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
       video.preload = "auto";
-      setIsMuted(true);
-      if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
+      const preferMutedPreview = shouldPreferMutedAutoplay();
+      setIsMuted(preferMutedPreview);
+      if (!userPausedRef.current) attemptInlineVideoPlayback(video, preferMutedPreview, setIsMuted);
     }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
 
     useEffect(() => () => {
@@ -2874,7 +2895,10 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
+              if (hoverPlaybackPendingRef.current) {
+                const preferMutedPreview = shouldPreferMutedAutoplay();
+                attemptInlineVideoPlayback(videoRef.current, preferMutedPreview, setIsMuted);
+              }
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2893,7 +2917,17 @@ function App() {
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
-        {directVideo && !showEditor && <InlineMediaControls visible={prefersHoverControls ? showPlaybackOverlay : true} onToggleFullscreen={openInlineFullscreen} />}
+        {directVideo && !showEditor && <InlineMediaControls
+          visible={prefersHoverControls ? showPlaybackOverlay : true}
+          showPlayToggle
+          isPlaying={isPlaying}
+          isMuted={isMuted}
+          timeLabel={mediaDuration ? `${currentTimeLabel} / ${mediaDuration}` : currentTimeLabel}
+          progressPercent={playbackProgress}
+          onTogglePlay={toggleInlinePlayback}
+          onToggleMute={toggleInlineMuted}
+          onToggleFullscreen={openInlineFullscreen}
+        />}
       </> : <div className="flex flex-col items-center justify-center p-2 text-center w-full h-full">
         <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 border border-white/5 group-hover:bg-white/10"><Icon name="UploadCloud" size={18} className="text-white/40" /></div>
         <span className="text-[10px] tracking-widest text-white/40 uppercase">{label || "Upload"}</span>
