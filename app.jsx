@@ -13,7 +13,6 @@ const PORTFOLIO_WARN_BYTES = 500 * 1024;
 const PORTFOLIO_BLOCK_BYTES = 1024 * 1024;
 const INLINE_AUDIO_SESSION_KEY = "zhangwei_portfolio_inline_audio_unlocked_v1";
 const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_v1";
-const INLINE_AUDIO_STATE_EVENT = "zhangwei-portfolio-inline-audio-statechange";
 
 const DEFAULT_SITE_META = {
   siteTitle: "ZHANG WEI - AIGC Portfolio",
@@ -552,7 +551,6 @@ const rememberInlineAudioPreference = (nextMuted) => {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(INLINE_AUDIO_PREFERENCE_KEY, nextMuted ? "muted" : "audible");
-    window.dispatchEvent(new CustomEvent(INLINE_AUDIO_STATE_EVENT));
   } catch (error) {}
 };
 
@@ -560,7 +558,6 @@ const markInlineAudioUnlocked = () => {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(INLINE_AUDIO_SESSION_KEY, "1");
-    window.dispatchEvent(new CustomEvent(INLINE_AUDIO_STATE_EVENT));
   } catch (error) {}
 };
 
@@ -582,15 +579,6 @@ const shouldPreferMutedAutoplay = () => {
   return !(activation?.hasBeenActive || activation?.isActive || hasUnlockedInlineAudio());
 };
 
-const canAttemptAudibleInlinePlayback = () => {
-  const storedPreference = readInlineAudioPreference();
-  if (storedPreference === "audible") return true;
-  if (storedPreference === "muted") return false;
-  if (typeof navigator === "undefined") return hasUnlockedInlineAudio();
-  const activation = navigator.userActivation;
-  return Boolean(activation?.hasBeenActive || activation?.isActive || hasUnlockedInlineAudio());
-};
-
 const resolveLayoutMode = () => {
   if (!IS_QR_MOBILE_MODE) return "desktop-feed";
   return getViewportOrientation() === "landscape" ? "mobile-landscape-feed" : "mobile-portrait-feed";
@@ -604,45 +592,20 @@ const attemptInlineVideoPlayback = (video, preferredMuted, onMutedChange) => {
       video.load();
     } catch (error) {}
   }
+  video.defaultMuted = preferredMuted;
   video.muted = preferredMuted;
   if (typeof onMutedChange === "function") onMutedChange(preferredMuted);
-  const shouldRetryAudible = !preferredMuted && canAttemptAudibleInlinePlayback();
-  const retryAudibleUnmute = () => {
-    if (!shouldRetryAudible) return;
-    let attempts = 0;
-    const syncAudibleState = () => {
-      if (!video || video.paused) return;
-      try {
-        video.defaultMuted = false;
-        video.muted = false;
-        if (typeof onMutedChange === "function") onMutedChange(false);
-      } catch (error) {}
-      attempts += 1;
-      if (!video.muted || attempts >= 8) return;
-      window.setTimeout(syncAudibleState, 120);
-    };
-    window.setTimeout(syncAudibleState, 80);
-  };
   const playAttempt = video.play();
-  if (playAttempt && typeof playAttempt.then === "function") {
-    playAttempt.then(() => retryAudibleUnmute()).catch(() => {
-      video.muted = true;
-      if (typeof onMutedChange === "function") onMutedChange(true);
-      const mutedAttempt = video.play();
-      if (mutedAttempt && typeof mutedAttempt.then === "function") {
-        mutedAttempt.then(() => retryAudibleUnmute()).catch(() => {});
-      } else if (mutedAttempt && typeof mutedAttempt.catch === "function") {
-        mutedAttempt.catch(() => {});
-      }
-    });
-  } else if (playAttempt && typeof playAttempt.catch === "function") {
+  if (playAttempt && typeof playAttempt.catch === "function") {
     playAttempt.catch(() => {
-      video.muted = true;
-      if (typeof onMutedChange === "function") onMutedChange(true);
+      if (preferredMuted) return;
+      try {
+        video.defaultMuted = true;
+        video.muted = true;
+        if (typeof onMutedChange === "function") onMutedChange(true);
+      } catch (error) {}
       const mutedAttempt = video.play();
-      if (mutedAttempt && typeof mutedAttempt.then === "function") {
-        mutedAttempt.then(() => retryAudibleUnmute()).catch(() => {});
-      } else if (mutedAttempt && typeof mutedAttempt.catch === "function") {
+      if (mutedAttempt && typeof mutedAttempt.catch === "function") {
         mutedAttempt.catch(() => {});
       }
     });
@@ -653,7 +616,7 @@ const stopInlineVideoPlayback = (video, options = {}) => {
   const shouldResetMuted = Boolean(options.resetMuted);
   const shouldResetTime = Boolean(options.resetTime);
   if (!video) return;
-  video.pause();
+  if (!video.paused) video.pause();
   if (shouldResetTime) {
     const resetTime = () => {
       try {
@@ -1276,30 +1239,6 @@ function App() {
     return () => {
       window.removeEventListener("pointerdown", unlockInlineAudio);
       window.removeEventListener("keydown", unlockInlineAudio);
-    };
-  }, []);
-
-  useEffect(() => {
-    const syncPlayingInlineVideoAudio = () => {
-      if (shouldPreferMutedAutoplay()) return;
-      document.querySelectorAll("video").forEach((video) => {
-        if (video.paused) return;
-        try {
-          video.defaultMuted = false;
-          video.muted = false;
-        } catch (error) {}
-      });
-    };
-
-    const intervalId = window.setInterval(syncPlayingInlineVideoAudio, 140);
-    window.addEventListener("pointerdown", syncPlayingInlineVideoAudio, { passive: true });
-    window.addEventListener("mousemove", syncPlayingInlineVideoAudio, { passive: true });
-    window.addEventListener(INLINE_AUDIO_STATE_EVENT, syncPlayingInlineVideoAudio);
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener("pointerdown", syncPlayingInlineVideoAudio);
-      window.removeEventListener("mousemove", syncPlayingInlineVideoAudio);
-      window.removeEventListener(INLINE_AUDIO_STATE_EVENT, syncPlayingInlineVideoAudio);
     };
   }, []);
 
@@ -2036,7 +1975,6 @@ function App() {
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
     const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster));
     const [isMuted, setIsMuted] = useState(true);
-    const [inlineAudioStateVersion, setInlineAudioStateVersion] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
     const [isInViewport, setIsInViewport] = useState(true);
@@ -2051,7 +1989,6 @@ function App() {
     const [isDragTarget, setIsDragTarget] = useState(false);
     const videoRef = useRef(null);
     const overlayTimerRef = useRef(null);
-    const audibleSyncTimerRef = useRef(null);
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
@@ -2060,20 +1997,10 @@ function App() {
     const isInlinePlaybackActive = prefersHoverControls && isHovered;
     const mediaClassName = "relative z-10 h-full w-full object-cover object-center";
 
-    useEffect(() => {
-      const handleInlineAudioStateChange = () => setInlineAudioStateVersion((value) => value + 1);
-      window.addEventListener(INLINE_AUDIO_STATE_EVENT, handleInlineAudioStateChange);
-      return () => window.removeEventListener(INLINE_AUDIO_STATE_EVENT, handleInlineAudioStateChange);
-    }, []);
-
     const resetInlinePreview = (options = {}) => {
       const preserveOverlay = Boolean(options.preserveOverlay);
       hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
-      if (audibleSyncTimerRef.current) {
-        window.clearInterval(audibleSyncTimerRef.current);
-        audibleSyncTimerRef.current = null;
-      }
       clearControlsTimer();
       if (!preserveOverlay) setShowPlaybackOverlay(false);
       setIsMuted(true);
@@ -2088,33 +2015,6 @@ function App() {
         window.clearTimeout(overlayTimerRef.current);
         overlayTimerRef.current = null;
       }
-    };
-
-    const forceAudiblePreview = () => {
-      if (shouldPreferMutedAutoplay()) return;
-      if (audibleSyncTimerRef.current) {
-        window.clearInterval(audibleSyncTimerRef.current);
-        audibleSyncTimerRef.current = null;
-      }
-      let attempts = 0;
-      const syncAudibleState = () => {
-        attempts += 1;
-        const video = videoRef.current;
-        if (!video || video.paused || attempts > 14) {
-          if (audibleSyncTimerRef.current) {
-            window.clearInterval(audibleSyncTimerRef.current);
-            audibleSyncTimerRef.current = null;
-          }
-          return;
-        }
-        try {
-          video.defaultMuted = false;
-          video.muted = false;
-          setIsMuted(false);
-        } catch (error) {}
-      };
-      syncAudibleState();
-      audibleSyncTimerRef.current = window.setInterval(syncAudibleState, 120);
     };
 
     const scheduleControlsHide = (delay = 2200) => {
@@ -2290,31 +2190,10 @@ function App() {
       setIsMuted(preferMutedPreview);
       if (!userPausedRef.current) {
         attemptInlineVideoPlayback(video, preferMutedPreview, setIsMuted);
-        forceAudiblePreview();
       }
-    }, [directVideo, inlineAudioStateVersion, isInViewport, isInlinePlaybackActive, showEditor]);
-
-    useEffect(() => {
-      if (!item || item.kind !== "video") return undefined;
-      if (!directVideo || showEditor || !isInViewport || !isInlinePlaybackActive) return undefined;
-      if (shouldPreferMutedAutoplay()) return undefined;
-      const video = videoRef.current;
-      if (!video) return undefined;
-      const unmuteTimerId = window.setTimeout(() => {
-        if (video.paused) return;
-        try {
-          video.muted = false;
-          setIsMuted(false);
-        } catch (error) {}
-      }, 180);
-      return () => window.clearTimeout(unmuteTimerId);
-    }, [directVideo, inlineAudioStateVersion, isInViewport, isInlinePlaybackActive, isPlaying, item, showEditor]);
+    }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
 
     useEffect(() => () => {
-      if (audibleSyncTimerRef.current) {
-        window.clearInterval(audibleSyncTimerRef.current);
-        audibleSyncTimerRef.current = null;
-      }
       clearControlsTimer();
     }, []);
 
@@ -2382,12 +2261,6 @@ function App() {
         onMouseEnter={() => {
           setIsHovered(true);
           if (prefersHoverControls) setShowPlaybackOverlay(true);
-          if (directVideo && videoRef.current && !userPausedRef.current) {
-            const preferMutedPreview = shouldPreferMutedAutoplay();
-            setIsMuted(preferMutedPreview);
-            attemptInlineVideoPlayback(videoRef.current, preferMutedPreview, setIsMuted);
-            if (!preferMutedPreview) forceAudiblePreview();
-          }
         }}
       onMouseMove={() => {
         if (prefersHoverControls) setShowPlaybackOverlay(true);
@@ -2455,15 +2328,8 @@ function App() {
             setIsMediaLoading(false);
             setHasMediaError(true);
             setIsVideoReady(false);
-            }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={(event) => {
+            }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
               setIsPlaying(true);
-              if (isInlinePlaybackActive && !shouldPreferMutedAutoplay()) {
-                try {
-                  event.currentTarget.muted = false;
-                  setIsMuted(false);
-                } catch (error) {}
-              }
-              forceAudiblePreview();
               revealControls();
             }} onVideoPause={() => {
             setIsPlaying(false);
@@ -2526,7 +2392,6 @@ function App() {
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
     const [isMuted, setIsMuted] = useState(true);
-    const [inlineAudioStateVersion, setInlineAudioStateVersion] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [isDragTarget, setIsDragTarget] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
@@ -2541,7 +2406,6 @@ function App() {
     const [showPlaybackOverlay, setShowPlaybackOverlay] = useState(false);
     const videoRef = useRef(null);
     const overlayTimerRef = useRef(null);
-    const audibleSyncTimerRef = useRef(null);
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
@@ -2553,20 +2417,10 @@ function App() {
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
       : "relative z-10 h-full w-full object-cover object-center";
 
-    useEffect(() => {
-      const handleInlineAudioStateChange = () => setInlineAudioStateVersion((value) => value + 1);
-      window.addEventListener(INLINE_AUDIO_STATE_EVENT, handleInlineAudioStateChange);
-      return () => window.removeEventListener(INLINE_AUDIO_STATE_EVENT, handleInlineAudioStateChange);
-    }, []);
-
     const resetInlinePreview = (options = {}) => {
       const preserveOverlay = Boolean(options.preserveOverlay);
       hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
-      if (audibleSyncTimerRef.current) {
-        window.clearInterval(audibleSyncTimerRef.current);
-        audibleSyncTimerRef.current = null;
-      }
       clearControlsTimer();
       if (!preserveOverlay) setShowPlaybackOverlay(false);
       setIsMuted(true);
@@ -2581,33 +2435,6 @@ function App() {
         window.clearTimeout(overlayTimerRef.current);
         overlayTimerRef.current = null;
       }
-    };
-
-    const forceAudiblePreview = () => {
-      if (shouldPreferMutedAutoplay()) return;
-      if (audibleSyncTimerRef.current) {
-        window.clearInterval(audibleSyncTimerRef.current);
-        audibleSyncTimerRef.current = null;
-      }
-      let attempts = 0;
-      const syncAudibleState = () => {
-        attempts += 1;
-        const video = videoRef.current;
-        if (!video || video.paused || attempts > 14) {
-          if (audibleSyncTimerRef.current) {
-            window.clearInterval(audibleSyncTimerRef.current);
-            audibleSyncTimerRef.current = null;
-          }
-          return;
-        }
-        try {
-          video.defaultMuted = false;
-          video.muted = false;
-          setIsMuted(false);
-        } catch (error) {}
-      };
-      syncAudibleState();
-      audibleSyncTimerRef.current = window.setInterval(syncAudibleState, 120);
     };
 
     const scheduleControlsHide = (delay = 2200) => {
@@ -2791,31 +2618,10 @@ function App() {
       setIsMuted(preferMutedPreview);
       if (!userPausedRef.current) {
         attemptInlineVideoPlayback(video, preferMutedPreview, setIsMuted);
-        forceAudiblePreview();
       }
-    }, [directVideo, inlineAudioStateVersion, isInViewport, isInlinePlaybackActive, showEditor]);
-
-    useEffect(() => {
-      if (!item || item.kind !== "video") return undefined;
-      if (!directVideo || showEditor || !isInViewport || !isInlinePlaybackActive) return undefined;
-      if (shouldPreferMutedAutoplay()) return undefined;
-      const video = videoRef.current;
-      if (!video) return undefined;
-      const unmuteTimerId = window.setTimeout(() => {
-        if (video.paused) return;
-        try {
-          video.muted = false;
-          setIsMuted(false);
-        } catch (error) {}
-      }, 180);
-      return () => window.clearTimeout(unmuteTimerId);
-    }, [directVideo, inlineAudioStateVersion, isInViewport, isInlinePlaybackActive, isPlaying, item, showEditor]);
+    }, [directVideo, isInViewport, isInlinePlaybackActive, showEditor]);
 
     useEffect(() => () => {
-      if (audibleSyncTimerRef.current) {
-        window.clearInterval(audibleSyncTimerRef.current);
-        audibleSyncTimerRef.current = null;
-      }
       clearControlsTimer();
     }, []);
 
@@ -2883,12 +2689,6 @@ function App() {
         onMouseEnter={() => {
           setIsHovered(true);
           if (prefersHoverControls) setShowPlaybackOverlay(true);
-          if (directVideo && videoRef.current && !userPausedRef.current) {
-            const preferMutedPreview = shouldPreferMutedAutoplay();
-            setIsMuted(preferMutedPreview);
-            attemptInlineVideoPlayback(videoRef.current, preferMutedPreview, setIsMuted);
-            if (!preferMutedPreview) forceAudiblePreview();
-          }
         }}
       onMouseMove={() => {
         if (prefersHoverControls) setShowPlaybackOverlay(true);
@@ -2964,15 +2764,8 @@ function App() {
               setIsMediaLoading(false);
               setHasMediaError(true);
               setIsVideoReady(false);
-            }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={(event) => {
+            }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
               setIsPlaying(true);
-              if (isInlinePlaybackActive && !shouldPreferMutedAutoplay()) {
-                try {
-                  event.currentTarget.muted = false;
-                  setIsMuted(false);
-                } catch (error) {}
-              }
-              forceAudiblePreview();
               revealControls();
             }} onVideoPause={() => {
             setIsPlaying(false);
