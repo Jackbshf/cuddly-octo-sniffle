@@ -885,7 +885,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     const embedUrl = getYouTubeEmbedUrl(item.url);
     if (!embedUrl) return null;
     if (!allowEmbeddedPlayback) return renderEmbeddedFallback("悬停播放视频");
-    return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="YouTube preview" loading="lazy" className="relative z-10 w-full h-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} onClick={handleSurfaceClick} />;
+    return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="YouTube preview" loading="eager" className="pointer-events-none relative z-10 h-full w-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} />;
   }
 
   if (item.kind === "video") {
@@ -894,7 +894,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     const embedUrl = getVideoEmbedUrl(src);
     if (embedUrl && !isDirectVideoSource(src)) {
       if (!allowEmbeddedPlayback) return renderEmbeddedFallback("悬停播放视频");
-      return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频预览" loading="lazy" className="relative z-10 w-full h-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} onClick={handleSurfaceClick} />;
+      return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频预览" loading="eager" className="pointer-events-none relative z-10 h-full w-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} />;
     }
     if (!isDirectVideoSource(src)) {
       if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
@@ -1991,6 +1991,7 @@ function App() {
   const FreeLayoutMediaBox = ({ slideIndex, element }) => {
     const item = normalizeMediaItem(element.media);
     const bindingInfo = getMediaBindingInfo(item);
+    const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
     const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster));
     const [isMuted, setIsMuted] = useState(true);
@@ -2012,7 +2013,7 @@ function App() {
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
     const directVideo = item && item.kind === "video" && isDirectVideoSource(getPrimaryMediaUrl(item, { preferDraftPreview }));
     const embeddedVideo = item && (item.kind === "youtube" || (item.kind === "video" && !directVideo && Boolean(getVideoEmbedUrl(getPrimaryMediaUrl(item, { preferDraftPreview })))));
-    const isInlinePlaybackActive = prefersHoverControls && isHovered && currentSlide === slideIndex;
+    const isInlinePlaybackActive = prefersHoverControls && isHovered;
     const mediaClassName = "relative z-10 h-full w-full object-cover object-center";
 
     const clearControlsTimer = () => {
@@ -2161,12 +2162,32 @@ function App() {
       setShowPlaybackOverlay(true);
       video.preload = "metadata";
       setIsMuted(true);
-      if (!userPausedRef.current) attemptInlineVideoPlayback(video, true, setIsMuted);
+      if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
     }, [item, isInlinePlaybackActive, preferDraftPreview, showEditor]);
 
     useEffect(() => () => {
       clearControlsTimer();
     }, []);
+
+    useEffect(() => {
+      if (currentSlide !== slideIndex && isHovered) {
+        setIsHovered(false);
+      }
+    }, [currentSlide, isHovered, slideIndex]);
+
+    useEffect(() => {
+      if (!isHovered) return undefined;
+
+      const handlePointerMove = (event) => {
+        const rect = rootRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+        if (!inside) setIsHovered(false);
+      };
+
+      window.addEventListener("mousemove", handlePointerMove, true);
+      return () => window.removeEventListener("mousemove", handlePointerMove, true);
+    }, [isHovered]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2200,6 +2221,7 @@ function App() {
     };
 
     return <div
+      ref={rootRef}
       className="relative h-full w-full overflow-hidden"
       onMouseEnter={() => { setIsHovered(true); if (prefersHoverControls) setShowPlaybackOverlay(true); }}
       onMouseMove={() => { if (prefersHoverControls) setShowPlaybackOverlay(true); }}
@@ -2252,7 +2274,7 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, true, setIsMuted);
+              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2308,6 +2330,7 @@ function App() {
     const slide = slidesData[slideIndex];
     const item = normalizeMediaItem(slide.media && slide.media[slotIndex]);
     const bindingInfo = getMediaBindingInfo(item);
+    const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
     const [isMuted, setIsMuted] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
@@ -2328,7 +2351,7 @@ function App() {
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
     const directVideo = item && item.kind === "video" && isDirectVideoSource(getPrimaryMediaUrl(item, { preferDraftPreview }));
     const embeddedVideo = item && (item.kind === "youtube" || (item.kind === "video" && !directVideo && Boolean(getVideoEmbedUrl(getPrimaryMediaUrl(item, { preferDraftPreview })))));
-    const isInlinePlaybackActive = prefersHoverControls && isHovered && currentSlide === slideIndex;
+    const isInlinePlaybackActive = prefersHoverControls && isHovered;
     const shouldContainMedia = slide?.id === 2 || slide?.title?.includes("个人简介");
     const mediaClassName = shouldContainMedia
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
@@ -2488,12 +2511,32 @@ function App() {
       setShowPlaybackOverlay(true);
       video.preload = "metadata";
       setIsMuted(true);
-      if (!userPausedRef.current) attemptInlineVideoPlayback(video, true, setIsMuted);
+      if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
     }, [item, isInlinePlaybackActive, preferDraftPreview, showEditor]);
 
     useEffect(() => () => {
       clearControlsTimer();
     }, []);
+
+    useEffect(() => {
+      if (currentSlide !== slideIndex && isHovered) {
+        setIsHovered(false);
+      }
+    }, [currentSlide, isHovered, slideIndex]);
+
+    useEffect(() => {
+      if (!isHovered) return undefined;
+
+      const handlePointerMove = (event) => {
+        const rect = rootRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+        if (!inside) setIsHovered(false);
+      };
+
+      window.addEventListener("mousemove", handlePointerMove, true);
+      return () => window.removeEventListener("mousemove", handlePointerMove, true);
+    }, [isHovered]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2527,6 +2570,7 @@ function App() {
     };
 
     return <div
+      ref={rootRef}
       className={`relative w-full h-full rounded-2xl overflow-hidden group cursor-pointer bg-[#0a0a0c]/80 border border-white/[0.06] transition-all duration-500 ${isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]"} shadow-xl`}
       onMouseEnter={() => { setIsHovered(true); if (prefersHoverControls) setShowPlaybackOverlay(true); }}
       onMouseMove={() => { if (prefersHoverControls) setShowPlaybackOverlay(true); }}
@@ -2587,7 +2631,7 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, true, setIsMuted);
+              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
