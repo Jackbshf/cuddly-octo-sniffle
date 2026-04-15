@@ -112,6 +112,8 @@ const getBilibiliEmbedUrl = (value = "") => {
   return id ? `https://player.bilibili.com/player.html?bvid=${id.replace(/^av/i, "") === id ? id : ""}${id.toLowerCase().startsWith("av") ? `&aid=${id.slice(2)}` : ""}&page=1` : "";
 };
 
+const isBilibiliVideoUrl = (value = "") => /(?:bilibili\.com|b23\.tv|player\.bilibili\.com)/i.test(String(value || "").trim());
+
 const extractDouyinVideoId = (value = "") => {
   const raw = String(value || "").trim();
   if (!raw) return "";
@@ -523,8 +525,18 @@ const attemptInlineVideoPlayback = (video, preferredMuted, onMutedChange) => {
 
 const stopInlineVideoPlayback = (video, options = {}) => {
   const shouldResetMuted = Boolean(options.resetMuted);
+  const shouldResetTime = Boolean(options.resetTime);
   if (!video) return;
   video.pause();
+  if (shouldResetTime) {
+    const resetTime = () => {
+      try {
+        video.currentTime = 0;
+      } catch (error) {}
+    };
+    if (video.readyState >= 1) resetTime();
+    else video.addEventListener("loadedmetadata", resetTime, { once: true });
+  }
   if (shouldResetMuted) video.muted = true;
 };
 
@@ -853,7 +865,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
   if (!item) return null;
   const handleSurfaceClick = typeof onMediaSurfaceClick === "function" ? onMediaSurfaceClick : stopClick;
   const fallbackDisplayUrl = getDisplayUrl(item, { preferDraftPreview });
-  const renderEmbeddedFallback = (label) => {
+  const renderEmbeddedFallback = (label, providerLabel = "") => {
     if (fallbackDisplayUrl) {
       return <img
         src={fallbackDisplayUrl}
@@ -875,8 +887,12 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
 
     if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
     return <div className="relative z-10 flex h-full w-full items-center justify-center p-6 text-center" onClick={handleSurfaceClick}>
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-4 py-2 text-sm text-white/75">
-        <Icon name="Play" size={14} className="translate-x-[1px]" /> {label}
+      <div className="flex min-h-[48%] w-full max-w-md flex-col items-center justify-center gap-4 rounded-[28px] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02)_38%,rgba(0,0,0,0.2)_100%)] px-6 py-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+        {providerLabel && <div className="text-[11px] font-mono uppercase tracking-[0.28em] text-white/42">{providerLabel}</div>}
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white/82">
+          <Icon name="Play" size={18} className="translate-x-[1px]" />
+        </div>
+        <div className="text-sm text-white/78">{label}</div>
       </div>
     </div>;
   };
@@ -893,6 +909,9 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     if (!src) return null;
     const embedUrl = getVideoEmbedUrl(src);
     if (embedUrl && !isDirectVideoSource(src)) {
+      if (isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl)) {
+        return renderEmbeddedFallback("点击放大播放视频", "Bilibili");
+      }
       if (!allowEmbeddedPlayback) return renderEmbeddedFallback("悬停播放视频");
       return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频预览" loading="eager" className="pointer-events-none relative z-10 h-full w-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} />;
     }
@@ -1230,6 +1249,7 @@ function App() {
   const slideSectionRefs = useRef(new Map());
   const activeSlideRatiosRef = useRef(new Map());
   const activeSlideFrameRef = useRef(null);
+  const currentSlideRef = useRef(0);
   const currentTheme = colorPalettes[currentSlide % colorPalettes.length] || colorPalettes[0];
   const slidesData = portfolioData.slides;
   const casesData = portfolioData.cases;
@@ -1263,6 +1283,10 @@ function App() {
     if (node) slideSectionRefs.current.set(index, node);
     else slideSectionRefs.current.delete(index);
   };
+
+  useEffect(() => {
+    currentSlideRef.current = currentSlide;
+  }, [currentSlide]);
 
   const scrollToElementRef = (targetRef) => {
     const node = targetRef?.current;
@@ -1416,7 +1440,7 @@ function App() {
       if (activeSlideFrameRef.current) return;
       activeSlideFrameRef.current = window.requestAnimationFrame(() => {
         activeSlideFrameRef.current = null;
-        let nextIndex = currentSlide;
+        let nextIndex = currentSlideRef.current;
         let bestRatio = 0;
         activeSlideRatiosRef.current.forEach((ratio, index) => {
           if (ratio > bestRatio) {
@@ -1439,8 +1463,8 @@ function App() {
       scheduleActiveSlideUpdate();
     }, {
       root: null,
-      rootMargin: "-14% 0px -48% 0px",
-      threshold: [0, 0.18, 0.42]
+      rootMargin: "-12% 0px -52% 0px",
+      threshold: [0, 0.24]
     });
 
     slideSectionRefs.current.forEach((node) => observer.observe(node));
@@ -1452,7 +1476,7 @@ function App() {
         activeSlideFrameRef.current = null;
       }
     };
-  }, [slidesData, currentSlide]);
+  }, [slidesData]);
 
   useEffect(() => {
     setPageJumpValue(String(currentSlide + 1));
@@ -2015,6 +2039,18 @@ function App() {
     const embeddedVideo = item && (item.kind === "youtube" || (item.kind === "video" && !directVideo && Boolean(getVideoEmbedUrl(getPrimaryMediaUrl(item, { preferDraftPreview })))));
     const isInlinePlaybackActive = prefersHoverControls && isHovered;
     const mediaClassName = "relative z-10 h-full w-full object-cover object-center";
+    const resetInlinePreview = (options = {}) => {
+      const preserveOverlay = Boolean(options.preserveOverlay);
+      hoverPlaybackPendingRef.current = false;
+      userPausedRef.current = false;
+      clearControlsTimer();
+      if (!preserveOverlay) setShowPlaybackOverlay(false);
+      setIsMuted(true);
+      setIsPlaying(false);
+      setCurrentTimeLabel("00:00");
+      setPlaybackProgress(0);
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
+    };
 
     const clearControlsTimer = () => {
       if (overlayTimerRef.current) {
@@ -2150,12 +2186,7 @@ function App() {
       const video = videoRef.current;
       if (!video) return;
       if (showEditor || !isInlinePlaybackActive) {
-        hoverPlaybackPendingRef.current = false;
-        userPausedRef.current = false;
-        clearControlsTimer();
-        setShowPlaybackOverlay(false);
-        stopInlineVideoPlayback(video, { resetMuted: true });
-        setIsMuted(true);
+        resetInlinePreview();
         return;
       }
       hoverPlaybackPendingRef.current = true;
@@ -2225,7 +2256,11 @@ function App() {
       className="relative h-full w-full overflow-hidden"
       onMouseEnter={() => { setIsHovered(true); if (prefersHoverControls) setShowPlaybackOverlay(true); }}
       onMouseMove={() => { if (prefersHoverControls) setShowPlaybackOverlay(true); }}
-      onMouseLeave={() => { setIsHovered(false); if (prefersHoverControls) setShowPlaybackOverlay(false); }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        if (prefersHoverControls) setShowPlaybackOverlay(false);
+        if (directVideo) resetInlinePreview();
+      }}
       onDoubleClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }}
       onDragEnterCapture={handleDragEnter}
       onDragOverCapture={handleDragOver}
@@ -2268,6 +2303,7 @@ function App() {
       </div>}
       {hasUsableMedia ? <>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_52%),linear-gradient(140deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02)_45%,transparent_78%)] pointer-events-none" />
+        {directVideo && item?.poster && !showEditor && !isInlinePlaybackActive && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
           <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} onMediaLoad={() => {
             setIsMediaLoading(false);
@@ -2356,6 +2392,18 @@ function App() {
     const mediaClassName = shouldContainMedia
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
       : "relative z-10 h-full w-full object-cover object-center";
+    const resetInlinePreview = (options = {}) => {
+      const preserveOverlay = Boolean(options.preserveOverlay);
+      hoverPlaybackPendingRef.current = false;
+      userPausedRef.current = false;
+      clearControlsTimer();
+      if (!preserveOverlay) setShowPlaybackOverlay(false);
+      setIsMuted(true);
+      setIsPlaying(false);
+      setCurrentTimeLabel("00:00");
+      setPlaybackProgress(0);
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
+    };
 
     const clearControlsTimer = () => {
       if (overlayTimerRef.current) {
@@ -2498,12 +2546,7 @@ function App() {
       if (!video) return;
 
       if (showEditor || !isInlinePlaybackActive) {
-        hoverPlaybackPendingRef.current = false;
-        userPausedRef.current = false;
-        clearControlsTimer();
-        setShowPlaybackOverlay(false);
-        stopInlineVideoPlayback(video, { resetMuted: true });
-        setIsMuted(true);
+        resetInlinePreview();
         return;
       }
 
@@ -2574,7 +2617,11 @@ function App() {
       className={`relative w-full h-full rounded-2xl overflow-hidden group cursor-pointer bg-[#0a0a0c]/80 border border-white/[0.06] transition-all duration-500 ${isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]"} shadow-xl`}
       onMouseEnter={() => { setIsHovered(true); if (prefersHoverControls) setShowPlaybackOverlay(true); }}
       onMouseMove={() => { if (prefersHoverControls) setShowPlaybackOverlay(true); }}
-      onMouseLeave={() => { setIsHovered(false); if (prefersHoverControls) setShowPlaybackOverlay(false); }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        if (prefersHoverControls) setShowPlaybackOverlay(false);
+        if (directVideo) resetInlinePreview();
+      }}
       onDragEnterCapture={handleDragEnter}
       onDragOverCapture={handleDragOver}
       onDragLeaveCapture={handleDragLeave}
@@ -2625,6 +2672,7 @@ function App() {
       </div>}
       {item ? <>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_52%),linear-gradient(140deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02)_45%,transparent_78%)] pointer-events-none" />
+        {directVideo && item?.poster && !showEditor && !isInlinePlaybackActive && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
           <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} onMediaLoad={() => {
             setIsMediaLoading(false);
@@ -2846,10 +2894,10 @@ function App() {
     {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setLightboxData(null)}>
       <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={() => setLightboxData(null)}>✕ 关闭</button>
       {lightboxData.meta && <div className="absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">Prompt / Metadata</span>{lightboxData.meta}</div>}
-      {lightboxData.kind === "youtube" ? <iframe src={getYouTubeEmbedUrl(lightboxData.url)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
+      {lightboxData.kind === "youtube" ? <iframe src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
         const videoSrc = getPrimaryMediaUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) });
         const embedUrl = getVideoEmbedUrl(videoSrc);
-        if (embedUrl && !isDirectVideoSource(videoSrc)) return <iframe src={embedUrl} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
+        if (embedUrl && !isDirectVideoSource(videoSrc)) return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         if (!isDirectVideoSource(videoSrc)) return <a href={videoSrc} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
         return <video src={videoSrc} poster={lightboxData.poster || undefined} controls autoPlay preload="metadata" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
