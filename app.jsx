@@ -7,7 +7,6 @@ const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
 const IS_EDITOR_MODE = window.location.protocol === "file:" || new URLSearchParams(window.location.search).get("editor") === "1";
 const MOBILE_MODE_QUERY = new URLSearchParams(window.location.search).get("mobile");
 const IS_QR_MOBILE_MODE = MOBILE_MODE_QUERY === "1";
-const CASE_QUERY_PARAM = "case";
 const SLIDE_TRANSITION_OUT_MS = 120;
 const SLIDE_TRANSITION_IN_MS = 180;
 const PORTFOLIO_WARN_BYTES = 500 * 1024;
@@ -50,13 +49,6 @@ const formatBytes = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 const getPortfolioSizeTone = (bytes) => bytes > PORTFOLIO_BLOCK_BYTES ? "danger" : bytes >= PORTFOLIO_WARN_BYTES ? "warning" : "safe";
-const getQueryParamValue = (name) => new URLSearchParams(window.location.search).get(name) || "";
-const setQueryParamValue = (name, value) => {
-  const url = new URL(window.location.href);
-  if (value) url.searchParams.set(name, value);
-  else url.searchParams.delete(name);
-  window.history.replaceState({}, "", url.toString());
-};
 const inferMediaKind = (value = "") => {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized) return "image";
@@ -1041,149 +1033,6 @@ const InlineMediaControls = ({ visible, showPlayToggle = false, isPlaying = fals
   </div>}
 </div>;
 
-const CaseResultPills = ({ results }) => {
-  const entries = Object.entries(results || {});
-  if (!entries.length) return null;
-  return <div className="flex flex-wrap gap-2">
-    {entries.map(([key, value]) => <div key={key} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/72">
-      <span className="mr-2 text-white/40">{key}</span>
-      <span className="font-medium text-white/88">{value}</span>
-    </div>)}
-  </div>;
-};
-
-const CaseList = ({ title, description, cases, activeCaseId, onSelectCase }) => {
-  const categories = ["全部", ...Array.from(new Set(cases.map((item) => item.category).filter(Boolean)))];
-  const [category, setCategory] = useState("全部");
-  const filteredCases = category === "全部" ? cases : cases.filter((item) => item.category === category);
-
-  return <div className="flex flex-col gap-6 px-2 py-4">
-    <div className="flex flex-col gap-3 px-2">
-      <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Case Library</div>
-      <h2 className="text-3xl font-semibold tracking-tight text-white/92">{title}</h2>
-      <p className="max-w-3xl text-sm leading-7 text-white/60">{description}</p>
-    </div>
-    <div className="flex flex-wrap gap-2 px-2">
-      {categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={`rounded-full border px-3 py-1.5 text-xs transition ${category === item ? "border-cyan-300/30 bg-cyan-500/15 text-cyan-50" : "border-white/10 bg-white/5 text-white/68 hover:bg-white/10"}`}>
-        {item}
-      </button>)}
-    </div>
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {filteredCases.map((item) => <button key={item.id} onClick={() => onSelectCase(item.id)} className={`group overflow-hidden rounded-[28px] border text-left transition ${activeCaseId === item.id ? "border-cyan-300/30 bg-white/[0.08]" : "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"}`}>
-        <div className="grid grid-cols-1 gap-0 md:grid-cols-[1.15fr_1fr]">
-          <div className="relative min-h-[220px] overflow-hidden bg-black/30">
-            {item.cover ? <img src={item.cover} alt={item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : <div className="flex h-full items-center justify-center text-white/25">暂无封面</div>}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/72 to-transparent" />
-            <div className="absolute bottom-3 left-3 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/75">{item.category}</div>
-          </div>
-          <div className="flex flex-col gap-4 p-5">
-            <div className="space-y-2">
-              <div className="text-xs uppercase tracking-[0.18em] text-white/40">{item.id}</div>
-              <h3 className="text-xl font-semibold leading-tight text-white/92">{item.title}</h3>
-              <p className="text-sm leading-7 text-white/62">{item.description}</p>
-            </div>
-            <CaseResultPills results={item.results} />
-            <div className="mt-auto flex flex-wrap gap-2">
-              {item.tags.map((tag) => <span key={tag} className="rounded-full bg-white/6 px-2.5 py-1 text-[11px] text-white/60">{tag}</span>)}
-            </div>
-          </div>
-        </div>
-      </button>)}
-    </div>
-  </div>;
-};
-
-const CaseDetail = ({ caseItem, onJumpToSlide, onOpenContact }) => {
-  if (!caseItem) {
-    return <div className="rounded-[28px] border border-dashed border-white/10 bg-white/[0.03] p-8 text-center text-sm leading-7 text-white/45">
-      从上方案例卡片进入详情，这里会显示项目说明、工具链、结果数据和关联作品跳转。
-    </div>;
-  }
-
-  return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.05]">
-    <div className="grid grid-cols-1 gap-0 xl:grid-cols-[1.1fr_0.9fr]">
-      <div className="relative min-h-[280px] bg-black/30">
-        {caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-white/25">暂无封面</div>}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/12 to-transparent" />
-        <div className="absolute bottom-6 left-6 right-6 space-y-3">
-          <div className="inline-flex rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/75">{caseItem.category}</div>
-          <h3 className="text-3xl font-semibold tracking-tight text-white">{caseItem.title}</h3>
-          <p className="max-w-2xl text-sm leading-7 text-white/72">{caseItem.description}</p>
-        </div>
-      </div>
-      <div className="flex flex-col gap-6 p-6">
-        <div className="space-y-3">
-          <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Results</div>
-          <CaseResultPills results={caseItem.results} />
-        </div>
-        <div className="space-y-3">
-          <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Tools</div>
-          <div className="flex flex-wrap gap-2">
-            {caseItem.tools.map((tool) => <span key={tool} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/72">{tool}</span>)}
-          </div>
-        </div>
-        <div className="space-y-3">
-          <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Linked Slides</div>
-          <div className="flex flex-wrap gap-2">
-            {caseItem.slideIds.map((slideId) => <button key={slideId} onClick={() => onJumpToSlide(slideId)} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 hover:bg-white/10">
-              跳转到作品 {slideId}
-            </button>)}
-          </div>
-        </div>
-        <div className="mt-auto flex flex-wrap gap-3 pt-2">
-          <button onClick={() => onOpenContact(caseItem, "consult")} className="rounded-full border border-cyan-300/20 bg-cyan-500/15 px-4 py-2 text-sm text-cyan-50 hover:bg-cyan-500/22">
-            咨询同类项目
-          </button>
-          <button onClick={() => onOpenContact(caseItem, "workflow")} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/72 hover:bg-white/10">
-            复用此工作流
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>;
-};
-
-const ContactForm = ({ meta, activeCase, requestContext }) => {
-  const hasEndpoint = Boolean(String(meta.formspreeEndpoint || "").trim());
-  return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.05]">
-    <div className="grid grid-cols-1 gap-0 xl:grid-cols-[0.92fr_1.08fr]">
-      <div className="flex flex-col gap-4 p-6">
-        <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Contact</div>
-        <h2 className="text-3xl font-semibold tracking-tight text-white/92">{meta.contactSectionTitle}</h2>
-        <p className="text-sm leading-7 text-white/62">{meta.contactSectionDesc}</p>
-        {activeCase && <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-white/38">当前案例上下文</div>
-          <div className="mt-2 text-base font-medium text-white/88">{activeCase.title}</div>
-          <div className="mt-1 text-sm leading-6 text-white/55">{requestContext === "workflow" ? "用户从“复用此工作流”进入表单。" : "用户从“咨询同类项目”进入表单。"}</div>
-        </div>}
-        {!hasEndpoint && <div className="rounded-2xl border border-amber-300/20 bg-amber-500/10 p-4 text-sm leading-7 text-amber-50/90">
-          当前还没有配置 `Formspree Endpoint`。在编辑站的 `meta` 区填入 `https://formspree.io/f/...` 后，这个表单就会直接生效。
-        </div>}
-      </div>
-      <form action={hasEndpoint ? meta.formspreeEndpoint : undefined} method="POST" className="flex flex-col gap-4 border-t border-white/8 p-6 xl:border-l xl:border-t-0">
-        <label className="text-sm text-white/60">
-          <span className="mb-2 block">项目类型</span>
-          <input name="projectType" required className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-300/30 focus:bg-white/10" placeholder="商业视觉 / 短视频分镜 / AIGC 工具链" />
-        </label>
-        <label className="text-sm text-white/60">
-          <span className="mb-2 block">预算区间</span>
-          <input name="budgetRange" required className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-300/30 focus:bg-white/10" placeholder="例如 5000-20000 元" />
-        </label>
-        <label className="text-sm text-white/60">
-          <span className="mb-2 block">联系方式</span>
-          <input name="contact" required className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-cyan-300/30 focus:bg-white/10" placeholder="邮箱 / 微信 / 手机号" />
-        </label>
-        <input type="hidden" name="caseId" value={activeCase?.id || ""} />
-        <input type="hidden" name="caseTitle" value={activeCase?.title || ""} />
-        <input type="hidden" name="requestContext" value={requestContext || "general"} />
-        <button type={hasEndpoint ? "submit" : "button"} disabled={!hasEndpoint} className={`mt-2 rounded-2xl px-4 py-3 text-sm font-medium transition ${hasEndpoint ? "bg-cyan-500 text-black hover:bg-cyan-400" : "cursor-not-allowed bg-white/8 text-white/32"}`}>
-          {meta.contactCtaLabel}
-        </button>
-      </form>
-    </div>
-  </div>;
-};
-
 const ensureMetaTag = (selector, createTag) => {
   let element = document.head.querySelector(selector);
   if (element) return element;
@@ -1284,8 +1133,6 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("正在载入发布数据...");
   const [isPageJumpEditing, setIsPageJumpEditing] = useState(false);
   const [pageJumpValue, setPageJumpValue] = useState("1");
-  const [activeCaseId, setActiveCaseId] = useState(() => getQueryParamValue(CASE_QUERY_PARAM));
-  const [contactRequestContext, setContactRequestContext] = useState("general");
   const [showStructureEditor, setShowStructureEditor] = useState(false);
   const [metaEditorValue, setMetaEditorValue] = useState("");
   const [metaEditorError, setMetaEditorError] = useState("");
@@ -1300,9 +1147,6 @@ function App() {
   const slideTransitionTimeoutRef = useRef(null);
   const preloadedMediaRef = useRef(new Set());
   const slideSectionRefs = useRef(new Map());
-  const caseListSectionRef = useRef(null);
-  const caseDetailSectionRef = useRef(null);
-  const contactSectionRef = useRef(null);
   const activeSlideRatiosRef = useRef(new Map());
   const activeSlideFrameRef = useRef(null);
   const currentSlideRef = useRef(0);
@@ -1311,7 +1155,6 @@ function App() {
   const casesData = portfolioData.cases;
   const siteMeta = portfolioData.meta;
   const publishedSlidesData = publishedPortfolioData.slides;
-  const activeCase = casesData.find((item) => item.id === activeCaseId) || null;
   const tocSlideIndex = Math.max(0, slidesData.findIndex((slide) => slide && slide.type === "toc"));
   const isMobileFeedMode = true;
   const isMobilePreviewMode = layoutMode !== "desktop-feed";
@@ -1345,13 +1188,6 @@ function App() {
     currentSlideRef.current = currentSlide;
   }, [currentSlide]);
 
-  const scrollToElementRef = (targetRef) => {
-    const node = targetRef?.current;
-    if (!node) return;
-    const targetTop = window.scrollY + node.getBoundingClientRect().top - sectionScrollOffset;
-    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
-  };
-
   const scrollToSlide = (nextIndex) => {
     const target = slideSectionRefs.current.get(nextIndex);
     if (!target) return;
@@ -1359,27 +1195,6 @@ function App() {
     const targetTop = window.scrollY + target.getBoundingClientRect().top - sectionScrollOffset;
     window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
     setCurrentSlide(nextIndex);
-  };
-
-  const openCaseDetail = (caseId) => {
-    setActiveCaseId(caseId);
-    setQueryParamValue(CASE_QUERY_PARAM, caseId);
-    window.setTimeout(() => scrollToElementRef(caseDetailSectionRef), 40);
-  };
-
-  const openContactForCase = (caseItem, context) => {
-    if (caseItem?.id) {
-      setActiveCaseId(caseItem.id);
-      setQueryParamValue(CASE_QUERY_PARAM, caseItem.id);
-    }
-    setContactRequestContext(context || "general");
-    setStatusMessage(context === "workflow" ? "已带着“复用此工作流”的上下文跳到合作表单。" : "已带着案例上下文跳到合作表单。");
-    window.setTimeout(() => scrollToElementRef(contactSectionRef), 40);
-  };
-
-  const jumpToSlideById = (slideId) => {
-    const nextIndex = slidesData.findIndex((slide) => Number(slide?.id) === Number(slideId));
-    if (nextIndex >= 0) goToSlide(nextIndex);
   };
 
   const applyMetaEditorValue = () => {
@@ -1441,25 +1256,6 @@ function App() {
     setMetaEditorValue(JSON.stringify(siteMeta, null, 2));
     setCasesEditorValue(JSON.stringify(casesData, null, 2));
   }, [showStructureEditor, siteMeta, casesData]);
-
-  useEffect(() => {
-    const handlePopState = () => setActiveCaseId(getQueryParamValue(CASE_QUERY_PARAM));
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
-    if (isLoading || !activeCaseId) return;
-    if (activeCase) return;
-    setActiveCaseId("");
-    setQueryParamValue(CASE_QUERY_PARAM, "");
-  }, [isLoading, activeCaseId, activeCase]);
-
-  useEffect(() => {
-    if (isLoading || !activeCaseId || !activeCase) return;
-    const timerId = window.setTimeout(() => scrollToElementRef(caseDetailSectionRef), 80);
-    return () => window.clearTimeout(timerId);
-  }, [isLoading, activeCaseId, activeCase]);
 
   useEffect(() => {
     const nextUrls = collectDraftPreviewUrls(slidesData);
@@ -1595,8 +1391,8 @@ function App() {
   }, [isPageJumpEditing]);
 
   useEffect(() => {
-    applyDocumentMeta(siteMeta, activeCase);
-  }, [siteMeta, activeCase]);
+    applyDocumentMeta(siteMeta, null);
+  }, [siteMeta]);
 
   useEffect(() => {
     if (isMobileFeedMode) return;
@@ -3065,8 +2861,6 @@ function App() {
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => goToSlide(0)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
             <button onClick={() => goToSlide(tocSlideIndex)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>
-            <button onClick={() => scrollToElementRef(caseListSectionRef)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">案例</button>
-            <button onClick={() => scrollToElementRef(contactSectionRef)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">合作</button>
           </div>
           <div className="hidden items-center gap-2 lg:flex">
             <span className="text-white/38">{siteMeta.siteTitle}</span>
@@ -3108,10 +2902,6 @@ function App() {
         </div>
       </div>}
       <div className={`mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
-        <section ref={caseListSectionRef} className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md" style={publishedSectionStyle}>
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
-          <CaseList title={siteMeta.caseSectionTitle} description={siteMeta.caseSectionDesc} cases={casesData} activeCaseId={activeCaseId} onSelectCase={openCaseDetail} />
-        </section>
         {slidesData.map((slide, index) => <section
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
@@ -3122,21 +2912,6 @@ function App() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
           {renderSlide(slide, index)}
         </section>)}
-        <section ref={caseDetailSectionRef} className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md" style={publishedSectionStyle}>
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
-          <div className="flex flex-col gap-6 px-2 py-4">
-            <div className="flex flex-col gap-3 px-2">
-              <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Case Detail</div>
-              <h2 className="text-3xl font-semibold tracking-tight text-white/92">{activeCase ? activeCase.title : "案例详情"}</h2>
-              <p className="max-w-3xl text-sm leading-7 text-white/60">{activeCase ? "这里会串起案例说明、工具链和现有作品 section。" : "从上方案例卡片进入后，这里会展开更完整的结构化说明。"}</p>
-            </div>
-            <CaseDetail caseItem={activeCase} onJumpToSlide={jumpToSlideById} onOpenContact={openContactForCase} />
-          </div>
-        </section>
-        <section ref={contactSectionRef} className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md" style={publishedSectionStyle}>
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
-          <ContactForm meta={siteMeta} activeCase={activeCase} requestContext={contactRequestContext} />
-        </section>
       </div>
     </div>
     {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setLightboxData(null)}>
