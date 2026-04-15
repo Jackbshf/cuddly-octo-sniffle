@@ -1260,6 +1260,7 @@ function App() {
   const [metaEditorError, setMetaEditorError] = useState("");
   const [casesEditorValue, setCasesEditorValue] = useState("");
   const [casesEditorError, setCasesEditorError] = useState("");
+  const lightboxVideoRef = useRef(null);
   const importInputRef = useRef(null);
   const pageJumpInputRef = useRef(null);
   const touchStartX = useRef(null);
@@ -1291,6 +1292,15 @@ function App() {
   const portfolioExportModel = sanitizePortfolioModelForExport(portfolioData);
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
+
+  const closeMediaLightbox = () => setLightboxData(null);
+  const openMediaLightbox = (item, options = {}) => {
+    if (!item) return;
+    setLightboxData({
+      ...item,
+      requestFullscreen: Boolean(options.requestFullscreen)
+    });
+  };
 
   const setSlidesData = (updater) => setPortfolioData((prev) => ({
     ...prev,
@@ -1377,6 +1387,20 @@ function App() {
       window.removeEventListener("keydown", unlockInlineAudio);
     };
   }, [inlineAudioPrimeSource]);
+
+  useEffect(() => {
+    if (!lightboxData?.requestFullscreen) return undefined;
+    const node = lightboxVideoRef.current;
+    if (!node) return undefined;
+    const requestFullscreen = node.requestFullscreen?.bind(node)
+      || node.webkitRequestFullscreen?.bind(node)
+      || node.msRequestFullscreen?.bind(node);
+    if (typeof requestFullscreen !== "function") return undefined;
+    const timeoutId = window.setTimeout(() => {
+      Promise.resolve(requestFullscreen()).catch(() => {});
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [lightboxData]);
 
   useEffect(() => {
     if (!prefersHoverControls) return undefined;
@@ -2253,7 +2277,7 @@ function App() {
       setShowPlaybackOverlay(true);
     };
 
-    const resolvePreviewMutedPreference = () => prefersHoverControls ? shouldPreferMutedAutoplay() : true;
+    const resolvePreviewMutedPreference = () => prefersHoverControls ? false : true;
 
     const updatePlaybackState = (video) => {
       const safeCurrentTime = Number.isFinite(video?.currentTime) ? video.currentTime : 0;
@@ -2323,7 +2347,7 @@ function App() {
       hoverPlaybackPendingRef.current = false;
       clearActiveInlinePreview(inlinePreviewOwnerId);
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
-      setLightboxData(item);
+      openMediaLightbox(item, { requestFullscreen: true });
     };
 
     const handleMediaSurfaceClick = (event) => {
@@ -2334,7 +2358,7 @@ function App() {
         return;
       }
       if (!IS_EDITOR_MODE) {
-        setLightboxData(item);
+        openMediaLightbox(item);
       }
     };
 
@@ -2516,7 +2540,7 @@ function App() {
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && <div className="absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
         <button onClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
-        {hasUsableMedia && <button onClick={(event) => { event.stopPropagation(); setLightboxData(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>}
+        {hasUsableMedia && <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>}
         <button onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
       </div>}
       {IS_EDITOR_MODE && showEditor && <div className="absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
@@ -2685,7 +2709,7 @@ function App() {
       setShowPlaybackOverlay(true);
     };
 
-    const resolvePreviewMutedPreference = () => prefersHoverControls ? shouldPreferMutedAutoplay() : true;
+    const resolvePreviewMutedPreference = () => prefersHoverControls ? false : true;
 
     const updatePlaybackState = (video) => {
       const safeCurrentTime = Number.isFinite(video?.currentTime) ? video.currentTime : 0;
@@ -2755,7 +2779,7 @@ function App() {
       hoverPlaybackPendingRef.current = false;
       clearActiveInlinePreview(inlinePreviewOwnerId);
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
-      setLightboxData(item);
+      openMediaLightbox(item, { requestFullscreen: true });
     };
 
     const handleMediaSurfaceClick = (event) => {
@@ -2766,7 +2790,7 @@ function App() {
         return;
       }
       if (!IS_EDITOR_MODE) {
-        setLightboxData(item);
+        openMediaLightbox(item);
       }
     };
 
@@ -2957,7 +2981,7 @@ function App() {
       {IS_EDITOR_MODE && item && <div className="absolute top-2 right-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-wrap justify-end gap-1.5 w-3/4">
         {item.kind === "youtube" && item.url && <a href={`https://www.youtube.com/watch?v=${extractYouTubeId(item.url)}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="ExternalLink" size={12} /></a>}
         <button onClick={(event) => { event.stopPropagation(); setShowEditor(!showEditor); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
-        <button onClick={(event) => { event.stopPropagation(); setLightboxData(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>
+        <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>
         <button onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
       </div>}
       {IS_EDITOR_MODE && item && showEditor && <div className="absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
@@ -3220,15 +3244,15 @@ function App() {
         </section>)}
       </div>
     </div>
-    {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setLightboxData(null)}>
-      <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={() => setLightboxData(null)}>✕ 关闭</button>
+    {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={closeMediaLightbox}>
+      <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={closeMediaLightbox}>✕ 关闭</button>
       {lightboxData.meta && <div className="absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">Prompt / Metadata</span>{lightboxData.meta}</div>}
       {lightboxData.kind === "youtube" ? <iframe src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
         const videoSrc = getPrimaryMediaUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) });
         const embedUrl = getVideoEmbedUrl(videoSrc);
         if (embedUrl && !isDirectVideoSource(videoSrc)) return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         if (!isDirectVideoSource(videoSrc)) return <a href={videoSrc} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
-        return <video src={videoSrc} poster={lightboxData.poster || undefined} controls autoPlay preload="metadata" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
+        return <video ref={lightboxVideoRef} src={videoSrc} poster={lightboxData.poster || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
     {IS_EDITOR_MODE && <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
