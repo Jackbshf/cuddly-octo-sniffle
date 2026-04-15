@@ -1,7 +1,9 @@
-const { useState, useEffect, useRef, startTransition } = React;
+import React, { useEffect, useRef, useState, startTransition } from "react";
+import { createRoot } from "react-dom/client";
 
 const DATA_FILE_PATH = "data/portfolio.json";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
+const THEME_STORAGE_KEY = "zhangwei_portfolio_theme_v1";
 const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
 const IS_EDITOR_MODE = window.location.protocol === "file:" || new URLSearchParams(window.location.search).get("editor") === "1";
 const MOBILE_MODE_QUERY = new URLSearchParams(window.location.search).get("mobile");
@@ -36,6 +38,7 @@ const colorPalettes = [
   { id: "amber", a: "bg-amber-600/20", b: "bg-red-600/15", c: "bg-orange-600/20", line: "bg-amber-500/50", text: "text-amber-100/60" }
 ];
 
+const cx = (...classNames) => classNames.filter(Boolean).join(" ");
 const deepClone = (value) => JSON.parse(JSON.stringify(value));
 const ensureString = (value, fallback = "") => typeof value === "string" ? value : fallback;
 const ensureStringArray = (value) => Array.isArray(value) ? value.map((item) => String(item ?? "").trim()).filter(Boolean) : [];
@@ -185,6 +188,12 @@ const buildPublishedAssetPath = (file) => {
 };
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const getInitialThemeMode = () => {
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === "light" || stored === "dark") return stored;
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) return "light";
+  return "dark";
+};
 
 const createFreeLayoutElement = (type) => {
   const base = {
@@ -855,12 +864,67 @@ const Icon = ({ name, size = 24, className = "" }) => {
     RotateCcw: <><path d="M3 2v6h6" /><path d="M3 8a9 9 0 1 0 2.6-4.4L3 8" /></>,
     Link2: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07L11.8 5.1" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.66-1.66" /></>,
     Settings2: <><path d="M12 3v3" /><path d="M18.364 5.636 16.243 7.757" /><path d="M21 12h-3" /><path d="m18.364 18.364-2.121-2.121" /><path d="M12 18v3" /><path d="m7.757 16.243-2.121 2.121" /><path d="M6 12H3" /><path d="m7.757 7.757-2.121-2.121" /><circle cx="12" cy="12" r="3" /></>,
-    ExternalLink: <><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></>
+    ExternalLink: <><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></>,
+    Sparkles: <><path d="M12 3l1.9 4.8L19 10l-5.1 2.2L12 17l-1.9-4.8L5 10l5.1-2.2L12 3Z" /><path d="M5 3v2" /><path d="M19 19v2" /><path d="M3 5h2" /><path d="M19 3h2" /></>,
+    Sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2.5" /><path d="M12 19.5V22" /><path d="M4.93 4.93l1.77 1.77" /><path d="M17.3 17.3l1.77 1.77" /><path d="M2 12h2.5" /><path d="M19.5 12H22" /><path d="M4.93 19.07l1.77-1.77" /><path d="M17.3 6.7l1.77-1.77" /></>,
+    Moon: <path d="M21 12.8A9 9 0 1 1 11.2 3c-.1.48-.15.98-.15 1.5a7.5 7.5 0 0 0 9.95 7.1Z" />
   };
   return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{icons[name]}</svg>;
 };
 
-const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, shouldAutoPlay = false, showPoster = true, allowEmbeddedPlayback = false }) => {
+const shouldUseInteractiveTilt = () => supportsHoverInteractions() && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const applyCardTiltFromPointer = (event) => {
+  if (!shouldUseInteractiveTilt()) return;
+  const rect = event.currentTarget.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const px = (event.clientX - rect.left) / rect.width;
+  const py = (event.clientY - rect.top) / rect.height;
+  const tiltY = (px - 0.5) * 10;
+  const tiltX = (0.5 - py) * 10;
+  event.currentTarget.style.setProperty("--pointer-x", `${(px * 100).toFixed(2)}%`);
+  event.currentTarget.style.setProperty("--pointer-y", `${(py * 100).toFixed(2)}%`);
+  event.currentTarget.style.setProperty("--tilt-x", `${tiltX.toFixed(2)}deg`);
+  event.currentTarget.style.setProperty("--tilt-y", `${tiltY.toFixed(2)}deg`);
+};
+
+const resetCardTilt = (event) => {
+  event.currentTarget.style.setProperty("--pointer-x", "50%");
+  event.currentTarget.style.setProperty("--pointer-y", "50%");
+  event.currentTarget.style.setProperty("--tilt-x", "0deg");
+  event.currentTarget.style.setProperty("--tilt-y", "0deg");
+};
+
+const Card3D = ({ as = "div", className = "", surfaceClassName = "", interactive = false, children, ...props }) => {
+  const Tag = as;
+  const { onPointerMove, onPointerLeave, type, ...restProps } = props;
+  const pointerProps = interactive ? {
+    onPointerMove: (event) => {
+      applyCardTiltFromPointer(event);
+      if (typeof onPointerMove === "function") onPointerMove(event);
+    },
+    onPointerLeave: (event) => {
+      resetCardTilt(event);
+      if (typeof onPointerLeave === "function") onPointerLeave(event);
+    }
+  } : {
+    onPointerMove,
+    onPointerLeave
+  };
+
+  return <Tag
+    {...restProps}
+    {...pointerProps}
+    type={Tag === "button" ? (type || "button") : type}
+    className={cx("card-3d", interactive && "card-3d--interactive", className)}
+  >
+    <div className={cx("card-3d-surface", surfaceClassName)}>
+      {children}
+    </div>
+  </Tag>;
+};
+
+const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, shouldAutoPlay = false, showPoster = true }) => {
   const item = normalizeMediaItem(mediaItem);
   if (!item) return null;
   const handleSurfaceClick = typeof onMediaSurfaceClick === "function" ? onMediaSurfaceClick : stopClick;
@@ -887,7 +951,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
 
     if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
     return <div className="relative z-10 flex h-full w-full items-center justify-center p-6 text-center" onClick={handleSurfaceClick}>
-      <div className="flex min-h-[48%] w-full max-w-md flex-col items-center justify-center gap-4 rounded-[28px] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02)_38%,rgba(0,0,0,0.2)_100%)] px-6 py-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+      <div className="media-fallback-badge flex min-h-[48%] w-full max-w-md flex-col items-center justify-center gap-4 rounded-[28px] px-6 py-8 shadow-[0_24px_80px_rgba(0,0,0,0.24)]">
         {providerLabel && <div className="text-[11px] font-mono uppercase tracking-[0.28em] text-white/42">{providerLabel}</div>}
         <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white/82">
           <Icon name="Play" size={18} className="translate-x-[1px]" />
@@ -900,8 +964,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
   if (item.kind === "youtube") {
     const embedUrl = getYouTubeEmbedUrl(item.url);
     if (!embedUrl) return null;
-    if (!allowEmbeddedPlayback) return renderEmbeddedFallback("悬停播放视频");
-    return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="YouTube preview" loading="eager" className="pointer-events-none relative z-10 h-full w-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} />;
+    return renderEmbeddedFallback("点击放大播放视频", "YouTube");
   }
 
   if (item.kind === "video") {
@@ -909,11 +972,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     if (!src) return null;
     const embedUrl = getVideoEmbedUrl(src);
     if (embedUrl && !isDirectVideoSource(src)) {
-      if (isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl)) {
-        return renderEmbeddedFallback("点击放大播放视频", "Bilibili");
-      }
-      if (!allowEmbeddedPlayback) return renderEmbeddedFallback("悬停播放视频");
-      return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频预览" loading="eager" className="pointer-events-none relative z-10 h-full w-full rounded-xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onLoad={onMediaLoad} />;
+      return renderEmbeddedFallback("点击放大播放视频", isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl) ? "Bilibili" : "Video");
     }
     if (!isDirectVideoSource(src)) {
       if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
@@ -994,9 +1053,9 @@ const CaseResultPills = ({ results }) => {
   const entries = Object.entries(results || {});
   if (!entries.length) return null;
   return <div className="flex flex-wrap gap-2">
-    {entries.map(([key, value]) => <div key={key} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/72">
-      <span className="mr-2 text-white/40">{key}</span>
-      <span className="font-medium text-white/88">{value}</span>
+    {entries.map(([key, value]) => <div key={key} className="card-chip px-3 py-1 text-xs">
+      <span className="mr-2 text-tertiary">{key}</span>
+      <span className="font-medium text-primary">{value}</span>
     </div>)}
   </div>;
 };
@@ -1008,17 +1067,17 @@ const CaseList = ({ title, description, cases, activeCaseId, onSelectCase }) => 
 
   return <div className="flex flex-col gap-6 px-2 py-4">
     <div className="flex flex-col gap-3 px-2">
-      <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Case Library</div>
-      <h2 className="text-3xl font-semibold tracking-tight text-white/92">{title}</h2>
-      <p className="max-w-3xl text-sm leading-7 text-white/60">{description}</p>
+      <div className="accent-text text-xs font-mono uppercase tracking-[0.22em]">Case Library</div>
+      <h2 className="ui-text-shadow text-3xl font-semibold tracking-tight text-primary">{title}</h2>
+      <p className="max-w-3xl text-sm leading-7 text-secondary">{description}</p>
     </div>
     <div className="flex flex-wrap gap-2 px-2">
-      {categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={`rounded-full border px-3 py-1.5 text-xs transition ${category === item ? "border-cyan-300/30 bg-cyan-500/15 text-cyan-50" : "border-white/10 bg-white/5 text-white/68 hover:bg-white/10"}`}>
+      {categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={cx("card-chip px-3 py-1.5 text-xs", category === item ? "border-cyan-300/30 bg-cyan-500/15 text-cyan-50" : "")}>
         {item}
       </button>)}
     </div>
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {filteredCases.map((item) => <button key={item.id} onClick={() => onSelectCase(item.id)} className={`group overflow-hidden rounded-[28px] border text-left transition ${activeCaseId === item.id ? "border-cyan-300/30 bg-white/[0.08]" : "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"}`}>
+      {filteredCases.map((item) => <Card3D as="button" key={item.id} onClick={() => onSelectCase(item.id)} interactive className="group text-left" surfaceClassName={cx(activeCaseId === item.id ? "border-cyan-300/35 bg-cyan-500/8" : "")}>
         <div className="grid grid-cols-1 gap-0 md:grid-cols-[1.15fr_1fr]">
           <div className="relative min-h-[220px] overflow-hidden bg-black/30">
             {item.cover ? <img src={item.cover} alt={item.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" /> : <div className="flex h-full items-center justify-center text-white/25">暂无封面</div>}
@@ -1027,29 +1086,29 @@ const CaseList = ({ title, description, cases, activeCaseId, onSelectCase }) => 
           </div>
           <div className="flex flex-col gap-4 p-5">
             <div className="space-y-2">
-              <div className="text-xs uppercase tracking-[0.18em] text-white/40">{item.id}</div>
-              <h3 className="text-xl font-semibold leading-tight text-white/92">{item.title}</h3>
-              <p className="text-sm leading-7 text-white/62">{item.description}</p>
+              <div className="text-xs uppercase tracking-[0.18em] text-tertiary">{item.id}</div>
+              <h3 className="text-xl font-semibold leading-tight text-primary">{item.title}</h3>
+              <p className="text-sm leading-7 text-secondary">{item.description}</p>
             </div>
             <CaseResultPills results={item.results} />
             <div className="mt-auto flex flex-wrap gap-2">
-              {item.tags.map((tag) => <span key={tag} className="rounded-full bg-white/6 px-2.5 py-1 text-[11px] text-white/60">{tag}</span>)}
+              {item.tags.map((tag) => <span key={tag} className="card-chip px-2.5 py-1 text-[11px]">{tag}</span>)}
             </div>
           </div>
         </div>
-      </button>)}
+      </Card3D>)}
     </div>
   </div>;
 };
 
 const CaseDetail = ({ caseItem, onJumpToSlide, onOpenContact }) => {
   if (!caseItem) {
-    return <div className="rounded-[28px] border border-dashed border-white/10 bg-white/[0.03] p-8 text-center text-sm leading-7 text-white/45">
+    return <div className="surface-panel rounded-[28px] border-dashed p-8 text-center text-sm leading-7 text-secondary">
       从上方案例卡片进入详情，这里会显示项目说明、工具链、结果数据和关联作品跳转。
     </div>;
   }
 
-  return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.05]">
+  return <Card3D className="overflow-hidden rounded-[28px]" surfaceClassName="rounded-[28px]">
     <div className="grid grid-cols-1 gap-0 xl:grid-cols-[1.1fr_0.9fr]">
       <div className="relative min-h-[280px] bg-black/30">
         {caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-white/25">暂无封面</div>}
@@ -1089,12 +1148,12 @@ const CaseDetail = ({ caseItem, onJumpToSlide, onOpenContact }) => {
         </div>
       </div>
     </div>
-  </div>;
+  </Card3D>;
 };
 
 const ContactForm = ({ meta, activeCase, requestContext }) => {
   const hasEndpoint = Boolean(String(meta.formspreeEndpoint || "").trim());
-  return <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.05]">
+  return <Card3D className="overflow-hidden rounded-[28px]" surfaceClassName="rounded-[28px]">
     <div className="grid grid-cols-1 gap-0 xl:grid-cols-[0.92fr_1.08fr]">
       <div className="flex flex-col gap-4 p-6">
         <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Contact</div>
@@ -1130,7 +1189,7 @@ const ContactForm = ({ meta, activeCase, requestContext }) => {
         </button>
       </form>
     </div>
-  </div>;
+  </Card3D>;
 };
 
 const ensureMetaTag = (selector, createTag) => {
@@ -1223,11 +1282,13 @@ const applyDocumentMeta = (meta, caseItem) => {
 function App() {
   const [portfolioData, setPortfolioData] = useState(() => createPortfolioModel(EMBEDDED_PORTFOLIO));
   const [publishedPortfolioData, setPublishedPortfolioData] = useState(() => createPortfolioModel(EMBEDDED_PORTFOLIO));
+  const [themeMode, setThemeMode] = useState(() => getInitialThemeMode());
   const [currentSlide, setCurrentSlide] = useState(0);
   const [layoutMode, setLayoutMode] = useState(() => resolveLayoutMode());
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [lightboxData, setLightboxData] = useState(null);
+  const [activePreviewKey, setActivePreviewKey] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadSource, setLoadSource] = useState("loading");
   const [statusMessage, setStatusMessage] = useState("正在载入发布数据...");
@@ -1265,6 +1326,7 @@ function App() {
   const portfolioExportModel = sanitizePortfolioModelForExport(portfolioData);
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
+  const isLightTheme = themeMode === "light";
 
   const setSlidesData = (updater) => setPortfolioData((prev) => ({
     ...prev,
@@ -1286,6 +1348,21 @@ function App() {
 
   useEffect(() => {
     currentSlideRef.current = currentSlide;
+  }, [currentSlide]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = themeMode;
+    document.body.classList.toggle("theme-light", themeMode === "light");
+    document.body.classList.toggle("theme-dark", themeMode === "dark");
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
+    setActivePreviewKey(null);
+  }, [lightboxData, themeMode]);
+
+  useEffect(() => {
+    setActivePreviewKey(null);
   }, [currentSlide]);
 
   const scrollToElementRef = (targetRef) => {
@@ -1459,15 +1536,21 @@ function App() {
         const nextIndex = Number(entry.target.dataset.slideIndex);
         if (!Number.isFinite(nextIndex)) return;
         activeSlideRatiosRef.current.set(nextIndex, entry.isIntersecting ? entry.intersectionRatio : 0);
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.12) {
+          entry.target.dataset.revealed = "true";
+        }
       });
       scheduleActiveSlideUpdate();
     }, {
       root: null,
-      rootMargin: "-12% 0px -52% 0px",
-      threshold: [0, 0.24]
+      rootMargin: "-10% 0px -48% 0px",
+      threshold: [0, 0.12, 0.28]
     });
 
-    slideSectionRefs.current.forEach((node) => observer.observe(node));
+    slideSectionRefs.current.forEach((node) => {
+      if (!node.dataset.revealed) node.dataset.revealed = node.dataset.slideIndex === "0" ? "true" : "false";
+      observer.observe(node);
+    });
     return () => {
       observer.disconnect();
       activeSlideRatiosRef.current.clear();
@@ -1833,7 +1916,7 @@ function App() {
     >{text}</Tag>;
   };
 
-  const FreeLayoutElement = ({ slideIndex, element, containerRef }) => {
+  const FreeLayoutElement = ({ slideIndex, element, containerRef, activePreviewKey, setActivePreviewKey }) => {
     const interactionRef = useRef(null);
     const [showTextSettings, setShowTextSettings] = useState(false);
 
@@ -1949,7 +2032,7 @@ function App() {
           duration={element.animationDuration}
           delay={element.animationDelay}
         />}
-      </div> : <FreeLayoutMediaBox slideIndex={slideIndex} element={element} />}
+      </div> : <FreeLayoutMediaBox slideIndex={slideIndex} element={element} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} />}
       {IS_EDITOR_MODE && <button onMouseDown={(event) => beginPointerInteraction("resize", event)} className="absolute bottom-2 right-2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white/75 cursor-se-resize">
         <Icon name="Maximize2" size={12} />
       </button>}
@@ -2012,7 +2095,7 @@ function App() {
     </>;
   };
 
-  const FreeLayoutMediaBox = ({ slideIndex, element }) => {
+  const FreeLayoutMediaBox = ({ slideIndex, element, activePreviewKey, setActivePreviewKey }) => {
     const item = normalizeMediaItem(element.media);
     const bindingInfo = getMediaBindingInfo(item);
     const rootRef = useRef(null);
@@ -2021,6 +2104,7 @@ function App() {
     const [isMuted, setIsMuted] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
+    const [isInViewport, setIsInViewport] = useState(true);
     const [isMediaLoading, setIsMediaLoading] = useState(Boolean(item));
     const [hasMediaError, setHasMediaError] = useState(false);
     const [isVideoReady, setIsVideoReady] = useState(false);
@@ -2035,9 +2119,10 @@ function App() {
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
+    const previewKey = `free:${slideIndex}:${element.id}`;
     const directVideo = item && item.kind === "video" && isDirectVideoSource(getPrimaryMediaUrl(item, { preferDraftPreview }));
-    const embeddedVideo = item && (item.kind === "youtube" || (item.kind === "video" && !directVideo && Boolean(getVideoEmbedUrl(getPrimaryMediaUrl(item, { preferDraftPreview })))));
-    const isInlinePlaybackActive = prefersHoverControls && isHovered;
+    const isPreviewOwner = activePreviewKey === previewKey;
+    const isInlinePlaybackActive = prefersHoverControls && isHovered && isPreviewOwner;
     const mediaClassName = "relative z-10 h-full w-full object-cover object-center";
     const resetInlinePreview = (options = {}) => {
       const preserveOverlay = Boolean(options.preserveOverlay);
@@ -2105,7 +2190,8 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       hoverPlaybackPendingRef.current = false;
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true });
+      if (activePreviewKey === previewKey) setActivePreviewKey(null);
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       setLightboxData(item);
     };
 
@@ -2180,12 +2266,31 @@ function App() {
     }, [item, preferDraftPreview]);
 
     useEffect(() => {
+      const node = rootRef.current;
+      if (!node || typeof IntersectionObserver === "undefined") return undefined;
+      const observer = new IntersectionObserver(([entry]) => {
+        const nextInViewport = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.08);
+        setIsInViewport(nextInViewport);
+        if (!nextInViewport) {
+          setIsHovered(false);
+          if (activePreviewKey === previewKey) setActivePreviewKey(null);
+        }
+      }, {
+        root: null,
+        threshold: [0, 0.08, 0.22],
+        rootMargin: "12% 0px 12% 0px"
+      });
+      observer.observe(node);
+      return () => observer.disconnect();
+    }, [activePreviewKey, previewKey, setActivePreviewKey]);
+
+    useEffect(() => {
       if (!item || item.kind !== "video") return;
       const src = getPrimaryMediaUrl(item, { preferDraftPreview });
       if (!isDirectVideoSource(src)) return;
       const video = videoRef.current;
       if (!video) return;
-      if (showEditor || !isInlinePlaybackActive) {
+      if (showEditor || !isInViewport || !isPreviewOwner) {
         resetInlinePreview();
         return;
       }
@@ -2194,7 +2299,7 @@ function App() {
       video.preload = "metadata";
       setIsMuted(true);
       if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
-    }, [item, isInlinePlaybackActive, preferDraftPreview, showEditor]);
+    }, [item, isInViewport, isPreviewOwner, preferDraftPreview, showEditor]);
 
     useEffect(() => () => {
       clearControlsTimer();
@@ -2207,18 +2312,27 @@ function App() {
     }, [currentSlide, isHovered, slideIndex]);
 
     useEffect(() => {
+      if (currentSlide === slideIndex) return;
+      if (activePreviewKey === previewKey) setActivePreviewKey(null);
+      resetInlinePreview();
+    }, [activePreviewKey, currentSlide, previewKey, setActivePreviewKey, slideIndex]);
+
+    useEffect(() => {
       if (!isHovered) return undefined;
 
       const handlePointerMove = (event) => {
         const rect = rootRef.current?.getBoundingClientRect();
         if (!rect) return;
         const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-        if (!inside) setIsHovered(false);
+        if (!inside) {
+          setIsHovered(false);
+          if (activePreviewKey === previewKey) setActivePreviewKey(null);
+        }
       };
 
       window.addEventListener("mousemove", handlePointerMove, true);
       return () => window.removeEventListener("mousemove", handlePointerMove, true);
-    }, [isHovered]);
+    }, [activePreviewKey, isHovered, previewKey, setActivePreviewKey]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2253,11 +2367,19 @@ function App() {
 
     return <div
       ref={rootRef}
-      className="relative h-full w-full overflow-hidden"
-      onMouseEnter={() => { setIsHovered(true); if (prefersHoverControls) setShowPlaybackOverlay(true); }}
-      onMouseMove={() => { if (prefersHoverControls) setShowPlaybackOverlay(true); }}
+      className="card-3d card-3d--interactive card-3d--media relative h-full w-full overflow-hidden"
+      onMouseEnter={() => {
+        setIsHovered(true);
+        if (directVideo && !showEditor && isInViewport) setActivePreviewKey(previewKey);
+        if (prefersHoverControls) setShowPlaybackOverlay(true);
+      }}
+      onMouseMove={() => {
+        if (directVideo && !showEditor && isInViewport && activePreviewKey !== previewKey) setActivePreviewKey(previewKey);
+        if (prefersHoverControls) setShowPlaybackOverlay(true);
+      }}
       onMouseLeave={() => {
         setIsHovered(false);
+        if (activePreviewKey === previewKey) setActivePreviewKey(null);
         if (prefersHoverControls) setShowPlaybackOverlay(false);
         if (directVideo) resetInlinePreview();
       }}
@@ -2271,6 +2393,7 @@ function App() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      <div className="card-3d-surface h-full w-full">
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-xs tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">拖到这里替换媒体</div>}
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && <div className="absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
@@ -2310,7 +2433,7 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
+              if (hoverPlaybackPendingRef.current && activePreviewKey === previewKey) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2325,7 +2448,7 @@ function App() {
           }} onVideoTimeUpdate={(event) => {
             updatePlaybackState(event.currentTarget);
             if (!prefersHoverControls) scheduleControlsHide(2400);
-          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && isInlinePlaybackActive} showPoster={!directVideo || !isInlinePlaybackActive || !isVideoReady || !prefersHoverControls} allowEmbeddedPlayback={embeddedVideo && isInlinePlaybackActive} />
+          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && isInlinePlaybackActive} showPoster={!directVideo || !isInlinePlaybackActive || !isVideoReady || !prefersHoverControls} />
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
@@ -2340,10 +2463,11 @@ function App() {
         if (file) applyLocalFile(file);
         event.target.value = "";
       }} />
+      </div>
     </div>;
   };
 
-  const FreeLayoutSlide = ({ slide, index }) => {
+  const FreeLayoutSlide = ({ slide, index, activePreviewKey, setActivePreviewKey }) => {
     const surfaceRef = useRef(null);
     const slideTheme = colorPalettes[index % colorPalettes.length] || colorPalettes[0];
     const elements = Array.isArray(slide.freeLayoutElements)
@@ -2357,12 +2481,12 @@ function App() {
       </div>
       <div ref={surfaceRef} className={`relative overflow-hidden rounded-[32px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-2xl ${isMobileFeedMode ? "min-h-[70svh]" : "flex-1"}`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_60%)] pointer-events-none" />
-        {elements.length ? elements.map((element) => <FreeLayoutElement key={element.id} slideIndex={index} element={element} containerRef={surfaceRef} />) : <div className="absolute inset-0 flex items-center justify-center text-sm tracking-[0.22em] text-white/35">点击底部 + 添加文本框或媒体框</div>}
+        {elements.length ? elements.map((element) => <FreeLayoutElement key={element.id} slideIndex={index} element={element} containerRef={surfaceRef} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} />) : <div className="absolute inset-0 flex items-center justify-center text-sm tracking-[0.22em] text-white/35">点击底部 + 添加文本框或媒体框</div>}
       </div>
     </div>;
   };
 
-  const MediaSlot = ({ slideIndex, slotIndex, label }) => {
+  const MediaSlot = ({ slideIndex, slotIndex, label, activePreviewKey, setActivePreviewKey }) => {
     const slide = slidesData[slideIndex];
     const item = normalizeMediaItem(slide.media && slide.media[slotIndex]);
     const bindingInfo = getMediaBindingInfo(item);
@@ -2372,6 +2496,7 @@ function App() {
     const [isHovered, setIsHovered] = useState(false);
     const [isDragTarget, setIsDragTarget] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
+    const [isInViewport, setIsInViewport] = useState(true);
     const [isMediaLoading, setIsMediaLoading] = useState(Boolean(item));
     const [hasMediaError, setHasMediaError] = useState(false);
     const [isVideoReady, setIsVideoReady] = useState(false);
@@ -2385,9 +2510,10 @@ function App() {
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
+    const previewKey = `slot:${slide.id}:${slotIndex}`;
     const directVideo = item && item.kind === "video" && isDirectVideoSource(getPrimaryMediaUrl(item, { preferDraftPreview }));
-    const embeddedVideo = item && (item.kind === "youtube" || (item.kind === "video" && !directVideo && Boolean(getVideoEmbedUrl(getPrimaryMediaUrl(item, { preferDraftPreview })))));
-    const isInlinePlaybackActive = prefersHoverControls && isHovered;
+    const isPreviewOwner = activePreviewKey === previewKey;
+    const isInlinePlaybackActive = prefersHoverControls && isHovered && isPreviewOwner;
     const shouldContainMedia = slide?.id === 2 || slide?.title?.includes("个人简介");
     const mediaClassName = shouldContainMedia
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
@@ -2458,7 +2584,8 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       hoverPlaybackPendingRef.current = false;
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true });
+      if (activePreviewKey === previewKey) setActivePreviewKey(null);
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       setLightboxData(item);
     };
 
@@ -2539,13 +2666,32 @@ function App() {
     }, [item, preferDraftPreview]);
 
     useEffect(() => {
+      const node = rootRef.current;
+      if (!node || typeof IntersectionObserver === "undefined") return undefined;
+      const observer = new IntersectionObserver(([entry]) => {
+        const nextInViewport = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.08);
+        setIsInViewport(nextInViewport);
+        if (!nextInViewport) {
+          setIsHovered(false);
+          if (activePreviewKey === previewKey) setActivePreviewKey(null);
+        }
+      }, {
+        root: null,
+        threshold: [0, 0.08, 0.22],
+        rootMargin: "12% 0px 12% 0px"
+      });
+      observer.observe(node);
+      return () => observer.disconnect();
+    }, [activePreviewKey, previewKey, setActivePreviewKey]);
+
+    useEffect(() => {
       if (!item || item.kind !== "video") return;
       const src = getPrimaryMediaUrl(item, { preferDraftPreview });
       if (!isDirectVideoSource(src)) return;
       const video = videoRef.current;
       if (!video) return;
 
-      if (showEditor || !isInlinePlaybackActive) {
+      if (showEditor || !isInViewport || !isPreviewOwner) {
         resetInlinePreview();
         return;
       }
@@ -2555,7 +2701,7 @@ function App() {
       video.preload = "metadata";
       setIsMuted(true);
       if (!userPausedRef.current) attemptInlineVideoPlayback(video, false, setIsMuted);
-    }, [item, isInlinePlaybackActive, preferDraftPreview, showEditor]);
+    }, [item, isInViewport, isPreviewOwner, preferDraftPreview, showEditor]);
 
     useEffect(() => () => {
       clearControlsTimer();
@@ -2568,18 +2714,27 @@ function App() {
     }, [currentSlide, isHovered, slideIndex]);
 
     useEffect(() => {
+      if (currentSlide === slideIndex) return;
+      if (activePreviewKey === previewKey) setActivePreviewKey(null);
+      resetInlinePreview();
+    }, [activePreviewKey, currentSlide, previewKey, setActivePreviewKey, slideIndex]);
+
+    useEffect(() => {
       if (!isHovered) return undefined;
 
       const handlePointerMove = (event) => {
         const rect = rootRef.current?.getBoundingClientRect();
         if (!rect) return;
         const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-        if (!inside) setIsHovered(false);
+        if (!inside) {
+          setIsHovered(false);
+          if (activePreviewKey === previewKey) setActivePreviewKey(null);
+        }
       };
 
       window.addEventListener("mousemove", handlePointerMove, true);
       return () => window.removeEventListener("mousemove", handlePointerMove, true);
-    }, [isHovered]);
+    }, [activePreviewKey, isHovered, previewKey, setActivePreviewKey]);
 
     const handleDragEnter = (event) => {
       if (!IS_EDITOR_MODE || !isFileDragEvent(event)) return;
@@ -2614,11 +2769,19 @@ function App() {
 
     return <div
       ref={rootRef}
-      className={`relative w-full h-full rounded-2xl overflow-hidden group cursor-pointer bg-[#0a0a0c]/80 border border-white/[0.06] transition-all duration-500 ${isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]"} shadow-xl`}
-      onMouseEnter={() => { setIsHovered(true); if (prefersHoverControls) setShowPlaybackOverlay(true); }}
-      onMouseMove={() => { if (prefersHoverControls) setShowPlaybackOverlay(true); }}
+      className={cx("card-3d card-3d--interactive card-3d--media relative w-full h-full overflow-hidden group cursor-pointer transition-all duration-500", isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]")}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        if (directVideo && !showEditor && isInViewport) setActivePreviewKey(previewKey);
+        if (prefersHoverControls) setShowPlaybackOverlay(true);
+      }}
+      onMouseMove={() => {
+        if (directVideo && !showEditor && isInViewport && activePreviewKey !== previewKey) setActivePreviewKey(previewKey);
+        if (prefersHoverControls) setShowPlaybackOverlay(true);
+      }}
       onMouseLeave={() => {
         setIsHovered(false);
+        if (activePreviewKey === previewKey) setActivePreviewKey(null);
         if (prefersHoverControls) setShowPlaybackOverlay(false);
         if (directVideo) resetInlinePreview();
       }}
@@ -2632,6 +2795,7 @@ function App() {
       onDrop={handleDrop}
       onDoubleClick={(event) => { if (!IS_EDITOR_MODE) return; event.stopPropagation(); openEmptyEditor(); }}
     >
+      <div className="card-3d-surface h-full w-full">
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-sm tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">
         拖到这里即可替换当前媒体
       </div>}
@@ -2679,7 +2843,7 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
+              if (hoverPlaybackPendingRef.current && activePreviewKey === previewKey) attemptInlineVideoPlayback(videoRef.current, false, setIsMuted);
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2694,7 +2858,7 @@ function App() {
           }} onVideoTimeUpdate={(event) => {
             updatePlaybackState(event.currentTarget);
             if (!prefersHoverControls) scheduleControlsHide(2400);
-          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && isInlinePlaybackActive} showPoster={!directVideo || !isInlinePlaybackActive || !isVideoReady || !prefersHoverControls} allowEmbeddedPlayback={embeddedVideo && isInlinePlaybackActive} />
+          }} stopClick={(event) => event.stopPropagation()} preferDraftPreview={preferDraftPreview} shouldAutoPlay={directVideo && isInlinePlaybackActive} showPoster={!directVideo || !isInlinePlaybackActive || !isVideoReady || !prefersHoverControls} />
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
@@ -2709,6 +2873,7 @@ function App() {
         </div>}
       </div>}
       {IS_EDITOR_MODE && <input id={fileInputId} type="file" accept="image/*,video/*" className="hidden" onChange={handleUpload} />}
+      </div>
     </div>;
   };
 
@@ -2757,7 +2922,7 @@ function App() {
     }
 
     if (slide.type === "free-layout") {
-      return <FreeLayoutSlide slide={slide} index={index} />;
+      return <FreeLayoutSlide slide={slide} index={index} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} />;
     }
 
     if (slide.type === "compare-slider") {
@@ -2788,7 +2953,7 @@ function App() {
       {slide.type !== "split" && <div className={`flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-4 px-4"}`}><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" /><EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} /></div>}
       <div className={slide.type === "split" ? (isFeedLayout ? "flex flex-col gap-5" : "flex-1 flex items-center gap-16 p-4") : `grid ${colsClass} gap-4`}>
         {slide.type === "split" && <div className={`${isFeedLayout ? "w-full flex flex-col relative gap-3 px-2" : "w-1/3 flex flex-col relative gap-4"}`}><div className={`absolute ${isFeedLayout ? "-left-1 top-0 h-14" : "-left-10 top-0 h-20"} w-1 bg-gradient-to-b from-white/40 to-transparent opacity-60`} /><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl md:text-4xl font-light mb-2 md:mb-4 leading-tight tracking-wide text-white/90" /><div className="flex flex-col gap-3">{(Array.isArray(slide.textBlocks) ? slide.textBlocks : [slide.text || ""]).map((block, blockIndex) => <EditableText key={`${slide.id}-text-${blockIndex}`} text={block} field="text" slideIndex={index} tagName="p" placeholder={`文本框 ${blockIndex + 1}`} className="text-base md:text-lg text-white/70 leading-relaxed font-light whitespace-pre-line" onBlurValue={(value) => updateTextBlock(index, blockIndex, value)} />)}</div></div>}
-        <div className={slide.type === "split" ? (isFeedLayout ? "w-full grid grid-cols-1 gap-3" : "w-2/3 h-[80vh] flex gap-6") : "contents"}>{Array.from({ length: slide.slots || 1 }).map((_, slotIndex) => <div key={slotIndex} className={slide.type === "split" ? (isFeedLayout ? "min-h-[320px]" : "flex-1 h-full") : ""}><MediaSlot slideIndex={index} slotIndex={slotIndex} label={slide.customLabels ? slide.customLabels[slotIndex] : `素材 ${String(slotIndex + 1).padStart(2, "0")}`} /></div>)}</div>
+        <div className={slide.type === "split" ? (isFeedLayout ? "w-full grid grid-cols-1 gap-3" : "w-2/3 h-[80vh] flex gap-6") : "contents"}>{Array.from({ length: slide.slots || 1 }).map((_, slotIndex) => <div key={slotIndex} className={slide.type === "split" ? (isFeedLayout ? "min-h-[320px]" : "flex-1 h-full") : ""}><MediaSlot slideIndex={index} slotIndex={slotIndex} label={slide.customLabels ? slide.customLabels[slotIndex] : `素材 ${String(slotIndex + 1).padStart(2, "0")}`} activePreviewKey={activePreviewKey} setActivePreviewKey={setActivePreviewKey} /></div>)}</div>
       </div>
     </div>;
   };
@@ -2826,7 +2991,7 @@ function App() {
   };
   const portfolioSizeToneClass = portfolioSizeTone === "danger" ? "text-rose-200 bg-rose-500/15 border-rose-300/20" : portfolioSizeTone === "warning" ? "text-amber-100 bg-amber-500/12 border-amber-300/20" : "text-emerald-100 bg-emerald-500/12 border-emerald-300/20";
 
-  return <div className="relative min-h-screen w-full font-sans select-none selection:bg-white/20" {...touchHandlers}>
+  return <div className="app-shell relative min-h-screen w-full font-sans select-none selection:bg-white/20" {...touchHandlers}>
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       <div className={`absolute -top-[16%] -left-[8%] h-[44%] w-[44%] ${currentTheme.a} rounded-full blur-[120px] opacity-90 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 10s infinite" }} />
       <div className={`absolute top-[24%] -right-[8%] h-[38%] w-[38%] ${currentTheme.b} rounded-full blur-[130px] opacity-85 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 13s infinite 1.8s" }} />
@@ -2834,14 +2999,20 @@ function App() {
     </div>
     <div className="relative z-10">
       <div className="sticky top-3 z-40 px-3">
-        <div className={`mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"}`}>
+        <div className={cx("surface-panel mx-auto flex w-full items-center justify-between gap-3 rounded-full px-4 py-2 text-xs", isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl")}>
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => goToSlide(0)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
             <button onClick={() => goToSlide(tocSlideIndex)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>
           </div>
           <div className="hidden items-center gap-2 lg:flex">
-            <span className="text-white/38">{siteMeta.siteTitle}</span>
-            <span className="font-mono tracking-widest text-white/70">{String(currentSlide + 1).padStart(2, "0")}/{String(slidesData.length).padStart(2, "0")}</span>
+            <span className="text-tertiary">{siteMeta.siteTitle}</span>
+            <span className="font-mono tracking-widest text-secondary">{String(currentSlide + 1).padStart(2, "0")}/{String(slidesData.length).padStart(2, "0")}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setThemeMode((value) => value === "dark" ? "light" : "dark")} className="nav-pill theme-toggle px-3 py-1.5 text-[11px] font-medium">
+              <Icon name={isLightTheme ? "Moon" : "Sun"} size={14} />
+              {isLightTheme ? "Dark" : "Light"}
+            </button>
           </div>
         </div>
       </div>
@@ -2883,7 +3054,7 @@ function App() {
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
           data-slide-index={index}
-          className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md"
+          className="section-shell reveal-section"
           style={publishedSectionStyle}
         >
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
@@ -2974,5 +3145,5 @@ function App() {
   </div>;
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = createRoot(document.getElementById("root"));
 root.render(<App />);

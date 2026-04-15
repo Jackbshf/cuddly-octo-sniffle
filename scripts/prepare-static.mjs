@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { buildAppAssets } from "./build-app.mjs";
 import { syncPortfolioArtifacts } from "./sync-portfolio-json.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +24,7 @@ const VIDEO_POSTER_SECOND = 1;
 
 const copyTargets = [
   "index.html",
-  "app.jsx",
+  "assets",
   "embedded-data.js",
   "admin",
   "data",
@@ -262,6 +263,7 @@ async function main() {
     outputFile: null,
     log: (message) => console.log(`[prepare-static] ${message}`)
   });
+  await buildAppAssets();
 
   await rm(distDir, { recursive: true, force: true });
   await mkdir(distDir, { recursive: true });

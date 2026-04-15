@@ -3,10 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:app": "node scripts/build-app.mjs",
     "sync:portfolio": "node scripts/sync-portfolio-json.mjs",
     "prepare:static": "node scripts/prepare-static.mjs"
   },
   "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "sharp": "0.34.4"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.4",
+    "tailwindcss": "3.4.17"
   }
 }
