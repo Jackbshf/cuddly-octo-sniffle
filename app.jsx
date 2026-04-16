@@ -614,7 +614,6 @@ const playInlineVideoAudible = (video, onMutedChange) => {
       rememberInlineAudioPreference(false);
       return true;
     }).catch(() => {
-      setInlineVideoMutedState(video, true, onMutedChange);
       return false;
     });
   }
@@ -643,10 +642,7 @@ const attemptInlineVideoPlayback = (video, options = {}) => {
     } catch (error) {}
   }
   if (preferAudible) {
-    return playInlineVideoAudible(video, onMutedChange).then((audibleStarted) => {
-      if (audibleStarted) return true;
-      return playInlineVideoMuted(video, onMutedChange).then(() => false);
-    });
+    return playInlineVideoAudible(video, onMutedChange);
   }
   return playInlineVideoMuted(video, onMutedChange).then(() => false);
 };
@@ -997,7 +993,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
   return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{icons[name]}</svg>;
 };
 
-const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, showPoster = true, videoPreloadMode = "metadata" }) => {
+const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, showPoster = true, videoPreloadMode = "metadata", showNativeVideoControls = false }) => {
   const item = normalizeMediaItem(mediaItem);
   if (!item) return null;
   const handleSurfaceClick = typeof onMediaSurfaceClick === "function" ? onMediaSurfaceClick : stopClick;
@@ -1060,6 +1056,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
       src={src}
       loop
       muted={muted}
+      controls={showNativeVideoControls}
       playsInline
       preload={videoPreloadMode}
       poster={showPoster ? item.poster || undefined : undefined}
@@ -2136,7 +2133,7 @@ function App() {
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
     const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster));
-    const [isMuted, setIsMuted] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
     const [isInViewport, setIsInViewport] = useState(true);
@@ -2152,7 +2149,6 @@ function App() {
     const videoRef = useRef(null);
     const overlayTimerRef = useRef(null);
     const playAttemptRef = useRef(null);
-    const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
     const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
@@ -2163,16 +2159,15 @@ function App() {
 
     const resetInlinePreview = (options = {}) => {
       const preserveOverlay = Boolean(options.preserveOverlay);
-      hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
       clearControlsTimer();
       if (!preserveOverlay) setShowPlaybackOverlay(false);
-      setIsMuted(true);
+      setIsMuted(false);
       setIsPlaying(false);
       setCurrentTimeLabel("00:00");
       setPlaybackProgress(0);
       playAttemptRef.current = null;
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
     };
 
     const stopOwnInlinePreview = (options = {}) => {
@@ -2226,7 +2221,6 @@ function App() {
       }
       const preferAudible = shouldPreferAudiblePreview();
       activateInlinePreview(inlinePreviewOwnerId);
-      hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
       const playAttempt = attemptInlineVideoPlayback(video, { preferAudible, onMutedChange: setIsMuted }).finally(() => {
         if (playAttemptRef.current === playAttempt) {
@@ -2277,9 +2271,8 @@ function App() {
     const openInlineFullscreen = async (event) => {
       if (event) event.stopPropagation();
       revealControls(3200);
-      hoverPlaybackPendingRef.current = false;
       clearActiveInlinePreview(inlinePreviewOwnerId);
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
       openMediaLightbox(item, { requestFullscreen: true });
     };
 
@@ -2329,8 +2322,7 @@ function App() {
         setPlaybackProgress(0);
         setIsPlaying(false);
         setShowPlaybackOverlay(false);
-        setIsMuted(true);
-        hoverPlaybackPendingRef.current = false;
+        setIsMuted(false);
         userPausedRef.current = false;
         return;
       }
@@ -2347,8 +2339,7 @@ function App() {
       setPlaybackProgress(0);
       setIsPlaying(false);
       setShowPlaybackOverlay(false);
-      setIsMuted(true);
-      hoverPlaybackPendingRef.current = false;
+      setIsMuted(false);
       userPausedRef.current = false;
       clearControlsTimer();
       clearActiveInlinePreview(inlinePreviewOwnerId);
@@ -2500,14 +2491,14 @@ function App() {
       {hasUsableMedia ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isInViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isInViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
+              if (prefersHoverControls && videoRef.current) {
+                setInlineVideoMutedState(videoRef.current, false, setIsMuted);
+              }
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (!playAttemptRef.current && hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
-                startInlinePreview();
-              }
             }
           }} onMediaError={() => {
             setIsMediaLoading(false);
@@ -2515,12 +2506,10 @@ function App() {
             setIsVideoReady(false);
             playAttemptRef.current = null;
             }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
-              hoverPlaybackPendingRef.current = false;
               playAttemptRef.current = null;
               setIsPlaying(true);
               revealControls();
             }} onVideoPause={() => {
-            hoverPlaybackPendingRef.current = false;
             playAttemptRef.current = null;
             setIsPlaying(false);
             if (!prefersHoverControls) scheduleControlsHide(2400);
@@ -2531,17 +2520,6 @@ function App() {
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
-        {directVideo && !showEditor && <InlineMediaControls
-          visible={prefersHoverControls ? showPlaybackOverlay : true}
-          showPlayToggle
-          isPlaying={isPlaying}
-          isMuted={isMuted}
-          timeLabel={mediaDuration ? `${currentTimeLabel} / ${mediaDuration}` : currentTimeLabel}
-          progressPercent={playbackProgress}
-          onTogglePlay={toggleInlinePlayback}
-          onToggleMute={toggleInlineMuted}
-          onToggleFullscreen={openInlineFullscreen}
-        />}
       </> : <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-center text-white/35 text-sm">
         <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5"><Icon name="UploadCloud" size={20} className="text-white/45" /></div>
         <div>拖入媒体，或点击右上角上传/填写链接</div>
@@ -2581,7 +2559,7 @@ function App() {
     const bindingInfo = getMediaBindingInfo(item);
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
-    const [isMuted, setIsMuted] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isDragTarget, setIsDragTarget] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
@@ -2597,7 +2575,6 @@ function App() {
     const videoRef = useRef(null);
     const overlayTimerRef = useRef(null);
     const playAttemptRef = useRef(null);
-    const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
     const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
@@ -2611,16 +2588,15 @@ function App() {
 
     const resetInlinePreview = (options = {}) => {
       const preserveOverlay = Boolean(options.preserveOverlay);
-      hoverPlaybackPendingRef.current = false;
       userPausedRef.current = false;
       clearControlsTimer();
       if (!preserveOverlay) setShowPlaybackOverlay(false);
-      setIsMuted(true);
+      setIsMuted(false);
       setIsPlaying(false);
       setCurrentTimeLabel("00:00");
       setPlaybackProgress(0);
       playAttemptRef.current = null;
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
     };
 
     const stopOwnInlinePreview = (options = {}) => {
@@ -2674,7 +2650,6 @@ function App() {
       }
       const preferAudible = shouldPreferAudiblePreview();
       activateInlinePreview(inlinePreviewOwnerId);
-      hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
       const playAttempt = attemptInlineVideoPlayback(video, { preferAudible, onMutedChange: setIsMuted }).finally(() => {
         if (playAttemptRef.current === playAttempt) {
@@ -2725,9 +2700,8 @@ function App() {
     const openInlineFullscreen = async (event) => {
       if (event) event.stopPropagation();
       revealControls(3200);
-      hoverPlaybackPendingRef.current = false;
       clearActiveInlinePreview(inlinePreviewOwnerId);
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
       openMediaLightbox(item, { requestFullscreen: true });
     };
 
@@ -2783,8 +2757,7 @@ function App() {
         setPlaybackProgress(0);
         setIsPlaying(false);
         setShowPlaybackOverlay(false);
-        setIsMuted(true);
-        hoverPlaybackPendingRef.current = false;
+        setIsMuted(false);
         userPausedRef.current = false;
         return;
       }
@@ -2801,8 +2774,7 @@ function App() {
       setPlaybackProgress(0);
       setIsPlaying(false);
       setShowPlaybackOverlay(false);
-      setIsMuted(true);
-      hoverPlaybackPendingRef.current = false;
+      setIsMuted(false);
       userPausedRef.current = false;
       clearControlsTimer();
       clearActiveInlinePreview(inlinePreviewOwnerId);
@@ -2962,14 +2934,14 @@ function App() {
       {item ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isInViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isInViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
+              if (prefersHoverControls && videoRef.current) {
+                setInlineVideoMutedState(videoRef.current, false, setIsMuted);
+              }
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (!playAttemptRef.current && hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
-                startInlinePreview();
-              }
             }
             }} onMediaError={() => {
               setIsMediaLoading(false);
@@ -2977,12 +2949,10 @@ function App() {
               setIsVideoReady(false);
               playAttemptRef.current = null;
             }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
-              hoverPlaybackPendingRef.current = false;
               playAttemptRef.current = null;
               setIsPlaying(true);
               revealControls();
             }} onVideoPause={() => {
-            hoverPlaybackPendingRef.current = false;
             playAttemptRef.current = null;
             setIsPlaying(false);
             if (!prefersHoverControls) scheduleControlsHide(2400);
@@ -2993,17 +2963,6 @@ function App() {
         </div>
         {isMediaLoading && <div className="absolute inset-0 z-20 animate-pulse bg-gradient-to-br from-white/8 via-white/4 to-transparent pointer-events-none" />}
         {hasMediaError && <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 text-xs tracking-[0.2em] text-rose-100/80 uppercase pointer-events-none">资源加载失败</div>}
-        {directVideo && !showEditor && <InlineMediaControls
-          visible={prefersHoverControls ? showPlaybackOverlay : true}
-          showPlayToggle
-          isPlaying={isPlaying}
-          isMuted={isMuted}
-          timeLabel={mediaDuration ? `${currentTimeLabel} / ${mediaDuration}` : currentTimeLabel}
-          progressPercent={playbackProgress}
-          onTogglePlay={toggleInlinePlayback}
-          onToggleMute={toggleInlineMuted}
-          onToggleFullscreen={openInlineFullscreen}
-        />}
       </> : <div className="flex flex-col items-center justify-center p-2 text-center w-full h-full">
         <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 border border-white/5 group-hover:bg-white/10"><Icon name="UploadCloud" size={18} className="text-white/40" /></div>
         <span className="text-[10px] tracking-widest text-white/40 uppercase">{label || "Upload"}</span>
