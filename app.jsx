@@ -998,6 +998,8 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
   if (!item) return null;
   const handleSurfaceClick = typeof onMediaSurfaceClick === "function" ? onMediaSurfaceClick : stopClick;
   const fallbackDisplayUrl = getDisplayUrl(item, { preferDraftPreview });
+  const shouldRenderInlineEmbed = !IS_EDITOR_MODE;
+  const embedFrameClassName = "relative z-10 h-full w-full rounded-[inherit] border-0 bg-black";
   const renderEmbeddedFallback = (label, providerLabel = "") => {
     if (fallbackDisplayUrl) {
       return <img
@@ -1033,6 +1035,18 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
   if (item.kind === "youtube") {
     const embedUrl = getYouTubeEmbedUrl(item.url);
     if (!embedUrl) return null;
+    if (shouldRenderInlineEmbed) {
+      return <iframe
+        src={withEmbedPlaybackParams(embedUrl, false)}
+        title="YouTube player"
+        className={embedFrameClassName}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+        onLoad={onMediaLoad}
+        onClick={stopClick}
+      />;
+    }
     return renderEmbeddedFallback("点击放大播放视频", "YouTube");
   }
 
@@ -1041,6 +1055,18 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     if (!src) return null;
     const embedUrl = getVideoEmbedUrl(src);
     if (embedUrl && !isDirectVideoSource(src)) {
+      if (shouldRenderInlineEmbed) {
+        return <iframe
+          src={withEmbedPlaybackParams(embedUrl, false)}
+          title={isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl) ? "Bilibili player" : "Embedded video player"}
+          className={embedFrameClassName}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+          onLoad={onMediaLoad}
+          onClick={stopClick}
+        />;
+      }
       return renderEmbeddedFallback("点击放大播放视频", isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl) ? "Bilibili" : "Video");
     }
     if (!isDirectVideoSource(src)) {
