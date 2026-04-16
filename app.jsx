@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 const DATA_FILE_PATH = "data/portfolio.json";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
 const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
+const APP_BUNDLE_VERSION = window.__APP_BUNDLE_VERSION__ ?? "";
 const IS_EDITOR_MODE = window.location.protocol === "file:" || new URLSearchParams(window.location.search).get("editor") === "1";
 const MOBILE_MODE_QUERY = new URLSearchParams(window.location.search).get("mobile");
 const IS_QR_MOBILE_MODE = MOBILE_MODE_QUERY === "1";
@@ -807,8 +808,11 @@ const loadPortfolioModel = async () => {
   if (window.location.protocol === "file:") return createPortfolioModel(EMBEDDED_PORTFOLIO);
 
   const shouldBypassCache = new URLSearchParams(window.location.search).get("editor") === "1";
-  const requestUrl = shouldBypassCache ? `${DATA_FILE_PATH}?t=${Date.now()}` : DATA_FILE_PATH;
-  const response = await fetch(requestUrl, shouldBypassCache ? { cache: "no-store" } : undefined);
+  const params = new URLSearchParams();
+  if (APP_BUNDLE_VERSION) params.set("v", APP_BUNDLE_VERSION);
+  if (shouldBypassCache) params.set("t", Date.now().toString());
+  const requestUrl = params.size ? `${DATA_FILE_PATH}?${params.toString()}` : DATA_FILE_PATH;
+  const response = await fetch(requestUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`Unable to load ${DATA_FILE_PATH}`);
   return createPortfolioModel(await response.json());
 };

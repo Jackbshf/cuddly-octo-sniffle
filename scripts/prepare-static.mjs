@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -41,6 +42,7 @@ const isLocalAssetUrl = (value = "") => {
   return Boolean(normalized) && !isRemoteUrl(normalized) && !isBlobUrl(normalized) && !normalized.startsWith("data:");
 };
 const toPosixPath = (value = "") => String(value || "").replace(/\\/g, "/");
+const getContentHash = (value) => createHash("sha256").update(value).digest("hex").slice(0, 10);
 
 const inferMediaKind = (value = "") => {
   const normalized = String(value || "").trim().toLowerCase();
@@ -87,6 +89,57 @@ const ensureInsideRepo = (assetUrl) => {
 
 const ensureDirectory = async (filePath) => {
   await mkdir(path.dirname(filePath), { recursive: true });
+};
+
+const fingerprintDistFile = async (absoluteFilePath) => {
+  const fileBuffer = await readFile(absoluteFilePath);
+  const parsed = path.parse(absoluteFilePath);
+  const hash = getContentHash(fileBuffer);
+  const hashedAbsolutePath = path.join(parsed.dir, `${parsed.name}.${hash}${parsed.ext}`);
+  await writeFile(hashedAbsolutePath, fileBuffer);
+  await rm(absoluteFilePath, { force: true });
+  return {
+    hash,
+    relativePath: toPosixPath(path.relative(distDir, hashedAbsolutePath))
+  };
+};
+
+const rewriteDistIndexHtml = async (versionedAssets) => {
+  const distIndexPath = path.join(distDir, "index.html");
+  let html = await readFile(distIndexPath, "utf8");
+
+  html = html.replace(/href="assets\/app\.css"/, `href="${versionedAssets.css.relativePath}"`);
+  html = html.replace(
+    /<script src="embedded-data\.js"><\/script>/,
+    `<script>window.__APP_BUNDLE_VERSION__ = ${JSON.stringify(versionedAssets.version)};</script>\n  <script src="${versionedAssets.embedded.relativePath}"></script>`
+  );
+  html = html.replace(/src="assets\/app\.js"/, `src="${versionedAssets.js.relativePath}"`);
+
+  await writeFile(distIndexPath, html, "utf8");
+};
+
+const writeDistHeaders = async () => {
+  const headersPath = path.join(distDir, "_headers");
+  const headersContent = [
+    "/",
+    "  Cache-Control: no-store",
+    "  CDN-Cache-Control: no-store",
+    "/index.html",
+    "  Cache-Control: no-store",
+    "  CDN-Cache-Control: no-store",
+    "/data/*",
+    "  Cache-Control: no-store",
+    "  CDN-Cache-Control: no-store",
+    "/assets/*",
+    "  Cache-Control: public, max-age=31536000, immutable",
+    "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    "/embedded-data*",
+    "  Cache-Control: public, max-age=31536000, immutable",
+    "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    ""
+  ].join("\n");
+
+  await writeFile(headersPath, headersContent, "utf8");
 };
 
 const runCommand = (command, args) => new Promise((resolve, reject) => {
@@ -306,6 +359,16 @@ async function main() {
   const { transformed, optimizedImageCount, posterCount } = await transformPortfolioForDist(normalizedPortfolio);
   await ensureDirectory(distJsonPath);
   await writeFile(distJsonPath, `${JSON.stringify(transformed, null, 2)}\n`, "utf8");
+
+  const versionedAssets = {
+    css: await fingerprintDistFile(path.join(distDir, "assets", "app.css")),
+    js: await fingerprintDistFile(path.join(distDir, "assets", "app.js")),
+    embedded: await fingerprintDistFile(path.join(distDir, "embedded-data.js"))
+  };
+  versionedAssets.version = versionedAssets.js.hash;
+
+  await rewriteDistIndexHtml(versionedAssets);
+  await writeDistHeaders();
 
   console.log(`Prepared static bundle in ${distDir}`);
   console.log(`Optimized referenced images: ${optimizedImageCount}`);
