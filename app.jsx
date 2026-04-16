@@ -687,6 +687,26 @@ const withEmbedPlaybackParams = (embedUrl, autoplay = false) => {
   }
 };
 
+const videoPreloadHintMap = new Map();
+
+const ensureVideoPreloadHint = (src, priority = "auto") => {
+  if (typeof document === "undefined" || !src || !isDirectVideoSource(src)) return;
+  let absoluteUrl = src;
+  try {
+    absoluteUrl = new URL(src, window.location.href).toString();
+  } catch (error) {}
+  let link = videoPreloadHintMap.get(absoluteUrl);
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "video";
+    link.href = absoluteUrl;
+    document.head.appendChild(link);
+    videoPreloadHintMap.set(absoluteUrl, link);
+  }
+  link.setAttribute("fetchpriority", priority);
+};
+
 const isFileDragEvent = (event) => {
   const types = event?.dataTransfer?.types;
   if (!types) return false;
@@ -2162,7 +2182,8 @@ function App() {
     const [isMuted, setIsMuted] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
-    const [isInViewport, setIsInViewport] = useState(true);
+    const [isInViewport, setIsInViewport] = useState(false);
+    const [isNearViewport, setIsNearViewport] = useState(false);
     const [isMediaLoading, setIsMediaLoading] = useState(Boolean(item));
     const [hasMediaError, setHasMediaError] = useState(false);
     const [isVideoReady, setIsVideoReady] = useState(false);
@@ -2383,17 +2404,25 @@ function App() {
 
     useEffect(() => {
       const node = rootRef.current;
-      if (!node || typeof IntersectionObserver === "undefined") return undefined;
+      if (!node) return undefined;
+      if (typeof IntersectionObserver === "undefined") {
+        setIsNearViewport(true);
+        setIsInViewport(true);
+        return undefined;
+      }
       const observer = new IntersectionObserver(([entry]) => {
-        const nextInViewport = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.08);
+        const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+        const nextNearViewport = Boolean(entry?.isIntersecting);
+        const nextInViewport = Boolean(entry?.intersectionRatio > 0.08 && entry?.boundingClientRect?.bottom > 0 && entry?.boundingClientRect?.top < viewportHeight);
+        setIsNearViewport(nextNearViewport);
         setIsInViewport(nextInViewport);
-        if (!nextInViewport) {
+        if (!nextNearViewport) {
           setIsHovered(false);
         }
       }, {
         root: null,
         threshold: [0, 0.08, 0.22],
-        rootMargin: "30% 0px 30% 0px"
+        rootMargin: "140% 0px 140% 0px"
       });
       observer.observe(node);
       return () => observer.disconnect();
@@ -2403,14 +2432,17 @@ function App() {
       if (!directVideo || !videoSource || showEditor) return;
       const video = videoRef.current;
       if (!video) return;
-      const nextPreload = shouldInlinePreviewPlay || isInViewport ? "auto" : "metadata";
+      const nextPreload = shouldInlinePreviewPlay || isInViewport || isNearViewport ? "auto" : "metadata";
       video.preload = nextPreload;
+      if (nextPreload === "auto") {
+        ensureVideoPreloadHint(videoSource, "high");
+      }
       if (nextPreload === "auto" && video.readyState < 1) {
         try {
           video.load();
         } catch (error) {}
       }
-    }, [directVideo, isInViewport, shouldInlinePreviewPlay, showEditor, videoSource]);
+    }, [directVideo, isInViewport, isNearViewport, shouldInlinePreviewPlay, showEditor, videoSource]);
 
     useEffect(() => {
       if (!directVideo) return undefined;
@@ -2517,7 +2549,7 @@ function App() {
       {hasUsableMedia ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isInViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               if (prefersHoverControls && videoRef.current) {
@@ -2589,7 +2621,8 @@ function App() {
     const [isHovered, setIsHovered] = useState(false);
     const [isDragTarget, setIsDragTarget] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
-    const [isInViewport, setIsInViewport] = useState(true);
+    const [isInViewport, setIsInViewport] = useState(false);
+    const [isNearViewport, setIsNearViewport] = useState(false);
     const [isMediaLoading, setIsMediaLoading] = useState(Boolean(item));
     const [hasMediaError, setHasMediaError] = useState(false);
     const [isVideoReady, setIsVideoReady] = useState(false);
@@ -2818,17 +2851,25 @@ function App() {
 
     useEffect(() => {
       const node = rootRef.current;
-      if (!node || typeof IntersectionObserver === "undefined") return undefined;
+      if (!node) return undefined;
+      if (typeof IntersectionObserver === "undefined") {
+        setIsNearViewport(true);
+        setIsInViewport(true);
+        return undefined;
+      }
       const observer = new IntersectionObserver(([entry]) => {
-        const nextInViewport = Boolean(entry?.isIntersecting && entry.intersectionRatio > 0.08);
+        const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+        const nextNearViewport = Boolean(entry?.isIntersecting);
+        const nextInViewport = Boolean(entry?.intersectionRatio > 0.08 && entry?.boundingClientRect?.bottom > 0 && entry?.boundingClientRect?.top < viewportHeight);
+        setIsNearViewport(nextNearViewport);
         setIsInViewport(nextInViewport);
-        if (!nextInViewport) {
+        if (!nextNearViewport) {
           setIsHovered(false);
         }
       }, {
         root: null,
         threshold: [0, 0.08, 0.22],
-        rootMargin: "30% 0px 30% 0px"
+        rootMargin: "140% 0px 140% 0px"
       });
       observer.observe(node);
       return () => observer.disconnect();
@@ -2838,14 +2879,17 @@ function App() {
       if (!directVideo || !videoSource || showEditor) return;
       const video = videoRef.current;
       if (!video) return;
-      const nextPreload = shouldInlinePreviewPlay || isInViewport ? "auto" : "metadata";
+      const nextPreload = shouldInlinePreviewPlay || isInViewport || isNearViewport ? "auto" : "metadata";
       video.preload = nextPreload;
+      if (nextPreload === "auto") {
+        ensureVideoPreloadHint(videoSource, "high");
+      }
       if (nextPreload === "auto" && video.readyState < 1) {
         try {
           video.load();
         } catch (error) {}
       }
-    }, [directVideo, isInViewport, shouldInlinePreviewPlay, showEditor, videoSource]);
+    }, [directVideo, isInViewport, isNearViewport, shouldInlinePreviewPlay, showEditor, videoSource]);
 
     useEffect(() => {
       if (!directVideo) return undefined;
@@ -2960,7 +3004,7 @@ function App() {
       {item ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isInViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               if (prefersHoverControls && videoRef.current) {
