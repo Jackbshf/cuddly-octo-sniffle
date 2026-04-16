@@ -532,38 +532,6 @@ const warmVideoSourceInBackground = async (src, signal) => {
   } catch (error) {}
 };
 
-const primeInlineAudioSession = async (src) => {
-  if (!src || typeof document === "undefined") return false;
-  const probe = document.createElement("video");
-  probe.playsInline = true;
-  probe.preload = "auto";
-  probe.defaultMuted = false;
-  probe.muted = false;
-  probe.volume = 0.001;
-  probe.src = src;
-  probe.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;";
-  document.body.appendChild(probe);
-
-  const cleanup = () => {
-    try {
-      probe.pause();
-      probe.removeAttribute("src");
-      probe.load();
-    } catch (error) {}
-    probe.remove();
-  };
-
-  try {
-    await probe.play();
-    await new Promise((resolve) => window.setTimeout(resolve, 120));
-    cleanup();
-    return true;
-  } catch (error) {
-    cleanup();
-    return false;
-  }
-};
-
 const getViewportOrientation = () => {
   const explicitOrientation = window.screen?.orientation?.type;
   if (typeof explicitOrientation === "string") {
@@ -622,13 +590,6 @@ const canUseAudibleInlinePlayback = () => {
   return Boolean(activation?.hasBeenActive || activation?.isActive || hasUnlockedInlineAudio());
 };
 
-const shouldPreferMutedAutoplay = () => {
-  const storedPreference = readInlineAudioPreference();
-  if (storedPreference === "audible") return false;
-  if (storedPreference === "muted") return true;
-  return !canUseAudibleInlinePlayback();
-};
-
 const resolveLayoutMode = () => {
   if (!IS_QR_MOBILE_MODE) return "desktop-feed";
   return getViewportOrientation() === "landscape" ? "mobile-landscape-feed" : "mobile-portrait-feed";
@@ -644,12 +605,12 @@ const setInlineVideoMutedState = (video, nextMuted, onMutedChange) => {
   if (typeof onMutedChange === "function") onMutedChange(nextMuted);
 };
 
-const retryInlineVideoWithAudio = (video, onMutedChange) => {
-  if (!video || video.paused || !canUseAudibleInlinePlayback()) return Promise.resolve(false);
+const playInlineVideoAudible = (video, onMutedChange) => {
+  if (!video || !canUseAudibleInlinePlayback()) return Promise.resolve(false);
   setInlineVideoMutedState(video, false, onMutedChange);
-  const retryAttempt = video.play();
-  if (retryAttempt && typeof retryAttempt.then === "function") {
-    return retryAttempt.then(() => {
+  const playAttempt = video.play();
+  if (playAttempt && typeof playAttempt.then === "function") {
+    return playAttempt.then(() => {
       rememberInlineAudioPreference(false);
       return true;
     }).catch(() => {
@@ -661,31 +622,33 @@ const retryInlineVideoWithAudio = (video, onMutedChange) => {
   return Promise.resolve(true);
 };
 
-const attemptInlineVideoPlayback = (video, preferredMuted, onMutedChange) => {
+const playInlineVideoMuted = (video, onMutedChange) => {
   if (!video) return Promise.resolve(false);
+  setInlineVideoMutedState(video, true, onMutedChange);
+  const playAttempt = video.play();
+  if (playAttempt && typeof playAttempt.then === "function") {
+    return playAttempt.then(() => true).catch(() => false);
+  }
+  return Promise.resolve(true);
+};
+
+const attemptInlineVideoPlayback = (video, options = {}) => {
+  if (!video) return Promise.resolve(false);
+  const preferAudible = Boolean(options.preferAudible);
+  const onMutedChange = options.onMutedChange;
   video.preload = "auto";
   if (video.readyState < 2) {
     try {
       video.load();
     } catch (error) {}
   }
-  const shouldStartMuted = preferredMuted || !canUseAudibleInlinePlayback();
-  setInlineVideoMutedState(video, shouldStartMuted, onMutedChange);
-  const playAttempt = video.play();
-  if (!playAttempt || typeof playAttempt.then !== "function") {
-    if (!shouldStartMuted) rememberInlineAudioPreference(false);
-    return Promise.resolve(!shouldStartMuted);
+  if (preferAudible) {
+    return playInlineVideoAudible(video, onMutedChange).then((audibleStarted) => {
+      if (audibleStarted) return true;
+      return playInlineVideoMuted(video, onMutedChange).then(() => false);
+    });
   }
-  return playAttempt.then(() => {
-    if (!shouldStartMuted) rememberInlineAudioPreference(false);
-    return !shouldStartMuted;
-  }).catch(() => {
-    if (shouldStartMuted) return false;
-    setInlineVideoMutedState(video, true, onMutedChange);
-    const mutedAttempt = video.play();
-    if (!mutedAttempt || typeof mutedAttempt.then !== "function") return false;
-    return mutedAttempt.then(() => retryInlineVideoWithAudio(video, onMutedChange)).catch(() => false);
-  });
+  return playInlineVideoMuted(video, onMutedChange).then(() => false);
 };
 
 const stopInlineVideoPlayback = (video, options = {}) => {
@@ -1277,7 +1240,6 @@ function App() {
   const activeSlideRatiosRef = useRef(new Map());
   const activeSlideFrameRef = useRef(null);
   const currentSlideRef = useRef(0);
-  const inlineAudioPrimedRef = useRef(false);
   const inlinePreviewRegistryRef = useRef(new Map());
   const activeInlinePreviewOwnerRef = useRef("");
   const currentTheme = colorPalettes[currentSlide % colorPalettes.length] || colorPalettes[0];
@@ -1285,7 +1247,6 @@ function App() {
   const casesData = portfolioData.cases;
   const siteMeta = portfolioData.meta;
   const publishedSlidesData = publishedPortfolioData.slides;
-  const inlineAudioPrimeSource = collectDirectVideoPreloadTargets(slidesData)[0] || "";
   const tocSlideIndex = Math.max(0, slidesData.findIndex((slide) => slide && slide.type === "toc"));
   const isMobileFeedMode = true;
   const isMobilePreviewMode = layoutMode !== "desktop-feed";
@@ -1358,13 +1319,6 @@ function App() {
     }
   };
 
-  const retryActiveInlinePreviewAudio = () => {
-    const activeOwnerId = activeInlinePreviewOwnerRef.current;
-    if (!activeOwnerId) return;
-    const controller = inlinePreviewRegistryRef.current.get(activeOwnerId);
-    if (typeof controller?.retryAudible === "function") controller.retryAudible();
-  };
-
   useEffect(() => {
     currentSlideRef.current = currentSlide;
   }, [currentSlide]);
@@ -1372,13 +1326,6 @@ function App() {
   useEffect(() => {
     const unlockInlineAudio = () => {
       markInlineAudioUnlocked();
-      const finishUnlock = () => retryActiveInlinePreviewAudio();
-      if (!inlineAudioPrimeSource || inlineAudioPrimedRef.current) {
-        finishUnlock();
-        return;
-      }
-      inlineAudioPrimedRef.current = true;
-      void primeInlineAudioSession(inlineAudioPrimeSource).finally(finishUnlock);
     };
     window.addEventListener("pointerdown", unlockInlineAudio, { passive: true });
     window.addEventListener("wheel", unlockInlineAudio, { passive: true });
@@ -1390,7 +1337,7 @@ function App() {
       window.removeEventListener("touchstart", unlockInlineAudio);
       window.removeEventListener("keydown", unlockInlineAudio);
     };
-  }, [inlineAudioPrimeSource]);
+  }, []);
 
   useEffect(() => {
     if (!lightboxData?.requestFullscreen) return undefined;
@@ -1407,52 +1354,19 @@ function App() {
   }, [lightboxData]);
 
   useEffect(() => {
-    if (!prefersHoverControls) return undefined;
-
-    const syncActiveHoverPreview = (eventTarget = null, pointer = null) => {
-      const activeOwnerId = activeInlinePreviewOwnerRef.current;
-      if (!activeOwnerId) return;
-
-      const controller = inlinePreviewRegistryRef.current.get(activeOwnerId);
-      if (!controller || controller.mode !== "hover") return;
-
-      const root = typeof controller.getRoot === "function" ? controller.getRoot() : null;
-      if (!root || !document.contains(root)) {
-        controller.stop?.();
-        return;
-      }
-
-      if (eventTarget instanceof Node && root.contains(eventTarget)) return;
-      if (pointer && Number.isFinite(pointer.x) && Number.isFinite(pointer.y)) {
-        const hoveredNode = document.elementFromPoint(pointer.x, pointer.y);
-        if (hoveredNode instanceof Node && root.contains(hoveredNode)) return;
-      }
-      if (root.matches(":hover")) return;
-      controller.stop?.();
-    };
-
-    const handleMouseOver = (event) => syncActiveHoverPreview(event.target);
-    const handleMouseMove = (event) => syncActiveHoverPreview(event.target, { x: event.clientX, y: event.clientY });
-    const handleScroll = () => syncActiveHoverPreview();
-    const handleWindowBlur = () => syncActiveHoverPreview();
+    const handleWindowBlur = () => stopActiveInlinePreview();
     const handleVisibilityChange = () => {
-      if (document.visibilityState !== "visible") syncActiveHoverPreview();
+      if (document.visibilityState !== "visible") stopActiveInlinePreview();
     };
 
-    window.addEventListener("mouseover", handleMouseOver, true);
-    window.addEventListener("mousemove", handleMouseMove, true);
-    window.addEventListener("scroll", handleScroll, true);
     window.addEventListener("blur", handleWindowBlur);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("mouseover", handleMouseOver, true);
-      window.removeEventListener("mousemove", handleMouseMove, true);
-      window.removeEventListener("scroll", handleScroll, true);
       window.removeEventListener("blur", handleWindowBlur);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [prefersHoverControls]);
+  }, []);
 
   const scrollToSlide = (nextIndex) => {
     const target = slideSectionRefs.current.get(nextIndex);
@@ -2237,6 +2151,7 @@ function App() {
     const [isDragTarget, setIsDragTarget] = useState(false);
     const videoRef = useRef(null);
     const overlayTimerRef = useRef(null);
+    const playAttemptRef = useRef(null);
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `free-upload-${slideIndex}-${element.id}`;
@@ -2256,6 +2171,7 @@ function App() {
       setIsPlaying(false);
       setCurrentTimeLabel("00:00");
       setPlaybackProgress(0);
+      playAttemptRef.current = null;
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
     };
 
@@ -2281,7 +2197,7 @@ function App() {
       setShowPlaybackOverlay(true);
     };
 
-    const resolvePreviewMutedPreference = () => prefersHoverControls ? false : true;
+    const shouldPreferAudiblePreview = () => prefersHoverControls;
 
     const updatePlaybackState = (video) => {
       const safeCurrentTime = Number.isFinite(video?.currentTime) ? video.currentTime : 0;
@@ -2294,7 +2210,7 @@ function App() {
     const retryOwnInlineAudio = () => {
       const video = videoRef.current;
       if (!video || video.paused) return;
-      void retryInlineVideoWithAudio(video, setIsMuted);
+      void playInlineVideoAudible(video, setIsMuted);
     };
 
     const startInlinePreview = (options = {}) => {
@@ -2303,16 +2219,21 @@ function App() {
       if (!video || !directVideo || showEditor || !isInViewport) return;
       if (prefersHoverControls && !forceDesktop && !isHovered) return;
       if (userPausedRef.current) return;
+      if (playAttemptRef.current) return;
       if (!video.paused && video.readyState >= 2) {
         setShowPlaybackOverlay(true);
         return;
       }
-      const preferredMuted = resolvePreviewMutedPreference();
+      const preferAudible = shouldPreferAudiblePreview();
       activateInlinePreview(inlinePreviewOwnerId);
       hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
-      setIsMuted(preferredMuted);
-      attemptInlineVideoPlayback(video, preferredMuted, setIsMuted);
+      const playAttempt = attemptInlineVideoPlayback(video, { preferAudible, onMutedChange: setIsMuted }).finally(() => {
+        if (playAttemptRef.current === playAttempt) {
+          playAttemptRef.current = null;
+        }
+      });
+      playAttemptRef.current = playAttempt;
     };
 
     const toggleInlinePlayback = (event) => {
@@ -2323,7 +2244,12 @@ function App() {
       if (video.paused) {
         userPausedRef.current = false;
         activateInlinePreview(inlinePreviewOwnerId);
-        attemptInlineVideoPlayback(video, isMuted, setIsMuted);
+        const playAttempt = attemptInlineVideoPlayback(video, { preferAudible: !isMuted, onMutedChange: setIsMuted }).finally(() => {
+          if (playAttemptRef.current === playAttempt) {
+            playAttemptRef.current = null;
+          }
+        });
+        playAttemptRef.current = playAttempt;
       } else {
         userPausedRef.current = true;
         clearActiveInlinePreview(inlinePreviewOwnerId);
@@ -2338,7 +2264,10 @@ function App() {
       rememberInlineAudioPreference(nextMuted);
       if (videoRef.current) {
         setInlineVideoMutedState(videoRef.current, nextMuted, setIsMuted);
-        if (!nextMuted) retryOwnInlineAudio();
+        if (!nextMuted) {
+          activateInlinePreview(inlinePreviewOwnerId);
+          retryOwnInlineAudio();
+        }
       } else {
         setIsMuted(nextMuted);
       }
@@ -2431,11 +2360,9 @@ function App() {
         stop: () => {
           resetInlinePreview();
         },
-        getRoot: () => rootRef.current,
-        mode: prefersHoverControls ? "hover" : "viewport",
         retryAudible: retryOwnInlineAudio
       });
-    }, [directVideo, inlinePreviewOwnerId, prefersHoverControls]);
+    }, [directVideo, inlinePreviewOwnerId]);
 
     useEffect(() => {
       const node = rootRef.current;
@@ -2578,7 +2505,7 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
+              if (!playAttemptRef.current && hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
                 startInlinePreview();
               }
             }
@@ -2586,12 +2513,15 @@ function App() {
             setIsMediaLoading(false);
             setHasMediaError(true);
             setIsVideoReady(false);
+            playAttemptRef.current = null;
             }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
               hoverPlaybackPendingRef.current = false;
+              playAttemptRef.current = null;
               setIsPlaying(true);
               revealControls();
             }} onVideoPause={() => {
             hoverPlaybackPendingRef.current = false;
+            playAttemptRef.current = null;
             setIsPlaying(false);
             if (!prefersHoverControls) scheduleControlsHide(2400);
           }} onVideoTimeUpdate={(event) => {
@@ -2666,6 +2596,7 @@ function App() {
     const [showPlaybackOverlay, setShowPlaybackOverlay] = useState(false);
     const videoRef = useRef(null);
     const overlayTimerRef = useRef(null);
+    const playAttemptRef = useRef(null);
     const hoverPlaybackPendingRef = useRef(false);
     const userPausedRef = useRef(false);
     const fileInputId = `upload-${slide.id}-${slotIndex}`;
@@ -2688,6 +2619,7 @@ function App() {
       setIsPlaying(false);
       setCurrentTimeLabel("00:00");
       setPlaybackProgress(0);
+      playAttemptRef.current = null;
       if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
     };
 
@@ -2713,7 +2645,7 @@ function App() {
       setShowPlaybackOverlay(true);
     };
 
-    const resolvePreviewMutedPreference = () => prefersHoverControls ? false : true;
+    const shouldPreferAudiblePreview = () => prefersHoverControls;
 
     const updatePlaybackState = (video) => {
       const safeCurrentTime = Number.isFinite(video?.currentTime) ? video.currentTime : 0;
@@ -2726,7 +2658,7 @@ function App() {
     const retryOwnInlineAudio = () => {
       const video = videoRef.current;
       if (!video || video.paused) return;
-      void retryInlineVideoWithAudio(video, setIsMuted);
+      void playInlineVideoAudible(video, setIsMuted);
     };
 
     const startInlinePreview = (options = {}) => {
@@ -2735,16 +2667,21 @@ function App() {
       if (!video || !directVideo || showEditor || !isInViewport) return;
       if (prefersHoverControls && !forceDesktop && !isHovered) return;
       if (userPausedRef.current) return;
+      if (playAttemptRef.current) return;
       if (!video.paused && video.readyState >= 2) {
         setShowPlaybackOverlay(true);
         return;
       }
-      const preferredMuted = resolvePreviewMutedPreference();
+      const preferAudible = shouldPreferAudiblePreview();
       activateInlinePreview(inlinePreviewOwnerId);
       hoverPlaybackPendingRef.current = true;
       setShowPlaybackOverlay(true);
-      setIsMuted(preferredMuted);
-      attemptInlineVideoPlayback(video, preferredMuted, setIsMuted);
+      const playAttempt = attemptInlineVideoPlayback(video, { preferAudible, onMutedChange: setIsMuted }).finally(() => {
+        if (playAttemptRef.current === playAttempt) {
+          playAttemptRef.current = null;
+        }
+      });
+      playAttemptRef.current = playAttempt;
     };
 
     const toggleInlinePlayback = (event) => {
@@ -2755,7 +2692,12 @@ function App() {
       if (video.paused) {
         userPausedRef.current = false;
         activateInlinePreview(inlinePreviewOwnerId);
-        attemptInlineVideoPlayback(video, isMuted, setIsMuted);
+        const playAttempt = attemptInlineVideoPlayback(video, { preferAudible: !isMuted, onMutedChange: setIsMuted }).finally(() => {
+          if (playAttemptRef.current === playAttempt) {
+            playAttemptRef.current = null;
+          }
+        });
+        playAttemptRef.current = playAttempt;
       } else {
         userPausedRef.current = true;
         clearActiveInlinePreview(inlinePreviewOwnerId);
@@ -2770,7 +2712,10 @@ function App() {
       rememberInlineAudioPreference(nextMuted);
       if (videoRef.current) {
         setInlineVideoMutedState(videoRef.current, nextMuted, setIsMuted);
-        if (!nextMuted) retryOwnInlineAudio();
+        if (!nextMuted) {
+          activateInlinePreview(inlinePreviewOwnerId);
+          retryOwnInlineAudio();
+        }
       } else {
         setIsMuted(nextMuted);
       }
@@ -2869,11 +2814,9 @@ function App() {
         stop: () => {
           resetInlinePreview();
         },
-        getRoot: () => rootRef.current,
-        mode: prefersHoverControls ? "hover" : "viewport",
         retryAudible: retryOwnInlineAudio
       });
-    }, [directVideo, inlinePreviewOwnerId, prefersHoverControls]);
+    }, [directVideo, inlinePreviewOwnerId]);
 
     useEffect(() => {
       const node = rootRef.current;
@@ -3024,7 +2967,7 @@ function App() {
             if (directVideo) {
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
-              if (hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
+              if (!playAttemptRef.current && hoverPlaybackPendingRef.current && shouldInlinePreviewPlay && !userPausedRef.current) {
                 startInlinePreview();
               }
             }
@@ -3032,12 +2975,15 @@ function App() {
               setIsMediaLoading(false);
               setHasMediaError(true);
               setIsVideoReady(false);
+              playAttemptRef.current = null;
             }} onVideoMetadata={() => updatePlaybackState(videoRef.current)} onMediaMeasure={() => {}} onVideoPlay={() => {
               hoverPlaybackPendingRef.current = false;
+              playAttemptRef.current = null;
               setIsPlaying(true);
               revealControls();
             }} onVideoPause={() => {
             hoverPlaybackPendingRef.current = false;
+            playAttemptRef.current = null;
             setIsPlaying(false);
             if (!prefersHoverControls) scheduleControlsHide(2400);
           }} onVideoTimeUpdate={(event) => {
