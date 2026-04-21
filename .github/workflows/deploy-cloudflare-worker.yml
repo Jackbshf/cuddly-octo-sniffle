@@ -35,7 +35,17 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 8ad8f870010a1f1de2a2bf7ca8220d4a
-        run: node scripts/media/sync-cloudflare-stream.mjs
+        run: |
+          set -o pipefail
+          if ! STREAM_OUTPUT=$(node scripts/media/sync-cloudflare-stream.mjs 2>&1); then
+            echo "$STREAM_OUTPUT"
+            STREAM_OUTPUT="${STREAM_OUTPUT//'%'/'%25'}"
+            STREAM_OUTPUT="${STREAM_OUTPUT//$'\n'/'%0A'}"
+            STREAM_OUTPUT="${STREAM_OUTPUT//$'\r'/'%0D'}"
+            echo "::error title=Cloudflare Stream sync failed::$STREAM_OUTPUT"
+            exit 1
+          fi
+          echo "$STREAM_OUTPUT"
 
       - name: Commit updated Stream manifest
         run: |
