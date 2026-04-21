@@ -19,7 +19,12 @@ if not "%~1"=="" (
 node "%~dp0scripts\sync-portfolio-json.mjs" ^
   --repo-root "%CD%" ^
   --preferred-json-path "%PREFERRED_JSON%" ^
-  --output-file "%PUBLISH_FILE_LIST%"
+  --no-publish-list
+if errorlevel 1 exit /b 1
+
+node "%~dp0scripts\media\sync-cloudflare-stream.mjs" ^
+  --repo-root "%CD%" ^
+  --publish-file "%PUBLISH_FILE_LIST%"
 if errorlevel 1 exit /b 1
 
 if defined PUBLISH_MSG (

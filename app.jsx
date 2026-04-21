@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, startTransition } from "react";
 import { createRoot } from "react-dom/client";
+import Hls from "hls.js";
 
 const DATA_FILE_PATH = "data/portfolio.json";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
@@ -146,9 +147,20 @@ const getVideoEmbedUrl = (value = "") => {
   return getYouTubeEmbedUrl(value) || getBilibiliEmbedUrl(value) || getDouyinEmbedUrl(value) || "";
 };
 
+const normalizeStreamDelivery = (value) => {
+  if (!value || typeof value !== "object") return null;
+  return {
+    provider: typeof value.provider === "string" ? value.provider.trim() : "",
+    uid: typeof value.uid === "string" ? value.uid.trim() : "",
+    hlsUrl: typeof value.hlsUrl === "string" ? value.hlsUrl.trim() : "",
+    iframeUrl: typeof value.iframeUrl === "string" ? value.iframeUrl.trim() : "",
+    thumbnailUrl: typeof value.thumbnailUrl === "string" ? value.thumbnailUrl.trim() : ""
+  };
+};
+
 const normalizeMediaItem = (item) => {
   if (!item) return null;
-  if (typeof item === "string") return { kind: inferMediaKind(item), url: item, poster: "", meta: "", draftPreviewUrl: "", label: "" };
+  if (typeof item === "string") return { kind: inferMediaKind(item), url: item, poster: "", meta: "", draftPreviewUrl: "", label: "", delivery: null };
 
   const rawUrl = typeof item.url === "string" ? item.url.trim() : "";
   const youtubeId = extractYouTubeId(item.youtubeId || rawUrl);
@@ -160,7 +172,8 @@ const normalizeMediaItem = (item) => {
     poster: typeof item.poster === "string" ? item.poster.trim() : "",
     meta: typeof item.meta === "string" ? item.meta : "",
     draftPreviewUrl: item.draftPreviewUrl && item.draftPreviewUrl.startsWith("blob:") ? item.draftPreviewUrl : "",
-    label: typeof item.label === "string" ? item.label : ""
+    label: typeof item.label === "string" ? item.label : "",
+    delivery: normalizeStreamDelivery(item.delivery)
   };
 };
 
@@ -514,6 +527,15 @@ const scheduleBrowserIdleTask = (callback) => {
 const warmVideoSourceInBackground = async (src, signal) => {
   if (!src || signal?.aborted) return;
   try {
+    if (isHlsManifestUrl(src)) {
+      await fetch(src, {
+        cache: "force-cache",
+        credentials: "omit",
+        mode: "cors",
+        signal
+      });
+      return;
+    }
     const response = await fetch(src, {
       cache: "force-cache",
       credentials: "same-origin",
@@ -631,12 +653,14 @@ const playInlineVideoMuted = (video, onMutedChange) => {
   return Promise.resolve(true);
 };
 
+const isManagedHlsVideo = (video) => video?.dataset?.hlsManaged === "1";
+
 const attemptInlineVideoPlayback = (video, options = {}) => {
   if (!video) return Promise.resolve(false);
   const preferAudible = Boolean(options.preferAudible);
   const onMutedChange = options.onMutedChange;
   video.preload = "auto";
-  if (video.readyState < 2) {
+  if (video.readyState < 2 && !isManagedHlsVideo(video)) {
     try {
       video.load();
     } catch (error) {}
@@ -688,6 +712,7 @@ const withEmbedPlaybackParams = (embedUrl, autoplay = false) => {
 };
 
 const videoPreloadHintMap = new Map();
+const videoPreconnectHintMap = new Map();
 
 const ensureVideoPreloadHint = (src, priority = "auto") => {
   if (typeof document === "undefined" || !src || !isDirectVideoSource(src)) return;
@@ -695,15 +720,32 @@ const ensureVideoPreloadHint = (src, priority = "auto") => {
   try {
     absoluteUrl = new URL(src, window.location.href).toString();
   } catch (error) {}
+  if (isHlsManifestUrl(absoluteUrl)) {
+    try {
+      const origin = new URL(absoluteUrl).origin;
+      if (!videoPreconnectHintMap.has(origin)) {
+        const preconnectLink = document.createElement("link");
+        preconnectLink.rel = "preconnect";
+        preconnectLink.href = origin;
+        preconnectLink.crossOrigin = "anonymous";
+        document.head.appendChild(preconnectLink);
+        videoPreconnectHintMap.set(origin, preconnectLink);
+      }
+    } catch (error) {}
+  }
   let link = videoPreloadHintMap.get(absoluteUrl);
   if (!link) {
     link = document.createElement("link");
     link.rel = "preload";
-    link.as = "video";
+    link.as = isHlsManifestUrl(absoluteUrl) ? "fetch" : "video";
     link.href = absoluteUrl;
+    if (isHlsManifestUrl(absoluteUrl)) {
+      link.crossOrigin = "anonymous";
+    }
     document.head.appendChild(link);
     videoPreloadHintMap.set(absoluteUrl, link);
   }
+  link.as = isHlsManifestUrl(absoluteUrl) ? "fetch" : "video";
   link.setAttribute("fetchpriority", priority);
 };
 
@@ -808,7 +850,7 @@ const downloadJsonFile = (filename, data) => {
   URL.revokeObjectURL(url);
 };
 
-const getPrimaryMediaUrl = (item, options = {}) => {
+const getSourceMediaUrl = (item, options = {}) => {
   const mediaItem = normalizeMediaItem(item);
   if (!mediaItem) return "";
   const preferDraftPreview = Boolean(options.preferDraftPreview);
@@ -816,13 +858,40 @@ const getPrimaryMediaUrl = (item, options = {}) => {
   return preferDraftPreview ? mediaItem.draftPreviewUrl || mediaItem.url || "" : mediaItem.url || mediaItem.draftPreviewUrl || "";
 };
 
+const getStreamDelivery = (item) => {
+  const mediaItem = normalizeMediaItem(item);
+  if (!mediaItem || mediaItem.kind !== "video") return null;
+  if (mediaItem.delivery?.provider !== "cloudflare-stream") return null;
+  return mediaItem.delivery;
+};
+
+const getPrimaryMediaUrl = (item, options = {}) => {
+  const mediaItem = normalizeMediaItem(item);
+  if (!mediaItem) return "";
+  const preferDraftPreview = Boolean(options.preferDraftPreview);
+  const preferSource = Boolean(options.preferSource);
+  if (mediaItem.kind === "youtube") return mediaItem.url || mediaItem.draftPreviewUrl || "";
+  if (!preferDraftPreview && !preferSource) {
+    const delivery = getStreamDelivery(mediaItem);
+    if (delivery?.hlsUrl) return delivery.hlsUrl;
+  }
+  return getSourceMediaUrl(mediaItem, { preferDraftPreview });
+};
+
 const getDisplayUrl = (item, options = {}) => {
   const mediaItem = normalizeMediaItem(item);
   if (!mediaItem) return "";
   const preferDraftPreview = Boolean(options.preferDraftPreview);
   if (mediaItem.kind === "youtube") return mediaItem.poster || getYouTubeThumbnail(mediaItem.url) || mediaItem.draftPreviewUrl || "";
-  if (mediaItem.kind === "video") return mediaItem.poster || "";
+  if (mediaItem.kind === "video") return mediaItem.poster || mediaItem.delivery?.thumbnailUrl || "";
   return preferDraftPreview ? mediaItem.draftPreviewUrl || mediaItem.url || mediaItem.poster || "" : mediaItem.url || mediaItem.draftPreviewUrl || mediaItem.poster || "";
+};
+
+const getLightboxVideoPlayerUrl = (item, options = {}) => {
+  const mediaItem = normalizeMediaItem(item);
+  if (!mediaItem || mediaItem.kind !== "video") return "";
+  if (Boolean(options.preferDraftPreview)) return "";
+  return mediaItem.delivery?.provider === "cloudflare-stream" ? mediaItem.delivery.iframeUrl || "" : "";
 };
 
 const getMediaBindingInfo = (item) => {
@@ -1013,6 +1082,102 @@ const Icon = ({ name, size = 24, className = "" }) => {
   return <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{icons[name]}</svg>;
 };
 
+const isHlsManifestUrl = (value = "") => /\.m3u8(\?|#|$)/i.test(String(value || "").trim());
+
+const assignMediaRef = (refTarget, value) => {
+  if (!refTarget) return;
+  if (typeof refTarget === "function") {
+    refTarget(value);
+    return;
+  }
+  refTarget.current = value;
+};
+
+const StreamVideoElement = ({
+  playbackUrl,
+  sourceUrl,
+  videoRef,
+  mediaClassName,
+  muted,
+  showNativeVideoControls,
+  videoPreloadMode,
+  poster,
+  onMediaLoad,
+  onMediaError,
+  onVideoMetadata,
+  onMediaMeasure,
+  onVideoPlay,
+  onVideoPause,
+  onVideoTimeUpdate,
+  handleSurfaceClick
+}) => {
+  const internalVideoRef = useRef(null);
+  const [nativeVideoSrc, setNativeVideoSrc] = useState("");
+
+  useEffect(() => {
+    assignMediaRef(videoRef, internalVideoRef.current);
+    return () => assignMediaRef(videoRef, null);
+  }, [videoRef]);
+
+  useEffect(() => {
+    const video = internalVideoRef.current;
+    if (!video) return undefined;
+
+    let hls = null;
+    const canUseNativeHls = isHlsManifestUrl(playbackUrl) && typeof video.canPlayType === "function" && Boolean(video.canPlayType("application/vnd.apple.mpegurl"));
+
+    delete video.dataset.hlsManaged;
+    video.crossOrigin = "anonymous";
+
+    if (playbackUrl && isHlsManifestUrl(playbackUrl) && !canUseNativeHls && Hls.isSupported()) {
+      setNativeVideoSrc("");
+      video.removeAttribute("src");
+      video.dataset.hlsManaged = "1";
+      hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        backBufferLength: 90
+      });
+      hls.loadSource(playbackUrl);
+      hls.attachMedia(video);
+    } else {
+      setNativeVideoSrc(playbackUrl || sourceUrl || "");
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+      delete video.dataset.hlsManaged;
+    };
+  }, [playbackUrl, sourceUrl]);
+
+  return <video
+    ref={internalVideoRef}
+    src={nativeVideoSrc || undefined}
+    data-media-source={sourceUrl || playbackUrl || ""}
+    loop
+    muted={muted}
+    controls={showNativeVideoControls}
+    playsInline
+    preload={videoPreloadMode}
+    poster={poster || undefined}
+    className={mediaClassName}
+    onLoadedData={onMediaLoad}
+    onLoadedMetadata={(event) => {
+      if (typeof onVideoMetadata === "function") onVideoMetadata(event.currentTarget.duration);
+      if (typeof onMediaMeasure === "function" && event.currentTarget.videoWidth && event.currentTarget.videoHeight) {
+        onMediaMeasure(event.currentTarget.videoWidth / event.currentTarget.videoHeight);
+      }
+    }}
+    onError={onMediaError}
+    onPlay={onVideoPlay}
+    onPause={onVideoPause}
+    onTimeUpdate={onVideoTimeUpdate}
+    onClick={handleSurfaceClick}
+  />;
+};
+
 const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, showPoster = true, videoPreloadMode = "metadata", showNativeVideoControls = false }) => {
   const item = normalizeMediaItem(mediaItem);
   if (!item) return null;
@@ -1071,14 +1236,15 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
   }
 
   if (item.kind === "video") {
-    const src = getPrimaryMediaUrl(item, { preferDraftPreview });
-    if (!src) return null;
-    const embedUrl = getVideoEmbedUrl(src);
-    if (embedUrl && !isDirectVideoSource(src)) {
+    const playbackUrl = getPrimaryMediaUrl(item, { preferDraftPreview });
+    const sourceUrl = getSourceMediaUrl(item, { preferDraftPreview });
+    if (!playbackUrl && !sourceUrl) return null;
+    const embedUrl = getVideoEmbedUrl(sourceUrl);
+    if (embedUrl && !isDirectVideoSource(sourceUrl)) {
       if (shouldRenderInlineEmbed) {
         return <iframe
           src={withEmbedPlaybackParams(embedUrl, false)}
-          title={isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl) ? "Bilibili player" : "Embedded video player"}
+          title={isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl) ? "Bilibili player" : "Embedded video player"}
           className={embedFrameClassName}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
@@ -1087,38 +1253,33 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
           onClick={stopClick}
         />;
       }
-      return renderEmbeddedFallback("点击放大播放视频", isBilibiliVideoUrl(src) || isBilibiliVideoUrl(embedUrl) ? "Bilibili" : "Video");
+      return renderEmbeddedFallback("点击放大播放视频", isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl) ? "Bilibili" : "Video");
     }
-    if (!isDirectVideoSource(src)) {
+    if (!isDirectVideoSource(playbackUrl)) {
       if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
       return <div className="relative z-10 flex h-full w-full items-center justify-center p-6 text-center">
-        <a href={src} target="_blank" rel="noreferrer" onClick={handleSurfaceClick} className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100 hover:bg-cyan-500/20">
+        <a href={sourceUrl || playbackUrl} target="_blank" rel="noreferrer" onClick={handleSurfaceClick} className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100 hover:bg-cyan-500/20">
           <Icon name="ExternalLink" size={14} /> 打开视频链接预览
         </a>
       </div>;
     }
-    return <video
-      ref={videoRef}
-      src={src}
-      loop
+    return <StreamVideoElement
+      playbackUrl={playbackUrl}
+      sourceUrl={sourceUrl}
+      videoRef={videoRef}
+      mediaClassName={mediaClassName}
       muted={muted}
-      controls={showNativeVideoControls}
-      playsInline
-      preload={videoPreloadMode}
-      poster={showPoster ? item.poster || undefined : undefined}
-      className={mediaClassName}
-      onLoadedData={onMediaLoad}
-      onLoadedMetadata={(event) => {
-        if (typeof onVideoMetadata === "function") onVideoMetadata(event.currentTarget.duration);
-        if (typeof onMediaMeasure === "function" && event.currentTarget.videoWidth && event.currentTarget.videoHeight) {
-          onMediaMeasure(event.currentTarget.videoWidth / event.currentTarget.videoHeight);
-        }
-      }}
-      onError={onMediaError}
-      onPlay={onVideoPlay}
-      onPause={onVideoPause}
-      onTimeUpdate={onVideoTimeUpdate}
-      onClick={handleSurfaceClick}
+      showNativeVideoControls={showNativeVideoControls}
+      videoPreloadMode={videoPreloadMode}
+      poster={showPoster ? item.poster || item.delivery?.thumbnailUrl || undefined : undefined}
+      onMediaLoad={onMediaLoad}
+      onMediaError={onMediaError}
+      onVideoMetadata={onVideoMetadata}
+      onMediaMeasure={onMediaMeasure}
+      onVideoPlay={onVideoPlay}
+      onVideoPause={onVideoPause}
+      onVideoTimeUpdate={onVideoTimeUpdate}
+      handleSurfaceClick={handleSurfaceClick}
     />;
   }
 
@@ -3226,12 +3387,15 @@ function App() {
     {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={closeMediaLightbox}>
       <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={closeMediaLightbox}>✕ 关闭</button>
       {lightboxData.meta && <div className="absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">Prompt / Metadata</span>{lightboxData.meta}</div>}
-      {lightboxData.kind === "youtube" ? <iframe src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
-        const videoSrc = getPrimaryMediaUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) });
-        const embedUrl = getVideoEmbedUrl(videoSrc);
-        if (embedUrl && !isDirectVideoSource(videoSrc)) return <iframe src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
-        if (!isDirectVideoSource(videoSrc)) return <a href={videoSrc} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
-        return <video ref={lightboxVideoRef} src={videoSrc} poster={lightboxData.poster || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
+      {lightboxData.kind === "youtube" ? <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
+        const preferDraftPreview = IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl);
+        const streamPlayerUrl = getLightboxVideoPlayerUrl(lightboxData, { preferDraftPreview });
+        if (streamPlayerUrl) return <iframe ref={lightboxVideoRef} src={`${streamPlayerUrl}?autoplay=true`} title="Cloudflare Stream player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0 bg-black" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
+        const sourceVideoUrl = getSourceMediaUrl(lightboxData, { preferDraftPreview });
+        const embedUrl = getVideoEmbedUrl(sourceVideoUrl);
+        if (embedUrl && !isDirectVideoSource(sourceVideoUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
+        if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
+        return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
     {IS_EDITOR_MODE && <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">

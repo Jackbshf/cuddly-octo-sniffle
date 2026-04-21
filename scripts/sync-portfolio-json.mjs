@@ -759,6 +759,7 @@ export async function syncPortfolioArtifacts(options = {}) {
   const publishPaths = [
     "data/meta.json",
     "data/portfolio.json",
+    "data/cloudflare-stream-manifest.json",
     "embedded-data.js",
     ...nextPortfolioModel.cases.map((item) => `data/cases/${item.id}.json`),
     ...referencedAssets

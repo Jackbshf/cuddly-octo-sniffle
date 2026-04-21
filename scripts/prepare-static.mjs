@@ -7,6 +7,11 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { buildAppAssets } from "./build-app.mjs";
 import { syncPortfolioArtifacts } from "./sync-portfolio-json.mjs";
+import {
+  isReadyStreamManifestEntry,
+  normalizeRepoVideoPath,
+  readStreamManifest
+} from "./media/lib.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,7 +35,6 @@ const copyTargets = [
   "admin",
   "data",
   "images",
-  "videos",
 ];
 
 const isRemoteUrl = (value = "") => /^https?:\/\//i.test(String(value || "").trim());
@@ -102,6 +106,13 @@ const fingerprintDistFile = async (absoluteFilePath) => {
     hash,
     relativePath: toPosixPath(path.relative(distDir, hashedAbsolutePath))
   };
+};
+
+const getReadyStreamEntry = (manifest, assetUrl) => {
+  const sourcePath = normalizeRepoVideoPath(assetUrl);
+  if (!sourcePath) return null;
+  const entry = manifest?.videos?.[sourcePath];
+  return isReadyStreamManifestEntry(entry) ? entry : null;
 };
 
 const rewriteDistIndexHtml = async (versionedAssets) => {
@@ -210,7 +221,7 @@ const createVideoPosterAsset = async (assetUrl, cache) => {
   return result;
 };
 
-const transformMediaItem = async (item, caches) => {
+const transformMediaItem = async (item, caches, streamManifest) => {
   const normalized = normalizeMediaRecord(item);
   if (!normalized) return item;
 
@@ -235,11 +246,33 @@ const transformMediaItem = async (item, caches) => {
       }
     }
 
-    if (typeof item === "string") {
-      return posterUrl ? { kind: "video", url: normalized.url, poster: posterUrl } : item;
+    const streamEntry = getReadyStreamEntry(streamManifest, normalized.url);
+    if (!streamEntry) {
+      throw new Error(`Missing ready Cloudflare Stream mapping for ${normalized.url}. Run scripts/media/sync-cloudflare-stream.mjs before prepare-static.`);
     }
 
-    return posterUrl ? { ...item, poster: posterUrl } : item;
+    const delivery = {
+      provider: "cloudflare-stream",
+      uid: streamEntry.uid,
+      hlsUrl: streamEntry.hlsUrl,
+      iframeUrl: streamEntry.iframeUrl,
+      thumbnailUrl: streamEntry.thumbnailUrl || posterUrl || ""
+    };
+
+    if (typeof item === "string") {
+      return {
+        kind: "video",
+        url: normalized.url,
+        ...(posterUrl ? { poster: posterUrl } : {}),
+        delivery
+      };
+    }
+
+    return {
+      ...item,
+      ...(posterUrl ? { poster: posterUrl } : {}),
+      delivery
+    };
   }
 
   return item;
@@ -267,7 +300,7 @@ const transformMetaForDist = async (meta, caches) => {
   };
 };
 
-const transformPortfolioForDist = async (portfolioModel) => {
+const transformPortfolioForDist = async (portfolioModel, streamManifest) => {
   const caches = {
     images: new Map(),
     posters: new Map()
@@ -277,7 +310,7 @@ const transformPortfolioForDist = async (portfolioModel) => {
     const nextSlide = { ...slide };
 
     if (Array.isArray(slide.media)) {
-      nextSlide.media = await Promise.all(slide.media.map((item) => transformMediaItem(item, caches)));
+      nextSlide.media = await Promise.all(slide.media.map((item) => transformMediaItem(item, caches, streamManifest)));
     }
 
     if (Array.isArray(slide.freeLayoutElements)) {
@@ -285,7 +318,7 @@ const transformPortfolioForDist = async (portfolioModel) => {
         if (element?.type !== "media") return element;
         return {
           ...element,
-          media: await transformMediaItem(element.media, caches)
+          media: await transformMediaItem(element.media, caches, streamManifest)
         };
       }));
     }
@@ -356,7 +389,8 @@ async function main() {
   const normalizedPortfolio = Array.isArray(sourcePortfolio)
     ? { meta: {}, cases: [], slides: sourcePortfolio }
     : sourcePortfolio;
-  const { transformed, optimizedImageCount, posterCount } = await transformPortfolioForDist(normalizedPortfolio);
+  const streamManifest = await readStreamManifest(root);
+  const { transformed, optimizedImageCount, posterCount } = await transformPortfolioForDist(normalizedPortfolio, streamManifest);
   await ensureDirectory(distJsonPath);
   await writeFile(distJsonPath, `${JSON.stringify(transformed, null, 2)}\n`, "utf8");
 
@@ -373,6 +407,7 @@ async function main() {
   console.log(`Prepared static bundle in ${distDir}`);
   console.log(`Optimized referenced images: ${optimizedImageCount}`);
   console.log(`Generated video posters: ${posterCount}`);
+  console.log(`Resolved Cloudflare Stream mappings: ${Object.values(streamManifest.videos || {}).filter((entry) => isReadyStreamManifestEntry(entry)).length}`);
 }
 
 main().catch((error) => {
