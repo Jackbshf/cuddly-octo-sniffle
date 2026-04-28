@@ -15,7 +15,7 @@ const runCommand = (command, args, options = {}) => new Promise((resolve, reject
   const child = spawn(command, args, {
     cwd: root,
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: false,
     ...options
   });
 
@@ -29,18 +29,14 @@ const runCommand = (command, args, options = {}) => new Promise((resolve, reject
   });
 });
 
-const resolveLocalBin = (name) => {
-  const suffix = process.platform === "win32" ? ".cmd" : "";
-  return path.join(root, "node_modules", ".bin", `${name}${suffix}`);
-};
-
 export const buildAppAssets = async () => {
   await mkdir(assetsDir, { recursive: true });
   await rm(path.join(assetsDir, "app.css"), { force: true });
   await rm(path.join(assetsDir, "app.js"), { force: true });
 
-  const tailwindBin = resolveLocalBin("tailwindcss");
-  await runCommand(tailwindBin, [
+  const tailwindCli = path.join(root, "node_modules", "tailwindcss", "lib", "cli.js");
+  await runCommand(process.execPath, [
+    tailwindCli,
     "-c", path.join(root, "tailwind.config.cjs"),
     "-i", cssEntry,
     "-o", path.join(assetsDir, "app.css"),

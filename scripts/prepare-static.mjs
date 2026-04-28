@@ -35,6 +35,7 @@ const copyTargets = [
   "admin",
   "data",
   "images",
+  "prompts",
 ];
 
 const isRemoteUrl = (value = "") => /^https?:\/\//i.test(String(value || "").trim());
@@ -139,6 +140,9 @@ const writeDistHeaders = async () => {
     "  Cache-Control: no-store",
     "  CDN-Cache-Control: no-store",
     "/data/*",
+    "  Cache-Control: no-store",
+    "  CDN-Cache-Control: no-store",
+    "/prompts/*",
     "  Cache-Control: no-store",
     "  CDN-Cache-Control: no-store",
     "/assets/*",
