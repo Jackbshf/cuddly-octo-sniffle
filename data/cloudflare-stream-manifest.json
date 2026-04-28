@@ -1,150 +1,150 @@
 {
   "version": 1,
   "customerCode": "",
-  "updatedAt": "2026-04-21T06:57:07.894Z",
+  "updatedAt": "2026-04-28T10:31:14.813Z",
   "videos": {
     "videos/10s AIGC视频提示词方案.mp4": {
       "sourcePath": "videos/10s AIGC视频提示词方案.mp4",
       "sha256": "7ac7ac938c51a96ae841aae5e28b482987e5de26057b2e82289f509bf3437909",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.492Z"
+      "updatedAt": "2026-04-28T10:31:12.280Z"
     },
     "videos/1774080806307.mp4": {
       "sourcePath": "videos/1774080806307.mp4",
       "sha256": "6d32ecbf87aa535398ec70115ec73e3fad36c22e0f6ee6746bbcd6a45d0e1f5b",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.529Z"
+      "updatedAt": "2026-04-28T10:31:12.622Z"
     },
     "videos/24eae46c0eba45f2f1176aa7847307fe.mp4": {
       "sourcePath": "videos/24eae46c0eba45f2f1176aa7847307fe.mp4",
       "sha256": "a6a747e973a49886f485840386fffceb78309b0fc59e5a0a1640c5e2af3d5e88",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 35.712,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.575Z"
+      "updatedAt": "2026-04-28T10:31:12.947Z"
     },
     "videos/51339bc463f2bb227aef56406ae9f0ac.mp4": {
       "sourcePath": "videos/51339bc463f2bb227aef56406ae9f0ac.mp4",
       "sha256": "23e103dc19628bff33d525d9a79b674ed3101e20db3270597931194f31e72771",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.077,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.615Z"
+      "updatedAt": "2026-04-28T10:31:13.173Z"
     },
     "videos/6d8e265b03fae19a22c0a0c0aeb920a7.mp4": {
       "sourcePath": "videos/6d8e265b03fae19a22c0a0c0aeb920a7.mp4",
       "sha256": "ad3673fff918d10be6b14e301b39c2ecc45fade3d8a3e8c922392e08969f2c79",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.656Z"
+      "updatedAt": "2026-04-28T10:31:13.454Z"
     },
     "videos/7210c7d10bf0f79baf3cfa2610af4fd7.mp4": {
       "sourcePath": "videos/7210c7d10bf0f79baf3cfa2610af4fd7.mp4",
       "sha256": "2488f682c1bfadf862c115e337631bc550f90b457dea8196d6be5ed92418552a",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 8,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.697Z"
+      "updatedAt": "2026-04-28T10:31:13.703Z"
     },
     "videos/a0e8e242e241cb0c0033bddea568b644.mp4": {
       "sourcePath": "videos/a0e8e242e241cb0c0033bddea568b644.mp4",
       "sha256": "20ae6d41e604aab144115515e04b82637d9078e45a2e80e807dc4a4b5a20612d",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.736Z"
+      "updatedAt": "2026-04-28T10:31:13.920Z"
     },
     "videos/a6537e213935b778ba57eade8bbf142a.mp4": {
       "sourcePath": "videos/a6537e213935b778ba57eade8bbf142a.mp4",
       "sha256": "b7c0a7c4b8ea498d4eefd4d5400abc9b8617016ef15b11a2574c107907509b58",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.1,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.777Z"
+      "updatedAt": "2026-04-28T10:31:14.198Z"
     },
     "videos/b6a39d08c7e48ae9e9604df1f825b8e5.mp4": {
       "sourcePath": "videos/b6a39d08c7e48ae9e9604df1f825b8e5.mp4",
       "sha256": "cffb4ced979d6bdfa8011876840c410cde1ca0403adb13dad0a652967dc640a7",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.815Z"
+      "updatedAt": "2026-04-28T10:31:14.409Z"
     },
     "videos/d9c14d8520e106a0803087b55aaea7ad.mp4": {
       "sourcePath": "videos/d9c14d8520e106a0803087b55aaea7ad.mp4",
       "sha256": "9070befb6dedbdce2724a1cb9aa7589f7e1ac8d1dc0d511ed8dc3f36acc17d74",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.854Z"
+      "updatedAt": "2026-04-28T10:31:14.604Z"
     },
     "videos/ffcffe00a999d24e399f2eeb2fc45b73.mp4": {
       "sourcePath": "videos/ffcffe00a999d24e399f2eeb2fc45b73.mp4",
       "sha256": "f9b930fcb0f28cebf37a422a3f54fba79efd29a4639d370a8d3ffc9cf20f5de8",
       "uid": "",
-      "status": "missing",
+      "status": "local-fallback",
       "readyToStream": false,
       "durationSeconds": 10.08,
       "iframeUrl": "",
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-21T06:57:07.894Z"
+      "updatedAt": "2026-04-28T10:31:14.813Z"
     }
   },
   "stale": []
