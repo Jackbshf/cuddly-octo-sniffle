@@ -234,28 +234,43 @@ export async function syncCloudflareStream(options = {}) {
     throw new Error(`Cloudflare Stream sync requires ${streamConfig.missing.join(", ")} before ${pendingUploads.length} 个视频可以上传。`);
   }
 
+  let uploadFailureCount = 0;
   for (const video of pendingUploads) {
-    log(`[stream-sync] Uploading ${video.sourcePath} (${(video.fileSizeBytes / (1024 * 1024)).toFixed(2)} MB)`);
-    const uploadResult = await uploadVideoFile(streamConfig, video.absolutePath);
-    const readyResult = uploadResult.readyToStream
-      ? uploadResult
-      : await waitForReadyStreamVideo(streamConfig, uploadResult.uid, {
-        pollIntervalMs,
-        timeoutMs
-      });
+    try {
+      log(`[stream-sync] Uploading ${video.sourcePath} (${(video.fileSizeBytes / (1024 * 1024)).toFixed(2)} MB)`);
+      const uploadResult = await uploadVideoFile(streamConfig, video.absolutePath);
+      const readyResult = uploadResult.readyToStream
+        ? uploadResult
+        : await waitForReadyStreamVideo(streamConfig, uploadResult.uid, {
+          pollIntervalMs,
+          timeoutMs
+        });
 
-    nextManifest.videos[video.sourcePath] = buildNextManifestEntry({
-      sourcePath: video.sourcePath,
-      previousEntry: video.previousEntry,
-      sha256: video.sha256,
-      customerCode: streamConfig.customerCode,
-      streamResult: readyResult,
-      fallbackDuration: video.fileDuration,
-      fallbackThumbnail: readyResult.thumbnail,
-      uploadedAt: typeof uploadResult.created === "string" ? uploadResult.created : ""
-    });
-    if (!nextManifest.customerCode) {
-      nextManifest.customerCode = getStreamDeliveryUrlsFromResult(readyResult, streamConfig.customerCode).customerCode;
+      nextManifest.videos[video.sourcePath] = buildNextManifestEntry({
+        sourcePath: video.sourcePath,
+        previousEntry: video.previousEntry,
+        sha256: video.sha256,
+        customerCode: streamConfig.customerCode,
+        streamResult: readyResult,
+        fallbackDuration: video.fileDuration,
+        fallbackThumbnail: readyResult.thumbnail,
+        uploadedAt: typeof uploadResult.created === "string" ? uploadResult.created : ""
+      });
+      if (!nextManifest.customerCode) {
+        nextManifest.customerCode = getStreamDeliveryUrlsFromResult(readyResult, streamConfig.customerCode).customerCode;
+      }
+    } catch (error) {
+      uploadFailureCount += 1;
+      log(`[stream-sync] Stream upload skipped for ${video.sourcePath}: ${error.message || error}`);
+      nextManifest.videos[video.sourcePath] = normalizeManifestEntry(video.sourcePath, {
+        ...video.previousEntry,
+        sha256: video.sha256,
+        status: "local-fallback",
+        readyToStream: false,
+        durationSeconds: Number.isFinite(video.fileDuration) ? video.fileDuration : video.previousEntry?.durationSeconds ?? null,
+        thumbnailUrl: video.previousEntry?.thumbnailUrl || "",
+        updatedAt: new Date().toISOString()
+      });
     }
   }
 
@@ -277,6 +292,9 @@ export async function syncCloudflareStream(options = {}) {
   const siteUrl = getCanonicalSiteUrl(portfolioModel);
   log(`[stream-sync] Synced Cloudflare Stream manifest: ${manifestPath}`);
   log(`[stream-sync] Ready videos: ${readyCount}/${sourcePaths.length}`);
+  if (uploadFailureCount) {
+    log(`[stream-sync] Local video fallback enabled for ${uploadFailureCount} video(s).`);
+  }
   if (nextManifest.stale.length) {
     log(`[stream-sync] Stale manifest entries: ${nextManifest.stale.map((entry) => entry.sourcePath).join(", ")}`);
   }

@@ -36,6 +36,7 @@ const copyTargets = [
   "data",
   "images",
   "prompts",
+  "videos",
 ];
 
 const isRemoteUrl = (value = "") => /^https?:\/\//i.test(String(value || "").trim());
@@ -252,7 +253,18 @@ const transformMediaItem = async (item, caches, streamManifest) => {
 
     const streamEntry = getReadyStreamEntry(streamManifest, normalized.url);
     if (!streamEntry) {
-      throw new Error(`Missing ready Cloudflare Stream mapping for ${normalized.url}. Run scripts/media/sync-cloudflare-stream.mjs before prepare-static.`);
+      console.warn(`[prepare-static] Missing ready Cloudflare Stream mapping for ${normalized.url}; using local video asset fallback.`);
+      if (typeof item === "string") {
+        return {
+          kind: "video",
+          url: normalized.url,
+          ...(posterUrl ? { poster: posterUrl } : {})
+        };
+      }
+      return {
+        ...item,
+        ...(posterUrl ? { poster: posterUrl } : {})
+      };
     }
 
     const delivery = {
