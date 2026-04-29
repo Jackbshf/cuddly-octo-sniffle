@@ -116,20 +116,11 @@ async function handlePromptPage(request, env, url) {
     return servePromptApp(request, env, url, true);
   }
 
-  if (!env.PROMPT_LIBRARY_PASSWORD) {
-    return textResponse("Prompt library password is not configured.", 503);
+  if (url.pathname === PROMPTS_PREFIX || url.pathname === VIEW_LOGIN_PATH) {
+    return Response.redirect(new URL(`${PROMPTS_PREFIX}/`, url), 302);
   }
 
-  const auth = await getPromptAuthState(request, env);
-  if (auth.viewer || auth.admin) {
-    if (url.pathname === PROMPTS_PREFIX || url.pathname === VIEW_LOGIN_PATH) {
-      return Response.redirect(new URL(`${PROMPTS_PREFIX}/`, url), 302);
-    }
-
-    return servePromptApp(request, env, url, false);
-  }
-
-  return renderLoginPage({ mode: "prompt-view", hasError: false });
+  return servePromptApp(request, env, url, false);
 }
 
 async function servePromptApp(request, env, url, isAdmin) {
@@ -174,14 +165,8 @@ async function handlePortfolioAdminPage(request, env, url) {
 }
 
 async function handlePromptsApi(request, env, url) {
-  const auth = await getPromptAuthState(request, env);
-
   if (url.pathname === `${PROMPTS_API_PREFIX}/library`) {
     if (request.method === "GET") {
-      if (!auth.viewer && !auth.admin) {
-        return jsonResponse({ ok: false, error: "Authentication required." }, 401);
-      }
-
       const assetUrl = new URL(url);
       assetUrl.pathname = `/${PROMPT_LIBRARY_PATH}`;
       const response = await env.ASSETS.fetch(new Request(assetUrl, request));
@@ -189,6 +174,7 @@ async function handlePromptsApi(request, env, url) {
     }
 
     if (request.method === "POST") {
+      const auth = await getPromptAuthState(request, env);
       if (!auth.admin) {
         return jsonResponse({ ok: false, error: "Administrator authentication required." }, 403);
       }
@@ -198,6 +184,7 @@ async function handlePromptsApi(request, env, url) {
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/assets` && request.method === "POST") {
+    const auth = await getPromptAuthState(request, env);
     if (!auth.admin) {
       return jsonResponse({ ok: false, error: "Administrator authentication required." }, 403);
     }
@@ -239,9 +226,8 @@ async function handlePortfolioAdminApi(request, env, url) {
 }
 
 async function handleProtectedPromptDataAsset(request, env) {
-  const auth = await getPromptAuthState(request, env);
-  if (!auth.viewer && !auth.admin) {
-    return textResponse("Authentication required.", 401);
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return textResponse("Method not allowed.", 405, { Allow: "GET, HEAD" });
   }
 
   const response = await env.ASSETS.fetch(request);
