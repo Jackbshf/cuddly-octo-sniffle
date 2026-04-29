@@ -326,6 +326,19 @@
       align-items: start;
     }
 
+    .cover-drop-zone {
+      margin: -8px;
+      padding: 8px;
+      border: 1px dashed transparent;
+      border-radius: 10px;
+      transition: border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .cover-drop-zone.drag-active {
+      border-color: rgba(15, 118, 110, 0.55);
+      background: rgba(15, 118, 110, 0.08);
+    }
+
     .cover-preview {
       width: 160px;
       aspect-ratio: 4 / 3;
@@ -345,6 +358,18 @@
     .upload-row input[type="file"] {
       max-width: 100%;
       padding: 7px;
+    }
+
+    .drop-hint {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .cover-drop-zone.drag-active .drop-hint {
+      color: var(--accent-strong);
+      font-weight: 700;
     }
 
     .empty {
@@ -493,7 +518,7 @@
           </div>
           <div class="field full">
             <label for="caseCover">封面路径</label>
-            <div class="cover-tools">
+            <div id="coverDropZone" class="cover-tools cover-drop-zone">
               <img id="coverPreview" class="cover-preview" alt="">
               <div>
                 <input id="caseCover" autocomplete="off">
@@ -501,6 +526,7 @@
                   <input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml">
                   <button id="uploadCoverButton" type="button">上传封面</button>
                 </div>
+                <p id="coverDropHint" class="drop-hint">可将封面图片拖到这里，上传后再保存案例。</p>
               </div>
             </div>
           </div>
@@ -533,8 +559,11 @@
       cases: [],
       selectedId: "",
       originalId: "",
-      activePanel: "meta"
+      activePanel: "meta",
+      busy: false
     };
+    const ACCEPTED_COVER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
+    const ACCEPTED_COVER_EXTENSIONS = /\.(jpe?g|png|webp|gif|svg)$/i;
 
     const fields = {
       siteTitle: document.getElementById("siteTitle"),
@@ -565,6 +594,7 @@
     const caseList = document.getElementById("caseList");
     const coverPreview = document.getElementById("coverPreview");
     const coverFile = document.getElementById("coverFile");
+    const coverDropZone = document.getElementById("coverDropZone");
 
     document.getElementById("reloadButton").addEventListener("click", loadContent);
     document.getElementById("newCaseButton").addEventListener("click", createCase);
@@ -576,6 +606,7 @@
     document.getElementById("caseCover").addEventListener("input", updateCoverPreview);
     document.getElementById("metaTab").addEventListener("click", () => setPanel("meta"));
     document.getElementById("caseTab").addEventListener("click", () => setPanel("case"));
+    bindCoverDropZone();
 
     loadContent();
 
@@ -689,8 +720,14 @@
 
     async function uploadCover() {
       const file = coverFile.files?.[0];
-      if (!file) {
-        showStatus("请先选择一张封面图片。", "error");
+      await uploadCoverFile(file, "请先选择一张封面图片。");
+    }
+
+    async function uploadCoverFile(file, emptyMessage = "请拖入一张封面图片。") {
+      if (state.busy) return;
+      const validationError = getCoverFileValidationError(file, emptyMessage);
+      if (validationError) {
+        showStatus(validationError, "error");
         return;
       }
 
@@ -712,6 +749,56 @@
       } finally {
         setBusy(false);
       }
+    }
+
+    function bindCoverDropZone() {
+      if (!coverDropZone) return;
+
+      const hasFile = (event) => Array.from(event.dataTransfer?.types || []).includes("Files");
+      const setDropState = (isActive) => coverDropZone.classList.toggle("drag-active", isActive);
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        coverDropZone.addEventListener(eventName, (event) => {
+          if (!hasFile(event)) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (!state.busy) event.dataTransfer.dropEffect = "copy";
+          setDropState(!state.busy);
+        });
+      });
+
+      ["dragleave", "dragend"].forEach((eventName) => {
+        coverDropZone.addEventListener(eventName, (event) => {
+          if (!hasFile(event)) return;
+          event.preventDefault();
+          event.stopPropagation();
+          setDropState(false);
+        });
+      });
+
+      coverDropZone.addEventListener("drop", async (event) => {
+        if (!hasFile(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setDropState(false);
+        const file = getFirstDroppedFile(event.dataTransfer);
+        await uploadCoverFile(file, "请拖入一张封面图片。");
+      });
+    }
+
+    function getFirstDroppedFile(dataTransfer) {
+      return Array.from(dataTransfer?.files || [])[0] || null;
+    }
+
+    function getCoverFileValidationError(file, emptyMessage) {
+      if (!(file instanceof File)) return emptyMessage;
+      if (!file.size) return "封面图片不能为空文件。";
+      const type = String(file.type || "").toLowerCase();
+      const name = String(file.name || "");
+      if (!ACCEPTED_COVER_TYPES.includes(type) && !ACCEPTED_COVER_EXTENSIONS.test(name)) {
+        return "只支持 jpg、png、webp、gif 或 svg 封面图片。";
+      }
+      return "";
     }
 
     async function requestJson(path, options = {}) {
@@ -879,6 +966,7 @@
     }
 
     function setBusy(isBusy) {
+      state.busy = isBusy;
       document.querySelectorAll("button, input, textarea").forEach((element) => {
         if (element.id === "caseSearch") return;
         element.disabled = isBusy;
