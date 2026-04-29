@@ -3,13 +3,23 @@
   "name": "floral-leaf-4e44",
   "main": "./src/worker.js",
   "compatibility_date": "2026-04-12",
+  "vars": {
+    "PROMPTS_GITHUB_OWNER": "Jackbshf",
+    "PROMPTS_GITHUB_REPO": "cuddly-octo-sniffle",
+    "PROMPTS_GITHUB_BRANCH": "main"
+  },
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
     "not_found_handling": "single-page-application",
     "run_worker_first": [
+      "/admin",
+      "/admin/*",
+      "/api/portfolio-admin/*",
+      "/api/prompts/*",
       "/prompts",
-      "/prompts/*"
+      "/prompts/*",
+      "/prompts-data/*"
     ]
   }
 }

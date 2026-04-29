@@ -36,6 +36,7 @@ const copyTargets = [
   "data",
   "images",
   "prompts",
+  "prompts-data",
   "videos",
 ];
 
@@ -144,6 +145,9 @@ const writeDistHeaders = async () => {
     "  Cache-Control: no-store",
     "  CDN-Cache-Control: no-store",
     "/prompts/*",
+    "  Cache-Control: no-store",
+    "  CDN-Cache-Control: no-store",
+    "/prompts-data/*",
     "  Cache-Control: no-store",
     "  CDN-Cache-Control: no-store",
     "/assets/*",
