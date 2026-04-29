@@ -70,17 +70,41 @@ jobs:
       - name: Install Wrangler
         run: npm install --global wrangler@latest
 
-      - name: Configure prompt library password
+      - name: Configure Worker secrets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 8ad8f870010a1f1de2a2bf7ca8220d4a
           PROMPT_LIBRARY_PASSWORD: ${{ secrets.PROMPT_LIBRARY_PASSWORD }}
+          PROMPT_LIBRARY_ADMIN_PASSWORD: ${{ secrets.PROMPT_LIBRARY_ADMIN_PASSWORD }}
+          PROMPTS_GITHUB_TOKEN: ${{ secrets.PROMPTS_GITHUB_TOKEN }}
+          PORTFOLIO_ADMIN_PASSWORD: ${{ secrets.PORTFOLIO_ADMIN_PASSWORD }}
+          PORTFOLIO_GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
         run: |
           if [ -z "$PROMPT_LIBRARY_PASSWORD" ]; then
             echo "::error title=Missing prompt library password::Set the PROMPT_LIBRARY_PASSWORD repository secret before deploying."
             exit 1
           fi
+          if [ -z "$PROMPT_LIBRARY_ADMIN_PASSWORD" ]; then
+            echo "::error title=Missing prompt library admin password::Set the PROMPT_LIBRARY_ADMIN_PASSWORD repository secret before deploying."
+            exit 1
+          fi
+          if [ -z "$PROMPTS_GITHUB_TOKEN" ]; then
+            echo "::error title=Missing prompt GitHub token::Set the PROMPTS_GITHUB_TOKEN repository secret before deploying."
+            exit 1
+          fi
+          if [ -z "$PORTFOLIO_ADMIN_PASSWORD" ]; then
+            echo "::error title=Missing portfolio admin password::Set the PORTFOLIO_ADMIN_PASSWORD repository secret before deploying."
+            exit 1
+          fi
+          if [ -z "$PORTFOLIO_GITHUB_TOKEN" ]; then
+            echo "::error title=Missing portfolio GitHub token::Set the PORTFOLIO_GITHUB_TOKEN repository secret before deploying."
+            exit 1
+          fi
           printf '%s' "$PROMPT_LIBRARY_PASSWORD" | wrangler secret put PROMPT_LIBRARY_PASSWORD --config wrangler.jsonc
+          printf '%s' "$PROMPT_LIBRARY_ADMIN_PASSWORD" | wrangler secret put PROMPT_LIBRARY_ADMIN_PASSWORD --config wrangler.jsonc
+          printf '%s' "$PROMPTS_GITHUB_TOKEN" | wrangler secret put PROMPTS_GITHUB_TOKEN --config wrangler.jsonc
+          printf '%s' "$PORTFOLIO_ADMIN_PASSWORD" | wrangler secret put PORTFOLIO_ADMIN_PASSWORD --config wrangler.jsonc
+          printf '%s' "$PORTFOLIO_GITHUB_TOKEN" | wrangler secret put PORTFOLIO_GITHUB_TOKEN --config wrangler.jsonc
 
       - name: Deploy Worker
         env:
