@@ -113,6 +113,18 @@ const mergePublishList = async (publishFile, extraPaths) => {
   await writeFile(publishFile, `${Array.from(nextLines).sort((left, right) => left.localeCompare(right, "zh-CN")).join("\n")}\n`, "utf8");
 };
 
+const markLocalFallback = (nextManifest, video) => {
+  nextManifest.videos[video.sourcePath] = normalizeManifestEntry(video.sourcePath, {
+    ...video.previousEntry,
+    sha256: video.sha256,
+    status: "local-fallback",
+    readyToStream: false,
+    durationSeconds: Number.isFinite(video.fileDuration) ? video.fileDuration : video.previousEntry?.durationSeconds ?? null,
+    thumbnailUrl: video.previousEntry?.thumbnailUrl || "",
+    updatedAt: new Date().toISOString()
+  });
+};
+
 const buildNextManifestEntry = ({
   sourcePath,
   previousEntry,
@@ -225,16 +237,14 @@ export async function syncCloudflareStream(options = {}) {
 
   const streamConfig = resolveStreamEnv(manifest, { requireAuth: pendingUploads.length > 0 });
   nextManifest.customerCode = streamConfig.customerCode;
+  let uploadFailureCount = 0;
 
   if (pendingUploads.length && streamConfig.missing.length) {
-    await writeStreamManifest(repoRoot, {
-      ...nextManifest,
-      updatedAt: new Date().toISOString()
-    });
-    throw new Error(`Cloudflare Stream sync requires ${streamConfig.missing.join(", ")} before ${pendingUploads.length} 个视频可以上传。`);
+    pendingUploads.forEach((video) => markLocalFallback(nextManifest, video));
+    uploadFailureCount += pendingUploads.length;
+    log(`[stream-sync] Cloudflare Stream upload skipped: missing ${streamConfig.missing.join(", ")}. Local video fallback enabled for ${pendingUploads.length} video(s).`);
+    pendingUploads.length = 0;
   }
-
-  let uploadFailureCount = 0;
   for (const video of pendingUploads) {
     try {
       log(`[stream-sync] Uploading ${video.sourcePath} (${(video.fileSizeBytes / (1024 * 1024)).toFixed(2)} MB)`);
@@ -262,15 +272,7 @@ export async function syncCloudflareStream(options = {}) {
     } catch (error) {
       uploadFailureCount += 1;
       log(`[stream-sync] Stream upload skipped for ${video.sourcePath}: ${error.message || error}`);
-      nextManifest.videos[video.sourcePath] = normalizeManifestEntry(video.sourcePath, {
-        ...video.previousEntry,
-        sha256: video.sha256,
-        status: "local-fallback",
-        readyToStream: false,
-        durationSeconds: Number.isFinite(video.fileDuration) ? video.fileDuration : video.previousEntry?.durationSeconds ?? null,
-        thumbnailUrl: video.previousEntry?.thumbnailUrl || "",
-        updatedAt: new Date().toISOString()
-      });
+      markLocalFallback(nextManifest, video);
     }
   }
 

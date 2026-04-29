@@ -239,13 +239,14 @@ export const getCanonicalSiteUrl = (portfolioModel) => {
 
 export const resolveStreamEnv = (manifest, options = {}) => {
   const requireAuth = Boolean(options.requireAuth);
-  const apiToken = String(process.env.CLOUDFLARE_STREAM_API_TOKEN || process.env.CLOUDFLARE_API_TOKEN || "").trim();
+  const allowGlobalToken = /^(1|true|yes)$/i.test(String(process.env.CLOUDFLARE_STREAM_ALLOW_GLOBAL_TOKEN || "").trim());
+  const apiToken = String(process.env.CLOUDFLARE_STREAM_API_TOKEN || (allowGlobalToken ? process.env.CLOUDFLARE_API_TOKEN : "") || "").trim();
   const accountId = String(process.env.CLOUDFLARE_STREAM_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
   const customerCode = String(process.env.CLOUDFLARE_STREAM_CUSTOMER_CODE || manifest?.customerCode || "").trim();
   const missing = [];
 
   if (requireAuth) {
-    if (!apiToken) missing.push("CLOUDFLARE_STREAM_API_TOKEN or CLOUDFLARE_API_TOKEN");
+    if (!apiToken) missing.push("CLOUDFLARE_STREAM_API_TOKEN");
     if (!accountId) missing.push("CLOUDFLARE_STREAM_ACCOUNT_ID or CLOUDFLARE_ACCOUNT_ID");
   }
 
