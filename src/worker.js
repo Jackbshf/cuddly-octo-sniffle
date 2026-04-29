@@ -142,7 +142,7 @@ async function servePromptApp(request, env, url, isAdmin) {
     if (url.pathname === PROMPT_ADMIN_PREFIX) {
       return Response.redirect(new URL(`${PROMPT_ADMIN_PREFIX}/`, url), 302);
     }
-    assetUrl.pathname = "/prompts/index.html";
+    assetUrl.pathname = `${PROMPTS_PREFIX}/`;
   }
 
   const response = await env.ASSETS.fetch(new Request(assetUrl, request));
@@ -168,7 +168,7 @@ async function handlePortfolioAdminPage(request, env, url) {
   }
 
   const assetUrl = new URL(url);
-  assetUrl.pathname = "/admin/index.html";
+  assetUrl.pathname = `${PORTFOLIO_ADMIN_PREFIX}/`;
   const response = await env.ASSETS.fetch(new Request(assetUrl, request));
   return withNoStore(response);
 }
