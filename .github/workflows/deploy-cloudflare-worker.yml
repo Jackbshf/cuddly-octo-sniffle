@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: deploy-cloudflare-worker-main
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -58,8 +62,17 @@ jobs:
             echo "No Stream manifest changes to commit."
             exit 0
           fi
-          git commit -m "Update Cloudflare Stream manifest"
-          git push
+          git commit -m "Update Cloudflare Stream manifest [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:${GITHUB_REF_NAME}; then
+              exit 0
+            fi
+            echo "Manifest push failed; rebasing on origin/${GITHUB_REF_NAME} before retry ${attempt}."
+            git fetch origin "${GITHUB_REF_NAME}"
+            git rebase "origin/${GITHUB_REF_NAME}"
+          done
+          echo "::error title=Stream manifest push failed::Could not push manifest update after rebasing."
+          exit 1
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
