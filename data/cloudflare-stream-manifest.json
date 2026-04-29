@@ -1,7 +1,7 @@
 {
   "version": 1,
   "customerCode": "",
-  "updatedAt": "2026-04-29T10:38:23.347Z",
+  "updatedAt": "2026-04-29T10:56:22.109Z",
   "videos": {
     "videos/10s AIGC视频提示词方案.mp4": {
       "sourcePath": "videos/10s AIGC视频提示词方案.mp4",
@@ -14,7 +14,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:20.350Z"
+      "updatedAt": "2026-04-29T10:56:19.387Z"
     },
     "videos/1774080806307.mp4": {
       "sourcePath": "videos/1774080806307.mp4",
@@ -27,7 +27,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:20.630Z"
+      "updatedAt": "2026-04-29T10:56:19.572Z"
     },
     "videos/24eae46c0eba45f2f1176aa7847307fe.mp4": {
       "sourcePath": "videos/24eae46c0eba45f2f1176aa7847307fe.mp4",
@@ -40,7 +40,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:20.984Z"
+      "updatedAt": "2026-04-29T10:56:20.453Z"
     },
     "videos/51339bc463f2bb227aef56406ae9f0ac.mp4": {
       "sourcePath": "videos/51339bc463f2bb227aef56406ae9f0ac.mp4",
@@ -53,7 +53,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:21.434Z"
+      "updatedAt": "2026-04-29T10:56:20.689Z"
     },
     "videos/6d8e265b03fae19a22c0a0c0aeb920a7.mp4": {
       "sourcePath": "videos/6d8e265b03fae19a22c0a0c0aeb920a7.mp4",
@@ -66,7 +66,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:21.773Z"
+      "updatedAt": "2026-04-29T10:56:20.850Z"
     },
     "videos/7210c7d10bf0f79baf3cfa2610af4fd7.mp4": {
       "sourcePath": "videos/7210c7d10bf0f79baf3cfa2610af4fd7.mp4",
@@ -79,7 +79,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:22.079Z"
+      "updatedAt": "2026-04-29T10:56:21.031Z"
     },
     "videos/a0e8e242e241cb0c0033bddea568b644.mp4": {
       "sourcePath": "videos/a0e8e242e241cb0c0033bddea568b644.mp4",
@@ -92,7 +92,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:22.338Z"
+      "updatedAt": "2026-04-29T10:56:21.212Z"
     },
     "videos/a6537e213935b778ba57eade8bbf142a.mp4": {
       "sourcePath": "videos/a6537e213935b778ba57eade8bbf142a.mp4",
@@ -105,7 +105,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:22.576Z"
+      "updatedAt": "2026-04-29T10:56:21.481Z"
     },
     "videos/b6a39d08c7e48ae9e9604df1f825b8e5.mp4": {
       "sourcePath": "videos/b6a39d08c7e48ae9e9604df1f825b8e5.mp4",
@@ -118,7 +118,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:22.868Z"
+      "updatedAt": "2026-04-29T10:56:21.688Z"
     },
     "videos/d9c14d8520e106a0803087b55aaea7ad.mp4": {
       "sourcePath": "videos/d9c14d8520e106a0803087b55aaea7ad.mp4",
@@ -131,7 +131,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:23.086Z"
+      "updatedAt": "2026-04-29T10:56:21.898Z"
     },
     "videos/ffcffe00a999d24e399f2eeb2fc45b73.mp4": {
       "sourcePath": "videos/ffcffe00a999d24e399f2eeb2fc45b73.mp4",
@@ -144,7 +144,7 @@
       "hlsUrl": "",
       "thumbnailUrl": "",
       "uploadedAt": "",
-      "updatedAt": "2026-04-29T10:38:23.347Z"
+      "updatedAt": "2026-04-29T10:56:22.109Z"
     }
   },
   "stale": []
