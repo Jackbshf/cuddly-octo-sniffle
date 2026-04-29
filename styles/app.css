@@ -102,3 +102,252 @@
     transform: none !important;
   }
 }
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+.portfolio-touch-button {
+  min-height: 44px;
+  min-width: 58px;
+}
+
+.portfolio-mobile {
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.portfolio-mobile .portfolio-topbar {
+  top: max(8px, env(safe-area-inset-top));
+  padding-left: max(8px, env(safe-area-inset-left));
+  padding-right: max(8px, env(safe-area-inset-right));
+}
+
+.portfolio-mobile .portfolio-topbar-inner {
+  min-height: 48px;
+  gap: 8px;
+  border-radius: 18px;
+  padding: 6px 8px;
+}
+
+.portfolio-mobile .portfolio-topbar-actions {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.portfolio-mobile .portfolio-page-indicator {
+  display: flex;
+  margin-left: auto;
+  font-size: 11px;
+}
+
+.portfolio-mobile .portfolio-page-indicator span:first-child {
+  display: none;
+}
+
+.portfolio-mobile .portfolio-feed {
+  gap: 12px;
+  padding: 10px 8px calc(92px + env(safe-area-inset-bottom));
+}
+
+.portfolio-mobile .portfolio-section {
+  border-radius: 18px;
+}
+
+.portfolio-mobile .portfolio-section h1 {
+  font-size: clamp(2.7rem, 13vw, 5rem) !important;
+  line-height: 0.98 !important;
+}
+
+.portfolio-mobile .portfolio-section h2 {
+  font-size: clamp(1.85rem, 8vw, 3rem) !important;
+  line-height: 1.05 !important;
+}
+
+.portfolio-mobile .portfolio-section p,
+.portfolio-mobile .portfolio-section [data-editable] {
+  overflow-wrap: anywhere;
+}
+
+.portfolio-mobile .portfolio-free-surface {
+  min-height: min(68svh, 560px) !important;
+  border-radius: 20px;
+}
+
+.portfolio-mobile-landscape .portfolio-feed {
+  gap: 10px;
+  padding-top: 4px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+.portfolio-mobile-landscape .portfolio-topbar {
+  top: max(4px, env(safe-area-inset-top));
+}
+
+.portfolio-mobile-landscape .portfolio-topbar-inner {
+  min-height: 50px;
+  border-radius: 16px;
+  padding: 3px 8px;
+}
+
+.portfolio-mobile-landscape .portfolio-touch-button {
+  min-height: 44px;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.portfolio-mobile-landscape .portfolio-section:first-child > div {
+  min-height: min(310px, calc(100svh - 72px)) !important;
+  gap: 8px !important;
+  padding: 12px 18px !important;
+}
+
+.portfolio-mobile-landscape.portfolio-editor .portfolio-section:first-child > div {
+  min-height: min(230px, calc(100svh - 130px)) !important;
+  padding: 10px 16px !important;
+}
+
+.portfolio-mobile-landscape .portfolio-section h1 {
+  font-size: clamp(2rem, 6vw, 3.2rem) !important;
+  padding-bottom: 0 !important;
+}
+
+.portfolio-mobile-landscape .portfolio-section h2 {
+  font-size: clamp(0.82rem, 2.6vw, 1.2rem) !important;
+  letter-spacing: 0.18em !important;
+}
+
+.portfolio-mobile-landscape .portfolio-section:first-child [data-editable] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.portfolio-mobile-landscape .portfolio-free-surface {
+  min-height: min(76svh, 360px) !important;
+}
+
+.portfolio-mobile .portfolio-media-slot {
+  min-height: 260px;
+  border-radius: 18px;
+}
+
+.portfolio-mobile-landscape .portfolio-media-slot {
+  min-height: 220px;
+}
+
+.portfolio-mobile-landscape .portfolio-editor-dock-mobile {
+  min-height: 58px;
+  padding: 6px 8px;
+}
+
+.portfolio-mobile-landscape .portfolio-mobile-more-panel {
+  bottom: calc(66px + env(safe-area-inset-bottom));
+  max-height: min(66dvh, 340px);
+}
+
+.portfolio-mobile-landscape .portfolio-structure-panel {
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  max-height: min(68dvh, 360px);
+}
+
+.portfolio-mobile .portfolio-media-tools {
+  top: 8px !important;
+  right: 8px !important;
+  width: auto !important;
+  max-width: calc(100% - 16px);
+  opacity: 1 !important;
+}
+
+.portfolio-mobile .portfolio-media-tools button,
+.portfolio-mobile .portfolio-media-tools a {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+.portfolio-mobile .portfolio-media-editor-panel {
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.portfolio-mobile .portfolio-media-editor-panel input,
+.portfolio-mobile .portfolio-media-editor-panel select,
+.portfolio-mobile .portfolio-media-editor-panel button {
+  min-height: 44px;
+}
+
+.portfolio-mobile .portfolio-editor-dock-mobile {
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(8px, env(safe-area-inset-bottom));
+  left: max(8px, env(safe-area-inset-left));
+  width: auto;
+  max-width: none;
+  transform: none;
+  justify-content: space-between;
+  gap: 6px;
+  overflow-x: auto;
+  border-radius: 20px;
+  padding: 8px;
+  scrollbar-width: none;
+}
+
+.portfolio-mobile .portfolio-editor-dock-mobile::-webkit-scrollbar {
+  display: none;
+}
+
+.portfolio-mobile .portfolio-editor-dock-mobile button,
+.portfolio-mobile .portfolio-editor-dock-mobile input {
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.portfolio-mobile-more-panel {
+  right: max(10px, env(safe-area-inset-right));
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  left: max(10px, env(safe-area-inset-left));
+  max-height: min(72dvh, 540px);
+  overflow-y: auto;
+  border-radius: 22px;
+}
+
+.portfolio-mobile-menu-button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.portfolio-mobile-menu-button:disabled {
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.portfolio-mobile .portfolio-structure-panel {
+  top: auto;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  left: max(10px, env(safe-area-inset-left));
+  width: auto;
+  max-height: min(74dvh, 620px);
+  overflow-y: auto;
+  border-radius: 22px;
+}
+
+.portfolio-mobile .portfolio-structure-panel textarea {
+  min-height: 128px;
+}
+
+.portfolio-mobile .portfolio-lightbox-meta {
+  bottom: max(12px, env(safe-area-inset-bottom));
+  max-height: 34dvh;
+  overflow-y: auto;
+}

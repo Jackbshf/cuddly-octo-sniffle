@@ -555,23 +555,44 @@ const warmVideoSourceInBackground = async (src, signal) => {
 };
 
 const getViewportOrientation = () => {
-  const explicitOrientation = window.screen?.orientation?.type;
-  if (typeof explicitOrientation === "string") {
-    return explicitOrientation.startsWith("landscape") ? "landscape" : "portrait";
+  const viewportWidth = window.visualViewport?.width || window.innerWidth;
+  const viewportHeight = window.visualViewport?.height || window.innerHeight;
+  if (Number.isFinite(viewportWidth) && Number.isFinite(viewportHeight) && viewportWidth > 0 && viewportHeight > 0) {
+    return viewportWidth > viewportHeight ? "landscape" : "portrait";
   }
 
   if (typeof window.matchMedia === "function") {
     return window.matchMedia("(orientation: landscape)").matches ? "landscape" : "portrait";
   }
 
-  const viewportWidth = window.visualViewport?.width || window.innerWidth;
-  const viewportHeight = window.visualViewport?.height || window.innerHeight;
-  return viewportWidth > viewportHeight ? "landscape" : "portrait";
+  const explicitOrientation = window.screen?.orientation?.type;
+  if (typeof explicitOrientation === "string") {
+    return explicitOrientation.startsWith("landscape") ? "landscape" : "portrait";
+  }
+
+  return "portrait";
 };
 
 const supportsHoverInteractions = () => {
   if (typeof window.matchMedia !== "function") return true;
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+};
+
+const getViewportSize = () => ({
+  width: window.visualViewport?.width || window.innerWidth || 0,
+  height: window.visualViewport?.height || window.innerHeight || 0
+});
+
+const usesCoarsePointer = () => {
+  if (typeof window.matchMedia !== "function") return false;
+  return window.matchMedia("(pointer: coarse)").matches;
+};
+
+const isMobileViewport = () => {
+  const { width, height } = getViewportSize();
+  const shortSide = Math.min(width, height);
+  const longSide = Math.max(width, height);
+  return IS_QR_MOBILE_MODE || width <= 720 || (usesCoarsePointer() && shortSide <= 820 && longSide <= 1180);
 };
 
 const readInlineAudioPreference = () => {
@@ -613,7 +634,7 @@ const canUseAudibleInlinePlayback = () => {
 };
 
 const resolveLayoutMode = () => {
-  if (!IS_QR_MOBILE_MODE) return "desktop-feed";
+  if (!isMobileViewport()) return "desktop-feed";
   return getViewportOrientation() === "landscape" ? "mobile-landscape-feed" : "mobile-portrait-feed";
 };
 
@@ -1061,6 +1082,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
     Copy: <><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>,
     Plus: <path d="M5 12h14M12 5v14" />,
     Trash2: <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" />,
+    MoreHorizontal: <><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></>,
     LayoutTemplate: <><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><path d="M3 9h18M9 21V9" /></>,
     Grid: <><rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" /></>,
     Volume2: <><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></>,
@@ -1307,14 +1329,14 @@ const InlineMediaControls = ({ visible, showPlayToggle = false, isPlaying = fals
   <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/78 via-black/28 to-transparent" />
   <div className="relative flex items-end justify-between gap-3 px-4 pb-4 pt-10">
     <div className="pointer-events-auto flex items-center gap-2">
-      {showPlayToggle && <button onClick={onTogglePlay} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
+      {showPlayToggle && <button onClick={onTogglePlay} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
         <Icon name={isPlaying ? "Pause" : "Play"} size={16} className={isPlaying ? "" : "translate-x-[1px]"} />
       </button>}
-      {showPlayToggle && <button onClick={onToggleMute} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
+      {showPlayToggle && <button onClick={onToggleMute} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
         <Icon name={isMuted ? "VolumeX" : "Volume2"} size={16} />
       </button>}
     </div>
-    <button onClick={onToggleFullscreen} className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
+    <button onClick={onToggleFullscreen} className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
       <Icon name="Maximize2" size={16} />
     </button>
   </div>
@@ -1420,6 +1442,7 @@ function App() {
   const [layoutMode, setLayoutMode] = useState(() => resolveLayoutMode());
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showMobileMoreMenu, setShowMobileMoreMenu] = useState(false);
   const [lightboxData, setLightboxData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadSource, setLoadSource] = useState("loading");
@@ -1968,6 +1991,7 @@ function App() {
       return next;
     });
     setShowAddMenu(false);
+    setShowMobileMoreMenu(false);
   };
 
   const adjustCurrentSlideSlots = (delta) => {
@@ -2080,6 +2104,7 @@ function App() {
     });
     setCurrentSlide(targetIndex);
     setShowAddMenu(false);
+    setShowMobileMoreMenu(false);
   };
 
   const deleteCurrentSlide = () => {
@@ -2087,6 +2112,7 @@ function App() {
     setSlidesData((prev) => prev.filter((_, index) => index !== currentSlide));
     setCurrentSlide(Math.max(0, Math.min(currentSlide - 1, slidesData.length - 2)));
     setShowAddMenu(false);
+    setShowMobileMoreMenu(false);
   };
 
   const submitPageJump = () => {
@@ -2679,12 +2705,12 @@ function App() {
       <div className="h-full w-full">
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-xs tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">拖到这里替换媒体</div>}
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
-      {IS_EDITOR_MODE && <div className="absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
+      {IS_EDITOR_MODE && <div className="portfolio-media-tools absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
         <button onClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
         {hasUsableMedia && <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>}
         <button onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
       </div>}
-      {IS_EDITOR_MODE && showEditor && <div className="absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
+      {IS_EDITOR_MODE && showEditor && <div className="portfolio-media-editor-panel absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
         <div className="text-xs text-cyan-300 font-mono uppercase tracking-widest flex items-center gap-2"><Icon name="Link2" size={14} /> 自由布局媒体设置</div>
         {bindingInfo && <div className={`rounded-xl border px-3 py-2 text-xs leading-6 ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/10 text-emerald-50/90" : "border-amber-300/20 bg-amber-500/10 text-amber-50/90"}`}>
           <div className="font-medium">{bindingInfo.text}</div>
@@ -2765,7 +2791,7 @@ function App() {
         <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" />
         <EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} />
       </div>
-      <div ref={surfaceRef} className={`relative overflow-hidden rounded-[32px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-2xl ${isMobileFeedMode ? "min-h-[70svh]" : "flex-1"}`}>
+      <div ref={surfaceRef} className={`portfolio-free-surface relative overflow-hidden rounded-[32px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-2xl ${isMobileFeedMode ? "min-h-[70svh]" : "flex-1"}`}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_60%)] pointer-events-none" />
         {elements.length ? elements.map((element) => <FreeLayoutElement key={element.id} slideIndex={index} element={element} containerRef={surfaceRef} />) : <div className="absolute inset-0 flex items-center justify-center text-sm tracking-[0.22em] text-white/35">点击底部 + 添加文本框或媒体框</div>}
       </div>
@@ -3100,7 +3126,7 @@ function App() {
 
     return <div
       ref={rootRef}
-        className={cx("relative w-full h-full overflow-hidden rounded-[26px] border border-white/10 bg-black/25 group cursor-pointer", isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]")}
+        className={cx("portfolio-media-slot relative w-full h-full overflow-hidden rounded-[26px] border border-white/10 bg-black/25 group cursor-pointer", isMobilePortraitMode ? "min-h-[260px]" : isMobileLandscapeMode ? "min-h-[240px]" : "min-h-[320px]")}
       onMouseEnter={() => {
           if (!prefersHoverControls) return;
           setIsHovered(true);
@@ -3128,13 +3154,13 @@ function App() {
         拖到这里即可替换当前媒体
       </div>}
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-2 left-2 z-50 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
-      {IS_EDITOR_MODE && item && <div className="absolute top-2 right-2 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-wrap justify-end gap-1.5 w-3/4">
+      {IS_EDITOR_MODE && item && <div className={cx("portfolio-media-tools absolute top-2 right-2 z-50 transition-opacity duration-300 flex flex-wrap justify-end gap-1.5 w-3/4", prefersHoverControls ? "opacity-0 group-hover:opacity-100" : "opacity-100")}>
         {item.kind === "youtube" && item.url && <a href={`https://www.youtube.com/watch?v=${extractYouTubeId(item.url)}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="ExternalLink" size={12} /></a>}
         <button onClick={(event) => { event.stopPropagation(); setShowEditor(!showEditor); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
         <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>
         <button onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
       </div>}
-      {IS_EDITOR_MODE && item && showEditor && <div className="absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
+      {IS_EDITOR_MODE && item && showEditor && <div className="portfolio-media-editor-panel absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
         <div className="text-xs text-cyan-300 font-mono uppercase tracking-widest flex items-center gap-2"><Icon name="Link2" size={14} /> 资源链接设置</div>
         {bindingInfo && <div className={`rounded-xl border px-3 py-2 text-xs leading-6 ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/10 text-emerald-50/90" : "border-amber-300/20 bg-amber-500/10 text-amber-50/90"}`}>
           <div className="font-medium">{bindingInfo.text}</div>
@@ -3319,26 +3345,26 @@ function App() {
   };
   const portfolioSizeToneClass = portfolioSizeTone === "danger" ? "text-rose-200 bg-rose-500/15 border-rose-300/20" : portfolioSizeTone === "warning" ? "text-amber-100 bg-amber-500/12 border-amber-300/20" : "text-emerald-100 bg-emerald-500/12 border-emerald-300/20";
 
-  return <div className="relative min-h-screen w-full font-sans select-none selection:bg-white/20" {...touchHandlers}>
+  return <div className={cx("relative min-h-screen w-full font-sans select-none selection:bg-white/20", isMobilePreviewMode && "portfolio-mobile", isMobilePortraitMode && "portfolio-mobile-portrait", isMobileLandscapeMode && "portfolio-mobile-landscape", IS_EDITOR_MODE && "portfolio-editor")} {...touchHandlers}>
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       <div className={`absolute -top-[16%] -left-[8%] h-[44%] w-[44%] ${currentTheme.a} rounded-full blur-[120px] opacity-90 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 10s infinite" }} />
       <div className={`absolute top-[24%] -right-[8%] h-[38%] w-[38%] ${currentTheme.b} rounded-full blur-[130px] opacity-85 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 13s infinite 1.8s" }} />
       <div className={`absolute -bottom-[22%] left-[24%] h-[46%] w-[46%] ${currentTheme.c} rounded-full blur-[120px] opacity-80 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 11s infinite 3.4s" }} />
     </div>
     <div className="relative z-10">
-      <div className="sticky top-3 z-40 px-3">
-        <div className={`mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"}`}>
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => goToSlide(0)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
-            <button onClick={() => goToSlide(tocSlideIndex)} className="rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>
+      <div className="portfolio-topbar sticky top-3 z-40 px-3">
+        <div className={`portfolio-topbar-inner mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"}`}>
+          <div className="portfolio-topbar-actions flex flex-wrap items-center gap-2">
+            <button onClick={() => goToSlide(0)} className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
+            <button onClick={() => goToSlide(tocSlideIndex)} className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>
           </div>
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="portfolio-page-indicator hidden items-center gap-2 lg:flex">
             <span className="text-white/38">{siteMeta.siteTitle}</span>
             <span className="font-mono tracking-widest text-white/70">{String(currentSlide + 1).padStart(2, "0")}/{String(slidesData.length).padStart(2, "0")}</span>
           </div>
         </div>
       </div>
-      {IS_EDITOR_MODE && showStructureEditor && <div className="fixed right-4 top-20 z-[70] w-[min(92vw,440px)] overflow-hidden rounded-[28px] border border-white/10 bg-[#101114]/92 shadow-2xl backdrop-blur-2xl">
+      {IS_EDITOR_MODE && showStructureEditor && <div className="portfolio-structure-panel fixed right-4 top-20 z-[70] w-[min(92vw,440px)] overflow-hidden rounded-[28px] border border-white/10 bg-[#101114]/92 shadow-2xl backdrop-blur-2xl">
         <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
           <div>
             <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Portfolio Model</div>
@@ -3371,12 +3397,12 @@ function App() {
           </div>
         </div>
       </div>}
-      <div className={`mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
+      <div className={`portfolio-feed mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
         {slidesData.map((slide, index) => <section
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
           data-slide-index={index}
-          className="reveal-section relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md"
+          className="portfolio-section reveal-section relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md"
           style={publishedSectionStyle}
         >
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
@@ -3386,7 +3412,7 @@ function App() {
     </div>
     {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={closeMediaLightbox}>
       <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={closeMediaLightbox}>✕ 关闭</button>
-      {lightboxData.meta && <div className="absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">Prompt / Metadata</span>{lightboxData.meta}</div>}
+      {lightboxData.meta && <div className="portfolio-lightbox-meta absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">Prompt / Metadata</span>{lightboxData.meta}</div>}
       {lightboxData.kind === "youtube" ? <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
         const preferDraftPreview = IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl);
         const streamPlayerUrl = getLightboxVideoPlayerUrl(lightboxData, { preferDraftPreview });
@@ -3398,7 +3424,56 @@ function App() {
         return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
-    {IS_EDITOR_MODE && <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
+    {IS_EDITOR_MODE && (isMobilePreviewMode ? <>
+      <div className="portfolio-editor-dock portfolio-editor-dock-mobile fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
+        <button onClick={() => goToSlide(tocSlideIndex)} className="p-2 text-white/55 hover:text-white hover:bg-white/10 rounded-full transition-all" title="目录"><Icon name="Home" size={18} /></button>
+        <button onClick={() => goToSlide(Math.max(0, currentSlide - 1))} className={`p-2 rounded-full transition-all ${currentSlide === 0 ? "text-white/20" : "text-white/70 hover:text-white hover:bg-white/10"}`} title="上一页"><Icon name="ChevronLeft" size={20} /></button>
+        {isPageJumpEditing ? <div className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1">
+          <input ref={pageJumpInputRef} type="text" inputMode="numeric" value={pageJumpValue} onChange={(event) => setPageJumpValue(event.target.value.replace(/[^\d]/g, "").slice(0, 3))} onBlur={submitPageJump} onKeyDown={(event) => {
+            if (event.key === "Enter") { event.preventDefault(); submitPageJump(); }
+            if (event.key === "Escape") { event.preventDefault(); setIsPageJumpEditing(false); setPageJumpValue(String(currentSlide + 1)); }
+          }} className="w-9 bg-transparent text-center text-xs font-mono font-bold tracking-widest text-white outline-none" />
+          <span className="text-[11px] font-mono tracking-widest text-white/35">/ {String(slidesData.length).padStart(2, "0")}</span>
+        </div> : <button onClick={() => setIsPageJumpEditing(true)} className="rounded-full px-2 py-1 text-xs font-mono tracking-widest text-white/80 font-bold hover:bg-white/10" title="点击输入页码跳转">
+          {String(currentSlide + 1).padStart(2, "0")}<span className="text-white/20 mx-1">/</span>{String(slidesData.length).padStart(2, "0")}
+        </button>}
+        <button onClick={() => goToSlide(Math.min(slidesData.length - 1, currentSlide + 1))} className={`p-2 rounded-full transition-all ${currentSlide === slidesData.length - 1 ? "text-white/20" : "text-white/70 hover:text-white hover:bg-white/10"}`} title="下一页"><Icon name="ChevronRight" size={20} /></button>
+        <button onClick={() => setShowMobileMoreMenu((value) => !value)} className={`p-2 rounded-full transition ${showMobileMoreMenu ? "bg-white text-black" : "text-white/70 hover:bg-white/10 hover:text-white"}`} title="更多操作"><Icon name="MoreHorizontal" size={20} /></button>
+        <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${loadSource.includes("draft") ? "bg-emerald-400" : "bg-cyan-400"}`} title={statusMessage} />
+      </div>
+      {showMobileMoreMenu && <div className="portfolio-mobile-more-panel fixed z-[60] border border-white/10 bg-[#111214]/94 shadow-2xl backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <span className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-100/70">编辑操作</span>
+          <button onClick={() => setShowMobileMoreMenu(false)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">关闭</button>
+        </div>
+        <div className="grid gap-2 p-3">
+          <button onClick={() => { setShowStructureEditor((value) => !value); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="FileJson" size={16} /> 编辑 meta / cases</button>
+          <button onClick={() => moveCurrentSlide(-1)} disabled={currentSlide <= 0} className="portfolio-mobile-menu-button"><Icon name="ArrowUp" size={16} /> 上移当前页</button>
+          <button onClick={() => moveCurrentSlide(1)} disabled={currentSlide >= slidesData.length - 1} className="portfolio-mobile-menu-button"><Icon name="ArrowDown" size={16} /> 下移当前页</button>
+          {slidesData[currentSlide]?.type !== "free-layout" && <button onClick={() => adjustCurrentSlideSlots(1)} className="portfolio-mobile-menu-button"><Icon name="Plus" size={16} /> 增加媒体框</button>}
+          {slidesData[currentSlide]?.type !== "free-layout" && <button onClick={() => adjustCurrentSlideSlots(-1)} className="portfolio-mobile-menu-button"><Icon name="Trash2" size={16} /> 减少媒体框</button>}
+          {slidesData[currentSlide]?.type === "split" && <button onClick={() => adjustCurrentTextBlocks(1)} className="portfolio-mobile-menu-button"><Icon name="Plus" size={16} /> 增加文本框</button>}
+          {slidesData[currentSlide]?.type === "split" && <button onClick={() => adjustCurrentTextBlocks(-1)} className="portfolio-mobile-menu-button"><Icon name="Trash2" size={16} /> 减少文本框</button>}
+          {slidesData[currentSlide]?.type === "free-layout" && <button onClick={() => addFreeLayoutElement("text")} className="portfolio-mobile-menu-button"><Icon name="Plus" size={16} /> 添加文本框</button>}
+          {slidesData[currentSlide]?.type === "free-layout" && <button onClick={() => addFreeLayoutElement("media")} className="portfolio-mobile-menu-button"><Icon name="UploadCloud" size={16} /> 添加媒体框</button>}
+          <div className="my-1 h-px bg-white/10" />
+          {[
+            ["split", "左文右图", "LayoutTemplate"],
+            ["free-layout", "自由布局", "Maximize2"],
+            ["full-media", "全屏巨幕", "Maximize"],
+            ["compare-slider", "双栏对比", "Sliders"],
+            ["gallery-2", "双图展示", "Grid"],
+            ["gallery-3", "三图展示", "Grid"],
+            ["gallery-4", "四图展示", "Grid"]
+          ].map(([layout, label, icon]) => <button key={layout} onClick={() => addSlide(layout)} className="portfolio-mobile-menu-button"><Icon name={icon} size={16} /> {label}</button>)}
+          <div className="my-1 h-px bg-white/10" />
+          <button onClick={() => { importInputRef.current && importInputRef.current.click(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="UploadCloud" size={16} /> 导入 JSON</button>
+          <button onClick={() => { resetDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="RotateCcw" size={16} /> 重置草稿</button>
+          <button onClick={() => { exportDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="Download" size={16} /> 导出 JSON</button>
+          <button onClick={deleteCurrentSlide} className="portfolio-mobile-menu-button text-red-200"><Icon name="Trash2" size={16} /> 删除当前页</button>
+        </div>
+      </div>}
+    </> : <div className="portfolio-editor-dock fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
       <button onClick={() => goToSlide(tocSlideIndex)} className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"><Icon name="Home" size={18} /></button>
       <div className="w-[1px] h-4 bg-white/10 mx-1" />
       <button onClick={() => goToSlide(Math.max(0, currentSlide - 1))} className={`p-2 rounded-full transition-all ${currentSlide === 0 ? "text-white/10" : "text-white/60 hover:text-white hover:bg-white/10"}`}><Icon name="ChevronLeft" size={20} /></button>
@@ -3464,7 +3539,7 @@ function App() {
       <button onClick={resetDraft} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="重置草稿"><Icon name="RotateCcw" size={16} /></button>
       <button onClick={exportDraft} className="p-2 text-cyan-300/80 hover:text-cyan-200 hover:bg-cyan-500/20 rounded-full" title="导出 JSON"><Icon name="Download" size={16} /></button>
       <div className={`h-2.5 w-2.5 rounded-full ${loadSource.includes("draft") ? "bg-emerald-400" : "bg-cyan-400"}`} title={statusMessage} />
-    </div>}
+    </div>)}
     {IS_EDITOR_MODE && <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />}
     <div className="fixed top-0 left-0 w-full h-[2px] bg-white/[0.02] z-50"><div className={`h-full ${currentTheme.line} transition-all duration-500 ease-out`} style={{ width: `${((currentSlide + 1) / slidesData.length) * 100}%` }} /></div>
   </div>;
