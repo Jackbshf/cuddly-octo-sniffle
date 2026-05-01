@@ -7,7 +7,9 @@
     "sync:portfolio": "node scripts/sync-portfolio-json.mjs",
     "sync:stream": "node scripts/media/sync-cloudflare-stream.mjs",
     "prepare:static": "node scripts/prepare-static.mjs",
-    "audit:stream": "node scripts/media/audit-stream-delivery.mjs"
+    "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
+    "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",
+    "validate:prompts": "node scripts/prompts/validate-general-prompts.mjs"
   },
   "dependencies": {
     "hls.js": "^1.6.16",

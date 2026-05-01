@@ -41,7 +41,12 @@ export const buildAppAssets = async () => {
     "-i", cssEntry,
     "-o", path.join(assetsDir, "app.css"),
     "--minify"
-  ]);
+  ], {
+    env: {
+      ...process.env,
+      BROWSERSLIST_IGNORE_OLD_DATA: process.env.BROWSERSLIST_IGNORE_OLD_DATA || "1"
+    }
+  });
 
   await build({
     entryPoints: [jsEntry],
