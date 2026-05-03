@@ -116,8 +116,26 @@ async function handlePromptPage(request, env, url) {
     return servePromptApp(request, env, url, true);
   }
 
-  if (url.pathname === PROMPTS_PREFIX || url.pathname === VIEW_LOGIN_PATH) {
+  if (!env.PROMPT_LIBRARY_PASSWORD) {
+    return textResponse("Prompt library password is not configured.", 503);
+  }
+
+  const auth = await getPromptAuthState(request, env);
+
+  if (url.pathname === VIEW_LOGIN_PATH) {
+    if (auth.viewer || auth.admin) {
+      return Response.redirect(new URL(`${PROMPTS_PREFIX}/`, url), 302);
+    }
+
+    return renderLoginPage({ mode: "prompt-view", hasError: false });
+  }
+
+  if (url.pathname === PROMPTS_PREFIX) {
     return Response.redirect(new URL(`${PROMPTS_PREFIX}/`, url), 302);
+  }
+
+  if (!auth.viewer && !auth.admin) {
+    return renderLoginPage({ mode: "prompt-view", hasError: false });
   }
 
   return servePromptApp(request, env, url, false);
@@ -167,6 +185,11 @@ async function handlePortfolioAdminPage(request, env, url) {
 async function handlePromptsApi(request, env, url) {
   if (url.pathname === `${PROMPTS_API_PREFIX}/library`) {
     if (request.method === "GET") {
+      const auth = await getPromptAuthState(request, env);
+      if (!auth.viewer && !auth.admin) {
+        return jsonResponse({ ok: false, error: "Prompt library authentication required." }, 403);
+      }
+
       const assetUrl = new URL(url);
       assetUrl.pathname = `/${PROMPT_LIBRARY_PATH}`;
       const response = await env.ASSETS.fetch(new Request(assetUrl, request));
@@ -228,6 +251,11 @@ async function handlePortfolioAdminApi(request, env, url) {
 async function handleProtectedPromptDataAsset(request, env) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return textResponse("Method not allowed.", 405, { Allow: "GET, HEAD" });
+  }
+
+  const auth = await getPromptAuthState(request, env);
+  if (!auth.viewer && !auth.admin) {
+    return textResponse("Prompt library authentication required.", 403);
   }
 
   const response = await env.ASSETS.fetch(request);
