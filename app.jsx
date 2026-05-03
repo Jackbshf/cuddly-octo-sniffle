@@ -8,7 +8,19 @@ const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
 const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
 const APP_BUNDLE_VERSION = window.__APP_BUNDLE_VERSION__ ?? "";
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
-const IS_EDITOR_MODE = window.location.protocol === "file:" || (SEARCH_PARAMS.get("editor") === "1" && SEARCH_PARAMS.get("tools") === "1");
+const IS_TOOLS_MODE = SEARCH_PARAMS.get("tools") === "1";
+const shouldNormalizeEditorQuery = window.location.protocol !== "file:" && SEARCH_PARAMS.get("editor") === "1";
+if (shouldNormalizeEditorQuery) {
+  const normalizedParams = new URLSearchParams(window.location.search);
+  normalizedParams.delete("editor");
+  const normalizedSearch = normalizedParams.toString();
+  window.history.replaceState(
+    window.history.state,
+    "",
+    `${window.location.pathname}${normalizedSearch ? `?${normalizedSearch}` : ""}${window.location.hash}`
+  );
+}
+const IS_EDITOR_MODE = window.location.protocol === "file:" || IS_TOOLS_MODE;
 const MOBILE_MODE_QUERY = SEARCH_PARAMS.get("mobile");
 const IS_QR_MOBILE_MODE = MOBILE_MODE_QUERY === "1";
 const SLIDE_TRANSITION_OUT_MS = 120;

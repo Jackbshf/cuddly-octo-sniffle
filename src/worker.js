@@ -104,6 +104,10 @@ function isPortfolioAdminPath(pathname) {
 
 async function handlePromptPage(request, env, url) {
   if (isPromptAdminPath(url.pathname)) {
+    if (url.pathname === PROMPT_ADMIN_PREFIX || url.pathname === PROMPT_ADMIN_LOGIN_PATH) {
+      return Response.redirect(new URL(`${PROMPT_ADMIN_PREFIX}/`, url), 302);
+    }
+
     if (!env.PROMPT_LIBRARY_ADMIN_PASSWORD) {
       return textResponse("Prompt library admin password is not configured.", 503);
     }
@@ -123,11 +127,7 @@ async function handlePromptPage(request, env, url) {
   const auth = await getPromptAuthState(request, env);
 
   if (url.pathname === VIEW_LOGIN_PATH) {
-    if (auth.viewer || auth.admin) {
-      return Response.redirect(new URL(`${PROMPTS_PREFIX}/`, url), 302);
-    }
-
-    return renderLoginPage({ mode: "prompt-view", hasError: false });
+    return Response.redirect(new URL(`${PROMPTS_PREFIX}/`, url), 302);
   }
 
   if (url.pathname === PROMPTS_PREFIX) {
@@ -163,6 +163,10 @@ async function handlePortfolioAdminPage(request, env, url) {
     return textResponse("Method not allowed.", 405, { Allow: "GET, HEAD" });
   }
 
+  if (url.pathname === PORTFOLIO_ADMIN_PREFIX || url.pathname === PORTFOLIO_ADMIN_LOGIN_PATH) {
+    return Response.redirect(new URL(`${PORTFOLIO_ADMIN_PREFIX}/`, url), 302);
+  }
+
   if (!env.PORTFOLIO_ADMIN_PASSWORD) {
     return textResponse("Portfolio admin password is not configured.", 503);
   }
@@ -170,10 +174,6 @@ async function handlePortfolioAdminPage(request, env, url) {
   const isAdmin = await hasValidAuthCookie(request, PORTFOLIO_ADMIN_COOKIE_NAME, env.PORTFOLIO_ADMIN_PASSWORD);
   if (!isAdmin) {
     return renderLoginPage({ mode: "portfolio-admin", hasError: false });
-  }
-
-  if (url.pathname === PORTFOLIO_ADMIN_PREFIX || url.pathname === PORTFOLIO_ADMIN_LOGIN_PATH) {
-    return Response.redirect(new URL(`${PORTFOLIO_ADMIN_PREFIX}/`, url), 302);
   }
 
   const assetUrl = new URL(url);
