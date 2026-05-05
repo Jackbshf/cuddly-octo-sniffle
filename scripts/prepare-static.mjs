@@ -32,7 +32,6 @@ const copyTargets = [
   "index.html",
   "assets",
   "embedded-data.js",
-  "admin",
   "data",
   "images",
   "prompts",
