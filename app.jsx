@@ -7,7 +7,8 @@ const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
 const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
 const APP_BUNDLE_VERSION = window.__APP_BUNDLE_VERSION__ ?? "";
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
-const IS_TOOLS_MODE = SEARCH_PARAMS.get("tools") === "1";
+const IS_PORTFOLIO_ADMIN_MODE = window.__PORTFOLIO_ADMIN_MODE__ === true;
+const IS_TOOLS_MODE = SEARCH_PARAMS.get("tools") === "1" || IS_PORTFOLIO_ADMIN_MODE;
 const shouldNormalizeEditorQuery = window.location.protocol !== "file:" && SEARCH_PARAMS.get("editor") === "1";
 if (shouldNormalizeEditorQuery) {
   const normalizedParams = new URLSearchParams(window.location.search);
@@ -1105,6 +1106,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
     Maximize2: <><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></>,
     Sliders: <><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></>,
     Download: <><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></>,
+    Save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" /><path d="M17 21v-8H7v8" /><path d="M7 3v5h8" /></>,
     FileJson: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M10 13H8" /></>,
     RotateCcw: <><path d="M3 2v6h6" /><path d="M3 8a9 9 0 1 0 2.6-4.4L3 8" /></>,
     Link2: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07L11.8 5.1" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.66-1.66" /></>,
@@ -1467,6 +1469,7 @@ function App() {
   const [metaEditorError, setMetaEditorError] = useState("");
   const [casesEditorValue, setCasesEditorValue] = useState("");
   const [casesEditorError, setCasesEditorError] = useState("");
+  const [isPublishingPortfolio, setIsPublishingPortfolio] = useState(false);
   const lightboxVideoRef = useRef(null);
   const importInputRef = useRef(null);
   const pageJumpInputRef = useRef(null);
@@ -1648,7 +1651,7 @@ function App() {
       setPublishedPortfolioData(deepClone(published));
       setPortfolioData(draft ? draft : deepClone(published));
       setLoadSource(draft ? "draft" : "published");
-      setStatusMessage(draft ? "已载入本地草稿，可继续编辑后导出 JSON。" : `已载入发布数据：${DATA_FILE_PATH}`);
+      setStatusMessage(draft ? "已载入本地草稿，可继续编辑后保存 JSON。" : `已载入发布数据：${DATA_FILE_PATH}`);
     }).catch(() => {
       if (!mounted) return;
       const fallback = createPortfolioModel(EMBEDDED_PORTFOLIO);
@@ -1968,6 +1971,57 @@ function App() {
 
     downloadJsonFile("portfolio.json", portfolioExportModel);
     setStatusMessage(issues.length ? `已导出 portfolio.json，但仍有 ${issues.length} 个待修复问题。` : "当前草稿已导出为 portfolio.json，可覆盖 data/portfolio.json 后提交到 GitHub。");
+  };
+
+  const publishPortfolioJson = async () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || isPublishingPortfolio) return;
+
+    const issues = await validateSlidesBeforeExport(slidesData);
+    const blockingIssues = issues.filter((issue) => issue.includes("未绑定发布路径"));
+
+    if (blockingIssues.length) {
+      const preview = blockingIssues.slice(0, 6).join("\n");
+      window.alert(`当前有 ${blockingIssues.length} 个媒体仍然只是本地预览，暂时不能保存发布文件：\n\n${preview}${blockingIssues.length > 6 ? "\n..." : ""}`);
+      setStatusMessage(`保存已拦截：有 ${blockingIssues.length} 个媒体仍未绑定发布路径。`);
+      return;
+    }
+
+    if (issues.length) {
+      const preview = issues.slice(0, 6).join("\n");
+      const shouldContinue = window.confirm(`保存前检查发现 ${issues.length} 个问题：\n\n${preview}${issues.length > 6 ? "\n..." : ""}\n\n仍然保存到 GitHub 吗？`);
+      setStatusMessage(`保存检查发现 ${issues.length} 个问题，请先修复或确认后继续。`);
+      if (!shouldContinue) return;
+    }
+
+    setIsPublishingPortfolio(true);
+    setStatusMessage("正在保存 data/portfolio.json 到 GitHub...");
+
+    try {
+      const response = await fetch("/api/portfolio-admin/portfolio-json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          portfolio: portfolioExportModel,
+          message: "Update portfolio JSON"
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || `保存失败：${response.status}`);
+      }
+
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setPublishedPortfolioData(deepClone(portfolioExportModel));
+      setPortfolioData(deepClone(portfolioExportModel));
+      setLoadSource("published");
+      setStatusMessage(`已保存 data/portfolio.json 到 GitHub${data.commit ? `：${data.commit.slice(0, 7)}` : ""}，等待 Actions 自动部署。`);
+    } catch (error) {
+      const message = error?.message || "GitHub 保存失败。";
+      window.alert(message);
+      setStatusMessage(message);
+    } finally {
+      setIsPublishingPortfolio(false);
+    }
   };
 
   const importDraft = async (event) => {
@@ -3483,6 +3537,7 @@ function App() {
           <button onClick={() => { importInputRef.current && importInputRef.current.click(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="UploadCloud" size={16} /> 导入 JSON</button>
           <button onClick={() => { resetDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="RotateCcw" size={16} /> 重置草稿</button>
           <button onClick={() => { exportDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="Download" size={16} /> 导出 JSON</button>
+          {IS_PORTFOLIO_ADMIN_MODE && <button onClick={() => { publishPortfolioJson(); setShowMobileMoreMenu(false); }} disabled={isPublishingPortfolio} className="portfolio-mobile-menu-button text-emerald-100"><Icon name="Save" size={16} /> {isPublishingPortfolio ? "保存中..." : "保存到 GitHub"}</button>}
           <button onClick={deleteCurrentSlide} className="portfolio-mobile-menu-button text-red-200"><Icon name="Trash2" size={16} /> 删除当前页</button>
         </div>
       </div>}
@@ -3551,6 +3606,7 @@ function App() {
       <button onClick={() => importInputRef.current && importInputRef.current.click()} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="导入 JSON"><Icon name="UploadCloud" size={16} /></button>
       <button onClick={resetDraft} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="重置草稿"><Icon name="RotateCcw" size={16} /></button>
       <button onClick={exportDraft} className="p-2 text-cyan-300/80 hover:text-cyan-200 hover:bg-cyan-500/20 rounded-full" title="导出 JSON"><Icon name="Download" size={16} /></button>
+      {IS_PORTFOLIO_ADMIN_MODE && <button onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className={`p-2 rounded-full transition ${isPublishingPortfolio ? "text-emerald-100/35" : "text-emerald-200/85 hover:bg-emerald-500/20 hover:text-emerald-100"}`} title={isPublishingPortfolio ? "正在保存到 GitHub" : "保存 portfolio.json 到 GitHub"}><Icon name="Save" size={16} /></button>}
       <div className={`h-2.5 w-2.5 rounded-full ${loadSource.includes("draft") ? "bg-emerald-400" : "bg-cyan-400"}`} title={statusMessage} />
     </div>)}
     {IS_EDITOR_MODE && <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />}

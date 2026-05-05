@@ -9,6 +9,7 @@ const PROMPT_LIBRARY_PATH = "prompts-data/library.json";
 const PORTFOLIO_ADMIN_PREFIX = "/admin";
 const PORTFOLIO_ADMIN_LOGIN_PATH = "/admin/login";
 const PORTFOLIO_API_PREFIX = "/api/portfolio-admin";
+const PORTFOLIO_JSON_PATH = "data/portfolio.json";
 const PORTFOLIO_META_PATH = "data/meta.json";
 const PORTFOLIO_CASES_DIR = "data/cases";
 const PORTFOLIO_UPLOADS_DIR = "images/uploads";
@@ -176,10 +177,7 @@ async function handlePortfolioAdminPage(request, env, url) {
     return renderLoginPage({ mode: "portfolio-admin", hasError: false });
   }
 
-  const assetUrl = new URL(url);
-  assetUrl.pathname = `${PORTFOLIO_ADMIN_PREFIX}/`;
-  const response = await env.ASSETS.fetch(new Request(assetUrl, request));
-  return withNoStore(response);
+  return servePortfolioEditorApp(request, env, url);
 }
 
 async function handlePromptsApi(request, env, url) {
@@ -228,6 +226,10 @@ async function handlePortfolioAdminApi(request, env, url) {
     return readPortfolioContent(env);
   }
 
+  if (url.pathname === `${PORTFOLIO_API_PREFIX}/portfolio-json` && request.method === "POST") {
+    return savePortfolioJson(request, env);
+  }
+
   if (url.pathname === `${PORTFOLIO_API_PREFIX}/meta` && request.method === "POST") {
     return savePortfolioMeta(request, env);
   }
@@ -246,6 +248,33 @@ async function handlePortfolioAdminApi(request, env, url) {
   }
 
   return jsonResponse({ ok: false, error: "Not found." }, 404);
+}
+
+async function servePortfolioEditorApp(request, env, url) {
+  const assetUrl = new URL(url);
+  assetUrl.pathname = "/";
+  assetUrl.search = "";
+  const response = await env.ASSETS.fetch(new Request(assetUrl, request));
+  const contentType = response.headers.get("Content-Type") || "";
+  if (!contentType.includes("text/html")) return withNoStore(response);
+
+  const html = await response.text();
+  const injection = [
+    '<base href="/">',
+    '<script>window.__PORTFOLIO_ADMIN_MODE__ = true;</script>'
+  ].join("\n  ");
+  const body = html.includes("<head>")
+    ? html.replace("<head>", `<head>\n  ${injection}`)
+    : `${injection}\n${html}`;
+  const headers = new Headers(response.headers);
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  headers.set("Cache-Control", "no-store");
+  headers.set("CDN-Cache-Control", "no-store");
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
 }
 
 async function handleProtectedPromptDataAsset(request, env) {
@@ -410,6 +439,39 @@ async function savePortfolioMeta(request, env) {
     });
   } catch (error) {
     return jsonResponse({ ok: false, error: error.message || "GitHub meta publish failed." }, 502);
+  }
+}
+
+async function savePortfolioJson(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse({ ok: false, error: "Invalid JSON payload." }, 400);
+  }
+
+  const portfolio = normalizePortfolioJson(payload?.portfolio || payload);
+  if (!portfolio.slides.length) {
+    return jsonResponse({ ok: false, error: "Portfolio JSON must contain at least one slide." }, 400);
+  }
+
+  const json = `${JSON.stringify(portfolio, null, 2)}\n`;
+  const secretMatch = findSecretLikeText(json);
+  if (secretMatch) {
+    return jsonResponse({ ok: false, error: `Refused to publish possible secret content: ${secretMatch.label}.` }, 400);
+  }
+
+  try {
+    const message = cleanCommitMessage(payload?.message || "Update portfolio JSON", "Update portfolio JSON");
+    const result = await putGitHubFile(env, PORTFOLIO_JSON_PATH, encoder.encode(json), message, PORTFOLIO_TOKEN_ENV);
+    return jsonResponse({
+      ok: true,
+      path: PORTFOLIO_JSON_PATH,
+      commit: result.commit?.sha || null,
+      url: result.content?.html_url || null
+    });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "GitHub portfolio publish failed." }, 502);
   }
 }
 
@@ -704,6 +766,15 @@ function normalizePortfolioCase(raw) {
     results: normalizePortfolioResults(source.results || source.resultItems),
     tools: cleanTextArray(source.tools),
     slideIds: normalizeNumberArray(source.slideIds)
+  };
+}
+
+function normalizePortfolioJson(raw) {
+  const source = Array.isArray(raw) ? { slides: raw } : raw && typeof raw === "object" ? raw : {};
+  return {
+    meta: source.meta && typeof source.meta === "object" ? source.meta : {},
+    cases: Array.isArray(source.cases) ? source.cases : [],
+    slides: Array.isArray(source.slides) ? source.slides : []
   };
 }
 
@@ -1037,9 +1108,9 @@ function constantTimeEqual(left, right) {
 function loginCopy(mode) {
   if (mode === "portfolio-admin") {
     return {
-      title: "Portfolio CMS",
-      heading: "Portfolio CMS 管理后台",
-      intro: "输入管理员密码后，可以管理 data/meta.json 和 data/cases/*.json。",
+      title: "作品集编辑后台",
+      heading: "作品集编辑后台",
+      intro: "输入管理员密码后，可以打开前端式作品集编辑器，直接保存 data/portfolio.json 到 GitHub。",
       label: "管理员密码",
       action: PORTFOLIO_ADMIN_LOGIN_PATH,
       button: "进入后台",
