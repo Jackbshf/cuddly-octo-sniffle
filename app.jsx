@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, startTransition } from "react";
 import { createRoot } from "react-dom/client";
 import Hls from "hls.js";
-import PortfolioSite from "./src/PortfolioSite.jsx";
 
 const DATA_FILE_PATH = "data/portfolio.json";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
@@ -3560,4 +3559,4 @@ function App() {
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(IS_EDITOR_MODE ? <App /> : <PortfolioSite />);
+root.render(<App />);
