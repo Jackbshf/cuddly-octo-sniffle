@@ -2773,7 +2773,7 @@ function App() {
     >
       <div className="h-full w-full">
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-xs tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">拖到这里替换媒体</div>}
-      {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
+      {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`portfolio-media-binding-chip absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && <div className="portfolio-media-tools absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
         <button onClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
         {hasUsableMedia && <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>}
@@ -3224,7 +3224,7 @@ function App() {
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-sm tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">
         拖到这里即可替换当前媒体
       </div>}
-      {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-2 left-2 z-50 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
+      {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`portfolio-media-binding-chip absolute top-2 left-2 z-50 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && item && <div className={cx("portfolio-media-tools absolute top-2 right-2 z-50 transition-opacity duration-300 flex flex-wrap justify-end gap-1.5 w-3/4", prefersHoverControls ? "opacity-0 group-hover:opacity-100" : "opacity-100")}>
         {item.kind === "youtube" && item.url && <a href={`https://www.youtube.com/watch?v=${extractYouTubeId(item.url)}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="ExternalLink" size={12} /></a>}
         <button onClick={(event) => { event.stopPropagation(); setShowEditor(!showEditor); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
@@ -3365,6 +3365,18 @@ function App() {
       </div>;
     }
 
+    if (slide.type === "full-media") {
+      return <div className={`portfolio-full-media-slide flex relative z-10 w-full max-w-[1920px] mx-auto flex-col ${isFeedLayout ? "gap-3 px-2 py-2" : "h-full p-8"}`}>
+        <div className={`portfolio-full-media-copy flex ${isFeedLayout ? "flex-col gap-1 px-1" : "items-end justify-between gap-8 px-4"}`}>
+          <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="portfolio-slide-title text-3xl md:text-4xl font-light leading-tight tracking-wide text-white/90" />
+          <EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`portfolio-slide-desc max-w-4xl text-sm md:text-base leading-relaxed font-mono ${slideTheme.text}`} />
+        </div>
+        <div className="portfolio-full-media-frame relative w-full overflow-hidden rounded-[24px] border border-white/10 bg-black/30 shadow-2xl">
+          <MediaSlot slideIndex={index} slotIndex={0} label={slide.customLabels ? slide.customLabels[0] : "Media 01"} />
+        </div>
+      </div>;
+    }
+
     let colsClass = "grid-cols-2";
     if (isFeedLayout) {
       colsClass = slide.slots === 1 && slide.type !== "split" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2";
@@ -3378,7 +3390,7 @@ function App() {
     }
 
     return <div className={`flex relative z-10 w-full max-w-[1920px] mx-auto flex-col ${isFeedLayout ? "gap-5 px-1 py-2" : "h-full p-10"}`}>
-      {slide.type !== "split" && <div className={`flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-4 px-4"}`}><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" /><EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} /></div>}
+      {slide.type !== "split" && <div className={`flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-4 px-4"}`}><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="portfolio-slide-title text-3xl font-light tracking-wide text-white/90" /><EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`portfolio-slide-desc text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} /></div>}
       <div className={slide.type === "split" ? (isFeedLayout ? "flex flex-col gap-5" : "flex-1 flex items-center gap-16 p-4") : `grid ${colsClass} gap-4`}>
         {slide.type === "split" && <div className={`${isFeedLayout ? "w-full flex flex-col relative gap-3 px-2" : "w-1/3 flex flex-col relative gap-4"}`}><div className={`absolute ${isFeedLayout ? "-left-1 top-0 h-14" : "-left-10 top-0 h-20"} w-1 bg-gradient-to-b from-white/40 to-transparent opacity-60`} /><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl md:text-4xl font-light mb-2 md:mb-4 leading-tight tracking-wide text-white/90" /><div className="flex flex-col gap-3">{(Array.isArray(slide.textBlocks) ? slide.textBlocks : [slide.text || ""]).map((block, blockIndex) => <EditableText key={`${slide.id}-text-${blockIndex}`} text={block} field="text" slideIndex={index} tagName="p" placeholder={`文本框 ${blockIndex + 1}`} className="text-base md:text-lg text-white/70 leading-relaxed font-light whitespace-pre-line" onBlurValue={(value) => updateTextBlock(index, blockIndex, value)} />)}</div></div>}
             <div className={slide.type === "split" ? (isFeedLayout ? "w-full grid grid-cols-1 gap-3" : "w-2/3 h-[80vh] flex gap-6") : "contents"}>{Array.from({ length: slide.slots || 1 }).map((_, slotIndex) => <div key={slotIndex} className={slide.type === "split" ? (isFeedLayout ? "min-h-[320px]" : "flex-1 h-full") : ""}><MediaSlot slideIndex={index} slotIndex={slotIndex} label={slide.customLabels ? slide.customLabels[slotIndex] : `素材 ${String(slotIndex + 1).padStart(2, "0")}`} /></div>)}</div>
@@ -3473,6 +3485,7 @@ function App() {
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
           data-slide-index={index}
+          data-slide-type={slide.type || ""}
           className="portfolio-section reveal-section relative overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl backdrop-blur-md"
           style={publishedSectionStyle}
         >
