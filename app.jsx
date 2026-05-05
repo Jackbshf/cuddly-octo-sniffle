@@ -2584,7 +2584,9 @@ function App() {
         revealControls(3200);
         return;
       }
-      if (!IS_EDITOR_MODE) {
+      const sourceUrl = item && item.kind === "video" ? getSourceMediaUrl(item, { preferDraftPreview }) : "";
+      const canOpenEmbeddedMedia = item && (item.kind === "youtube" || (item.kind === "video" && Boolean(getVideoEmbedUrl(sourceUrl))));
+      if (!IS_EDITOR_MODE || canOpenEmbeddedMedia) {
         openMediaLightbox(item);
       }
     };
@@ -3025,7 +3027,9 @@ function App() {
         revealControls(3200);
         return;
       }
-      if (!IS_EDITOR_MODE) {
+      const sourceUrl = item && item.kind === "video" ? getSourceMediaUrl(item, { preferDraftPreview }) : "";
+      const canOpenEmbeddedMedia = item && (item.kind === "youtube" || (item.kind === "video" && Boolean(getVideoEmbedUrl(sourceUrl))));
+      if (!IS_EDITOR_MODE || canOpenEmbeddedMedia) {
         openMediaLightbox(item);
       }
     };
