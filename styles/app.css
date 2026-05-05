@@ -87,6 +87,60 @@
     background: rgba(10, 16, 24, 0.46);
     color: var(--text-secondary);
   }
+
+  .portfolio-media-binding-chip {
+    max-width: min(70%, 540px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.72;
+  }
+
+  .portfolio-media-slot:hover .portfolio-media-binding-chip {
+    opacity: 0.92;
+  }
+
+  .portfolio-full-media-slide {
+    min-height: 0;
+  }
+
+  .portfolio-full-media-copy {
+    padding-bottom: 2px;
+  }
+
+  .portfolio-full-media-frame {
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+  }
+
+  .portfolio-full-media-frame .portfolio-media-slot {
+    min-height: 0 !important;
+    height: 100%;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(127, 230, 255, 0.08), transparent 42%),
+      rgba(0, 0, 0, 0.38);
+  }
+
+  .portfolio-full-media-frame iframe,
+  .portfolio-full-media-frame video,
+  .portfolio-full-media-frame img {
+    border-radius: inherit;
+  }
+
+  .portfolio-full-media-frame .media-fallback-badge {
+    max-width: min(620px, 72%);
+    min-height: 58%;
+    border-radius: 20px;
+    background: rgba(9, 14, 23, 0.78);
+  }
+
+  .portfolio-full-media-frame .portfolio-media-binding-chip {
+    top: 10px !important;
+    left: 10px !important;
+    transform: scale(0.92);
+    transform-origin: left top;
+  }
 }
 
 @layer utilities {
@@ -160,8 +214,18 @@ html {
 }
 
 .portfolio-mobile .portfolio-section h2 {
-  font-size: clamp(1.85rem, 8vw, 3rem) !important;
-  line-height: 1.05 !important;
+  font-size: clamp(1.28rem, 5.8vw, 2rem) !important;
+  line-height: 1.08 !important;
+}
+
+.portfolio-mobile .portfolio-section[data-slide-type="cover"] h2 {
+  font-size: clamp(0.88rem, 3.6vw, 1.25rem) !important;
+  letter-spacing: 0.2em !important;
+}
+
+.portfolio-mobile .portfolio-section[data-slide-type="chapter"] h2 {
+  font-size: clamp(2.25rem, 10vw, 4.5rem) !important;
+  line-height: 1 !important;
 }
 
 .portfolio-mobile .portfolio-section p,
@@ -228,6 +292,28 @@ html {
 
 .portfolio-mobile .portfolio-media-slot {
   min-height: 260px;
+  border-radius: 18px;
+}
+
+.portfolio-mobile .portfolio-full-media-slide {
+  gap: 8px;
+}
+
+.portfolio-mobile .portfolio-full-media-copy {
+  padding: 0 2px 2px;
+}
+
+.portfolio-mobile .portfolio-full-media-frame {
+  border-radius: 18px;
+}
+
+.portfolio-mobile .portfolio-full-media-frame .portfolio-media-slot {
+  min-height: 0 !important;
+}
+
+.portfolio-mobile .portfolio-full-media-frame .media-fallback-badge {
+  max-width: min(84%, 360px);
+  min-height: 62%;
   border-radius: 18px;
 }
 
