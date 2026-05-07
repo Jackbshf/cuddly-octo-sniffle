@@ -1,22 +1,22 @@
 {
   "id": "controlnet-ecommerce",
   "title": "ControlNet 电商产品精修",
-  "cover": "images/_optimized/微信图片_20260411183220_100_7.webp",
-  "category": "商业视觉",
+  "cover": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
+  "category": "电商视觉",
   "tags": [
-    "AIGC",
-    "电商",
-    "ControlNet"
+    "电商主图",
+    "ControlNet",
+    "产品渲染"
   ],
-  "description": "围绕产品结构和光影一致性，完成线稿约束到高精渲染的电商主图升级。",
+  "description": "围绕产品结构、光影和材质一致性，把线稿或原始素材整理成更适合展示的产品视觉。",
   "results": [
     {
-      "label": "clickRate",
-      "value": "+32%"
+      "label": "输出内容",
+      "value": "产品主图、包装视觉与细节展示"
     },
     {
-      "label": "conversion",
-      "value": "+18%"
+      "label": "能力重点",
+      "value": "结构控制、材质统一、高清展示"
     }
   ],
   "tools": [

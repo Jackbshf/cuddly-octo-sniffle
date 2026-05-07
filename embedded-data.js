@@ -1,47 +1,49 @@
 window.__EMBEDDED_PORTFOLIO__ = {
   "meta": {
-    "siteTitle": "ZHANG WEI - AIGC Portfolio",
-    "siteDescription": "AIGC 内容创意师作品集，专注商业视觉、短视频分镜与 AIGC 工具链。",
+    "siteTitle": "张玮｜AIGC 视觉作品集",
+    "siteDescription": "张玮的 AIGC 商业视觉作品集，展示图像生成、视频制作、电商产品图、品牌海报、短视频素材与创作流程。",
     "siteKeywords": [
       "AIGC",
       "作品集",
+      "图像生成",
+      "AI 视频制作",
       "商业视觉",
-      "短视频分镜",
-      "ComfyUI",
-      "AI广告"
+      "电商产品图",
+      "品牌海报",
+      "短视频素材"
     ],
     "canonicalUrl": "https://www.zhangweivisual.cn/",
-    "ogTitle": "ZHANG WEI - AIGC Portfolio",
-    "ogDescription": "用 AIGC 重构商业视觉与叙事内容",
-    "ogImage": "images/_optimized/微信图片_20260411183220_100_7.webp",
+    "ogTitle": "张玮｜AIGC 视觉作品集",
+    "ogDescription": "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
+    "ogImage": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
     "twitterCard": "summary_large_image",
-    "caseSectionTitle": "精选案例",
-    "caseSectionDesc": "用结构化案例说明创作链路、工具选择和最终结果。",
-    "contactSectionTitle": "合作咨询",
-    "contactSectionDesc": "留下项目类型、预算区间和联系方式，我会根据你的需求给出匹配方案。",
+    "caseSectionTitle": "商业视觉案例",
+    "caseSectionDesc": "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
+    "contactSectionTitle": "联系我",
+    "contactSectionDesc": "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
     "formspreeEndpoint": "",
-    "contactCtaLabel": "提交需求"
+    "contactCtaLabel": "查看联系方式"
   },
   "cases": [
     {
       "id": "ai-short-video-campaign",
-      "title": "AI 广告短视频与抖音系列内容",
-      "cover": "images/_optimized/微信图片_20260411183234_116_7.webp",
-      "category": "叙事内容",
+      "title": "AI 广告短视频与外链播放素材",
+      "cover": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
+      "category": "AI 视频素材",
       "tags": [
-        "短视频",
-        "广告",
-        "AIGC"
+        "AI 视频",
+        "短视频素材",
+        "外链播放"
       ],
-      "description": "用 AI 原生视频和后期剪辑构建电商广告和平台分发内容，形成系列化投放素材。",
+      "description": "围绕产品展示、平台短视频和外站成片链接，整理可播放、可复用的 AI 视频素材。",
       "results": {
-        "videoLength": "30s+",
-        "outputs": "5 支短视频"
+        "输出内容": "视频片段、视频封面与外站成片链接",
+        "能力重点": "镜头生成、封面整理、播放入口管理"
       },
       "tools": [
-        "Sora",
-        "Kling",
-        "剪映"
+        "Sora / Kling",
+        "剪映",
+        "外链播放器"
       ],
       "slideIds": [
         16,
@@ -52,17 +54,17 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "controlnet-ecommerce",
       "title": "ControlNet 电商产品精修",
-      "cover": "images/_optimized/微信图片_20260411183220_100_7.webp",
-      "category": "商业视觉",
+      "cover": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
+      "category": "电商视觉",
       "tags": [
-        "AIGC",
-        "电商",
-        "ControlNet"
+        "电商主图",
+        "ControlNet",
+        "产品渲染"
       ],
-      "description": "围绕产品结构和光影一致性，完成线稿约束到高精渲染的电商主图升级。",
+      "description": "围绕产品结构、光影和材质一致性，把线稿或原始素材整理成更适合展示的产品视觉。",
       "results": {
-        "clickRate": "+32%",
-        "conversion": "+18%"
+        "输出内容": "产品主图、包装视觉与细节展示",
+        "能力重点": "结构控制、材质统一、高清展示"
       },
       "tools": [
         "ComfyUI",
@@ -76,18 +78,18 @@ window.__EMBEDDED_PORTFOLIO__ = {
     },
     {
       "id": "future-brand-visuals",
-      "title": "未来感品牌海报与 VI 系统",
-      "cover": "images/_optimized/微信图片_20260411183205_89_7.webp",
+      "title": "品牌海报与视觉延展",
+      "cover": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
       "category": "品牌视觉",
       "tags": [
-        "品牌",
-        "海报",
-        "VI"
+        "品牌海报",
+        "视觉延展",
+        "AIGC"
       ],
-      "description": "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
+      "description": "用统一的视觉语言扩展品牌海报、角色视觉、包装视觉和社媒物料。",
       "results": {
-        "deliverables": "6 套物料",
-        "iteration": "3 轮迭代"
+        "输出内容": "海报、角色视觉、包装视觉与图文素材",
+        "能力重点": "风格设定、系列化输出、版式整理"
       },
       "tools": [
         "Midjourney",
@@ -106,25 +108,29 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 1,
       "type": "cover",
       "title": "张玮",
-      "subtitle": "AIGC 商业视觉作品集",
-      "desc": "Generative AI & Agent Workflow | 2026",
+      "subtitle": "AIGC 视觉作品集",
+      "desc": "图像生成 / 视频制作 / 商业视觉设计",
       "media": []
     },
     {
       "id": 2,
       "type": "split",
       "title": "Profile | 个人简介",
-      "text": "资深视觉设计师，深耕AIGC。\n掌握 SD/ComfyUI 到 Sora/Kling 全链路。专注解决商业落地“控制力”痛点。",
+      "text": "AIGC 视觉与视频创作经历说明，后台保留为资料页，公开作品集不作为主展示区。",
       "slots": 1,
       "slotType": "image",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/删掉图片中已毕业和右下角白色文字，可立即到岗改成薪资面议，其他内容不变_2K_202604131852.webp"
+          "url": "images/_optimized/删掉图片中已毕业和右下角白色文字，可立即到岗改成薪资面议，其他内容不变_2K_202604131852.webp",
+          "fullUrl": "images/删掉图片中已毕业和右下角白色文字，可立即到岗改成薪资面议，其他内容不变_2K_202604131852.png",
+          "width": 2752,
+          "height": 1536,
+          "alt": "Profile | 个人简介 01"
         }
       ],
       "textBlocks": [
-        "资深视觉设计师，深耕AIGC。\n掌握 SD/ComfyUI 到 Sora/Kling 全链路。专注解决商业落地“控制力”痛点。"
+        "AIGC 视觉与视频创作经历说明，后台保留为资料页，公开作品集不作为主展示区。"
       ]
     },
     {
@@ -137,25 +143,33 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 4,
       "type": "chapter",
       "chapter": "01",
-      "title": "E-Commerce Visuals",
-      "desc": "项目 1：线稿精修图",
+      "title": "电商产品视觉",
+      "desc": "线稿控制、产品渲染与商业主图整理",
       "media": []
     },
     {
       "id": 5,
       "type": "compare-slider",
-      "title": "ControlNet | 线稿与重绘对比",
-      "desc": "拖动滑块查看【草图线稿】与【高精渲染】的进化（展现绝对控制力）",
+      "title": "ControlNet 电商产品精修",
+      "desc": "从结构线稿到高精产品图，突出形体、材质和光影控制。",
       "slots": 2,
       "slotType": "image",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183220_100_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D ecommerce product polishing visual"
         },
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183210_92_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D wireless earbuds product render"
         }
       ]
     },
@@ -163,50 +177,70 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 7,
       "type": "chapter",
       "chapter": "02",
-      "title": "Commercial Posters",
-      "desc": "项目 2：商业海报与品牌VI设计",
+      "title": "品牌海报视觉",
+      "desc": "商业海报、包装主视觉与品牌延展",
       "media": []
     },
     {
       "id": 8,
       "type": "split",
-      "title": "Brand Poster | 极简与未来感视觉",
-      "text": "第一套风格：高科技/未来感产品发布会主视觉海报，展现极高的光影质感与排版空间感。",
+      "title": "未来感品牌海报视觉",
+      "text": "以未来感光影和克制版式呈现产品发布、品牌主视觉和社媒封面。",
       "slots": 1,
       "slotType": "image",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183205_89_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D brand visual system image"
         }
       ],
       "textBlocks": [
-        "第一套风格：高科技/未来感产品发布会主视觉海报，展现极高的光影质感与排版空间感。"
+        "以未来感光影和克制版式呈现产品发布、品牌主视觉和社媒封面。"
       ]
     },
     {
       "id": 9,
       "type": "gallery-4",
-      "title": "VI Design | 多元风格商业应用",
-      "desc": "国潮风与波普艺术风格在品牌视觉体系中的一致性延展 (展示6套物料)",
+      "title": "品牌 VI 与国潮海报延展",
+      "desc": "将统一风格扩展到海报、角色视觉、包装和社媒物料。",
       "slots": 4,
       "slotType": "image",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183204_88_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D brand visual system image"
         },
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183221_101_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D original IP campaign visual"
         },
         {
           "kind": "image",
-          "url": "images/微信图片_20260411183208_90_7.jpg"
+          "url": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D character consistency portrait"
         },
         {
           "kind": "image",
-          "url": "images/Gemini_Generated_Image_3zk3hz3zk3hz3zk3.png"
+          "url": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D beverage packaging render"
         }
       ]
     },
@@ -214,32 +248,36 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 10,
       "type": "chapter",
       "chapter": "03",
-      "title": "PS & C4D Synergy",
-      "desc": "项目 3：产品包装与 3D 特效展示",
+      "title": "包装与 3D 样机",
+      "desc": "产品包装、贴图设计与 C4D/AI 动态展示",
       "media": []
     },
     {
       "id": 11,
       "type": "split",
-      "title": "Packaging Integration | AI与传统包装设计",
-      "text": "利用 AI 生成高精度表面贴图与插画，结合 Illustrator 矢量排版，最终完成包装平面结构设计。",
+      "title": "饮料包装与 3D 样机整合",
+      "text": "从包装平面到产品样机，展示贴图、排版、材质和高分辨率细节。",
       "slots": 1,
       "slotType": "mix",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183200_84_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D beverage packaging render"
         }
       ],
       "textBlocks": [
-        "利用 AI 生成高精度表面贴图与插画，结合 Illustrator 矢量排版，最终完成包装平面结构设计。"
+        "从包装平面到产品样机，展示贴图、排版、材质和高分辨率细节。"
       ]
     },
     {
       "id": 12,
       "type": "gallery-2",
-      "title": "3D Mockups | C4D AI特效渲染",
-      "desc": "结合 C4D 与 Photoshop (AI Firefly)，将包装平面转化为逼真的 3D 空间样机",
+      "title": "C4D 产品样机动态展示",
+      "desc": "用动效镜头展示包装结构、材质质感和产品空间感。",
       "slots": 2,
       "slotType": "image",
       "customLabels": [
@@ -263,40 +301,52 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 13,
       "type": "chapter",
       "chapter": "04",
-      "title": "LoRA Training",
-      "desc": "项目 4：专属模型微调训练",
+      "title": "LoRA 一致性训练",
+      "desc": "角色、产品与画风的一致性输出",
       "media": []
     },
     {
       "id": 14,
       "type": "split",
-      "title": "Character LoRA | 专属人物特征训练",
-      "text": "展示基于特定真人或虚拟IP形象训练的人物 LoRA，确保面部特征高度锁定的输出结果。",
+      "title": "人物 LoRA：角色一致性训练",
+      "text": "围绕人物特征和角色风格做一致性训练，适合角色海报和连续视觉输出。",
       "slots": 3,
       "slotType": "image",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183312_154_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D character consistency portrait"
         },
         {
           "kind": "image",
-          "url": "images/_optimized/ref-look-202604131510.webp"
+          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D brand visual system image"
         },
         {
           "kind": "image",
-          "url": "images/_optimized/ref-look-202604131510-2.webp"
+          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D original IP campaign visual"
         }
       ],
       "textBlocks": [
-        "展示基于特定真人或虚拟IP形象训练的人物 LoRA，确保面部特征高度锁定的输出结果。"
+        "围绕人物特征和角色风格做一致性训练，适合角色海报和连续视觉输出。"
       ]
     },
     {
       "id": 15,
       "type": "gallery-2",
-      "title": "Product & Style LoRA | 产品与画风微调",
-      "desc": "针对特定商业品牌产品外形与指定插画风格进行的微调模型训练成果",
+      "title": "产品与插画风格 LoRA",
+      "desc": "针对产品外形和指定画风进行微调训练与系列化输出。",
       "slots": 2,
       "slotType": "image",
       "customLabels": [
@@ -307,11 +357,19 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183217_97_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D wireless earbuds product render"
         },
         {
           "kind": "image",
-          "url": "images/_optimized/微信图片_20260411183158_81_7.webp"
+          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D original IP campaign visual"
         }
       ]
     },
@@ -319,15 +377,15 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 16,
       "type": "chapter",
       "chapter": "05",
-      "title": "Commercial Ads Video",
-      "desc": "项目 5 & 8：AI广告短视频与抖音爆款",
+      "title": "AI 广告短视频",
+      "desc": "产品广告、平台短视频与信息流素材",
       "media": []
     },
     {
       "id": 17,
       "type": "full-media",
-      "title": "30s E-commerce Ad | 30秒电商创意广告",
-      "desc": "运用 Sora/Veo/Kling 生成运镜素材，结合剪映后期剪辑与特效制作",
+      "title": "电商广告短片：产品卖点镜头",
+      "desc": "用视频生成工具完成产品展示、运镜素材和剪辑片段整理。",
       "slots": 1,
       "slotType": "video",
       "media": [
@@ -341,8 +399,8 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": 18,
       "type": "gallery-4",
-      "title": "TikTok Viral Reels | 抖音风格系列短视频",
-      "desc": "抖音爆款复刻：利用 AI 原生视频与图生视频技术批量制作",
+      "title": "抖音风格短视频素材",
+      "desc": "围绕口播、产品、场景和节奏做系列短视频封面与素材整理。",
       "slots": 4,
       "slotType": "video",
       "media": [
@@ -372,15 +430,15 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 19,
       "type": "chapter",
       "chapter": "06",
-      "title": "Digital Avatar & Audio",
-      "desc": "项目 6：10秒钟产品展示视频 (数字人+音色)",
+      "title": "数字人与音频",
+      "desc": "AI 讲解、口型同步与本地音色合成",
       "media": []
     },
     {
       "id": 20,
       "type": "split",
-      "title": "AI Spokesperson | 虚拟代言人系统",
-      "text": "使用 飞影数字人 / HeyGen 构建虚拟讲解角色，配合高度自然的肢体动作与口型同步。",
+      "title": "AI 数字人产品讲解",
+      "text": "使用数字人和视频生成工具构建讲解角色，匹配产品介绍和口型同步。",
       "slots": 1,
       "slotType": "video",
       "media": [
@@ -391,14 +449,14 @@ window.__EMBEDDED_PORTFOLIO__ = {
         }
       ],
       "textBlocks": [
-        "使用 飞影数字人 / HeyGen 构建虚拟讲解角色，配合高度自然的肢体动作与口型同步。"
+        "使用数字人和视频生成工具构建讲解角色，匹配产品介绍和口型同步。"
       ]
     },
     {
       "id": 21,
       "type": "split",
-      "title": "Voice Cloning | 本地音色克隆与合成",
-      "text": "掌握 IndexTTS2 本地部署与 CosyVoice 音色克隆，实现指定情绪、语气的产品解说音频。",
+      "title": "本地音色克隆与产品配音",
+      "text": "使用本地音色合成流程，为产品讲解和短视频素材生成更贴合的声音。",
       "slots": 1,
       "slotType": "mix",
       "media": [
@@ -409,54 +467,71 @@ window.__EMBEDDED_PORTFOLIO__ = {
         }
       ],
       "textBlocks": [
-        "掌握 IndexTTS2 本地部署与 CosyVoice 音色克隆，实现指定情绪、语气的产品解说音频。"
+        "使用本地音色合成流程，为产品讲解和短视频素材生成更贴合的声音。"
       ]
     },
     {
       "id": 22,
       "type": "chapter",
       "chapter": "07",
-      "title": "AI Short Drama",
-      "desc": "项目 7：1-5分钟完整AI短剧",
+      "title": "AI 短剧制作",
+      "desc": "脚本、分镜、视频生成与后期剪辑",
       "media": []
     },
     {
       "id": 23,
       "type": "full-media",
-      "title": "Drama Masterpiece | 全链路短剧制作",
-      "desc": "展示3-5分钟完整短剧最终成片 (包含悬疑剧情、流畅运镜与电影级调色)",
+      "title": "AI 短剧全链路成片",
+      "desc": "展示完整短剧成片入口，包含剧情、镜头、声音和后期整理。",
       "slots": 1,
       "slotType": "video",
       "media": [
         {
           "kind": "video",
-          "url": "https://www.bilibili.com/video/BV1XgQhBqET4/?vd_source=9284a45b4666eb9b3b133193d466c744"
+          "url": "https://www.bilibili.com/video/BV1XgQhBqET4/?vd_source=9284a45b4666eb9b3b133193d466c744",
+          "externalProvider": "bilibili"
         }
       ]
     },
     {
       "id": 24,
       "type": "gallery-4",
-      "title": "Workflow Breakdown | 短剧工作流拆解",
-      "desc": "涵盖：脚本生成 → 分镜 → 视频生成 → 配音剪辑",
+      "title": "短剧工作流拆解",
+      "desc": "脚本生成、分镜图、视频生成、配音和剪辑流程说明。",
       "slots": 4,
       "slotType": "image",
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/a3855ba84a066337e5a3c0ab2d555dee.webp"
+          "url": "images/generated/eastern-future/zw-3d-drama-workflow-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-drama-workflow-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D drama workflow storyboard"
         },
         {
           "kind": "image",
-          "url": "images/_optimized/v2_mnr9v465_c5c783ec9dba146b (2).webp"
+          "url": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D short-video campaign visual"
         },
         {
           "kind": "image",
-          "url": "images/v2_mnr9tx74_15aadd9d1b8db9c3.png_.webp"
+          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D brand visual system image"
         },
         {
           "kind": "image",
-          "url": "images/v2_mnr9v4ax_c4177d8db447350a.jpg_.webp"
+          "url": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D character consistency portrait"
         }
       ]
     },
@@ -464,15 +539,15 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "id": 25,
       "type": "chapter",
       "chapter": "08",
-      "title": "Campaign & Free Topics",
-      "desc": "项目 9 & 11：原创IP全套周边与自由商业项目",
+      "title": "IP 视觉与自由商业项目",
+      "desc": "原创 IP、包装视觉、直播间和场景素材",
       "media": []
     },
     {
       "id": 26,
       "type": "gallery-2",
-      "title": "Brand Campaign | 原创IP全套周边",
-      "desc": "保持主视觉元素在 海报、动效视频、图文帖子 中的完美统一",
+      "title": "原创 IP 视觉周边",
+      "desc": "保持主视觉元素在海报、动效视频和图文内容中的统一。",
       "slots": 2,
       "slotType": "mix",
       "customLabels": [
@@ -483,19 +558,27 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/v2_mntugcis_84d653d28b55c585.jpg_.jpg"
+          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D original IP campaign visual"
         },
         {
           "kind": "image",
-          "url": "images/v2_mnwx0sct_f3164cf856ee478b.jpg_.jpg"
+          "url": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
+          "fullUrl": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Naked-eye 3D beverage packaging render"
         }
       ]
     },
     {
       "id": 27,
       "type": "gallery-2",
-      "title": "Free Topic Commercial | 自由选题",
-      "desc": "应用于室内设计效果图、游戏原画设定或直播间背景素材搭建",
+      "title": "商业自由选题短视频",
+      "desc": "适用于产品展示、空间视觉、直播间背景和平台视频素材。",
       "slots": 2,
       "slotType": "image",
       "media": [
@@ -514,9 +597,9 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": 30,
       "type": "cover",
-      "title": "GET IN TOUCH",
-      "subtitle": "追踪前沿，重塑视觉",
-      "desc": "期待加入您的团队",
+      "title": "联系我",
+      "subtitle": "期待更多可能",
+      "desc": "欢迎通过邮箱或招聘平台联系。",
       "media": []
     }
   ]

@@ -1,23 +1,25 @@
 {
-  "siteTitle": "ZHANG WEI - AIGC Portfolio",
-  "siteDescription": "AIGC 内容创意师作品集，专注商业视觉、短视频分镜与 AIGC 工具链。",
+  "siteTitle": "张玮｜AIGC 视觉作品集",
+  "siteDescription": "张玮的 AIGC 商业视觉作品集，展示图像生成、视频制作、电商产品图、品牌海报、短视频素材与创作流程。",
   "siteKeywords": [
     "AIGC",
     "作品集",
+    "图像生成",
+    "AI 视频制作",
     "商业视觉",
-    "短视频分镜",
-    "ComfyUI",
-    "AI广告"
+    "电商产品图",
+    "品牌海报",
+    "短视频素材"
   ],
   "canonicalUrl": "https://www.zhangweivisual.cn/",
-  "ogTitle": "ZHANG WEI - AIGC Portfolio",
-  "ogDescription": "用 AIGC 重构商业视觉与叙事内容",
-  "ogImage": "images/_optimized/微信图片_20260411183220_100_7.webp",
+  "ogTitle": "张玮｜AIGC 视觉作品集",
+  "ogDescription": "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
+  "ogImage": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
   "twitterCard": "summary_large_image",
-  "caseSectionTitle": "精选案例",
-  "caseSectionDesc": "用结构化案例说明创作链路、工具选择和最终结果。",
-  "contactSectionTitle": "合作咨询",
-  "contactSectionDesc": "留下项目类型、预算区间和联系方式，我会根据你的需求给出匹配方案。",
+  "caseSectionTitle": "商业视觉案例",
+  "caseSectionDesc": "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
+  "contactSectionTitle": "联系我",
+  "contactSectionDesc": "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
   "formspreeEndpoint": "",
-  "contactCtaLabel": "提交需求"
+  "contactCtaLabel": "查看联系方式"
 }

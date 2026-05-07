@@ -1,28 +1,28 @@
 {
   "id": "ai-short-video-campaign",
-  "title": "AI 广告短视频与抖音系列内容",
-  "cover": "images/_optimized/微信图片_20260411183234_116_7.webp",
-  "category": "叙事内容",
+  "title": "AI 广告短视频与外链播放素材",
+  "cover": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
+  "category": "AI 视频素材",
   "tags": [
-    "短视频",
-    "广告",
-    "AIGC"
+    "AI 视频",
+    "短视频素材",
+    "外链播放"
   ],
-  "description": "用 AI 原生视频和后期剪辑构建电商广告和平台分发内容，形成系列化投放素材。",
+  "description": "围绕产品展示、平台短视频和外站成片链接，整理可播放、可复用的 AI 视频素材。",
   "results": [
     {
-      "label": "videoLength",
-      "value": "30s+"
+      "label": "输出内容",
+      "value": "视频片段、视频封面与外站成片链接"
     },
     {
-      "label": "outputs",
-      "value": "5 支短视频"
+      "label": "能力重点",
+      "value": "镜头生成、封面整理、播放入口管理"
     }
   ],
   "tools": [
-    "Sora",
-    "Kling",
-    "剪映"
+    "Sora / Kling",
+    "剪映",
+    "外链播放器"
   ],
   "slideIds": [
     16,

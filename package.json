@@ -15,7 +15,8 @@
     "hls.js": "^1.6.16",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "sharp": "0.34.4"
+    "sharp": "0.34.4",
+    "three": "^0.181.2"
   },
   "devDependencies": {
     "esbuild": "0.25.4",

@@ -1,22 +1,22 @@
 {
   "id": "future-brand-visuals",
-  "title": "未来感品牌海报与 VI 系统",
-  "cover": "images/_optimized/微信图片_20260411183205_89_7.webp",
+  "title": "品牌海报与视觉延展",
+  "cover": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
   "category": "品牌视觉",
   "tags": [
-    "品牌",
-    "海报",
-    "VI"
+    "品牌海报",
+    "视觉延展",
+    "AIGC"
   ],
-  "description": "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
+  "description": "用统一的视觉语言扩展品牌海报、角色视觉、包装视觉和社媒物料。",
   "results": [
     {
-      "label": "deliverables",
-      "value": "6 套物料"
+      "label": "输出内容",
+      "value": "海报、角色视觉、包装视觉与图文素材"
     },
     {
-      "label": "iteration",
-      "value": "3 轮迭代"
+      "label": "能力重点",
+      "value": "风格设定、系列化输出、版式整理"
     }
   ],
   "tools": [

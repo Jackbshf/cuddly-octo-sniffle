@@ -1,4 +1,4 @@
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
@@ -33,6 +33,7 @@ export const buildAppAssets = async () => {
   await mkdir(assetsDir, { recursive: true });
   await rm(path.join(assetsDir, "app.css"), { force: true });
   await rm(path.join(assetsDir, "app.js"), { force: true });
+  const jsOutput = path.join(assetsDir, "app.js");
 
   const tailwindCli = path.join(root, "node_modules", "tailwindcss", "lib", "cli.js");
   await runCommand(process.execPath, [
@@ -50,7 +51,7 @@ export const buildAppAssets = async () => {
 
   await build({
     entryPoints: [jsEntry],
-    outfile: path.join(assetsDir, "app.js"),
+    outfile: jsOutput,
     bundle: true,
     minify: true,
     sourcemap: false,
@@ -63,6 +64,9 @@ export const buildAppAssets = async () => {
       "process.env.NODE_ENV": "\"production\""
     }
   });
+
+  const bundledJs = await readFile(jsOutput, "utf8");
+  await writeFile(jsOutput, bundledJs.replace(/[ \t]+$/gm, ""), "utf8");
 };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
