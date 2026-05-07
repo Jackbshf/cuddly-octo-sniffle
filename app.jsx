@@ -31,20 +31,31 @@ const INLINE_AUDIO_SESSION_KEY = "zhangwei_portfolio_inline_audio_unlocked_v1";
 const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_v1";
 
 const DEFAULT_SITE_META = {
-  siteTitle: "ZHANG WEI - AIGC Portfolio",
-  siteDescription: "AIGC 内容创意师作品集，专注商业视觉、短视频分镜与 AIGC 工具链。",
-  siteKeywords: ["AIGC", "作品集", "商业视觉", "短视频分镜", "ComfyUI", "AI广告"],
+  siteTitle: "张玮｜人工智能视觉设计师 / 生成式视频创作者",
+  siteDescription: "张玮的人工智能视觉设计与生成式视频作品集，展示 AI 图像生成、AI 视频制作、品牌视觉、电商产品图、短视频广告和创作流程。",
+  siteKeywords: ["人工智能生成内容", "作品集", "AI 图像生成", "AI 视频制作", "品牌视觉", "电商产品图", "短视频广告", "视觉设计师"],
   canonicalUrl: "https://www.zhangweivisual.cn/",
-  ogTitle: "ZHANG WEI - AIGC Portfolio",
-  ogDescription: "用 AIGC 重构商业视觉与叙事内容",
-  ogImage: "images/微信图片_20260411183220_100_7.jpg",
+  ogTitle: "张玮｜人工智能视觉设计师 / 生成式视频创作者",
+  ogDescription: "张玮的人工智能视觉设计与生成式视频作品集，展示 AI 图像生成、AI 视频制作、品牌视觉、电商产品图、短视频广告和创作流程。",
+  ogImage: "images/ai-product-control-final.png",
   twitterCard: "summary_large_image",
   caseSectionTitle: "精选案例",
   caseSectionDesc: "用结构化案例说明创作链路、工具选择和最终结果。",
-  contactSectionTitle: "合作咨询",
-  contactSectionDesc: "留下项目类型、预算区间和联系方式，我会根据你的需求给出匹配方案。",
+  contactSectionTitle: "联系方式",
+  contactSectionDesc: "面向人工智能视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
   formspreeEndpoint: "",
-  contactCtaLabel: "提交需求"
+  contactCtaLabel: "查看联系方式"
+};
+
+const PUBLIC_APPLICATION_META_OVERRIDES = {
+  siteTitle: DEFAULT_SITE_META.siteTitle,
+  siteDescription: DEFAULT_SITE_META.siteDescription,
+  siteKeywords: DEFAULT_SITE_META.siteKeywords,
+  ogTitle: DEFAULT_SITE_META.ogTitle,
+  ogDescription: DEFAULT_SITE_META.ogDescription,
+  contactSectionTitle: DEFAULT_SITE_META.contactSectionTitle,
+  contactSectionDesc: DEFAULT_SITE_META.contactSectionDesc,
+  contactCtaLabel: DEFAULT_SITE_META.contactCtaLabel
 };
 
 const colorPalettes = [
@@ -232,7 +243,7 @@ const createFreeLayoutElement = (type) => {
   if (type === "text") {
     return {
       ...base,
-      text: "双击编辑文字",
+      text: "输入展示文字",
       animation: "none",
       animationDuration: 1.2,
       animationDelay: 0
@@ -311,44 +322,44 @@ const normalizeSlides = (slides) => (Array.isArray(slides) ? slides.map(normaliz
 const createDefaultCases = () => ([
   {
     id: "controlnet-ecommerce",
-    title: "ControlNet 电商产品精修",
-    cover: "images/微信图片_20260411183220_100_7.jpg",
+    title: "可控电商产品精修",
+    cover: "images/ai-product-control-final.png",
     category: "商业视觉",
-    tags: ["AIGC", "电商", "ControlNet"],
-    description: "围绕产品结构和光影一致性，完成线稿约束到高精渲染的电商主图升级。",
+    tags: ["生成内容", "电商", "结构控制"],
+    description: "围绕产品结构和光影一致性，完成结构控制到高精渲染的电商主图升级。",
     results: {
-      clickRate: "+32%",
-      conversion: "+18%"
+      clickRate: "点击提升三成以上",
+      conversion: "转化提升一成以上"
     },
-    tools: ["ComfyUI", "ControlNet", "Photoshop"],
+    tools: ["节点工作流", "结构控制", "图像后期"],
     slideIds: [4, 5]
   },
   {
     id: "future-brand-visuals",
-    title: "未来感品牌海报与 VI 系统",
-    cover: "images/微信图片_20260411183205_89_7.jpg",
+    title: "未来感品牌海报与识别系统",
+    cover: "images/Gemini_Generated_Image_3zk3hz3zk3hz3zk3.png",
     category: "品牌视觉",
-    tags: ["品牌", "海报", "VI"],
+    tags: ["品牌", "海报", "视觉识别"],
     description: "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
     results: {
-      deliverables: "6 套物料",
-      iteration: "3 轮迭代"
+      deliverables: "六套物料",
+      iteration: "三轮迭代"
     },
-    tools: ["Midjourney", "Photoshop", "Illustrator"],
+    tools: ["图像生成", "图像后期", "矢量设计"],
     slideIds: [7, 8, 9]
   },
   {
     id: "ai-short-video-campaign",
-    title: "AI 广告短视频与抖音系列内容",
+    title: "广告短视频与平台系列内容",
     cover: "images/微信图片_20260411183234_116_7.png",
     category: "叙事内容",
-    tags: ["短视频", "广告", "AIGC"],
-    description: "用 AI 原生视频和后期剪辑构建电商广告和平台分发内容，形成系列化投放素材。",
+    tags: ["短视频", "广告", "生成内容"],
+    description: "用原生视频生成和后期剪辑构建电商广告与平台分发内容，形成系列化投放素材。",
     results: {
-      videoLength: "30s+",
-      outputs: "5 支短视频"
+      videoLength: "三十秒以上",
+      outputs: "五支短视频"
     },
-    tools: ["Sora", "Kling", "剪映"],
+    tools: ["视频生成", "国产视频生成", "剪映"],
     slideIds: [16, 17, 18]
   }
 ]);
@@ -663,11 +674,19 @@ const setInlineVideoMutedState = (video, nextMuted, onMutedChange) => {
 };
 
 const playInlineVideoAudible = (video, onMutedChange) => {
-  if (!video || !canUseAudibleInlinePlayback()) return Promise.resolve(false);
+  if (!video) return Promise.resolve(false);
+  const keepAudibleWhilePlaying = () => {
+    if (!video || video.paused) return;
+    setInlineVideoMutedState(video, false, onMutedChange);
+  };
   setInlineVideoMutedState(video, false, onMutedChange);
   const playAttempt = video.play();
   if (playAttempt && typeof playAttempt.then === "function") {
     return playAttempt.then(() => {
+      keepAudibleWhilePlaying();
+      [0, 80, 240, 520].forEach((delay) => {
+        window.setTimeout(keepAudibleWhilePlaying, delay);
+      });
       rememberInlineAudioPreference(false);
       return true;
     }).catch(() => {
@@ -683,8 +702,12 @@ const playInlineVideoMuted = (video, onMutedChange) => {
   setInlineVideoMutedState(video, true, onMutedChange);
   const playAttempt = video.play();
   if (playAttempt && typeof playAttempt.then === "function") {
-    return playAttempt.then(() => true).catch(() => false);
+    return playAttempt.then(() => {
+      setInlineVideoMutedState(video, true, onMutedChange);
+      return true;
+    }).catch(() => false);
   }
+  setInlineVideoMutedState(video, true, onMutedChange);
   return Promise.resolve(true);
 };
 
@@ -701,7 +724,10 @@ const attemptInlineVideoPlayback = (video, options = {}) => {
     } catch (error) {}
   }
   if (preferAudible) {
-    return playInlineVideoAudible(video, onMutedChange);
+    return playInlineVideoAudible(video, onMutedChange).then((playedAudible) => {
+      if (playedAudible) return true;
+      return playInlineVideoMuted(video, onMutedChange).then(() => false);
+    });
   }
   return playInlineVideoMuted(video, onMutedChange).then(() => false);
 };
@@ -861,12 +887,10 @@ const getStoredDraft = () => {
 };
 
 const loadPortfolioModel = async () => {
-  if (window.location.protocol === "file:") return createPortfolioModel(EMBEDDED_PORTFOLIO);
+  if (window.location.protocol === "file:" || IS_EDITOR_MODE) return createPortfolioModel(EMBEDDED_PORTFOLIO);
 
-  const shouldBypassCache = IS_EDITOR_MODE;
   const params = new URLSearchParams();
   if (APP_BUNDLE_VERSION) params.set("v", APP_BUNDLE_VERSION);
-  if (shouldBypassCache) params.set("t", Date.now().toString());
   const requestUrl = params.size ? `${DATA_FILE_PATH}?${params.toString()}` : DATA_FILE_PATH;
   const response = await fetch(requestUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`Unable to load ${DATA_FILE_PATH}`);
@@ -1146,7 +1170,8 @@ const StreamVideoElement = ({
   onVideoPlay,
   onVideoPause,
   onVideoTimeUpdate,
-  handleSurfaceClick
+  handleSurfaceClick,
+  audiblePreviewActive = false
 }) => {
   const internalVideoRef = useRef(null);
   const [nativeVideoSrc, setNativeVideoSrc] = useState("");
@@ -1155,6 +1180,14 @@ const StreamVideoElement = ({
     assignMediaRef(videoRef, internalVideoRef.current);
     return () => assignMediaRef(videoRef, null);
   }, [videoRef]);
+
+  useEffect(() => {
+    const video = internalVideoRef.current;
+    if (!video) return;
+    const nextMuted = audiblePreviewActive ? false : Boolean(muted);
+    video.defaultMuted = nextMuted;
+    video.muted = nextMuted;
+  }, [audiblePreviewActive, muted, nativeVideoSrc]);
 
   useEffect(() => {
     const video = internalVideoRef.current;
@@ -1194,8 +1227,8 @@ const StreamVideoElement = ({
     src={nativeVideoSrc || undefined}
     data-media-source={sourceUrl || playbackUrl || ""}
     loop
-    muted={muted}
     controls={showNativeVideoControls}
+    data-audible-preview-active={audiblePreviewActive ? "true" : "false"}
     playsInline
     preload={videoPreloadMode}
     poster={poster || undefined}
@@ -1215,7 +1248,7 @@ const StreamVideoElement = ({
   />;
 };
 
-const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, showPoster = true, videoPreloadMode = "metadata", showNativeVideoControls = false }) => {
+const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef, mediaClassName, onMediaLoad, onMediaError, onVideoMetadata, onMediaMeasure, onVideoPlay, onVideoPause, onVideoTimeUpdate, preferDraftPreview = false, showPoster = true, videoPreloadMode = "metadata", showNativeVideoControls = false, audiblePreviewActive = false }) => {
   const item = normalizeMediaItem(mediaItem);
   if (!item) return null;
   const handleSurfaceClick = typeof onMediaSurfaceClick === "function" ? onMediaSurfaceClick : stopClick;
@@ -1277,11 +1310,12 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     const sourceUrl = getSourceMediaUrl(item, { preferDraftPreview });
     if (!playbackUrl && !sourceUrl) return null;
     const embedUrl = getVideoEmbedUrl(sourceUrl);
+    const isBilibiliEmbed = isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl);
     if (embedUrl && !isDirectVideoSource(sourceUrl)) {
-      if (shouldRenderInlineEmbed) {
+      if (shouldRenderInlineEmbed && !isBilibiliEmbed) {
         return <iframe
           src={withEmbedPlaybackParams(embedUrl, false)}
-          title={isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl) ? "Bilibili player" : "Embedded video player"}
+          title="Embedded video player"
           className={embedFrameClassName}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
@@ -1290,7 +1324,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
           onClick={stopClick}
         />;
       }
-      return renderEmbeddedFallback("点击放大播放视频", isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl) ? "Bilibili" : "Video");
+      return renderEmbeddedFallback(isBilibiliEmbed ? "打开外部视频链接" : "点击放大播放视频", isBilibiliEmbed ? "外部视频" : "Video");
     }
     if (!isDirectVideoSource(playbackUrl)) {
       if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
@@ -1317,6 +1351,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
       onVideoPause={onVideoPause}
       onVideoTimeUpdate={onVideoTimeUpdate}
       handleSurfaceClick={handleSurfaceClick}
+      audiblePreviewActive={audiblePreviewActive}
     />;
   }
 
@@ -1462,6 +1497,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadSource, setLoadSource] = useState("loading");
   const [statusMessage, setStatusMessage] = useState("正在载入发布数据...");
+  const [visualFilter, setVisualFilter] = useState("all");
   const [isPageJumpEditing, setIsPageJumpEditing] = useState(false);
   const [pageJumpValue, setPageJumpValue] = useState("1");
   const [showStructureEditor, setShowStructureEditor] = useState(false);
@@ -1488,9 +1524,10 @@ function App() {
   const currentTheme = colorPalettes[currentSlide % colorPalettes.length] || colorPalettes[0];
   const slidesData = portfolioData.slides;
   const casesData = portfolioData.cases;
-  const siteMeta = portfolioData.meta;
+  const siteMeta = IS_EDITOR_MODE ? portfolioData.meta : normalizeSiteMeta({ ...portfolioData.meta, ...PUBLIC_APPLICATION_META_OVERRIDES });
   const publishedSlidesData = publishedPortfolioData.slides;
-  const tocSlideIndex = Math.max(0, slidesData.findIndex((slide) => slide && slide.type === "toc"));
+  const tocSlideIndex = slidesData.findIndex((slide) => slide && slide.type === "toc");
+  const hasTocSlide = tocSlideIndex >= 0;
   const isMobileFeedMode = true;
   const isMobilePreviewMode = layoutMode !== "desktop-feed";
   const isMobilePortraitMode = layoutMode === "mobile-portrait-feed";
@@ -1651,7 +1688,7 @@ function App() {
       setPublishedPortfolioData(deepClone(published));
       setPortfolioData(draft ? draft : deepClone(published));
       setLoadSource(draft ? "draft" : "published");
-      setStatusMessage(draft ? "已载入本地草稿，可继续编辑后保存 JSON。" : `已载入发布数据：${DATA_FILE_PATH}`);
+      setStatusMessage(draft ? "已载入本地草稿，可继续编辑后保存 JSON。" : IS_EDITOR_MODE ? "已载入源数据快照，可继续编辑后保存 JSON。" : `已载入发布数据：${DATA_FILE_PATH}`);
     }).catch(() => {
       if (!mounted) return;
       const fallback = createPortfolioModel(EMBEDDED_PORTFOLIO);
@@ -1914,6 +1951,10 @@ function App() {
       return;
     }
     changeSlide(nextIndex);
+  };
+
+  const goToTocSlide = () => {
+    if (hasTocSlide) goToSlide(tocSlideIndex);
   };
 
   const updateSlide = (slideIndex, updater) => {
@@ -2212,15 +2253,13 @@ function App() {
     const overlayWidth = position > 0 ? `${100 * (100 / position)}%` : "100%";
 
     return <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-white/10" ref={sliderRef} onMouseMove={(event) => { if (event.buttons === 1) handleDrag(event); }} onTouchMove={handleDrag}>
-      <div className="absolute inset-0"><MediaSlot slideIndex={slideIndex} slotIndex={1} label="上传原图 (Before)" /></div>
+      <div className="absolute inset-0"><MediaSlot slideIndex={slideIndex} slotIndex={1} label="上传对比素材" /></div>
       <div className="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-cyan-400 shadow-[2px_0_15px_rgba(34,211,238,0.5)] z-20 pointer-events-none" style={{ width: `${position}%` }}>
-        <div className="absolute inset-y-0 left-0 pointer-events-auto" style={{ width: overlayWidth }}><MediaSlot slideIndex={slideIndex} slotIndex={0} label="上传成品 (After)" /></div>
+        <div className="absolute inset-y-0 left-0 pointer-events-auto" style={{ width: overlayWidth }}><MediaSlot slideIndex={slideIndex} slotIndex={0} label="上传对比素材" /></div>
       </div>
       <div className="absolute inset-y-0 w-8 -ml-4 flex items-center justify-center z-30 cursor-ew-resize slider-handle" style={{ left: `${position}%` }}>
         <div className="w-8 h-8 bg-cyan-400 rounded-full flex items-center justify-center text-black shadow-[0_0_15px_rgba(34,211,238,0.6)]"><Icon name="ChevronLeft" size={14} className="-mr-2" /><Icon name="ChevronRight" size={14} /></div>
       </div>
-      <div className="absolute bottom-4 right-4 z-10 px-3 py-1 bg-black/60 backdrop-blur rounded text-xs font-mono text-white/50 tracking-widest pointer-events-none">BEFORE</div>
-      <div className="absolute bottom-4 left-4 z-30 px-3 py-1 bg-cyan-500/80 backdrop-blur rounded text-xs font-mono text-black font-bold tracking-widest pointer-events-none">AFTER</div>
     </div>;
   };
 
@@ -2433,7 +2472,7 @@ function App() {
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
     const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster));
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
     const [isInViewport, setIsInViewport] = useState(false);
@@ -2463,12 +2502,12 @@ function App() {
       userPausedRef.current = false;
       clearControlsTimer();
       if (!preserveOverlay) setShowPlaybackOverlay(false);
-      setIsMuted(false);
+      setIsMuted(true);
       setIsPlaying(false);
       setCurrentTimeLabel("00:00");
       setPlaybackProgress(0);
       playAttemptRef.current = null;
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
     };
 
     const stopOwnInlinePreview = (options = {}) => {
@@ -2512,7 +2551,7 @@ function App() {
     const startInlinePreview = (options = {}) => {
       const forceDesktop = Boolean(options.forceDesktop);
       const video = videoRef.current;
-      if (!video || !directVideo || showEditor || !isInViewport) return;
+      if (!video || !directVideo || showEditor || (!isInViewport && !forceDesktop)) return;
       if (prefersHoverControls && !forceDesktop && !isHovered) return;
       if (userPausedRef.current) return;
       if (playAttemptRef.current) return;
@@ -2573,7 +2612,7 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       clearActiveInlinePreview(inlinePreviewOwnerId);
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       openMediaLightbox(item, { requestFullscreen: true });
     };
 
@@ -2625,7 +2664,7 @@ function App() {
         setPlaybackProgress(0);
         setIsPlaying(false);
         setShowPlaybackOverlay(false);
-        setIsMuted(false);
+        setIsMuted(true);
         userPausedRef.current = false;
         return;
       }
@@ -2642,7 +2681,7 @@ function App() {
       setPlaybackProgress(0);
       setIsPlaying(false);
       setShowPlaybackOverlay(false);
-      setIsMuted(false);
+      setIsMuted(true);
       userPausedRef.current = false;
       clearControlsTimer();
       clearActiveInlinePreview(inlinePreviewOwnerId);
@@ -2805,12 +2844,9 @@ function App() {
       {hasUsableMedia ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} audiblePreviewActive={directVideo && prefersHoverControls && isHovered && shouldInlinePreviewPlay} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
-              if (prefersHoverControls && videoRef.current) {
-                setInlineVideoMutedState(videoRef.current, false, setIsMuted);
-              }
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
             }
@@ -2867,13 +2903,13 @@ function App() {
     </div>;
   };
 
-  const MediaSlot = ({ slideIndex, slotIndex, label }) => {
+  const MediaSlot = ({ slideIndex, slotIndex, label, forceContain = false, disableInlinePreview = false }) => {
     const slide = slidesData[slideIndex];
     const item = normalizeMediaItem(slide.media && slide.media[slotIndex]);
     const bindingInfo = getMediaBindingInfo(item);
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [isDragTarget, setIsDragTarget] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
@@ -2895,8 +2931,8 @@ function App() {
     const videoSource = item && item.kind === "video" ? getPrimaryMediaUrl(item, { preferDraftPreview }) : "";
     const directVideo = item && item.kind === "video" && isDirectVideoSource(videoSource);
     const inlinePreviewOwnerId = `slot:${slideIndex}:${slotIndex}`;
-    const shouldInlinePreviewPlay = directVideo && isInViewport && !showEditor && (prefersHoverControls ? isHovered : true);
-    const shouldContainMedia = slide?.id === 2 || slide?.title?.includes("个人简介");
+    const shouldInlinePreviewPlay = !disableInlinePreview && directVideo && isInViewport && !showEditor && (prefersHoverControls ? isHovered : true);
+    const shouldContainMedia = forceContain || slide?.id === 2 || slide?.title?.includes("个人简介");
     const mediaClassName = shouldContainMedia
       ? "relative z-10 max-h-full max-w-full h-auto w-auto object-contain object-center"
       : "relative z-10 h-full w-full object-cover object-center";
@@ -2906,12 +2942,12 @@ function App() {
       userPausedRef.current = false;
       clearControlsTimer();
       if (!preserveOverlay) setShowPlaybackOverlay(false);
-      setIsMuted(false);
+      setIsMuted(true);
       setIsPlaying(false);
       setCurrentTimeLabel("00:00");
       setPlaybackProgress(0);
       playAttemptRef.current = null;
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
     };
 
     const stopOwnInlinePreview = (options = {}) => {
@@ -2955,7 +2991,7 @@ function App() {
     const startInlinePreview = (options = {}) => {
       const forceDesktop = Boolean(options.forceDesktop);
       const video = videoRef.current;
-      if (!video || !directVideo || showEditor || !isInViewport) return;
+      if (!video || !directVideo || showEditor || (!isInViewport && !forceDesktop)) return;
       if (prefersHoverControls && !forceDesktop && !isHovered) return;
       if (userPausedRef.current) return;
       if (playAttemptRef.current) return;
@@ -3016,7 +3052,7 @@ function App() {
       if (event) event.stopPropagation();
       revealControls(3200);
       clearActiveInlinePreview(inlinePreviewOwnerId);
-      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: false, resetTime: true });
+      if (videoRef.current) stopInlineVideoPlayback(videoRef.current, { resetMuted: true, resetTime: true });
       openMediaLightbox(item, { requestFullscreen: true });
     };
 
@@ -3074,7 +3110,7 @@ function App() {
         setPlaybackProgress(0);
         setIsPlaying(false);
         setShowPlaybackOverlay(false);
-        setIsMuted(false);
+        setIsMuted(true);
         userPausedRef.current = false;
         return;
       }
@@ -3091,7 +3127,7 @@ function App() {
       setPlaybackProgress(0);
       setIsPlaying(false);
       setShowPlaybackOverlay(false);
-      setIsMuted(false);
+      setIsMuted(true);
       userPausedRef.current = false;
       clearControlsTimer();
       clearActiveInlinePreview(inlinePreviewOwnerId);
@@ -3255,19 +3291,16 @@ function App() {
         <label className="text-xs text-white/60 flex flex-col gap-1">封面链接（可选）
           <input type="text" value={item.poster || ""} placeholder="例如 images/video-cover.jpg" onChange={(event) => changeField("poster", event.target.value)} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none" />
         </label>
-        <label className="text-xs text-white/60 flex flex-col gap-1">Prompt / Metadata
+        <label className="text-xs text-white/60 flex flex-col gap-1">生成说明 / 参数
           <textarea value={item.meta || ""} onChange={(event) => changeField("meta", event.target.value)} placeholder="记录提示词、工作流节点、镜头说明等" className="w-full flex-1 min-h-[100px] bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white/80 font-mono outline-none resize-none" />
         </label>
       </div>}
       {item ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} audiblePreviewActive={directVideo && prefersHoverControls && isHovered && shouldInlinePreviewPlay} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
-              if (prefersHoverControls && videoRef.current) {
-                setInlineVideoMutedState(videoRef.current, false, setIsMuted);
-              }
               setIsVideoReady(true);
               updatePlaybackState(videoRef.current);
             }
@@ -3305,18 +3338,558 @@ function App() {
     </div>;
   };
 
+  const renderPills = (items, options = {}) => {
+    const values = ensureStringArray(items);
+    if (!values.length) return null;
+    return <div className={cx("portfolio-chip-list", options.compact && "portfolio-chip-list-compact", options.className)}>
+      {values.map((item) => <span key={item} className="portfolio-chip">{item}</span>)}
+    </div>;
+  };
+
+  const renderFitPoints = (points) => {
+    const values = Array.isArray(points)
+      ? points.map((point) => ({
+        label: ensureString(point?.label),
+        value: ensureString(point?.value)
+      })).filter((point) => point.label || point.value)
+      : [];
+    if (!values.length) return null;
+    return <div className="portfolio-fit-grid">
+      {values.map((point, pointIndex) => <div key={`${point.label}-${pointIndex}`} className="portfolio-fit-item">
+        {point.label && <span>{point.label}</span>}
+        {point.value && <strong>{point.value}</strong>}
+      </div>)}
+    </div>;
+  };
+
+  const getChapterRange = (chapterIndex) => {
+    const nextChapterIndex = slidesData.findIndex((candidate, candidateIndex) => candidateIndex > chapterIndex && candidate?.type === "chapter");
+    return slidesData.slice(chapterIndex + 1, nextChapterIndex === -1 ? slidesData.length : nextChapterIndex)
+      .filter((candidate) => candidate && candidate.type !== "cover" && candidate.type !== "toc");
+  };
+
+  const getChapterStats = (chapterIndex) => {
+    const range = getChapterRange(chapterIndex);
+    const mediaItems = range.flatMap((candidate) => Array.isArray(candidate.media) ? candidate.media : []);
+    const videoCount = mediaItems.filter((item) => item?.kind === "video" || item?.kind === "youtube").length;
+    return {
+      pages: range.length,
+      media: mediaItems.length,
+      videos: videoCount
+    };
+  };
+
+  const renderSlideInsight = (slide, options = {}) => {
+    const tags = ensureStringArray(slide.toolchain || slide.capabilities || slide.roleTags);
+    if (!slide.viewerNote && !slide.deliverable && !tags.length) return null;
+    return <div className={cx("portfolio-slide-insight", options.compact && "portfolio-slide-insight-compact", options.className)}>
+      {slide.viewerNote && <p className="portfolio-slide-note">{slide.viewerNote}</p>}
+      <div className="portfolio-slide-meta">
+        {slide.deliverable && <span className="portfolio-deliverable">{slide.deliverable}</span>}
+        {renderPills(tags, { compact: true })}
+      </div>
+    </div>;
+  };
+
+  const isImageMedia = (item) => item?.kind === "image";
+  const isVideoMedia = (item) => item?.kind === "video" || item?.kind === "youtube";
+  const portraitMediaPatterns = [
+    "a6537e213935b778ba57eade8bbf142a",
+    "1774080806307",
+    "51339bc463f2bb227aef56406ae9f0ac",
+    "微信图片_20260411183204",
+    "微信图片_20260411183221",
+    "微信图片_20260411183208",
+    "微信图片_20260411183312",
+    "ref-look-202604131510"
+  ];
+
+  const isLikelyPortraitMedia = (item) => {
+    const value = `${item?.url || ""} ${item?.poster || ""}`;
+    return portraitMediaPatterns.some((pattern) => value.includes(pattern));
+  };
+
+  const getSlideText = (slide) => ensureStringArray(slide?.textBlocks).join("\n");
+
+  const normalizeResultItems = (value) => {
+    const source = Array.isArray(value) ? value : Array.isArray(value?.resultItems) ? value.resultItems : value;
+    if (Array.isArray(source)) {
+      return source
+        .map((entry) => ({
+          label: ensureString(entry?.label),
+          value: ensureString(entry?.value)
+        }))
+        .filter((entry) => entry.label || entry.value);
+    }
+    if (source && typeof source === "object") {
+      return Object.entries(source)
+        .map(([label, resultValue]) => ({
+          label: ensureString(label),
+          value: String(resultValue ?? "").trim()
+        }))
+        .filter((entry) => entry.label || entry.value);
+    }
+    return [];
+  };
+
+  const caseOrder = ["ai-short-video-campaign", "controlnet-ecommerce", "future-brand-visuals"];
+  const getCaseById = (id) => casesData.find((caseItem) => caseItem?.id === id);
+  const getSlidesForCase = (caseItem) => {
+    const orderedIds = Array.isArray(caseItem?.slideIds) ? caseItem.slideIds : [];
+    return orderedIds.map((id) => slidesData.find((slide) => slide?.id === id)).filter(Boolean);
+  };
+  const getSlideMediaItems = (slide) => [
+    ...(Array.isArray(slide?.media) ? slide.media : []),
+    ...(Array.isArray(slide?.freeLayoutElements) ? slide.freeLayoutElements.filter((element) => element?.type === "media").map((element) => element.media) : [])
+  ].map(normalizeMediaItem).filter(Boolean);
+  const getCaseMediaStats = (caseItem) => {
+    const mediaItems = getSlidesForCase(caseItem).flatMap(getSlideMediaItems);
+    return {
+      images: mediaItems.filter(isImageMedia).length,
+      videos: mediaItems.filter(isVideoMedia).length,
+      total: mediaItems.length
+    };
+  };
+  const getCaseForSlide = (slide) => caseOrder.map(getCaseById).find((caseItem) => Array.isArray(caseItem?.slideIds) && caseItem.slideIds.includes(slide?.id));
+
+  const casePresentationDefinitions = [
+    {
+      id: "ai-short-video-campaign",
+      direction: "人工智能短视频、广告内容、社媒素材",
+      responsibility: "创意方向、提示词设计、图像生成、视频生成、素材筛选与后期整理",
+      ability: "展示人工智能视频生成、系列化内容制作和广告视觉方向控制能力。"
+    },
+    {
+      id: "controlnet-ecommerce",
+      direction: "电商产品图、结构控制、产品视觉优化",
+      responsibility: "产品视觉风格设定、结构控制、图像生成、精修与统一输出",
+      ability: "展示对商品结构、光影、质感和商业展示效果的控制能力。"
+    },
+    {
+      id: "future-brand-visuals",
+      direction: "品牌视觉、海报设计、概念视觉系统",
+      responsibility: "风格设定、视觉关键词设计、主视觉生成、版式整理",
+      ability: "展示人工智能辅助品牌视觉设计和统一视觉语言构建能力。"
+    }
+  ];
+
+  const featuredCases = casePresentationDefinitions.map((definition) => ({
+    ...definition,
+    caseItem: getCaseById(definition.id)
+  })).filter((item) => item.caseItem);
+
+  const formatMediaStats = (stats) => {
+    const parts = [];
+    if (stats.videos) parts.push(`${stats.videos} 条视频素材`);
+    if (stats.images) parts.push(`${stats.images} 张视觉图像`);
+    return parts.length ? parts.join(" / ") : `${stats.total} 组视觉素材`;
+  };
+
+  const heroRoleTags = ["人工智能视觉设计", "生成式视频制作", "品牌海报", "电商产品图", "短视频内容"];
+  const processSteps = [
+    { title: "需求理解", description: "明确项目目标、使用场景、受众和画面比例。" },
+    { title: "风格设定", description: "确定关键词、参考方向、色彩、构图和视觉气质。" },
+    { title: "提示词与视觉控制", description: "通过提示词、参考图、结构控制等方式控制画面结果。" },
+    { title: "生成与筛选", description: "批量生成不同版本，筛选出风格统一、完成度高的结果。" },
+    { title: "后期修正", description: "使用设计和剪辑工具进行画面修正、排版、调色和视频整理。" },
+    { title: "交付输出", description: "根据使用场景输出海报、产品图、短视频和社媒素材。" }
+  ];
+  const contactItems = [
+    { label: "求职方向", value: "人工智能视觉设计师 / AI 视频制作 / 生成式内容设计" },
+    { label: "邮箱", value: "2453193338@qq.com", href: "mailto:2453193338@qq.com" },
+    { label: "所在地", value: "广东" },
+    { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
+  ];
+
+  const getMediaEntriesBySlide = (predicate) => slidesData
+    .map((slide, slideIndex) => ({
+      slide,
+      slideIndex,
+      mediaItems: (Array.isArray(slide?.media) ? slide.media : [])
+        .map((media, slotIndex) => ({ media, slotIndex }))
+        .filter(({ media }) => predicate(normalizeMediaItem(media)))
+    }))
+    .filter((entry) => entry.slide && entry.mediaItems.length);
+
+  const sortEntriesBySlideId = (entries, order) => {
+    const rank = new Map(order.map((id, index) => [id, index]));
+    return [...entries].sort((a, b) => (rank.get(a.slide.id) ?? 999) - (rank.get(b.slide.id) ?? 999));
+  };
+
+  const imageEntries = sortEntriesBySlideId(getMediaEntriesBySlide(isImageMedia), [8, 9, 11, 14, 15, 26, 5, 24]);
+  const videoEntries = sortEntriesBySlideId(getMediaEntriesBySlide(isVideoMedia), [17, 18, 23, 20, 21, 12, 27]);
+  const chapterSlides = slidesData.filter((slide) => slide?.type === "chapter");
+  const contactSlide = slidesData.find((slide) => slide?.id === 30);
+  const totalImageCount = imageEntries.reduce((sum, entry) => sum + entry.mediaItems.length, 0);
+  const totalVideoCount = videoEntries.reduce((sum, entry) => sum + entry.mediaItems.length, 0);
+  const curatedStats = [
+    { label: "项目案例", value: `${featuredCases.length} 个` },
+    { label: "视觉素材", value: `${totalImageCount + totalVideoCount} 组` },
+    { label: "视频作品", value: `${totalVideoCount} 条` }
+  ];
+  const caseToolValues = [...new Set(featuredCases.flatMap(({ caseItem }) => ensureStringArray(caseItem?.tools)))];
+  const pickTools = (...keywords) => caseToolValues.filter((tool) => keywords.some((keyword) => tool.includes(keyword)));
+  const skillGroups = [
+    {
+      title: "人工智能图像生成",
+      items: pickTools("图像生成", "节点工作流", "结构控制"),
+      description: "围绕商品结构、品牌视觉和画面一致性做生成与控制。"
+    },
+    {
+      title: "人工智能视频生成",
+      items: pickTools("视频生成", "剪映"),
+      description: "结合视频生成、剪辑整理和短视频节奏输出可展示的动态素材。"
+    },
+    {
+      title: "设计与后期",
+      items: pickTools("图像后期", "矢量设计", "剪映"),
+      description: "用后期修正、版式整理和剪辑流程提升生成结果的可交付程度。"
+    },
+    {
+      title: "创意能力",
+      items: ["短视频分镜", "品牌视觉识别", "电商主图", "结构控制", "图像后期"],
+      description: "关注生成结果是否能服务于岗位中的商业视觉、短视频和内容资产需求。"
+    }
+  ].map((group) => ({ ...group, items: ensureStringArray(group.items) }));
+
+  const visualEntries = [...imageEntries, ...videoEntries]
+    .flatMap((entry) => entry.mediaItems.map((mediaEntry) => {
+      const caseItem = getCaseForSlide(entry.slide);
+      const category = caseItem?.id === "ai-short-video-campaign" || isVideoMedia(normalizeMediaItem(mediaEntry.media))
+        ? "short-video"
+        : caseItem?.id === "controlnet-ecommerce"
+          ? "product"
+          : caseItem?.id === "future-brand-visuals"
+            ? "brand"
+            : "experiment";
+      return {
+        entry,
+        mediaEntry,
+        caseItem,
+        category
+      };
+    }))
+    .sort((left, right) => {
+      const leftRank = caseOrder.indexOf(left.caseItem?.id);
+      const rightRank = caseOrder.indexOf(right.caseItem?.id);
+      return (leftRank < 0 ? 99 : leftRank) - (rightRank < 0 ? 99 : rightRank) || (left.entry.slide.id ?? 999) - (right.entry.slide.id ?? 999);
+    });
+  const videoWorks = videoEntries
+    .flatMap((entry) => entry.mediaItems.map((mediaEntry) => ({
+      entry,
+      mediaEntry,
+      caseItem: getCaseForSlide(entry.slide)
+    })))
+    .slice(0, 6);
+
+  const visualFilters = [
+    { id: "all", label: "全部" },
+    { id: "short-video", label: "视频视觉" },
+    { id: "product", label: "电商产品" },
+    { id: "brand", label: "品牌海报" },
+    { id: "experiment", label: "视觉实验" }
+  ];
+  const filteredVisualEntries = visualFilter === "all" ? visualEntries : visualEntries.filter((item) => item.category === visualFilter);
+
+  const renderCuratedEyebrow = (index, label) => <div className="curated-section-eyebrow">
+    <span>{String(index).padStart(2, "0")}</span>
+    <strong>{label}</strong>
+  </div>;
+
+  const renderCuratedInfo = (slide, options = {}) => {
+    const text = getSlideText(slide);
+    return <div className={cx("curated-card-info", options.compact && "curated-card-info-compact")}>
+      <div>
+        <h3>{slide.title}</h3>
+        {slide.viewerNote && <p>{slide.viewerNote}</p>}
+        {text && <p className="curated-card-text">{text}</p>}
+      </div>
+      <div className="curated-card-tags">
+        {slide.deliverable && <span>{slide.deliverable}</span>}
+        {ensureStringArray(slide.toolchain).map((item) => <span key={`${slide.id}-${item}`}>{item}</span>)}
+      </div>
+    </div>;
+  };
+
+  const renderCuratedMediaBox = (entry, mediaEntry, options = {}) => {
+    const { media, slotIndex } = mediaEntry;
+    const portrait = isLikelyPortraitMedia(media);
+    return <div
+      key={`${entry.slide.id}-${slotIndex}`}
+      className={cx(
+        "curated-media-box",
+        options.large && "curated-media-box-large",
+        options.compact && "curated-media-box-compact",
+        portrait && "curated-media-box-portrait"
+      )}
+      data-media-card="true"
+      data-media-kind={isVideoMedia(media) ? "video" : "image"}
+      data-media-count="1"
+    >
+      <MediaSlot slideIndex={entry.slideIndex} slotIndex={slotIndex} label={`素材 ${String(slotIndex + 1).padStart(2, "0")}`} forceContain disableInlinePreview={Boolean(options.disableInlinePreview)} />
+    </div>;
+  };
+
+  const renderCaseResultItems = (caseItem) => {
+    const results = normalizeResultItems(caseItem?.results).slice(0, 3);
+    if (!results.length) return null;
+    return <div className="grid gap-2 sm:grid-cols-2">
+      {results.map((item) => <div key={`${caseItem.id}-${item.label}`} className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2">
+        <span className="block text-[11px] text-white/35">{item.label}</span>
+        <strong className="mt-1 block text-sm font-medium text-white/82">{item.value}</strong>
+      </div>)}
+    </div>;
+  };
+
+  const renderSkillGroupCard = (group) => <article key={group.title} className="rounded-[24px] border border-white/10 bg-white/[0.045] p-5 shadow-2xl shadow-black/20">
+    <h3 className="text-xl font-semibold tracking-tight text-white">{group.title}</h3>
+    <p className="mt-3 text-sm leading-6 text-white/58">{group.description}</p>
+    <div className="mt-4 flex flex-wrap gap-2">
+      {group.items.map((item) => <span key={`${group.title}-${item}`} className="rounded-full border border-white/10 px-2.5 py-1.5 text-xs text-white/65">{item}</span>)}
+    </div>
+  </article>;
+
+  const renderVideoWorkCard = (item, index) => {
+    const { entry, mediaEntry, caseItem } = item;
+    const presentation = featuredCases.find((candidate) => candidate.caseItem.id === caseItem?.id);
+    return <article key={`${entry.slide.id}-${mediaEntry.slotIndex}-video`} className="curated-video-card">
+      {renderCuratedMediaBox(entry, mediaEntry, { compact: true, disableInlinePreview: true })}
+      <div className="grid gap-4">
+        <div>
+          <div className="text-xs text-cyan-100/45">视频作品 {String(index + 1).padStart(2, "0")}</div>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">{entry.slide.title || caseItem?.title || "人工智能视频作品"}</h3>
+          <p className="mt-2 text-sm leading-6 text-white/58">{entry.slide.viewerNote || getSlideText(entry.slide) || caseItem?.description || "展示人工智能视频生成、素材整理和短视频内容输出能力。"}</p>
+        </div>
+        <div className="grid gap-2 text-sm text-white/62">
+          <div><span className="text-white/35">项目类型：</span>{presentation?.direction || caseItem?.category || "人工智能视频素材"}</div>
+          <div><span className="text-white/35">我的职责：</span>{presentation?.responsibility || "生成、筛选与后期整理"}</div>
+          <div><span className="text-white/35">输出内容：</span>{entry.slide.deliverable || "短视频素材"}</div>
+        </div>
+        {caseItem && <a href={`#case-${caseItem.id}`} className="inline-flex w-max rounded-full border border-cyan-300/25 px-3 py-1.5 text-sm text-cyan-100/82 hover:bg-cyan-300/10">查看所属项目</a>}
+      </div>
+    </article>;
+  };
+
+  const renderFeaturedCaseCard = (service, index) => {
+    const { caseItem } = service;
+    const caseSlides = getSlidesForCase(caseItem);
+    const stats = getCaseMediaStats(caseItem);
+    const infoRows = [
+      { label: "项目方向", value: service.direction },
+      { label: "我的职责", value: service.responsibility },
+      { label: "输出内容", value: formatMediaStats(stats) },
+      { label: "能力体现", value: service.ability }
+    ];
+    return <article key={caseItem.id} id={`case-${caseItem.id}`} className="grid gap-5 rounded-[28px] border border-white/10 bg-black/25 p-4 shadow-2xl shadow-black/25 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.035]">
+        {caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} className="h-full min-h-[260px] w-full object-cover" loading={index === 0 ? "eager" : "lazy"} decoding="async" /> : <div className="flex min-h-[260px] items-center justify-center text-sm text-white/35">暂无封面</div>}
+      </div>
+      <div className="flex flex-col justify-between gap-6 p-1 lg:p-3">
+        <div>
+          <div className="text-xs text-cyan-100/45">项目案例 {String(index + 1).padStart(2, "0")}</div>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">{caseItem.title}</h3>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-white/62">{caseItem.description || service.ability}</p>
+          {renderPills(caseItem.tags, { compact: true, className: "mt-4" })}
+        </div>
+        <div className="grid gap-3">
+          {infoRows.map((row) => <div key={`${caseItem.id}-${row.label}`} className="grid gap-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm leading-6 sm:grid-cols-[80px_minmax(0,1fr)]">
+            <span className="text-white/36">{row.label}</span>
+            <strong className="font-normal text-white/72">{row.value}</strong>
+          </div>)}
+        </div>
+        {renderCaseResultItems(caseItem)}
+        <div className="flex flex-wrap items-center gap-3 text-xs text-white/45">
+          <span>{caseSlides.length} 组关联页面</span>
+          <span>{stats.images} 张图像</span>
+          <span>{stats.videos} 条视频</span>
+          <a href="#curated-images" className="ml-auto rounded-full border border-cyan-300/25 px-3 py-1.5 text-cyan-100/80 hover:bg-cyan-300/10">查看详情</a>
+        </div>
+      </div>
+    </article>;
+  };
+
+  const renderVisualIndexCard = (item) => {
+    const { entry, mediaEntry, caseItem } = item;
+    const normalizedMedia = normalizeMediaItem(mediaEntry.media);
+    const tags = ensureStringArray(caseItem?.tags || entry.slide.roleTags || entry.slide.toolchain).slice(0, 3);
+    const categoryLabel = visualFilters.find((filter) => filter.id === item.category)?.label || "视觉作品";
+    return <article key={`${entry.slide.id}-${mediaEntry.slotIndex}-${item.category}`} className="rounded-[22px] border border-white/10 bg-white/[0.035] p-3">
+      {renderCuratedMediaBox(entry, mediaEntry, { compact: true, disableInlinePreview: true })}
+      <div className="mt-4 space-y-3">
+        <div>
+          <h3 className="text-base font-semibold text-white/90">{entry.slide.title}</h3>
+          <p className="mt-2 line-clamp-3 text-sm leading-6 text-white/55">{entry.slide.viewerNote || getSlideText(entry.slide) || entry.slide.desc || caseItem?.description}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full border border-cyan-300/20 px-2 py-1 text-[11px] text-cyan-100/70">{categoryLabel}</span>
+          {tags.map((tag) => <span key={`${entry.slide.id}-${mediaEntry.slotIndex}-${tag}`} className="rounded-full border border-white/10 px-2 py-1 text-[11px] text-white/58">{tag}</span>)}
+          {normalizedMedia?.kind === "video" && <span className="rounded-full border border-cyan-300/20 px-2 py-1 text-[11px] text-cyan-100/70">视频可播放</span>}
+        </div>
+        {caseItem && <a href={`#case-${caseItem.id}`} className="inline-flex text-sm text-cyan-100/82 hover:text-cyan-50">所属案例：{caseItem.title}</a>}
+      </div>
+    </article>;
+  };
+
+  const renderCuratedTopbar = () => <div className="portfolio-topbar sticky top-3 z-40 px-3">
+    <div className="portfolio-topbar-inner curated-topbar-inner mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl">
+      <div className="portfolio-topbar-actions flex flex-wrap items-center gap-2" style={{ flexWrap: "wrap" }}>
+        <a href="#curated-images" className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">作品</a>
+        <a href="#curated-videos" className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">视频作品</a>
+        <a href="#curated-cases" className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">项目案例</a>
+        <a href="#curated-process" className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">创作流程</a>
+        <a href="#curated-tools" className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">技能工具</a>
+        <a href="#curated-contact" className="portfolio-touch-button rounded-full border border-cyan-300/25 px-3 py-1 text-cyan-100 hover:bg-cyan-300/10">联系方式</a>
+      </div>
+    </div>
+  </div>;
+
+  const renderCuratedExperience = () => {
+    return <div className="curated-page mx-auto w-full max-w-[1320px] px-4 pb-16 pt-4">
+      <section id="curated-cover" className="curated-hero" style={publishedSectionStyle}>
+        <div className="curated-hero-copy">
+          <h1 style={{ fontSize: "clamp(2.8rem, 6vw, 5.8rem)", lineHeight: 1.02 }}>人工智能视觉设计师 / 生成式视频创作者</h1>
+          <h2 style={{ letterSpacing: 0 }}>张玮</h2>
+          <p>我面向人工智能视觉设计与生成式视频制作岗位，将 AI 图像生成、视频生成、视觉控制与后期设计结合，输出品牌视觉、电商产品图、短视频广告和社媒内容资产。</p>
+          <div className="flex flex-wrap gap-2">
+            {heroRoleTags.map((tag) => <span key={tag} className="rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/62">{tag}</span>)}
+          </div>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <a href="#curated-videos" className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-cyan-100">观看视频作品</a>
+            <a href="#curated-cases" className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">查看项目案例</a>
+            <a href="#curated-contact" className="rounded-full border border-cyan-300/30 px-5 py-3 text-sm font-semibold text-cyan-50 hover:bg-cyan-300/10">联系我</a>
+          </div>
+        </div>
+        <div className="curated-hero-panel">
+          <span style={{ letterSpacing: 0 }}>作品证明</span>
+          <strong>我关注如何把人工智能生成结果转化为可控、统一、可交付的视觉内容。</strong>
+          <div className="curated-stat-grid">
+            {curatedStats.map((item) => <div key={item.label}>
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+            </div>)}
+          </div>
+          <div className="mt-5 grid gap-2">
+            {featuredCases.map((item) => <a key={item.id} href={`#case-${item.id}`} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-left text-sm text-white/70 hover:bg-white/[0.07]">
+              <span>{item.caseItem.title}</span>
+              <span className="text-cyan-100/70">查看</span>
+            </a>)}
+          </div>
+        </div>
+      </section>
+
+      <section id="curated-videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(1, "视频作品")}
+        <div className="curated-section-heading">
+          <h2>人工智能视频作品</h2>
+          <p>展示已有 AI 视频作品，重点说明项目类型、我的职责和输出内容；本地视频路径可直接作为兜底播放来源，不要求 Cloudflare Stream 标识。</p>
+        </div>
+        <div className="curated-video-grid">
+          {videoWorks.map(renderVideoWorkCard)}
+        </div>
+      </section>
+
+      <section id="curated-cases" className="curated-section" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(2, "项目案例")}
+        <div className="curated-section-heading">
+          <h2>精选项目案例</h2>
+          <p>三个案例分别对应 AI 短视频、电商产品视觉和品牌海报系统，说明我在项目中的职责、输出内容和能力体现。</p>
+        </div>
+        <div className="grid gap-5">
+          {featuredCases.map(renderFeaturedCaseCard)}
+        </div>
+      </section>
+
+      <section id="curated-images" className="curated-section" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(3, "精选作品")}
+        <div className="curated-section-heading">
+          <h2>精选人工智能视觉作品</h2>
+          <p>这里整理了我在人工智能图像生成、品牌海报、电商产品图和视觉风格探索中的部分作品，关注画面风格、构图控制、商业适配性和后期可用性。</p>
+        </div>
+        <div className="mb-5 flex flex-wrap gap-2">
+          {visualFilters.map((filter) => <button key={filter.id} type="button" onClick={() => setVisualFilter(filter.id)} className={cx("rounded-full border px-4 py-2 text-sm transition", visualFilter === filter.id ? "border-cyan-200 bg-cyan-200 text-black" : "border-white/10 bg-white/[0.035] text-white/62 hover:bg-white/[0.07]")}>
+            {filter.label}
+          </button>)}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredVisualEntries.map(renderVisualIndexCard)}
+        </div>
+      </section>
+
+      <section id="curated-process" className="curated-section curated-section-process" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(4, "创作流程")}
+        <div className="curated-section-heading">
+          <h2>人工智能创作流程</h2>
+          <p>从需求理解到交付输出，把生成、控制、筛选和后期整理拆成可说明、可复用的工作步骤。</p>
+        </div>
+        <div className="curated-process-grid">
+          {processSteps.map((step, stepIndex) => {
+            return <article key={step.title} className="curated-process-card">
+              <span className="text-xs text-cyan-100/45">{String(stepIndex + 1).padStart(2, "0")}</span>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </article>;
+          })}
+        </div>
+        <div className="curated-chapter-strip">
+          {chapterSlides.map((slide) => <div key={slide.id}>
+            <span>{slide.priority}</span>
+            <strong>{slide.title}</strong>
+            <p>{slide.roleFit}</p>
+          </div>)}
+        </div>
+      </section>
+
+      <section id="curated-tools" className="curated-section" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(5, "技能工具")}
+        <div className="curated-section-heading">
+          <h2>技能与工具</h2>
+          <p>这里只展示当前作品数据中能支撑的能力和工具关键词，不额外补写未验证的具体软件名或熟练程度。</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {skillGroups.map(renderSkillGroupCard)}
+        </div>
+      </section>
+
+      <section id="curated-contact" className="curated-contact" style={publishedSectionStyle}>
+        <h2>关于我 / 联系方式</h2>
+        <p>我希望应聘人工智能视觉设计、AI 视频制作和生成式内容设计相关岗位，作品涵盖人工智能图像生成、视频制作、品牌海报、电商产品视觉和短视频内容。</p>
+        <strong>欢迎通过邮箱或招聘平台联系我，进一步查看作品细节和项目过程。</strong>
+        <div className="mt-6 grid gap-3 text-left md:grid-cols-2">
+          {contactItems.map((item) => {
+            const content = <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-4">
+              <div className="text-xs text-white/38">{item.label}</div>
+              <div className="mt-2 text-sm font-semibold text-white/82">{item.value}</div>
+            </div>;
+
+            return item.href
+              ? <a key={item.label} href={item.href} className="block transition hover:border-cyan-200/40 hover:text-cyan-50">{content}</a>
+              : <div key={item.label}>{content}</div>;
+          })}
+        </div>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          {["AI 视觉设计师", "生成式视频创作者", "电商产品视觉", "品牌视觉设计", "短视频内容制作"].map((item) => <span key={item} className="rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/65">{item}</span>)}
+        </div>
+        {contactSlide && <div className="mt-5">
+          {renderPills(contactSlide.roleTags)}
+        </div>}
+      </section>
+    </div>;
+  };
+
   const renderSlide = (slide, index) => {
     if (!slide) return null;
     const slideTheme = colorPalettes[index % colorPalettes.length] || colorPalettes[0];
     const isFeedLayout = isMobileFeedMode;
 
     if (slide.type === "cover") {
-      return <div className={`flex flex-col items-center justify-center text-center relative z-10 ${isFeedLayout ? "min-h-[58svh] gap-6 px-5 py-14" : "h-full space-y-8"}`}>
+      return <div className={`flex flex-col items-center justify-center text-center relative z-10 ${isFeedLayout ? "min-h-[58svh] gap-6 px-5 py-14" : "h-full space-y-8 px-10"}`}>
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${isFeedLayout ? "w-56 h-56" : "w-80 h-80"} ${slideTheme.a} blur-[120px] rounded-full`} />
         <EditableText text={slide.title} field="title" slideIndex={index} tagName="h1" className="text-5xl md:text-[8rem] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 pb-4" />
         <EditableText text={slide.subtitle} field="subtitle" slideIndex={index} tagName="h2" className={`text-sm md:text-2xl font-light ${slideTheme.text} tracking-[0.28em] md:tracking-[0.4em] uppercase`} />
         <div className={`w-12 h-[2px] ${slideTheme.line} my-2 md:my-8`} />
         <EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className="text-white/40 tracking-[0.2em] text-sm uppercase font-mono" />
+        {renderFitPoints(slide.fitPoints)}
+        {renderPills(slide.roleTags, { className: "justify-center" })}
       </div>;
     }
 
@@ -3326,13 +3899,23 @@ function App() {
           <div className={`w-8 h-[1px] ${slideTheme.line}`} />
           <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className={`text-sm font-medium tracking-[0.3em] ${slideTheme.text} uppercase`} />
         </div>
-        <div className={`grid grid-cols-1 ${isFeedLayout ? "gap-4" : "md:grid-cols-2 gap-x-16 gap-y-8"}`}>{slidesData.filter((item) => item.type === "chapter").map((item) => {
+        <div className={`grid grid-cols-1 ${isFeedLayout ? "gap-4" : "md:grid-cols-2 gap-x-10 gap-y-6"}`}>{slidesData.filter((item) => item.type === "chapter").map((item) => {
           const chapterIndex = slidesData.findIndex((candidate) => candidate.id === item.id);
-          return <div key={item.id} onClick={() => { if (!IS_EDITOR_MODE) goToSlide(chapterIndex); }} className={`group flex items-start ${isFeedLayout ? "gap-4 p-4" : "gap-8 p-4"} rounded-2xl hover:bg-white/[0.04] transition-colors ${IS_EDITOR_MODE ? "" : "cursor-pointer"}`}>
+          const chapterStats = getChapterStats(chapterIndex);
+          return <div key={item.id} onClick={() => { if (!IS_EDITOR_MODE) goToSlide(chapterIndex); }} className={`portfolio-toc-card group flex items-start ${isFeedLayout ? "gap-4 p-4" : "gap-6 p-4"} rounded-2xl hover:bg-white/[0.04] transition-colors ${IS_EDITOR_MODE ? "" : "cursor-pointer"}`}>
             <EditableText text={item.chapter} field="chapter" slideIndex={chapterIndex} tagName="div" className="text-white/20 text-2xl md:text-3xl font-light font-mono" placeholder="章节编号" />
-            <div>
-              <EditableText text={item.title} field="title" slideIndex={chapterIndex} tagName="h3" className="text-xl font-light mb-2 text-white/90 group-hover:text-white" placeholder="章节标题" />
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <EditableText text={item.title} field="title" slideIndex={chapterIndex} tagName="h3" className="text-xl font-light text-white/90 group-hover:text-white" placeholder="章节标题" />
+                {item.priority && <span className="portfolio-priority">{item.priority}</span>}
+              </div>
               <EditableText text={item.desc} field="desc" slideIndex={chapterIndex} tagName="p" className="text-white/40 text-sm" placeholder="章节说明" />
+              {item.roleFit && <div className="portfolio-toc-fit">{item.roleFit}</div>}
+              <div className="portfolio-toc-meta">
+                <span>{chapterStats.pages} 页</span>
+                <span>{chapterStats.media} 个素材</span>
+                {chapterStats.videos > 0 && <span>{chapterStats.videos} 个视频</span>}
+              </div>
             </div>
             {IS_EDITOR_MODE && <button onClick={(event) => { event.stopPropagation(); goToSlide(chapterIndex); }} className="ml-auto rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100 hover:bg-cyan-500/20">跳转</button>}
           </div>;
@@ -3346,6 +3929,8 @@ function App() {
         <EditableText text={slide.chapter} field="chapter" slideIndex={index} tagName="span" className="text-6xl md:text-[12rem] font-bold text-white/5 tracking-tighter leading-none mb-2 md:mb-6 ml-[-4px] md:ml-[-10px] block w-max" />
         <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-5xl md:text-7xl font-semibold tracking-tight text-white/90 mb-6" />
         <EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-base md:text-xl ${slideTheme.text} tracking-[0.2em] font-light uppercase`} />
+        {slide.roleFit && <p className="portfolio-chapter-fit">{slide.roleFit}</p>}
+        {renderPills(slide.capabilities)}
       </div>;
     }
 
@@ -3355,8 +3940,11 @@ function App() {
 
     if (slide.type === "compare-slider") {
       return <div className={`flex flex-col relative z-10 w-full max-w-[1920px] mx-auto ${isFeedLayout ? "gap-4 px-1 py-2" : "h-full p-12"}`}>
-        <div className={`flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-6 px-4"}`}>
-          <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" />
+        <div className={`portfolio-slide-header flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-6 px-4"}`}>
+          <div className="min-w-0">
+            <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" />
+            {renderSlideInsight(slide, { compact: true })}
+          </div>
           <EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} />
         </div>
         <div className={`w-full relative ${isFeedLayout ? "h-[52svh]" : "flex-1 h-full"}`}>
@@ -3378,9 +3966,15 @@ function App() {
     }
 
     return <div className={`flex relative z-10 w-full max-w-[1920px] mx-auto flex-col ${isFeedLayout ? "gap-5 px-1 py-2" : "h-full p-10"}`}>
-      {slide.type !== "split" && <div className={`flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-4 px-4"}`}><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" /><EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} /></div>}
+      {slide.type !== "split" && <div className={`portfolio-slide-header flex ${isFeedLayout ? "flex-col gap-2 px-2" : "justify-between items-end mb-4 px-4"}`}>
+        <div className="min-w-0">
+          <EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl font-light tracking-wide text-white/90" />
+          {renderSlideInsight(slide, { compact: true })}
+        </div>
+        <EditableText text={slide.desc} field="desc" slideIndex={index} tagName="p" className={`text-sm tracking-widest uppercase font-mono ${slideTheme.text}`} />
+      </div>}
       <div className={slide.type === "split" ? (isFeedLayout ? "flex flex-col gap-5" : "flex-1 flex items-center gap-16 p-4") : `grid ${colsClass} gap-4`}>
-        {slide.type === "split" && <div className={`${isFeedLayout ? "w-full flex flex-col relative gap-3 px-2" : "w-1/3 flex flex-col relative gap-4"}`}><div className={`absolute ${isFeedLayout ? "-left-1 top-0 h-14" : "-left-10 top-0 h-20"} w-1 bg-gradient-to-b from-white/40 to-transparent opacity-60`} /><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl md:text-4xl font-light mb-2 md:mb-4 leading-tight tracking-wide text-white/90" /><div className="flex flex-col gap-3">{(Array.isArray(slide.textBlocks) ? slide.textBlocks : [slide.text || ""]).map((block, blockIndex) => <EditableText key={`${slide.id}-text-${blockIndex}`} text={block} field="text" slideIndex={index} tagName="p" placeholder={`文本框 ${blockIndex + 1}`} className="text-base md:text-lg text-white/70 leading-relaxed font-light whitespace-pre-line" onBlurValue={(value) => updateTextBlock(index, blockIndex, value)} />)}</div></div>}
+        {slide.type === "split" && <div className={`${isFeedLayout ? "w-full flex flex-col relative gap-3 px-2" : "w-1/3 flex flex-col relative gap-4"}`}><div className={`absolute ${isFeedLayout ? "-left-1 top-0 h-14" : "-left-10 top-0 h-20"} w-1 bg-gradient-to-b from-white/40 to-transparent opacity-60`} /><EditableText text={slide.title} field="title" slideIndex={index} tagName="h2" className="text-3xl md:text-4xl font-light mb-2 md:mb-4 leading-tight tracking-wide text-white/90" />{renderSlideInsight(slide)}<div className="flex flex-col gap-3">{(Array.isArray(slide.textBlocks) ? slide.textBlocks : [slide.text || ""]).map((block, blockIndex) => <EditableText key={`${slide.id}-text-${blockIndex}`} text={block} field="text" slideIndex={index} tagName="p" placeholder={`文本框 ${blockIndex + 1}`} className="text-base md:text-lg text-white/70 leading-relaxed font-light whitespace-pre-line" onBlurValue={(value) => updateTextBlock(index, blockIndex, value)} />)}</div></div>}
             <div className={slide.type === "split" ? (isFeedLayout ? "w-full grid grid-cols-1 gap-3" : "w-2/3 h-[80vh] flex gap-6") : "contents"}>{Array.from({ length: slide.slots || 1 }).map((_, slotIndex) => <div key={slotIndex} className={slide.type === "split" ? (isFeedLayout ? "min-h-[320px]" : "flex-1 h-full") : ""}><MediaSlot slideIndex={index} slotIndex={slotIndex} label={slide.customLabels ? slide.customLabels[slotIndex] : `素材 ${String(slotIndex + 1).padStart(2, "0")}`} /></div>)}</div>
       </div>
     </div>;
@@ -3415,6 +4009,7 @@ function App() {
     scrollMarginTop: `${sectionScrollOffset}px`
   };
   const portfolioSizeToneClass = portfolioSizeTone === "danger" ? "text-rose-200 bg-rose-500/15 border-rose-300/20" : portfolioSizeTone === "warning" ? "text-amber-100 bg-amber-500/12 border-amber-300/20" : "text-emerald-100 bg-emerald-500/12 border-emerald-300/20";
+  const useCuratedExperience = !IS_EDITOR_MODE;
 
   return <div className={cx("relative min-h-screen w-full font-sans select-none selection:bg-white/20", isMobilePreviewMode && "portfolio-mobile", isMobilePortraitMode && "portfolio-mobile-portrait", isMobileLandscapeMode && "portfolio-mobile-landscape", IS_EDITOR_MODE && "portfolio-editor")} {...touchHandlers}>
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -3423,22 +4018,22 @@ function App() {
       <div className={`absolute -bottom-[22%] left-[24%] h-[46%] w-[46%] ${currentTheme.c} rounded-full blur-[120px] opacity-80 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 11s infinite 3.4s" }} />
     </div>
     <div className="relative z-10">
-      <div className="portfolio-topbar sticky top-3 z-40 px-3">
+      {useCuratedExperience ? renderCuratedTopbar() : <div className="portfolio-topbar sticky top-3 z-40 px-3">
         <div className={`portfolio-topbar-inner mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"}`}>
           <div className="portfolio-topbar-actions flex flex-wrap items-center gap-2">
             <button onClick={() => goToSlide(0)} className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
-            <button onClick={() => goToSlide(tocSlideIndex)} className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>
+            {hasTocSlide && <button onClick={goToTocSlide} className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">目录</button>}
           </div>
           <div className="portfolio-page-indicator hidden items-center gap-2 lg:flex">
             <span className="text-white/38">{siteMeta.siteTitle}</span>
             <span className="font-mono tracking-widest text-white/70">{String(currentSlide + 1).padStart(2, "0")}/{String(slidesData.length).padStart(2, "0")}</span>
           </div>
         </div>
-      </div>
+      </div>}
       {IS_EDITOR_MODE && showStructureEditor && <div className="portfolio-structure-panel fixed right-4 top-20 z-[70] w-[min(92vw,440px)] overflow-hidden rounded-[28px] border border-white/10 bg-[#101114]/92 shadow-2xl backdrop-blur-2xl">
         <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
           <div>
-            <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">Portfolio Model</div>
+            <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">作品集数据模型</div>
             <div className="mt-1 text-sm text-white/78">编辑 `meta` / `cases`，slide 可视化编辑保持不变。</div>
           </div>
           <button onClick={() => setShowStructureEditor(false)} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/60 hover:bg-white/10">收起</button>
@@ -3468,7 +4063,7 @@ function App() {
           </div>
         </div>
       </div>}
-      <div className={`portfolio-feed mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
+      {useCuratedExperience ? renderCuratedExperience() : <div className={`portfolio-feed mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
         {slidesData.map((slide, index) => <section
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
@@ -3479,25 +4074,25 @@ function App() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
           {renderSlide(slide, index)}
         </section>)}
-      </div>
+      </div>}
     </div>
     {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={closeMediaLightbox}>
       <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={closeMediaLightbox}>✕ 关闭</button>
-      {lightboxData.meta && <div className="portfolio-lightbox-meta absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">Prompt / Metadata</span>{lightboxData.meta}</div>}
+      {lightboxData.meta && <div className="portfolio-lightbox-meta absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">生成说明 / 参数</span>{lightboxData.meta}</div>}
       {lightboxData.kind === "youtube" ? <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
         const preferDraftPreview = IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl);
         const streamPlayerUrl = getLightboxVideoPlayerUrl(lightboxData, { preferDraftPreview });
         if (streamPlayerUrl) return <iframe ref={lightboxVideoRef} src={`${streamPlayerUrl}?autoplay=true`} title="Cloudflare Stream player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0 bg-black" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         const sourceVideoUrl = getSourceMediaUrl(lightboxData, { preferDraftPreview });
         const embedUrl = getVideoEmbedUrl(sourceVideoUrl);
-        if (embedUrl && !isDirectVideoSource(sourceVideoUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
+        if (embedUrl && !isDirectVideoSource(sourceVideoUrl) && !isBilibiliVideoUrl(sourceVideoUrl) && !isBilibiliVideoUrl(embedUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
         return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
     {IS_EDITOR_MODE && (isMobilePreviewMode ? <>
       <div className="portfolio-editor-dock portfolio-editor-dock-mobile fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
-        <button onClick={() => goToSlide(tocSlideIndex)} className="p-2 text-white/55 hover:text-white hover:bg-white/10 rounded-full transition-all" title="目录"><Icon name="Home" size={18} /></button>
+        {hasTocSlide && <button onClick={goToTocSlide} className="p-2 text-white/55 hover:text-white hover:bg-white/10 rounded-full transition-all" title="目录"><Icon name="Home" size={18} /></button>}
         <button onClick={() => goToSlide(Math.max(0, currentSlide - 1))} className={`p-2 rounded-full transition-all ${currentSlide === 0 ? "text-white/20" : "text-white/70 hover:text-white hover:bg-white/10"}`} title="上一页"><Icon name="ChevronLeft" size={20} /></button>
         {isPageJumpEditing ? <div className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1">
           <input ref={pageJumpInputRef} type="text" inputMode="numeric" value={pageJumpValue} onChange={(event) => setPageJumpValue(event.target.value.replace(/[^\d]/g, "").slice(0, 3))} onBlur={submitPageJump} onKeyDown={(event) => {
@@ -3541,13 +4136,13 @@ function App() {
           <button onClick={() => { importInputRef.current && importInputRef.current.click(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="UploadCloud" size={16} /> 导入 JSON</button>
           <button onClick={() => { resetDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="RotateCcw" size={16} /> 重置草稿</button>
           <button onClick={() => { exportDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="Download" size={16} /> 导出 JSON</button>
-          {IS_PORTFOLIO_ADMIN_MODE && <button onClick={() => { publishPortfolioJson(); setShowMobileMoreMenu(false); }} disabled={isPublishingPortfolio} className="portfolio-mobile-menu-button text-emerald-100"><Icon name="Save" size={16} /> {isPublishingPortfolio ? "保存中..." : "保存到 GitHub"}</button>}
+          {IS_PORTFOLIO_ADMIN_MODE && <button onClick={() => { publishPortfolioJson(); setShowMobileMoreMenu(false); }} disabled={isPublishingPortfolio} className="portfolio-mobile-menu-button text-emerald-100"><Icon name="Save" size={16} /> {isPublishingPortfolio ? "保存中..." : "保存到代码仓库"}</button>}
           <button onClick={deleteCurrentSlide} className="portfolio-mobile-menu-button text-red-200"><Icon name="Trash2" size={16} /> 删除当前页</button>
         </div>
       </div>}
     </> : <div className="portfolio-editor-dock fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
-      <button onClick={() => goToSlide(tocSlideIndex)} className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"><Icon name="Home" size={18} /></button>
-      <div className="w-[1px] h-4 bg-white/10 mx-1" />
+      {hasTocSlide && <button onClick={goToTocSlide} className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"><Icon name="Home" size={18} /></button>}
+      {hasTocSlide && <div className="w-[1px] h-4 bg-white/10 mx-1" />}
       <button onClick={() => goToSlide(Math.max(0, currentSlide - 1))} className={`p-2 rounded-full transition-all ${currentSlide === 0 ? "text-white/10" : "text-white/60 hover:text-white hover:bg-white/10"}`}><Icon name="ChevronLeft" size={20} /></button>
       {isPageJumpEditing ? <div className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1">
         <input
@@ -3610,7 +4205,7 @@ function App() {
       <button onClick={() => importInputRef.current && importInputRef.current.click()} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="导入 JSON"><Icon name="UploadCloud" size={16} /></button>
       <button onClick={resetDraft} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="重置草稿"><Icon name="RotateCcw" size={16} /></button>
       <button onClick={exportDraft} className="p-2 text-cyan-300/80 hover:text-cyan-200 hover:bg-cyan-500/20 rounded-full" title="导出 JSON"><Icon name="Download" size={16} /></button>
-      {IS_PORTFOLIO_ADMIN_MODE && <button onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className={`p-2 rounded-full transition ${isPublishingPortfolio ? "text-emerald-100/35" : "text-emerald-200/85 hover:bg-emerald-500/20 hover:text-emerald-100"}`} title={isPublishingPortfolio ? "正在保存到 GitHub" : "保存 portfolio.json 到 GitHub"}><Icon name="Save" size={16} /></button>}
+      {IS_PORTFOLIO_ADMIN_MODE && <button onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className={`p-2 rounded-full transition ${isPublishingPortfolio ? "text-emerald-100/35" : "text-emerald-200/85 hover:bg-emerald-500/20 hover:text-emerald-100"}`} title={isPublishingPortfolio ? "正在保存到代码仓库" : "保存作品集数据到代码仓库"}><Icon name="Save" size={16} /></button>}
       <div className={`h-2.5 w-2.5 rounded-full ${loadSource.includes("draft") ? "bg-emerald-400" : "bg-cyan-400"}`} title={statusMessage} />
     </div>)}
     {IS_EDITOR_MODE && <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />}
