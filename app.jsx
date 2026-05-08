@@ -334,7 +334,7 @@ const createDefaultCases = () => ([
   {
     id: "controlnet-ecommerce",
     title: "可控电商产品精修",
-    cover: "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+    cover: "images/works/foundation/poster.webp",
     category: "商业视觉",
     tags: ["生成内容", "电商", "结构控制"],
     description: "围绕产品结构和光影一致性，完成结构控制到高精渲染的电商主图升级。",
@@ -348,7 +348,7 @@ const createDefaultCases = () => ([
   {
     id: "future-brand-visuals",
     title: "未来感品牌海报与识别系统",
-    cover: "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+    cover: "images/works/foundation/poster.webp",
     category: "品牌视觉",
     tags: ["品牌", "海报", "视觉识别"],
     description: "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
@@ -362,7 +362,7 @@ const createDefaultCases = () => ([
   {
     id: "ai-short-video-campaign",
     title: "广告短视频与平台系列内容",
-    cover: "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+    cover: "images/works/cybercity/poster.webp",
     category: "叙事内容",
     tags: ["短视频", "广告", "生成内容"],
     description: "用原生视频生成和后期剪辑构建电商广告与平台分发内容，形成系列化投放素材。",
@@ -1752,6 +1752,7 @@ function App() {
   const portfolioExportModel = sanitizePortfolioModelForExport(portfolioData);
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
+  const useGalleryWorldHome = false;
 
   const curatedNavItems = [
     { id: "home", label: "首页" },
@@ -2660,7 +2661,9 @@ function App() {
       });
       const replacement = buildReplacementMediaFromUpload(upload, pending.file, measured);
       const nextModel = replaceMediaInPortfolioModel(portfolioData, pending.target, replacement);
-      await publishPortfolioModel(nextModel, `Replace portfolio media ${pending.target.label || pending.file.name}`);
+      setPortfolioData(deepClone(nextModel));
+      setLoadSource("draft");
+      setStatusMessage(`已替换到本地草稿：${pending.target.label || pending.file.name}。确认无误后再点击保存到代码仓库发布。`);
       setPendingMediaReplacement(null);
       if (pending.previewUrl) URL.revokeObjectURL(pending.previewUrl);
     } catch (error) {
@@ -2695,7 +2698,9 @@ function App() {
     });
     try {
       const nextModel = replaceMediaInPortfolioModel(portfolioData, target, replacement);
-      await publishPortfolioModel(nextModel, `Replace external portfolio video ${target.label || ""}`.trim());
+      setPortfolioData(deepClone(nextModel));
+      setLoadSource("draft");
+      setStatusMessage(`已替换到本地草稿：${target.label || "当前媒体"}。确认无误后再点击保存到代码仓库发布。`);
     } catch (error) {
       setStatusMessage(error?.message || "外链视频保存失败，已保留原作品数据。");
     }
@@ -4747,9 +4752,9 @@ function App() {
             : <img src={previewUrl} alt="" />}
         </div>
         <div className="curated-upload-copy">
-          <span>确认替换并上线</span>
+          <span>确认替换到草稿</span>
           <h2>{target.label || "当前作品媒体"}</h2>
-          <p>确认后会先上传文件，再原位替换作品数据并保存到 GitHub，部署完成后线上站点生效。</p>
+          <p>确认后会先上传文件，再原位替换当前草稿预览；不会自动上线。确认页面无误后，再点击保存到代码仓库发布。</p>
           <div className="curated-upload-rows">
             <div><span>文件</span><strong>{file.name}</strong></div>
             <div><span>类型 / 大小</span><strong>{summary}</strong></div>
@@ -4758,7 +4763,7 @@ function App() {
           </div>
           <div className="curated-upload-actions">
             <button type="button" onClick={cancelPendingMediaReplacement} disabled={isReplacingMedia}>取消</button>
-            <button type="button" onClick={confirmPendingMediaReplacement} disabled={isReplacingMedia}>{isReplacingMedia ? "正在上传..." : "确认替换并保存"}</button>
+            <button type="button" onClick={confirmPendingMediaReplacement} disabled={isReplacingMedia}>{isReplacingMedia ? "正在上传..." : "确认替换到草稿"}</button>
           </div>
         </div>
       </aside>
@@ -4784,10 +4789,11 @@ function App() {
   };
 
   const renderHeroKineticStage = (heroDetail, stageItems) => {
-    const target = heroDetail ? {
+    const heroItem = heroDetail || stageItems?.[0]?.detail || null;
+    const target = heroItem ? {
       type: "slide-media",
-      slideId: heroDetail.entry.slide.id,
-      slotIndex: heroDetail.mediaEntry.slotIndex,
+      slideId: heroItem.entry.slide.id,
+      slotIndex: heroItem.mediaEntry.slotIndex,
       label: "首页动态舞台"
     } : null;
     const targetKey = target ? getCuratedDropTargetKey(target) : "";
@@ -4800,7 +4806,29 @@ function App() {
       )}
       {...handlers}
     >
-      <ThreeHeroStage items={stageItems} onOpen={openWorkDetail} />
+      {heroItem ? <article
+        className="curated-hero-single-stage"
+        role="button"
+        tabIndex={0}
+        onClick={() => openWorkDetail(heroItem)}
+        onKeyDown={(event) => openWorkDetailFromKeyboard(event, heroItem)}
+        aria-label={`查看作品：${heroItem.title}`}
+      >
+        {renderCuratedMediaBox(heroItem.entry, heroItem.mediaEntry, {
+          large: true,
+          eager: true,
+          key: "curated-hero-single",
+          label: heroItem.title || "首页主视觉"
+        })}
+        <div className="curated-hero-single-copy">
+          <span>{heroItem.label}</span>
+          <strong>{heroItem.title}</strong>
+          {heroItem.description && <p>{heroItem.description}</p>}
+        </div>
+      </article> : <div className="curated-hero-single-empty">
+        <Icon name="Image" size={26} />
+        <span>等待添加首页主视觉</span>
+      </div>}
       {IS_PORTFOLIO_ADMIN_MODE && target && <div className="curated-admin-media-tools">
         <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById("curated-hero-upload").click(); }}><Icon name="UploadCloud" size={14} /> 替换舞台作品</button>
       </div>}
@@ -4812,6 +4840,40 @@ function App() {
     </div>;
   };
 
+  const renderCuratedAdminDock = () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return null;
+    return <>
+      <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />
+      <div className="curated-admin-preview-dock" role="toolbar" aria-label="作品集后台可视化编辑工具">
+        <div className="curated-admin-preview-status">
+          <span className={loadSource.includes("draft") ? "is-draft" : "is-published"} />
+          <div>
+            <strong>后台可视化编辑</strong>
+            <em>{statusMessage || "当前画面与公开首页使用同一套布局。"}</em>
+          </div>
+        </div>
+        <div className="curated-admin-preview-actions">
+          <button type="button" onClick={() => importInputRef.current && importInputRef.current.click()} title="导入 JSON">
+            <Icon name="UploadCloud" size={16} />
+            <span>导入 JSON</span>
+          </button>
+          <button type="button" onClick={resetDraft} title="重置草稿">
+            <Icon name="RotateCcw" size={16} />
+            <span>重置草稿</span>
+          </button>
+          <button type="button" onClick={exportDraft} title="下载当前 JSON">
+            <Icon name="Download" size={16} />
+            <span>下载 JSON</span>
+          </button>
+          <button type="button" onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className="is-primary" title={isPublishingPortfolio ? "正在保存到代码仓库" : "确认发布上线"}>
+            <Icon name="Save" size={16} />
+            <span>{isPublishingPortfolio ? "保存中..." : "确认发布上线"}</span>
+          </button>
+        </div>
+      </div>
+    </>;
+  };
+
   const renderCuratedExperience = () => {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
@@ -4820,7 +4882,7 @@ function App() {
     const imageVisualEntries = visualEntries.filter((item) => !isVideoMedia(normalizeMediaItem(item.mediaEntry.media)));
     const heroVisualEntry = imageVisualEntries.find((item) => hasFourKSource(normalizeMediaItem(item.mediaEntry.media))) || imageVisualEntries[0];
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
-    const heroStageItems = [...imageVisualEntries.slice(0, 5), ...videoWorks.slice(0, 3)].map((item, index) => {
+    const heroStageItems = (heroVisualEntry ? [heroVisualEntry] : []).map((item, index) => {
       const media = normalizeMediaItem(item.mediaEntry.media);
       const detail = isVideoMedia(media) ? buildVideoWorkDetail(item, index) : buildVisualWorkDetail(item, index);
       return {
@@ -4836,7 +4898,7 @@ function App() {
     const hasMoreVideos = visibleVideoCount < videoWorks.length;
     const visibleVisualEntries = filteredVisualEntries.slice(0, visibleVisualCount);
     const hasMoreVisualEntries = visibleVisualCount < filteredVisualEntries.length;
-    return <div className="curated-page curated-shell">
+    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
       {renderCuratedLayoutStyles()}
       <section id="home" className="curated-hero" style={publishedSectionStyle}>
         <div className="curated-hero-copy">
@@ -4928,6 +4990,7 @@ function App() {
       </section>
       {renderWorkDetailDrawer()}
       {renderMediaReplacementDialog()}
+      {renderCuratedAdminDock()}
     </div>;
   };
 
@@ -5035,7 +5098,7 @@ function App() {
     </div>;
   };
 
-  if (isLoading) {
+  if (isLoading && !useGalleryWorldHome) {
     return <div className="w-full h-screen flex items-center justify-center bg-[#030305] text-white">
       <div className="text-center space-y-4">
         <div className="text-sm uppercase tracking-[0.4em] text-white/40">作品集加载中</div>
@@ -5064,16 +5127,19 @@ function App() {
     scrollMarginTop: `${sectionScrollOffset}px`
   };
   const portfolioSizeToneClass = portfolioSizeTone === "danger" ? "text-rose-200 bg-rose-500/15 border-rose-300/20" : portfolioSizeTone === "warning" ? "text-amber-100 bg-amber-500/12 border-amber-300/20" : "text-emerald-100 bg-emerald-500/12 border-emerald-300/20";
-  const useCuratedExperience = !IS_EDITOR_MODE || IS_PORTFOLIO_ADMIN_MODE;
 
-  return <div className={cx("relative min-h-screen w-full font-sans select-none selection:bg-white/20", isMobilePreviewMode && "portfolio-mobile", isMobilePortraitMode && "portfolio-mobile-portrait", isMobileLandscapeMode && "portfolio-mobile-landscape", IS_EDITOR_MODE && "portfolio-editor")} {...touchHandlers}>
-    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+  if (!IS_EDITOR_MODE || IS_PORTFOLIO_ADMIN_MODE) {
+    return renderCuratedExperience();
+  }
+
+  return <div className={cx("relative min-h-screen w-full font-sans selection:bg-white/20", !useGalleryWorldHome && "select-none", isMobilePreviewMode && "portfolio-mobile", isMobilePortraitMode && "portfolio-mobile-portrait", isMobileLandscapeMode && "portfolio-mobile-landscape", IS_EDITOR_MODE && !useGalleryWorldHome && "portfolio-editor")} {...touchHandlers}>
+    {!useGalleryWorldHome && <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       <div className={`absolute -top-[16%] -left-[8%] h-[44%] w-[44%] ${currentTheme.a} rounded-full blur-[120px] opacity-90 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 10s infinite" }} />
       <div className={`absolute top-[24%] -right-[8%] h-[38%] w-[38%] ${currentTheme.b} rounded-full blur-[130px] opacity-85 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 13s infinite 1.8s" }} />
       <div className={`absolute -bottom-[22%] left-[24%] h-[46%] w-[46%] ${currentTheme.c} rounded-full blur-[120px] opacity-80 transition-colors duration-700`} style={{ animation: isMobilePreviewMode ? "none" : "pulse-slow 11s infinite 3.4s" }} />
-    </div>
+    </div>}
     <div className="relative z-10">
-      {useCuratedExperience ? renderCuratedTopbar() : <div className="portfolio-topbar sticky top-3 z-40 px-3">
+      {useGalleryWorldHome ? null : <div className="portfolio-topbar sticky top-3 z-40 px-3">
         <div className={`portfolio-topbar-inner mx-auto flex w-full items-center justify-between gap-3 rounded-full border border-white/10 bg-[#111214]/82 px-4 py-2 text-xs text-white/75 shadow-2xl backdrop-blur-xl ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"}`}>
           <div className="portfolio-topbar-actions flex flex-wrap items-center gap-2">
             <button onClick={() => goToSlide(0)} className="portfolio-touch-button rounded-full border border-white/10 px-3 py-1 hover:bg-white/10">首页</button>
@@ -5085,7 +5151,7 @@ function App() {
           </div>
         </div>
       </div>}
-      {IS_EDITOR_MODE && showStructureEditor && <div className="portfolio-structure-panel fixed right-4 top-20 z-[70] w-[min(92vw,440px)] overflow-hidden rounded-[28px] border border-white/10 bg-[#101114]/92 shadow-2xl backdrop-blur-2xl">
+      {IS_EDITOR_MODE && !useGalleryWorldHome && showStructureEditor && <div className="portfolio-structure-panel fixed right-4 top-20 z-[70] w-[min(92vw,440px)] overflow-hidden rounded-[28px] border border-white/10 bg-[#101114]/92 shadow-2xl backdrop-blur-2xl">
         <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
           <div>
             <div className="text-xs font-mono uppercase tracking-[0.22em] text-cyan-200/65">作品集数据模型</div>
@@ -5118,7 +5184,7 @@ function App() {
           </div>
         </div>
       </div>}
-      {useCuratedExperience ? renderCuratedExperience() : <div className={`portfolio-feed mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
+      <div className={`portfolio-feed mx-auto flex w-full flex-col gap-4 px-3 pt-4 ${isMobileLandscapeMode ? "max-w-[1400px]" : "max-w-6xl"} ${IS_EDITOR_MODE ? "pb-28" : "pb-12"}`}>
         {slidesData.map((slide, index) => <section
           key={slide.id ?? index}
           ref={(node) => setSlideSectionRef(index, node)}
@@ -5129,9 +5195,9 @@ function App() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_18%,transparent_82%,rgba(255,255,255,0.025))] pointer-events-none" />
           {renderSlide(slide, index)}
         </section>)}
-      </div>}
+      </div>
     </div>
-    {lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={closeMediaLightbox}>
+    {!useGalleryWorldHome && lightboxData && <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4" onClick={closeMediaLightbox}>
       <button className="absolute top-6 right-6 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10" onClick={closeMediaLightbox}>✕ 关闭</button>
       {lightboxData.meta && <div className="portfolio-lightbox-meta absolute bottom-6 left-1/2 -translate-x-1/2 max-w-3xl w-[90%] p-4 bg-black/60 border border-white/10 rounded-xl backdrop-blur text-sm text-cyan-200/80 font-mono" onClick={(event) => event.stopPropagation()}><span className="text-white/40 block mb-1 uppercase tracking-widest text-xs">生成说明 / 参数</span>{lightboxData.meta}</div>}
       {lightboxData.kind === "youtube" ? <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
@@ -5145,7 +5211,7 @@ function App() {
         return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
-    {IS_EDITOR_MODE && (isMobilePreviewMode ? <>
+    {IS_EDITOR_MODE && !useGalleryWorldHome && (isMobilePreviewMode ? <>
       <div className="portfolio-editor-dock portfolio-editor-dock-mobile fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
         {hasTocSlide && <button onClick={goToTocSlide} className="p-2 text-white/55 hover:text-white hover:bg-white/10 rounded-full transition-all" title="目录"><Icon name="Home" size={18} /></button>}
         <button onClick={() => goToSlide(Math.max(0, currentSlide - 1))} className={`p-2 rounded-full transition-all ${currentSlide === 0 ? "text-white/20" : "text-white/70 hover:text-white hover:bg-white/10"}`} title="上一页"><Icon name="ChevronLeft" size={20} /></button>
@@ -5263,8 +5329,8 @@ function App() {
       {IS_PORTFOLIO_ADMIN_MODE && <button onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className={`p-2 rounded-full transition ${isPublishingPortfolio ? "text-emerald-100/35" : "text-emerald-200/85 hover:bg-emerald-500/20 hover:text-emerald-100"}`} title={isPublishingPortfolio ? "正在保存到代码仓库" : "保存作品集数据到代码仓库"}><Icon name="Save" size={16} /></button>}
       <div className={`h-2.5 w-2.5 rounded-full ${loadSource.includes("draft") ? "bg-emerald-400" : "bg-cyan-400"}`} title={statusMessage} />
     </div>)}
-    {IS_EDITOR_MODE && <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />}
-    <div className="fixed top-0 left-0 w-full h-[2px] bg-white/[0.02] z-50"><div className={`h-full ${currentTheme.line} transition-all duration-500 ease-out`} style={{ width: `${((currentSlide + 1) / slidesData.length) * 100}%` }} /></div>
+    {IS_EDITOR_MODE && !useGalleryWorldHome && <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />}
+    {IS_EDITOR_MODE && !useGalleryWorldHome && <div className="fixed top-0 left-0 w-full h-[2px] bg-white/[0.02] z-50"><div className={`h-full ${currentTheme.line} transition-all duration-500 ease-out`} style={{ width: `${((currentSlide + 1) / slidesData.length) * 100}%` }} /></div>}
   </div>;
 }
 

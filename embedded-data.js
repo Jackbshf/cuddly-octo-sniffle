@@ -15,7 +15,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     "canonicalUrl": "https://www.zhangweivisual.cn/",
     "ogTitle": "张玮｜AIGC 视觉作品集",
     "ogDescription": "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
-    "ogImage": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+    "ogImage": "images/works/hotel/poster.webp",
     "twitterCard": "summary_large_image",
     "caseSectionTitle": "商业视觉案例",
     "caseSectionDesc": "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
@@ -28,7 +28,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "ai-short-video-campaign",
       "title": "AI 广告短视频与外链播放素材",
-      "cover": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+      "cover": "images/works/cybercity/poster.webp",
       "category": "AI 视频素材",
       "tags": [
         "AI 视频",
@@ -54,7 +54,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "controlnet-ecommerce",
       "title": "ControlNet 电商产品精修",
-      "cover": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+      "cover": "images/works/foundation/poster.webp",
       "category": "电商视觉",
       "tags": [
         "电商主图",
@@ -79,7 +79,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "future-brand-visuals",
       "title": "品牌海报与视觉延展",
-      "cover": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+      "cover": "images/works/hotel/poster.webp",
       "category": "品牌视觉",
       "tags": [
         "品牌海报",
@@ -122,11 +122,12 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "url": "images/works/hotel/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/hotel/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Brand visual identity extension board"
+          "alt": "????????????????"
         }
       ],
       "textBlocks": [
@@ -157,19 +158,21 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "url": "images/works/earbuds/poster.webp",
+          "label": "?????????",
+          "fullUrl": "images/works/earbuds/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Ecommerce product control input board"
+          "alt": "?????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "url": "images/works/foundation/poster.webp",
+          "label": "?????????",
+          "fullUrl": "images/works/foundation/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Ecommerce product polish output board"
+          "alt": "????????????"
         }
       ]
     },
@@ -191,11 +194,12 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "url": "images/works/hotel/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/hotel/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Brand visual identity extension board"
+          "alt": "????????????????"
         }
       ],
       "textBlocks": [
@@ -212,35 +216,39 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "url": "images/works/hotel/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/hotel/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Brand visual identity extension board"
+          "alt": "????????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "url": "images/works/drink/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/drink/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Beverage packaging and 3D mockup board"
+          "alt": "????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "url": "images/works/giftbox/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/giftbox/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Original IP merchandise and character board"
+          "alt": "?????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "url": "images/works/foundation/poster.webp",
+          "label": "?????????",
+          "fullUrl": "images/works/foundation/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Product retouching output board"
+          "alt": "????????????"
         }
       ]
     },
@@ -262,11 +270,12 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "url": "images/works/drink/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/drink/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Beverage packaging and 3D mockup board"
+          "alt": "????????????"
         }
       ],
       "textBlocks": [
@@ -315,27 +324,30 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "url": "images/works/portrait/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/portrait/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Character LoRA consistency reference board"
+          "alt": "???????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "url": "images/works/giftbox/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/giftbox/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Original IP merchandise and character board"
+          "alt": "?????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "url": "images/works/hotel/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/hotel/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Brand visual identity extension board"
+          "alt": "????????????????"
         }
       ],
       "textBlocks": [
@@ -357,19 +369,21 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "url": "images/works/earbuds/poster.webp",
+          "label": "?????????",
+          "fullUrl": "images/works/earbuds/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Product input and reference board"
+          "alt": "?????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "url": "images/works/foundation/poster.webp",
+          "label": "?????????",
+          "fullUrl": "images/works/foundation/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Product retouching output board"
+          "alt": "????????????"
         }
       ]
     },
@@ -503,35 +517,39 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
+          "url": "images/works/monkey/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/monkey/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Short drama workflow and storyboard board"
+          "alt": "??????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+          "url": "images/works/cybercity/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/cybercity/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Short video reel production board"
+          "alt": "?????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "url": "images/works/portrait/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/portrait/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Character LoRA consistency reference board"
+          "alt": "???????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "url": "images/works/hotel/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/hotel/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Brand visual identity extension board"
+          "alt": "????????????????"
         }
       ]
     },
@@ -558,19 +576,21 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "url": "images/works/giftbox/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/giftbox/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Original IP merchandise and character board"
+          "alt": "?????????????"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
-          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "url": "images/works/drink/poster.webp",
+          "label": "????????",
+          "fullUrl": "images/works/drink/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "Beverage packaging and 3D mockup board"
+          "alt": "????????????"
         }
       ]
     },

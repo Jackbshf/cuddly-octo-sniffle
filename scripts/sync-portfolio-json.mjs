@@ -18,7 +18,7 @@ const DEFAULT_SITE_META = {
   canonicalUrl: "https://www.zhangweivisual.cn/",
   ogTitle: "ZHANG WEI - AIGC Portfolio",
   ogDescription: "用 AIGC 重构商业视觉与叙事内容",
-  ogImage: "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+  ogImage: "images/works/hotel/poster.webp",
   twitterCard: "summary_large_image",
   caseSectionTitle: "精选案例",
   caseSectionDesc: "用结构化案例说明创作链路、工具选择和最终结果。",
@@ -88,7 +88,7 @@ const createDefaultCases = () => ([
   {
     id: "controlnet-ecommerce",
     title: "ControlNet 电商产品精修",
-    cover: "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+    cover: "images/works/foundation/poster.webp",
     category: "商业视觉",
     tags: ["AIGC", "电商", "ControlNet"],
     description: "围绕产品结构和光影一致性，完成线稿约束到高精渲染的电商主图升级。",
@@ -102,7 +102,7 @@ const createDefaultCases = () => ([
   {
     id: "future-brand-visuals",
     title: "未来感品牌海报与 VI 系统",
-    cover: "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+    cover: "images/works/hotel/poster.webp",
     category: "品牌视觉",
     tags: ["品牌", "海报", "VI"],
     description: "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
@@ -116,7 +116,7 @@ const createDefaultCases = () => ([
   {
     id: "ai-short-video-campaign",
     title: "AI 广告短视频与抖音系列内容",
-    cover: "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+    cover: "images/works/cybercity/poster.webp",
     category: "叙事内容",
     tags: ["短视频", "广告", "AIGC"],
     description: "用 AI 原生视频和后期剪辑构建电商广告和平台分发内容，形成系列化投放素材。",
