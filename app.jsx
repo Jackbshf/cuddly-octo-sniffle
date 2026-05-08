@@ -11,7 +11,7 @@ const APP_BUNDLE_VERSION = window.__APP_BUNDLE_VERSION__ ?? "";
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const IS_PORTFOLIO_ADMIN_MODE = window.__PORTFOLIO_ADMIN_MODE__ === true;
 const IS_TOOLS_MODE = SEARCH_PARAMS.get("tools") === "1" || IS_PORTFOLIO_ADMIN_MODE;
-const USE_GALLERY_WORLD_HOME = SEARCH_PARAMS.get("classic") !== "1";
+const USE_GALLERY_WORLD_HOME = SEARCH_PARAMS.get("gallery") === "1";
 const shouldNormalizeEditorQuery = window.location.protocol !== "file:" && SEARCH_PARAMS.get("editor") === "1";
 if (shouldNormalizeEditorQuery) {
   const normalizedParams = new URLSearchParams(window.location.search);
