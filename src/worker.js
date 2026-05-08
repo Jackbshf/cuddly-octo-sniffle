@@ -11,6 +11,7 @@ const PORTFOLIO_ADMIN_LOGIN_PATH = "/admin/login";
 const PORTFOLIO_API_PREFIX = "/api/portfolio-admin";
 const PORTFOLIO_JSON_PATH = "data/portfolio.json";
 const PORTFOLIO_META_PATH = "data/meta.json";
+const GALLERY_WORLDS_PATH = "data/gallery-worlds.json";
 const PORTFOLIO_CASES_DIR = "data/cases";
 const PORTFOLIO_IMAGE_UPLOADS_DIR = "images/uploads";
 const PORTFOLIO_VIDEO_UPLOADS_DIR = "videos/uploads";
@@ -215,6 +216,10 @@ async function handlePortfolioAdminApi(request, env, url) {
 
   if (url.pathname === `${PORTFOLIO_API_PREFIX}/portfolio-json` && request.method === "POST") {
     return savePortfolioJson(request, env);
+  }
+
+  if (url.pathname === `${PORTFOLIO_API_PREFIX}/gallery-worlds` && request.method === "POST") {
+    return saveGalleryWorlds(request, env);
   }
 
   if (url.pathname === `${PORTFOLIO_API_PREFIX}/meta` && request.method === "POST") {
@@ -454,6 +459,50 @@ async function savePortfolioJson(request, env) {
     });
   } catch (error) {
     return jsonResponse({ ok: false, error: error.message || "GitHub portfolio publish failed." }, 502);
+  }
+}
+
+async function saveGalleryWorlds(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse({ ok: false, error: "Invalid JSON payload." }, 400);
+  }
+
+  const galleryData = normalizeGalleryWorldsData(payload?.galleryWorldsData || payload?.galleryWorlds || payload);
+  if (!galleryData.works.length) {
+    return jsonResponse({ ok: false, error: "Gallery worlds JSON must contain at least one work." }, 400);
+  }
+  if (!galleryData.galleryWorlds.length) {
+    return jsonResponse({ ok: false, error: "Gallery worlds JSON must contain at least one world." }, 400);
+  }
+
+  const draftOnlyPoster = galleryData.works.find((work) => {
+    const poster = String(work.poster || "").trim();
+    return poster.startsWith("blob:") || poster.startsWith("data:");
+  });
+  if (draftOnlyPoster) {
+    return jsonResponse({ ok: false, error: `Work ${draftOnlyPoster.id || draftOnlyPoster.title || ""} still uses a local preview image.` }, 400);
+  }
+
+  const json = `${JSON.stringify(galleryData, null, 2)}\n`;
+  const secretMatch = findSecretLikeText(json);
+  if (secretMatch) {
+    return jsonResponse({ ok: false, error: `Refused to publish possible secret content: ${secretMatch.label}.` }, 400);
+  }
+
+  try {
+    const message = cleanCommitMessage(payload?.message || "Update immersive gallery worlds", "Update immersive gallery worlds");
+    const result = await putGitHubFile(env, GALLERY_WORLDS_PATH, encoder.encode(json), message, PORTFOLIO_TOKEN_ENV);
+    return jsonResponse({
+      ok: true,
+      path: GALLERY_WORLDS_PATH,
+      commit: result.commit?.sha || null,
+      url: result.content?.html_url || null
+    });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "GitHub gallery worlds publish failed." }, 502);
   }
 }
 
@@ -760,6 +809,67 @@ function normalizePortfolioJson(raw) {
     meta: source.meta && typeof source.meta === "object" ? source.meta : {},
     cases: Array.isArray(source.cases) ? source.cases : [],
     slides: Array.isArray(source.slides) ? source.slides : []
+  };
+}
+
+function normalizeGalleryWorldsData(raw) {
+  const source = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const works = asArray(source.works).map((work, index) => {
+    const id = cleanId(work?.id, `work-${index + 1}`);
+    const layers = work?.layers && typeof work.layers === "object" ? {
+      bg: cleanPortfolioMediaPath(work.layers.bg),
+      subject: cleanPortfolioMediaPath(work.layers.subject),
+      foreground: cleanPortfolioMediaPath(work.layers.foreground),
+      light: cleanPortfolioMediaPath(work.layers.light)
+    } : null;
+
+    return {
+      id,
+      title: cleanText(work?.title) || id,
+      category: cleanText(work?.category) || "AIGC",
+      type: cleanText(work?.type) || "image",
+      duration: cleanText(work?.duration),
+      description: cleanText(work?.description),
+      poster: cleanPortfolioMediaPath(work?.poster),
+      alt: cleanText(work?.alt) || `${id} poster`,
+      tags: cleanTextArray(work?.tags),
+      ...(layers && Object.values(layers).some(Boolean) ? { layers } : {})
+    };
+  }).filter((work) => work.id && work.poster);
+
+  const workIds = new Set(works.map((work) => work.id));
+  const galleryWorlds = asArray(source.galleryWorlds).map((world, index) => {
+    const rawWorkIds = cleanTextArray(world?.workIds).filter((id) => workIds.has(id));
+    const heroWorkId = workIds.has(cleanText(world?.heroWorkId)) ? cleanText(world?.heroWorkId) : rawWorkIds[0] || "";
+    const workIdList = rawWorkIds.length ? rawWorkIds : [heroWorkId].filter(Boolean);
+
+    return {
+      id: cleanId(world?.id, `world-${index + 1}`),
+      name: cleanText(world?.name) || `Gallery World ${index + 1}`,
+      kicker: cleanText(world?.kicker) || "GALLERY WORLD",
+      title: cleanText(world?.title) || cleanText(world?.name) || `Gallery World ${index + 1}`,
+      description: cleanText(world?.description),
+      heroWorkId,
+      workIds: workIdList,
+      interaction: cleanText(world?.interaction) || "showroom",
+      accent: cleanText(world?.accent) || "#68B7FF",
+      cta: cleanText(world?.cta) || "Enter world"
+    };
+  }).filter((world) => world.id && world.heroWorkId && world.workIds.length);
+
+  return {
+    version: Number(source.version) || 1,
+    updatedAt: new Date().toISOString(),
+    intro: source.intro && typeof source.intro === "object" ? {
+      brand: cleanText(source.intro.brand),
+      kicker: cleanText(source.intro.kicker),
+      title: cleanText(source.intro.title),
+      subtitle: cleanText(source.intro.subtitle),
+      description: cleanText(source.intro.description),
+      cta: cleanText(source.intro.cta)
+    } : {},
+    works,
+    galleryWorlds
   };
 }
 
