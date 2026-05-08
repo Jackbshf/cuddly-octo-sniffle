@@ -30,6 +30,10 @@ const DEFAULT_SITE_META = {
 
 const ensureString = (value, fallback = "") => typeof value === "string" ? value : fallback;
 const ensureStringArray = (value) => Array.isArray(value) ? value.map((item) => String(item ?? "").trim()).filter(Boolean) : [];
+const toPositiveNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : 0;
+};
 const uniq = (values) => Array.from(new Set(values.filter(Boolean)));
 const toPosixPath = (value = "") => String(value || "").replace(/\\/g, "/");
 const normalizeRepoMediaPath = (value = "") => {
@@ -89,8 +93,8 @@ const createDefaultCases = () => ([
     tags: ["AIGC", "电商", "ControlNet"],
     description: "围绕产品结构和光影一致性，完成线稿约束到高精渲染的电商主图升级。",
     results: {
-      clickRate: "+32%",
-      conversion: "+18%"
+      输出内容: "电商主图与产品视觉",
+      能力重点: "结构控制、光影和质感统一"
     },
     tools: ["ComfyUI", "ControlNet", "Photoshop"],
     slideIds: [4, 5]
@@ -103,8 +107,8 @@ const createDefaultCases = () => ([
     tags: ["品牌", "海报", "VI"],
     description: "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
     results: {
-      deliverables: "6 套物料",
-      iteration: "3 轮迭代"
+      输出内容: "海报与品牌延展视觉",
+      能力重点: "风格设定与视觉统一"
     },
     tools: ["Midjourney", "Photoshop", "Illustrator"],
     slideIds: [7, 8, 9]
@@ -117,8 +121,8 @@ const createDefaultCases = () => ([
     tags: ["短视频", "广告", "AIGC"],
     description: "用 AI 原生视频和后期剪辑构建电商广告和平台分发内容，形成系列化投放素材。",
     results: {
-      videoLength: "30s+",
-      outputs: "5 支短视频"
+      输出内容: "短视频片段与封面",
+      能力重点: "视频生成与系列化整理"
     },
     tools: ["Sora", "Kling", "剪映"],
     slideIds: [16, 17, 18]
@@ -127,7 +131,7 @@ const createDefaultCases = () => ([
 
 const normalizeMediaItem = (item) => {
   if (!item) return null;
-  if (typeof item === "string") return { kind: inferMediaKind(item), url: item, poster: "", meta: "", label: "" };
+  if (typeof item === "string") return { kind: inferMediaKind(item), url: item, poster: "", meta: "", label: "", fullUrl: "", width: 0, height: 0, alt: "", externalProvider: "" };
 
   const rawUrl = ensureString(item.url).trim();
   const youtubeId = extractYouTubeId(item.youtubeId || rawUrl);
@@ -138,7 +142,12 @@ const normalizeMediaItem = (item) => {
     url: kind === "youtube" && youtubeId ? youtubeId : rawUrl,
     poster: ensureString(item.poster).trim(),
     meta: ensureString(item.meta),
-    label: ensureString(item.label)
+    label: ensureString(item.label),
+    fullUrl: ensureString(item.fullUrl).trim(),
+    width: toPositiveNumber(item.width),
+    height: toPositiveNumber(item.height),
+    alt: ensureString(item.alt).trim(),
+    externalProvider: ensureString(item.externalProvider).trim()
   };
 };
 
@@ -147,7 +156,12 @@ const createDefaultMediaItem = () => ({
   url: "",
   poster: "",
   meta: "",
-  label: ""
+  label: "",
+  fullUrl: "",
+  width: 0,
+  height: 0,
+  alt: "",
+  externalProvider: ""
 });
 
 const createFreeLayoutElement = (type) => {
@@ -337,12 +351,22 @@ const sanitizeMediaForWrite = (item) => {
     url: normalized.kind === "youtube" ? extractYouTubeId(normalized.url) || normalized.url : normalized.url,
     poster: normalized.poster,
     meta: normalized.meta,
-    label: normalized.label
+    label: normalized.label,
+    fullUrl: normalized.fullUrl,
+    width: normalized.width,
+    height: normalized.height,
+    alt: normalized.alt,
+    externalProvider: normalized.externalProvider
   };
   if (!cleaned.url) delete cleaned.url;
   if (!cleaned.poster) delete cleaned.poster;
   if (!cleaned.meta) delete cleaned.meta;
   if (!cleaned.label) delete cleaned.label;
+  if (!cleaned.fullUrl) delete cleaned.fullUrl;
+  if (!cleaned.width) delete cleaned.width;
+  if (!cleaned.height) delete cleaned.height;
+  if (!cleaned.alt) delete cleaned.alt;
+  if (!cleaned.externalProvider) delete cleaned.externalProvider;
   return cleaned;
 };
 
@@ -426,12 +450,14 @@ const collectReferencedRepoAssets = (model) => {
     for (const mediaItem of Array.isArray(slide.media) ? slide.media : []) {
       const normalized = normalizeMediaItem(mediaItem);
       addRef(normalized?.url);
+      addRef(normalized?.fullUrl);
       addRef(normalized?.poster);
     }
     for (const element of Array.isArray(slide.freeLayoutElements) ? slide.freeLayoutElements : []) {
       if (element?.type !== "media") continue;
       const normalized = normalizeMediaItem(element.media);
       addRef(normalized?.url);
+      addRef(normalized?.fullUrl);
       addRef(normalized?.poster);
     }
   }

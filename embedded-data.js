@@ -15,7 +15,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     "canonicalUrl": "https://www.zhangweivisual.cn/",
     "ogTitle": "张玮｜AIGC 视觉作品集",
     "ogDescription": "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
-    "ogImage": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+    "ogImage": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
     "twitterCard": "summary_large_image",
     "caseSectionTitle": "商业视觉案例",
     "caseSectionDesc": "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
@@ -28,7 +28,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "ai-short-video-campaign",
       "title": "AI 广告短视频与外链播放素材",
-      "cover": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
+      "cover": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
       "category": "AI 视频素材",
       "tags": [
         "AI 视频",
@@ -54,7 +54,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "controlnet-ecommerce",
       "title": "ControlNet 电商产品精修",
-      "cover": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
+      "cover": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
       "category": "电商视觉",
       "tags": [
         "电商主图",
@@ -79,7 +79,7 @@ window.__EMBEDDED_PORTFOLIO__ = {
     {
       "id": "future-brand-visuals",
       "title": "品牌海报与视觉延展",
-      "cover": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
+      "cover": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
       "category": "品牌视觉",
       "tags": [
         "品牌海报",
@@ -157,19 +157,19 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-ecommerce-product-polish-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D ecommerce product polishing visual"
+          "url": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Ecommerce product control input board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D wireless earbuds product render"
+          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Ecommerce product polish output board"
         }
       ]
     },
@@ -191,11 +191,11 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D brand visual system image"
+          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Brand visual identity extension board"
         }
       ],
       "textBlocks": [
@@ -212,35 +212,35 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D brand visual system image"
+          "url": "images/generated/eastern-future/ef-gallery-brand-poster-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-brand-poster-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Brand poster key visual"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D original IP campaign visual"
+          "url": "images/generated/eastern-future/ef-gallery-vi-jade-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-vi-jade-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Jade visual identity extension"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D character consistency portrait"
+          "url": "images/generated/eastern-future/ef-gallery-vi-lacquer-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-vi-lacquer-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Lacquer texture visual identity extension"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D beverage packaging render"
+          "url": "images/generated/eastern-future/ef-gallery-vi-stage-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-vi-stage-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Brand spatial stage visual"
         }
       ]
     },
@@ -262,11 +262,11 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D beverage packaging render"
+          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Beverage packaging and 3D mockup board"
         }
       ],
       "textBlocks": [
@@ -315,27 +315,27 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D character consistency portrait"
+          "url": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Character LoRA consistency reference board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D brand visual system image"
+          "url": "images/generated/eastern-future/ef-gallery-character-reference-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-character-reference-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Character reference sheet"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D original IP campaign visual"
+          "url": "images/generated/eastern-future/ef-gallery-character-variant-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-character-variant-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Character style variant"
         }
       ],
       "textBlocks": [
@@ -357,19 +357,19 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-wireless-earbuds-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D wireless earbuds product render"
+          "url": "images/generated/eastern-future/ef-gallery-product-lora-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-product-lora-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Product LoRA style mockup"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D original IP campaign visual"
+          "url": "images/generated/eastern-future/ef-gallery-style-lora-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-style-lora-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Illustration style LoRA extension"
         }
       ]
     },
@@ -503,35 +503,35 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-drama-workflow-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-drama-workflow-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D drama workflow storyboard"
+          "url": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Short drama workflow and storyboard board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-short-video-campaign-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D short-video campaign visual"
+          "url": "images/generated/eastern-future/ef-gallery-storyboard-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-storyboard-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Short drama storyboard design"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D brand visual system image"
+          "url": "images/generated/eastern-future/ef-gallery-shot-design-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-shot-design-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Shot design and visual staging"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-character-lora-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D character consistency portrait"
+          "url": "images/generated/eastern-future/ef-gallery-editing-system-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-editing-system-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Editing and delivery system visual"
         }
       ]
     },
@@ -558,19 +558,19 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-ip-campaign-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D original IP campaign visual"
+          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Original IP merchandise and character board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
-          "fullUrl": "images/generated/eastern-future/zw-3d-beverage-packaging-v2.webp",
-          "width": 1672,
-          "height": 941,
-          "alt": "Naked-eye 3D beverage packaging render"
+          "url": "images/generated/eastern-future/ef-gallery-ip-campaign-v1.webp",
+          "fullUrl": "images/generated/eastern-future/ef-gallery-ip-campaign-v1.webp",
+          "width": 1200,
+          "height": 1200,
+          "alt": "Original IP campaign visual"
         }
       ]
     },

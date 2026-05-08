@@ -12,13 +12,15 @@ const PORTFOLIO_API_PREFIX = "/api/portfolio-admin";
 const PORTFOLIO_JSON_PATH = "data/portfolio.json";
 const PORTFOLIO_META_PATH = "data/meta.json";
 const PORTFOLIO_CASES_DIR = "data/cases";
-const PORTFOLIO_UPLOADS_DIR = "images/uploads";
+const PORTFOLIO_IMAGE_UPLOADS_DIR = "images/uploads";
+const PORTFOLIO_VIDEO_UPLOADS_DIR = "videos/uploads";
 
 const VIEW_COOKIE_NAME = "prompt_library_auth";
 const PROMPT_ADMIN_COOKIE_NAME = "prompt_library_admin_auth";
 const PORTFOLIO_ADMIN_COOKIE_NAME = "portfolio_admin_auth";
 const COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;
-const MAX_ASSET_BYTES = 10 * 1024 * 1024;
+const MAX_IMAGE_ASSET_BYTES = 32 * 1024 * 1024;
+const MAX_VIDEO_ASSET_BYTES = 95 * 1024 * 1024;
 
 const PROMPTS_TOKEN_ENV = "PROMPTS_GITHUB_TOKEN";
 const PORTFOLIO_TOKEN_ENV = "PORTFOLIO_GITHUB_TOKEN";
@@ -334,7 +336,7 @@ async function uploadPromptAsset(request, env) {
 
   const file = form.get("file");
   if (!(file instanceof File)) {
-    return jsonResponse({ ok: false, error: "Missing image file." }, 400);
+    return jsonResponse({ ok: false, error: "Missing media file." }, 400);
   }
 
   const extension = getImageExtension(file.name, file.type);
@@ -342,8 +344,8 @@ async function uploadPromptAsset(request, env) {
     return jsonResponse({ ok: false, error: "Only jpg, png, webp, gif, and svg images are supported." }, 415);
   }
 
-  if (!file.size || file.size > MAX_ASSET_BYTES) {
-    return jsonResponse({ ok: false, error: `Image must be between 1 byte and ${MAX_ASSET_BYTES} bytes.` }, 413);
+  if (!file.size || file.size > MAX_IMAGE_ASSET_BYTES) {
+    return jsonResponse({ ok: false, error: `Image must be between 1 byte and ${MAX_IMAGE_ASSET_BYTES} bytes.` }, 413);
   }
 
   const buffer = await file.arrayBuffer();
@@ -352,7 +354,7 @@ async function uploadPromptAsset(request, env) {
   const { year, month, timestamp } = timestampParts(now);
   const safeName = safeAssetFileName(file.name, extension);
   const relativePath = `${PROMPT_LIBRARY_PATH.replace(/\/library\.json$/, "")}/assets/${year}/${month}/${timestamp}-${hash.slice(0, 12)}-${safeName}`;
-  const src = `/${relativePath}`;
+  const src = relativePath;
   const title = cleanText(form.get("title")) || stripExtension(file.name) || "Untitled asset";
   const category = cleanText(form.get("category")) || "Uncategorized";
   const width = cleanNumber(form.get("width"));
@@ -555,24 +557,26 @@ async function uploadPortfolioAsset(request, env) {
 
   const file = form.get("file");
   if (!(file instanceof File)) {
-    return jsonResponse({ ok: false, error: "Missing image file." }, 400);
+    return jsonResponse({ ok: false, error: "Missing media file." }, 400);
   }
 
-  const extension = getImageExtension(file.name, file.type);
-  if (!extension) {
-    return jsonResponse({ ok: false, error: "Only jpg, png, webp, gif, and svg images are supported." }, 415);
+  const assetType = getPortfolioAssetType(file.name, file.type);
+  if (!assetType) {
+    return jsonResponse({ ok: false, error: "Only jpg, png, webp, gif, svg, mp4, webm, mov, and m4v files are supported." }, 415);
   }
 
-  if (!file.size || file.size > MAX_ASSET_BYTES) {
-    return jsonResponse({ ok: false, error: `Image must be between 1 byte and ${MAX_ASSET_BYTES} bytes.` }, 413);
+  const maxBytes = assetType.kind === "video" ? MAX_VIDEO_ASSET_BYTES : MAX_IMAGE_ASSET_BYTES;
+  if (!file.size || file.size > maxBytes) {
+    return jsonResponse({ ok: false, error: `${assetType.kind === "video" ? "Video" : "Image"} must be between 1 byte and ${maxBytes} bytes.` }, 413);
   }
 
   const buffer = await file.arrayBuffer();
   const hash = await sha256Hex(buffer);
   const now = new Date();
   const { year, month, timestamp } = timestampParts(now);
-  const safeName = safeAssetFileName(file.name, extension);
-  const relativePath = `${PORTFOLIO_UPLOADS_DIR}/${year}/${month}/${timestamp}-${hash.slice(0, 12)}-${safeName}`;
+  const safeName = safeAssetFileName(file.name, assetType.extension);
+  const uploadDir = assetType.kind === "video" ? PORTFOLIO_VIDEO_UPLOADS_DIR : PORTFOLIO_IMAGE_UPLOADS_DIR;
+  const relativePath = `${uploadDir}/${year}/${month}/${timestamp}-${hash.slice(0, 12)}-${safeName}`;
   const src = `/${relativePath}`;
   const updatedAt = formatLocalTimestamp(now);
 
@@ -589,12 +593,13 @@ async function uploadPortfolioAsset(request, env) {
       title: cleanText(form.get("title")) || stripExtension(file.name) || "Untitled upload",
       category: cleanText(form.get("category")) || "portfolio-cover",
       tags: cleanTextArray(form.get("tags")),
+      kind: assetType.kind,
       src,
       relativePath,
       path: relativePath,
       fileName: file.name || safeName,
       size: file.size,
-      mime: file.type || mimeFromExtension(extension),
+      mime: file.type || mimeFromExtension(assetType.extension),
       width: cleanNumber(form.get("width")),
       height: cleanNumber(form.get("height")),
       hash,
@@ -1035,6 +1040,26 @@ function getImageExtension(fileName, mime) {
   return mimeExtension || "";
 }
 
+function getVideoExtension(fileName, mime) {
+  const extension = String(fileName || "").toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || "";
+  const mimeExtension = {
+    "video/mp4": "mp4",
+    "video/webm": "webm",
+    "video/quicktime": "mov",
+    "video/x-m4v": "m4v"
+  }[String(mime || "").toLowerCase()];
+  if (["mp4", "webm", "mov", "m4v"].includes(extension)) return extension;
+  return mimeExtension || "";
+}
+
+function getPortfolioAssetType(fileName, mime) {
+  const imageExtension = getImageExtension(fileName, mime);
+  if (imageExtension) return { kind: "image", extension: imageExtension };
+  const videoExtension = getVideoExtension(fileName, mime);
+  if (videoExtension) return { kind: "video", extension: videoExtension };
+  return null;
+}
+
 function safeAssetFileName(fileName, extension) {
   const base = stripExtension(fileName)
     .normalize("NFKD")
@@ -1055,7 +1080,11 @@ function mimeFromExtension(extension) {
     png: "image/png",
     webp: "image/webp",
     gif: "image/gif",
-    svg: "image/svg+xml"
+    svg: "image/svg+xml",
+    mp4: "video/mp4",
+    webm: "video/webm",
+    mov: "video/quicktime",
+    m4v: "video/x-m4v"
   }[extension] || "application/octet-stream";
 }
 
@@ -1156,49 +1185,75 @@ function renderLoginPage({ mode, hasError, status = 200 }) {
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: #f5f6f3;
-      color: #202421;
+      background:
+        linear-gradient(180deg, rgba(5, 11, 19, 0.16), rgba(5, 11, 19, 0.94) 62%, #06101b),
+        url("/images/generated/celestial-whale-city.webp") center top / cover fixed no-repeat,
+        #07111d;
+      color: rgba(250, 253, 255, 0.96);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
     }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(2, 8, 15, 0.72), rgba(2, 8, 15, 0.2) 48%, rgba(239, 210, 153, 0.08)),
+        linear-gradient(180deg, rgba(232, 201, 121, 0.16), transparent 34%, rgba(6, 16, 27, 0.82) 88%);
+    }
     main {
+      position: relative;
       width: min(420px, calc(100vw - 32px));
-      border: 1px solid #d8dfda;
+      border: 1px solid rgba(236, 214, 160, 0.24);
       border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 18px 60px rgba(22, 31, 27, 0.12);
+      background:
+        linear-gradient(145deg, rgba(245, 249, 255, 0.1), rgba(5, 15, 26, 0.42)),
+        rgba(5, 15, 26, 0.58);
+      box-shadow: 0 26px 90px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.065);
+      backdrop-filter: blur(20px);
       padding: 24px;
     }
-    h1 { margin: 0 0 6px; font-size: 22px; line-height: 1.25; }
-    p { margin: 0 0 18px; color: #657067; font-size: 14px; line-height: 1.7; }
-    label { display: grid; gap: 8px; color: #657067; font-size: 13px; font-weight: 700; }
+    h1 { margin: 0 0 6px; color: rgba(252, 247, 234, 0.98); font-size: 22px; line-height: 1.25; text-shadow: 0 18px 60px rgba(0, 0, 0, 0.36); }
+    p { margin: 0 0 18px; color: rgba(219, 231, 242, 0.72); font-size: 14px; line-height: 1.7; }
+    label { display: grid; gap: 8px; color: rgba(219, 231, 242, 0.72); font-size: 13px; font-weight: 700; }
     input {
       width: 100%;
       height: 42px;
-      border: 1px solid #d8dfda;
+      border: 1px solid rgba(236, 214, 160, 0.22);
       border-radius: 8px;
+      background: rgba(7, 18, 30, 0.54);
+      color: rgba(250, 253, 255, 0.96);
       padding: 0 12px;
       font: 15px inherit;
     }
-    input:focus { outline: 0; border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14); }
+    input:focus { outline: 0; border-color: rgba(232, 201, 121, 0.52); box-shadow: 0 0 0 3px rgba(110, 231, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
     button {
       width: 100%;
       height: 42px;
       margin-top: 14px;
-      border: 1px solid #0f766e;
+      border: 1px solid rgba(232, 201, 121, 0.58);
       border-radius: 8px;
-      background: #0f766e;
-      color: #fff;
+      background: linear-gradient(135deg, rgba(232, 201, 121, 0.24), rgba(110, 231, 255, 0.11));
+      color: rgba(255, 249, 232, 0.98);
       font: 700 14px inherit;
       cursor: pointer;
     }
     .error {
       margin: 0 0 12px;
       padding: 10px;
-      border: 1px solid rgba(185, 28, 28, 0.25);
+      border: 1px solid rgba(251, 113, 133, 0.36);
       border-radius: 8px;
-      color: #991b1b;
-      background: #fef2f2;
+      color: #fecdd3;
+      background: rgba(127, 29, 29, 0.36);
       font-size: 13px;
+    }
+    @media (max-width: 620px) {
+      body {
+        background-image:
+          linear-gradient(180deg, rgba(5, 11, 19, 0.18), rgba(5, 11, 19, 0.96) 60%, #06101b),
+          url("/images/generated/celestial-whale-city-small.webp");
+        background-attachment: scroll;
+      }
     }
   </style>
 </head>

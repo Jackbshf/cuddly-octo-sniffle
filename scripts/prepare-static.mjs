@@ -155,6 +155,12 @@ const writeDistHeaders = async () => {
     "/embedded-data*",
     "  Cache-Control: public, max-age=31536000, immutable",
     "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    "/images/*",
+    "  Cache-Control: public, max-age=31536000, immutable",
+    "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    "/videos/*",
+    "  Cache-Control: public, max-age=31536000, immutable",
+    "  CDN-Cache-Control: public, max-age=31536000, immutable",
     ""
   ].join("\n");
 

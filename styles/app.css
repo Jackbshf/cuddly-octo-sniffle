@@ -105,8 +105,8 @@
 
 /* Naked-eye 3D blue-glass art direction, based on the user's reference image. */
 :root {
-  --whale-city-image: url("../images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp");
-  --whale-city-image-small: url("../images/generated/eastern-future/zw-3d-brand-visual-system-v2.webp");
+  --whale-city-image: url("../images/generated/eastern-future/zw-local-brand-vi-board-v1.webp");
+  --whale-city-image-small: url("../images/generated/eastern-future/zw-local-brand-vi-board-v1.webp");
 }
 
 html {
