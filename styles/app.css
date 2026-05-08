@@ -3290,3 +3290,251 @@ button.curated-hero-stage {
       #07111d;
   }
 }
+
+/* Motion pass based on the standalone AIGC prototype: subtle depth, not a layout rewrite. */
+@keyframes curatedAuroraDrift {
+  0% {
+    transform: translate3d(-1.5%, -1%, 0) rotate(0deg) scale(1);
+  }
+
+  100% {
+    transform: translate3d(1.5%, 1.5%, 0) rotate(10deg) scale(1.04);
+  }
+}
+
+.curated-page {
+  position: relative;
+}
+
+.curated-page::after {
+  content: "";
+  position: fixed;
+  inset: -26% -18%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    conic-gradient(from 145deg at 50% 44%, transparent 0 18%, rgba(91, 216, 255, 0.22) 28%, transparent 44%, rgba(139, 156, 255, 0.18) 58%, transparent 74%, rgba(110, 231, 255, 0.12) 84%, transparent 100%);
+  filter: blur(86px);
+  opacity: 0.28;
+  animation: curatedAuroraDrift 18s ease-in-out infinite alternate;
+}
+
+.curated-page .curated-hero-copy,
+.curated-page .curated-hero-stage-wrap,
+.curated-page .curated-hero-proof,
+.curated-page .curated-section,
+.curated-page .curated-contact {
+  opacity: 0;
+  translate: 0 24px;
+  transition:
+    opacity 680ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    translate 680ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.curated-page .is-motion-visible {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.curated-hero-stage-wrap {
+  --hero-rx: 0deg;
+  --hero-ry: 0deg;
+  --stage-shift-x: 0px;
+  --stage-shift-y: 0px;
+  --stage-spot-x: 50%;
+  --stage-spot-y: 48%;
+  transform: perspective(1200px) rotateX(var(--hero-rx)) rotateY(var(--hero-ry));
+  transform-style: preserve-3d;
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 260ms ease, border-color 260ms ease;
+  will-change: transform;
+}
+
+.curated-hero-stage-wrap::before {
+  background:
+    radial-gradient(circle at var(--stage-spot-x) var(--stage-spot-y), rgba(246, 251, 255, 0.18), rgba(110, 231, 255, 0.07) 18%, transparent 38%),
+    linear-gradient(90deg, rgba(91, 216, 255, 0.16), transparent 22%, transparent 78%, rgba(139, 156, 255, 0.14)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 34%, rgba(0, 0, 0, 0.28));
+}
+
+.curated-hero-stage-wrap:hover,
+.curated-hero-stage-wrap:focus-within {
+  border-color: rgba(126, 208, 255, 0.36);
+  box-shadow: 0 42px 138px rgba(0, 0, 0, 0.56), 0 0 110px rgba(110, 231, 255, 0.16);
+}
+
+.curated-hero-stage-wrap .curated-three-canvas,
+.curated-hero-stage-wrap .curated-three-core,
+.curated-hero-stage-wrap .curated-three-timeline,
+.curated-hero-stage-wrap .curated-orbit-card {
+  translate: var(--stage-shift-x) var(--stage-shift-y);
+  transition: translate 240ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 180ms ease, border-color 180ms ease;
+}
+
+.curated-video-card,
+.curated-case-card,
+.curated-visual-card,
+.curated-process-card,
+.curated-skill-card,
+.curated-feature-grid article {
+  --card-rx: 0deg;
+  --card-ry: 0deg;
+  --spot-x: 50%;
+  --spot-y: 50%;
+  --media-shift-x: 0px;
+  --media-shift-y: 0px;
+  position: relative;
+  overflow: hidden;
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0);
+  transform-style: preserve-3d;
+  transition:
+    transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
+  will-change: transform;
+}
+
+.curated-video-card > *,
+.curated-case-card > *,
+.curated-visual-card > *,
+.curated-process-card > *,
+.curated-skill-card > *,
+.curated-feature-grid article > * {
+  position: relative;
+  z-index: 1;
+}
+
+.curated-video-card::before,
+.curated-case-card::before,
+.curated-visual-card::before,
+.curated-process-card::before,
+.curated-skill-card::before,
+.curated-feature-grid article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--spot-x) var(--spot-y), rgba(246, 251, 255, 0.2), rgba(110, 231, 255, 0.08) 16%, transparent 40%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.curated-video-card:hover,
+.curated-video-card:focus-visible,
+.curated-case-card:hover,
+.curated-case-card:focus-visible,
+.curated-visual-card:hover,
+.curated-visual-card:focus-visible,
+.curated-process-card:hover,
+.curated-process-card:focus-visible,
+.curated-skill-card:hover,
+.curated-skill-card:focus-visible,
+.curated-feature-grid article:hover,
+.curated-feature-grid article:focus-visible {
+  transform: perspective(1000px) rotateX(var(--card-rx)) rotateY(var(--card-ry)) translateY(-4px);
+  border-color: rgba(91, 216, 255, 0.44);
+  background:
+    linear-gradient(180deg, rgba(91, 216, 255, 0.12), rgba(139, 156, 255, 0.05)),
+    rgba(11, 18, 24, 0.92);
+  box-shadow: 0 32px 96px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(91, 216, 255, 0.08);
+  filter: saturate(1.05);
+  outline: none;
+}
+
+.curated-video-card:hover::before,
+.curated-video-card:focus-visible::before,
+.curated-case-card:hover::before,
+.curated-case-card:focus-visible::before,
+.curated-visual-card:hover::before,
+.curated-visual-card:focus-visible::before,
+.curated-process-card:hover::before,
+.curated-process-card:focus-visible::before,
+.curated-skill-card:hover::before,
+.curated-skill-card:focus-visible::before,
+.curated-feature-grid article:hover::before,
+.curated-feature-grid article:focus-visible::before {
+  opacity: 1;
+}
+
+.curated-video-card .curated-media-box img,
+.curated-case-card .curated-case-cover img,
+.curated-visual-card .curated-media-box img,
+.curated-feature-grid article .curated-media-box img {
+  transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 260ms ease;
+  will-change: transform;
+}
+
+.curated-video-card:hover .curated-media-box img,
+.curated-case-card:hover .curated-case-cover img,
+.curated-visual-card:hover .curated-media-box img,
+.curated-feature-grid article:hover .curated-media-box img {
+  transform: translate3d(var(--media-shift-x), var(--media-shift-y), 0) scale(1.055);
+  filter: saturate(1.06) contrast(1.03);
+}
+
+.curated-filter-bar button,
+.curated-hero-actions a,
+.curated-video-copy button,
+.curated-case-meta button,
+.curated-load-more button {
+  position: relative;
+  overflow: hidden;
+}
+
+.curated-filter-bar button::after,
+.curated-hero-actions a::after,
+.curated-video-copy button::after,
+.curated-case-meta button::after,
+.curated-load-more button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 12%, rgba(255, 255, 255, 0.2) 42%, transparent 68%);
+  opacity: 0;
+  translate: -110% 0;
+  transition: opacity 160ms ease, translate 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.curated-filter-bar button:hover::after,
+.curated-hero-actions a:hover::after,
+.curated-video-copy button:hover::after,
+.curated-case-meta button:hover::after,
+.curated-load-more button:hover::after {
+  opacity: 1;
+  translate: 110% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curated-page::after {
+    animation: none;
+  }
+
+  .curated-page .curated-hero-copy,
+  .curated-page .curated-hero-stage-wrap,
+  .curated-page .curated-hero-proof,
+  .curated-page .curated-section,
+  .curated-page .curated-contact {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .curated-hero-stage-wrap,
+  .curated-video-card,
+  .curated-case-card,
+  .curated-visual-card,
+  .curated-process-card,
+  .curated-skill-card,
+  .curated-feature-grid article,
+  .curated-media-box img,
+  .curated-case-cover img {
+    transform: none !important;
+    transition: none !important;
+  }
+}

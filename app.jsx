@@ -1923,6 +1923,136 @@ function App() {
   }, [isLoading]);
 
   useEffect(() => {
+    if (isLoading) return undefined;
+
+    const revealTargets = Array.from(document.querySelectorAll([
+      ".curated-page .curated-hero-copy",
+      ".curated-page .curated-hero-stage-wrap",
+      ".curated-page .curated-hero-proof",
+      ".curated-page .curated-section",
+      ".curated-page .curated-contact"
+    ].join(",")));
+    if (!revealTargets.length) return undefined;
+
+    const reducedMotion = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion || typeof IntersectionObserver !== "function") {
+      revealTargets.forEach((target) => target.classList.add("is-motion-visible"));
+      return () => revealTargets.forEach((target) => target.classList.remove("is-motion-visible"));
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-motion-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
+
+    revealTargets.forEach((target, index) => {
+      target.style.setProperty("--reveal-delay", `${Math.min(index * 45, 180)}ms`);
+      observer.observe(target);
+    });
+
+    return () => {
+      observer.disconnect();
+      revealTargets.forEach((target) => {
+        target.classList.remove("is-motion-visible");
+        target.style.removeProperty("--reveal-delay");
+      });
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (isLoading) return undefined;
+    if (typeof window.matchMedia !== "function") return undefined;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (reducedMotion || !finePointer) return undefined;
+
+    const cardSelector = [
+      ".curated-page .curated-video-card",
+      ".curated-page .curated-case-card",
+      ".curated-page .curated-visual-card",
+      ".curated-page .curated-feature-grid article",
+      ".curated-page .curated-process-card",
+      ".curated-page .curated-skill-card"
+    ].join(",");
+    const motionTargets = Array.from(document.querySelectorAll(cardSelector));
+    const heroStage = document.querySelector(".curated-page .curated-hero-stage-wrap");
+    const disposers = [];
+
+    const resetCardMotion = (target) => {
+      target.style.setProperty("--card-rx", "0deg");
+      target.style.setProperty("--card-ry", "0deg");
+      target.style.setProperty("--spot-x", "50%");
+      target.style.setProperty("--spot-y", "50%");
+      target.style.setProperty("--media-shift-x", "0px");
+      target.style.setProperty("--media-shift-y", "0px");
+    };
+
+    motionTargets.forEach((target) => {
+      resetCardMotion(target);
+      const handlePointerMove = (event) => {
+        const rect = target.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const px = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+        const py = clamp((event.clientY - rect.top) / rect.height, 0, 1);
+        const x = px - 0.5;
+        const y = py - 0.5;
+        target.style.setProperty("--card-ry", `${x * 7.5}deg`);
+        target.style.setProperty("--card-rx", `${-y * 5.5}deg`);
+        target.style.setProperty("--spot-x", `${px * 100}%`);
+        target.style.setProperty("--spot-y", `${py * 100}%`);
+        target.style.setProperty("--media-shift-x", `${-x * 10}px`);
+        target.style.setProperty("--media-shift-y", `${-y * 8}px`);
+      };
+      target.addEventListener("pointermove", handlePointerMove);
+      const handlePointerLeave = () => resetCardMotion(target);
+      target.addEventListener("pointerleave", handlePointerLeave);
+      disposers.push(() => {
+        target.removeEventListener("pointermove", handlePointerMove);
+        target.removeEventListener("pointerleave", handlePointerLeave);
+        resetCardMotion(target);
+      });
+    });
+
+    if (heroStage) {
+      const resetStageMotion = () => {
+        heroStage.style.setProperty("--hero-rx", "0deg");
+        heroStage.style.setProperty("--hero-ry", "0deg");
+        heroStage.style.setProperty("--stage-shift-x", "0px");
+        heroStage.style.setProperty("--stage-shift-y", "0px");
+        heroStage.style.setProperty("--stage-spot-x", "50%");
+        heroStage.style.setProperty("--stage-spot-y", "48%");
+      };
+      const handleStagePointerMove = (event) => {
+        const rect = heroStage.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const px = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+        const py = clamp((event.clientY - rect.top) / rect.height, 0, 1);
+        const x = px - 0.5;
+        const y = py - 0.5;
+        heroStage.style.setProperty("--hero-ry", `${x * 3.2}deg`);
+        heroStage.style.setProperty("--hero-rx", `${-y * 2.4}deg`);
+        heroStage.style.setProperty("--stage-shift-x", `${x * 12}px`);
+        heroStage.style.setProperty("--stage-shift-y", `${y * 10}px`);
+        heroStage.style.setProperty("--stage-spot-x", `${px * 100}%`);
+        heroStage.style.setProperty("--stage-spot-y", `${py * 100}%`);
+      };
+      resetStageMotion();
+      heroStage.addEventListener("pointermove", handleStagePointerMove);
+      heroStage.addEventListener("pointerleave", resetStageMotion);
+      disposers.push(() => {
+        heroStage.removeEventListener("pointermove", handleStagePointerMove);
+        heroStage.removeEventListener("pointerleave", resetStageMotion);
+        resetStageMotion();
+      });
+    }
+
+    return () => disposers.forEach((dispose) => dispose());
+  }, [isLoading, visualFilter, visibleVideoCount, visibleVisualCount]);
+
+  useEffect(() => {
     if (IS_EDITOR_MODE) return undefined;
     const canvas = heroCanvasRef.current;
     if (!canvas) return undefined;
