@@ -332,8 +332,9 @@
         },
         {
           "kind": "video",
-          "url": "videos/d9c14d8520e106a0803087b55aaea7ad.mp4",
-          "poster": "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp"
+          "url": "videos/uploads/2026/05/20260508T070737Z-0ae6244f4c2b-539ccba4-5f2d-425a-a18b-bb082c323ff7.mp4",
+          "label": "539ccba4-5f2d-425a-a18b-bb082c323ff7.mp4",
+          "alt": "539ccba4-5f2d-425a-a18b-bb082c323ff7.mp4"
         },
         {
           "kind": "video",
