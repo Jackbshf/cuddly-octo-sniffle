@@ -122,11 +122,11 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/_optimized/删掉图片中已毕业和右下角白色文字，可立即到岗改成薪资面议，其他内容不变_2K_202604131852.webp",
-          "fullUrl": "images/删掉图片中已毕业和右下角白色文字，可立即到岗改成薪资面议，其他内容不变_2K_202604131852.png",
-          "width": 2752,
-          "height": 1536,
-          "alt": "Profile | 个人简介 01"
+          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Brand visual identity extension board"
         }
       ],
       "textBlocks": [
@@ -212,35 +212,35 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-brand-poster-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-brand-poster-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Brand poster key visual"
+          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Brand visual identity extension board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-vi-jade-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-vi-jade-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Jade visual identity extension"
+          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Beverage packaging and 3D mockup board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-vi-lacquer-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-vi-lacquer-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Lacquer texture visual identity extension"
+          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Original IP merchandise and character board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-vi-stage-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-vi-stage-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Brand spatial stage visual"
+          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Product retouching output board"
         }
       ]
     },
@@ -323,19 +323,19 @@ window.__EMBEDDED_PORTFOLIO__ = {
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-character-reference-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-character-reference-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Character reference sheet"
+          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Original IP merchandise and character board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-character-variant-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-character-variant-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Character style variant"
+          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Brand visual identity extension board"
         }
       ],
       "textBlocks": [
@@ -357,19 +357,19 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-product-lora-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-product-lora-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Product LoRA style mockup"
+          "url": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Product input and reference board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-style-lora-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-style-lora-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Illustration style LoRA extension"
+          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Product retouching output board"
         }
       ]
     },
@@ -511,27 +511,27 @@ window.__EMBEDDED_PORTFOLIO__ = {
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-storyboard-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-storyboard-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Short drama storyboard design"
+          "url": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Short video reel production board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-shot-design-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-shot-design-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Shot design and visual staging"
+          "url": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Character LoRA consistency reference board"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-editing-system-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-editing-system-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Editing and delivery system visual"
+          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Brand visual identity extension board"
         }
       ]
     },
@@ -566,11 +566,11 @@ window.__EMBEDDED_PORTFOLIO__ = {
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/ef-gallery-ip-campaign-v1.webp",
-          "fullUrl": "images/generated/eastern-future/ef-gallery-ip-campaign-v1.webp",
-          "width": 1200,
-          "height": 1200,
-          "alt": "Original IP campaign visual"
+          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "width": 1600,
+          "height": 1000,
+          "alt": "Beverage packaging and 3D mockup board"
         }
       ]
     },

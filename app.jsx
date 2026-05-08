@@ -334,7 +334,7 @@ const createDefaultCases = () => ([
   {
     id: "controlnet-ecommerce",
     title: "可控电商产品精修",
-    cover: "images/ai-product-control-final.png",
+    cover: "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
     category: "商业视觉",
     tags: ["生成内容", "电商", "结构控制"],
     description: "围绕产品结构和光影一致性，完成结构控制到高精渲染的电商主图升级。",
@@ -348,7 +348,7 @@ const createDefaultCases = () => ([
   {
     id: "future-brand-visuals",
     title: "未来感品牌海报与识别系统",
-    cover: "images/Gemini_Generated_Image_3zk3hz3zk3hz3zk3.png",
+    cover: "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
     category: "品牌视觉",
     tags: ["品牌", "海报", "视觉识别"],
     description: "统一未来感主视觉语言，扩展到海报、品牌应用和多风格商业物料。",
@@ -362,7 +362,7 @@ const createDefaultCases = () => ([
   {
     id: "ai-short-video-campaign",
     title: "广告短视频与平台系列内容",
-    cover: "images/微信图片_20260411183234_116_7.png",
+    cover: "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
     category: "叙事内容",
     tags: ["短视频", "广告", "生成内容"],
     description: "用原生视频生成和后期剪辑构建电商广告与平台分发内容，形成系列化投放素材。",
@@ -4053,11 +4053,6 @@ function App() {
     "a6537e213935b778ba57eade8bbf142a",
     "1774080806307",
     "51339bc463f2bb227aef56406ae9f0ac",
-    "微信图片_20260411183204",
-    "微信图片_20260411183221",
-    "微信图片_20260411183208",
-    "微信图片_20260411183312",
-    "ref-look-202604131510"
   ];
 
   const isLikelyPortraitMedia = (item) => {
