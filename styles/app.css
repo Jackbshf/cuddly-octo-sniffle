@@ -5088,6 +5088,7 @@ html {
   font-size: clamp(44px, 7vw, 84px);
   line-height: 0.96;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .gallery-corridor__copy p {
@@ -5252,6 +5253,7 @@ html {
   font-size: clamp(34px, 5vw, 62px);
   line-height: 1.02;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .main-exhibition-hall__top p,
@@ -5331,8 +5333,10 @@ html {
 }
 
 .world-frame__media img {
+  display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   transform: scale(1.02);
   transition: transform 360ms ease, filter 360ms ease;
 }
@@ -5826,6 +5830,12 @@ html {
   line-height: 1.55;
 }
 
+.gallery-admin-status.is-blocked {
+  border-color: rgba(244, 63, 94, 0.28);
+  background: rgba(244, 63, 94, 0.09);
+  color: rgba(255, 226, 231, 0.9);
+}
+
 .gallery-admin-actions,
 .gallery-admin-inline {
   display: grid;
@@ -5878,8 +5888,161 @@ html {
   font-size: 13px;
 }
 
+.gallery-admin-history {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(104, 183, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(8, 17, 28, 0.44);
+}
+
+.gallery-admin-history > span {
+  color: var(--gallery-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.gallery-admin-history > div {
+  display: grid;
+  gap: 6px;
+}
+
+.gallery-admin-history button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.gallery-admin-history strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-admin-history em,
+.gallery-admin-history p {
+  margin: 0;
+  color: rgba(218, 232, 248, 0.66);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.5;
+}
+
 .gallery-admin-file input {
   padding: 7px;
+}
+
+.gallery-admin-dropzone {
+  padding: 10px;
+  border: 1px dashed rgba(104, 183, 255, 0.32);
+  border-radius: 16px;
+  background: rgba(104, 183, 255, 0.06);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.gallery-admin-dropzone.is-dragging {
+  border-color: rgba(104, 183, 255, 0.76);
+  background: rgba(104, 183, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.gallery-admin-dropzone img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(243, 247, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(5, 11, 18, 0.76);
+}
+
+.gallery-admin-dropzone strong,
+.gallery-admin-dropzone em {
+  display: block;
+  color: rgba(243, 247, 255, 0.86);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.gallery-admin-dropzone em {
+  color: rgba(218, 232, 248, 0.62);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.gallery-admin-library {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(104, 183, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(8, 17, 28, 0.44);
+}
+
+.gallery-admin-library > span {
+  color: var(--gallery-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.gallery-admin-library > p {
+  margin: 0;
+  color: rgba(218, 232, 248, 0.62);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gallery-admin-library > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-height: 280px;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.gallery-admin-library button {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(5, 11, 18, 0.66);
+  text-align: left;
+}
+
+.gallery-admin-library button.is-selected {
+  border-color: rgba(104, 183, 255, 0.72);
+  background: rgba(104, 183, 255, 0.14);
+}
+
+.gallery-admin-library img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 9px;
+  background: rgba(5, 11, 18, 0.72);
+}
+
+.gallery-admin-library strong,
+.gallery-admin-library em {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(243, 247, 255, 0.86);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-admin-library em {
+  color: rgba(104, 183, 255, 0.78);
 }
 
 @supports (animation-timeline: scroll()) {
@@ -5958,7 +6121,8 @@ html {
   }
 
   .gallery-corridor__copy h1 {
-    font-size: 42px;
+    font-size: clamp(36px, 13vw, 42px);
+    line-height: 1.04;
   }
 
   .gallery-corridor__depth {
@@ -6023,6 +6187,14 @@ html {
   .gallery-admin-inline {
     grid-template-columns: 1fr;
     display: grid;
+  }
+
+  .gallery-admin-history button {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-admin-library > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

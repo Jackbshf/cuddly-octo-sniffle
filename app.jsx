@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, startTransition } from "react";
 import { createRoot } from "react-dom/client";
 import Hls from "hls.js";
 import * as THREE from "three";
+import GalleryWorldHome from "./src/components/GalleryWorldHome.jsx";
 
 const DATA_FILE_PATH = "data/portfolio.json";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
@@ -10,6 +11,7 @@ const APP_BUNDLE_VERSION = window.__APP_BUNDLE_VERSION__ ?? "";
 const SEARCH_PARAMS = new URLSearchParams(window.location.search);
 const IS_PORTFOLIO_ADMIN_MODE = window.__PORTFOLIO_ADMIN_MODE__ === true;
 const IS_TOOLS_MODE = SEARCH_PARAMS.get("tools") === "1" || IS_PORTFOLIO_ADMIN_MODE;
+const USE_GALLERY_WORLD_HOME = SEARCH_PARAMS.get("classic") !== "1";
 const shouldNormalizeEditorQuery = window.location.protocol !== "file:" && SEARCH_PARAMS.get("editor") === "1";
 if (shouldNormalizeEditorQuery) {
   const normalizedParams = new URLSearchParams(window.location.search);
@@ -5335,4 +5337,8 @@ function App() {
 }
 
 const root = createRoot(document.getElementById("root"));
-root.render(<App />);
+root.render(
+  USE_GALLERY_WORLD_HOME && (!IS_EDITOR_MODE || IS_PORTFOLIO_ADMIN_MODE)
+    ? <GalleryWorldHome admin={IS_PORTFOLIO_ADMIN_MODE} />
+    : <App />
+);
