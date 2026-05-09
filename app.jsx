@@ -4399,8 +4399,9 @@ function App() {
   const isWorkflowSlide = (slide) => slide?.type === "workflow-diagram";
   const isMediaCuratedHidden = (media) => normalizeMediaItem(media)?.curatedHidden === true;
   const getMediaEntriesBySlide = (predicate, options = {}) => slidesData
-    .filter((slide) => slide?.id !== 2 && (options.includeWorkflow || !isWorkflowSlide(slide)))
-    .map((slide, slideIndex) => ({
+    .map((slide, slideIndex) => ({ slide, slideIndex }))
+    .filter(({ slide }) => slide?.id !== 2 && (options.includeWorkflow || !isWorkflowSlide(slide)))
+    .map(({ slide, slideIndex }) => ({
       slide,
       slideIndex,
       mediaItems: (Array.isArray(slide?.media) ? slide.media : [])

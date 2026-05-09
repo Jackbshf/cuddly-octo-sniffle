@@ -271,11 +271,11 @@
         {
           "kind": "image",
           "url": "images/works/drink/poster.webp",
-          "label": "????????",
+          "label": "饮料包装样机",
           "fullUrl": "images/works/drink/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????"
+          "alt": "饮料包装与 3D 样机展示"
         }
       ],
       "textBlocks": [
@@ -528,20 +528,20 @@
         {
           "kind": "image",
           "url": "images/works/monkey/poster.webp",
-          "label": "????????",
+          "label": "角色短剧分镜",
           "fullUrl": "images/works/monkey/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "??????????????"
+          "alt": "短剧角色动态分镜概念图"
         },
         {
           "kind": "image",
           "url": "images/works/cybercity/poster.webp",
-          "label": "????????",
+          "label": "赛博城市场景",
           "fullUrl": "images/works/cybercity/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "?????????????"
+          "alt": "赛博城市短剧场景概念图"
         },
         {
           "kind": "image",
@@ -631,6 +631,201 @@
           "kind": "video",
           "url": "videos/commercial-mattress-soft-focus.mp4",
           "poster": "images/_posters/commercial-mattress-soft-focus.webp"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "type": "workflow-diagram",
+      "title": "ComfyUI 工作流拆解",
+      "desc": "用节点流程展示从输入素材、控制条件到后期输出的图像处理能力。",
+      "slots": 9,
+      "slotType": "image",
+      "roleTags": [
+        "ComfyUI",
+        "节点流程",
+        "图像修复",
+        "商业视觉"
+      ],
+      "media": [
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/interior-style-transfer.png",
+          "meta": "结合 HED 结构控制与 IPAdapter 风格参考，保持空间结构并重塑视觉风格。",
+          "label": "室内风格迁移",
+          "fullUrl": "images/workflows/comfyui/interior-style-transfer.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 室内空间风格迁移工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "输入空间图",
+            "HED 结构控制",
+            "风格参考/IPAdapter",
+            "采样生成",
+            "细节修正"
+          ],
+          "workflowAbility": "在保留空间结构的前提下完成风格重塑。",
+          "workflowOutcome": "适用于空间设计、酒店视觉和室内方案预览。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/virtual-try-on.png",
+          "meta": "将服装参考、人物姿态和遮罩重绘串联，生成更贴合的试穿预览。",
+          "label": "虚拟试衣",
+          "fullUrl": "images/workflows/comfyui/virtual-try-on.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 虚拟试衣工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "人物与服装输入",
+            "姿态/OpenPose",
+            "遮罩绘制",
+            "Inpaint Try-on",
+            "Refiner 精修"
+          ],
+          "workflowAbility": "快速验证服装上身效果和版型关系。",
+          "workflowOutcome": "适用于电商服装预览和选款提案。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/portrait-face-swap.png",
+          "meta": "通过 InsightFace 与局部修复节点，保留原画面光影并替换人物面部。",
+          "label": "人物换脸",
+          "fullUrl": "images/workflows/comfyui/portrait-face-swap.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 人物面部替换工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "源脸/目标图",
+            "面部检测",
+            "inswapper",
+            "局部修复",
+            "肤色与光影统一"
+          ],
+          "workflowAbility": "在保留姿态与场景的同时替换角色身份。",
+          "workflowOutcome": "适用于角色概念、短剧测试和视觉预演。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/canvas-outpainting.png",
+          "meta": "基于原图边缘与扩展遮罩生成新画面，补足横竖版构图需求。",
+          "label": "画面扩图",
+          "fullUrl": "images/workflows/comfyui/canvas-outpainting.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 画面扩展工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "原图输入",
+            "画布扩展",
+            "边缘遮罩",
+            "扩图采样",
+            "接缝修复"
+          ],
+          "workflowAbility": "把固定比例素材扩展为更多投放版式。",
+          "workflowOutcome": "适用于海报延展、社媒多比例适配和广告投放。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/watermark-removal.png",
+          "meta": "通过局部遮罩与 Inpaint 节点移除干扰元素，恢复干净背景和纹理。",
+          "label": "瑕疵去除",
+          "fullUrl": "images/workflows/comfyui/watermark-removal.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 局部瑕疵去除工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "瑕疵区域标注",
+            "遮罩扩张",
+            "Inpaint 修复",
+            "纹理统一"
+          ],
+          "workflowAbility": "清理不需要的文字、标记或画面杂点。",
+          "workflowOutcome": "适用于素材清洁、旧图修复和发布前处理。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/subject-cutout.png",
+          "meta": "通过主体分割、透明通道和边缘修正，输出可复用的商品或人物素材。",
+          "label": "主体抠图",
+          "fullUrl": "images/workflows/comfyui/subject-cutout.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 主体抠图透明背景工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "主体检测",
+            "Alpha 输出",
+            "边缘修正",
+            "背景替换",
+            "透明 PNG"
+          ],
+          "workflowAbility": "将复杂背景中的主体稳定分离出来。",
+          "workflowOutcome": "适用于电商主图、KV 合成和素材资产整理。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/local-inpainting.png",
+          "meta": "对画面指定区域进行语义重绘，补充缺失内容或替换局部元素。",
+          "label": "局部重绘",
+          "fullUrl": "images/workflows/comfyui/local-inpainting.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 局部重绘工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "原图输入",
+            "区域遮罩",
+            "提示词控制",
+            "重绘采样",
+            "结果筛选"
+          ],
+          "workflowAbility": "保持整体画面一致性的同时替换局部内容。",
+          "workflowOutcome": "适用于产品细节调整、服装换色和创意修补。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/hd-restoration.png",
+          "meta": "结合放大、降噪和细节重绘，把低清素材转为更适合展示的版本。",
+          "label": "高清修复",
+          "fullUrl": "images/workflows/comfyui/hd-restoration.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 高清修复工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "低清图输入",
+            "超分辨率放大",
+            "降噪处理",
+            "细节补强",
+            "色彩校正"
+          ],
+          "workflowAbility": "提升素材清晰度和边缘质感。",
+          "workflowOutcome": "适用于旧素材复用、案例归档和上线展示。"
+        },
+        {
+          "kind": "image",
+          "url": "images/workflows/comfyui/product-retouch.png",
+          "meta": "围绕产品主体进行光影、材质和背景统一，强化商业出片质感。",
+          "label": "产品精修",
+          "fullUrl": "images/workflows/comfyui/product-retouch.png",
+          "width": 1672,
+          "height": 941,
+          "alt": "ComfyUI 产品精修工作流",
+          "curatedCategory": "workflow",
+          "workflowSteps": [
+            "产品图输入",
+            "主体保护",
+            "背景清理",
+            "光影重绘",
+            "质感增强"
+          ],
+          "workflowAbility": "把普通产品图整理成更完整的商业视觉。",
+          "workflowOutcome": "适用于电商详情、品牌海报和产品提案。"
         }
       ]
     },
