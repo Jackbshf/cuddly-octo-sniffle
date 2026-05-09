@@ -1727,7 +1727,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("正在载入发布数据...");
   const [visualFilter, setVisualFilter] = useState("all");
   const [visibleVideoCount, setVisibleVideoCount] = useState(6);
-  const [visibleVisualCount, setVisibleVisualCount] = useState(12);
+  const [visibleVisualCount, setVisibleVisualCount] = useState(24);
   const [activeCuratedSection, setActiveCuratedSection] = useState("home");
   const [selectedWorkItem, setSelectedWorkItem] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -1779,10 +1779,9 @@ function App() {
 
   const curatedNavItems = [
     { id: "home", label: "首页" },
-    { id: "videos", label: "视频" },
     { id: "cases", label: "案例" },
+    { id: "capabilities", label: "能力" },
     { id: "gallery", label: "作品" },
-    { id: "workflows", label: "工作流" },
     { id: "process", label: "流程" },
     { id: "contact", label: "联系" }
   ];
@@ -1899,7 +1898,7 @@ function App() {
   }, [selectedWorkItem]);
 
   useEffect(() => {
-    setVisibleVisualCount(12);
+    setVisibleVisualCount(curatedGalleryMaxCount);
   }, [visualFilter]);
 
   useEffect(() => {
@@ -1953,9 +1952,7 @@ function App() {
     const revealTargets = Array.from(document.querySelectorAll([
       ".curated-page .curated-hero-copy",
       ".curated-page .curated-hero-stage-wrap",
-      ".curated-page .curated-hero-proof",
-      ".curated-page .curated-section",
-      ".curated-page .curated-contact"
+      ".curated-page .curated-hero-proof"
     ].join(",")));
     if (!revealTargets.length) return undefined;
 
@@ -4385,6 +4382,45 @@ function App() {
     { label: "所在地", value: "广东" },
     { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
   ];
+  const capabilityHighlights = [
+    {
+      title: "产品广告视觉",
+      description: "控制产品结构、材质、光影和商业构图，适合电商主图、KV 和新品发布视觉。",
+      tags: ["电商主图", "产品精修", "商业构图"],
+      category: "product"
+    },
+    {
+      title: "商业短视频分镜",
+      description: "把卖点拆成镜头节奏、封面和短视频素材，支持广告内容快速试拍与迭代。",
+      tags: ["镜头节奏", "短视频素材", "封面"],
+      category: "short-video",
+      caseId: "ai-short-video-campaign"
+    },
+    {
+      title: "AI 人像与数字人",
+      description: "面向角色一致性、口播讲解和人物宣传图，保证画面完成度和岗位展示价值。",
+      tags: ["角色一致性", "数字人", "人像视觉"],
+      category: "brand"
+    },
+    {
+      title: "国潮与东方现代",
+      description: "用东方审美、现代构图和品牌语言做视觉延展，避免只停留在单张氛围图。",
+      tags: ["东方视觉", "品牌延展", "海报"],
+      category: "brand"
+    },
+    {
+      title: "ComfyUI 工作流搭建",
+      description: "把扩图、局部重绘、换脸、抠图和高清修复拆成可解释、可复用的节点流程。",
+      tags: ["ComfyUI", "ControlNet", "节点流程"],
+      category: "workflow"
+    },
+    {
+      title: "后期精修与交付",
+      description: "完成筛选、修图、排版、调色、视频剪辑和多规格输出，让生成结果变成交付物。",
+      tags: ["Photoshop", "剪辑整理", "多规格输出"],
+      category: "experiment"
+    }
+  ];
 
   const isGeneratedBoardMedia = (media) => {
     const normalized = normalizeMediaItem(media);
@@ -4398,6 +4434,21 @@ function App() {
 
   const isWorkflowSlide = (slide) => slide?.type === "workflow-diagram";
   const isMediaCuratedHidden = (media) => normalizeMediaItem(media)?.curatedHidden === true;
+  const homepageGalleryExcludedSources = [
+    "images/uploads/2026/05/20260508T065718Z-10ab0bfabb84-ChatGPT-Image-2026-5-8-00_28_13-6.png",
+    "images/works/monkey/poster.webp",
+    "images/works/cybercity/poster.webp",
+    "images/generated/celestial-whale-city.webp",
+    "images/works/portal/poster.webp"
+  ];
+  const getMediaPreviewSource = (media) => {
+    const normalized = normalizeMediaItem(media);
+    return String(normalized?.poster || normalized?.draftPreviewUrl || normalized?.url || normalized?.fullUrl || "").replace(/\\/g, "/");
+  };
+  const isHomepageGalleryEligible = (item) => {
+    const previewSource = getMediaPreviewSource(item.mediaEntry.media);
+    return previewSource && !homepageGalleryExcludedSources.some((source) => previewSource.includes(source));
+  };
   const getMediaEntriesBySlide = (predicate, options = {}) => slidesData
     .map((slide, slideIndex) => ({ slide, slideIndex }))
     .filter(({ slide }) => slide?.id !== 2 && (options.includeWorkflow || !isWorkflowSlide(slide)))
@@ -4481,14 +4532,20 @@ function App() {
       const rightRank = caseOrder.indexOf(right.caseItem?.id);
       return (leftRank < 0 ? 99 : leftRank) - (rightRank < 0 ? 99 : rightRank) || (left.entry.slide.id ?? 999) - (right.entry.slide.id ?? 999);
     });
+  const curatedGalleryMaxCount = 24;
+  const curatedWorkflowPreviewCount = 3;
   const videoWorks = videoEntries
     .flatMap((entry) => entry.mediaItems.map((mediaEntry) => ({
       entry,
       mediaEntry,
       caseItem: getCaseForSlide(entry.slide)
     })));
+  const visibleVisualEntriesForDisplay = visualEntries.filter((item) => !isMediaCuratedHidden(item.mediaEntry.media));
+  const eligibleVisualEntriesForDisplay = visibleVisualEntriesForDisplay.filter(isHomepageGalleryEligible);
+  const imageVisualEntriesForDisplay = eligibleVisualEntriesForDisplay.filter((item) => isImageMedia(normalizeMediaItem(item.mediaEntry.media)));
+  const defaultGalleryEntries = imageVisualEntriesForDisplay.slice(0, curatedGalleryMaxCount);
   const visibleVideoEntriesForDisplay = videoWorks.filter((item) => !isMediaCuratedHidden(item.mediaEntry.media));
-  const visibleWorkflowEntriesForDisplay = workflowEntries.filter((item) => !isMediaCuratedHidden(item.mediaEntry.media));
+  const visibleWorkflowEntriesForDisplay = workflowEntries.filter((item) => !isMediaCuratedHidden(item.mediaEntry.media)).slice(0, curatedWorkflowPreviewCount);
 
   const visualFilters = [
     { id: "all", label: "全部" },
@@ -4497,8 +4554,8 @@ function App() {
     { id: "brand", label: "品牌海报" },
     { id: "experiment", label: "视觉实验" }
   ];
-  const displayVisualEntries = visualEntries.filter((item) => !isMediaCuratedHidden(item.mediaEntry.media));
-  const filteredVisualEntries = visualFilter === "all" ? displayVisualEntries : displayVisualEntries.filter((item) => item.category === visualFilter);
+  const displayVisualEntries = visualFilter === "all" ? defaultGalleryEntries : eligibleVisualEntriesForDisplay.filter((item) => item.category === visualFilter);
+  const filteredVisualEntries = displayVisualEntries;
 
   const renderCuratedLayoutStyles = () => null;
 
@@ -4677,6 +4734,32 @@ function App() {
     </div>
   </article>;
 
+  const renderCapabilityCard = (item, index) => {
+    const relatedCase = item.caseId ? featuredCases.find(({ caseItem }) => caseItem?.id === item.caseId) : null;
+    const relatedEntry = relatedCase ? null : item.category === "workflow"
+      ? visibleWorkflowEntriesForDisplay[0]
+      : displayVisualEntries.find((entry) => entry.category === item.category) || displayVisualEntries[index];
+    const preview = relatedCase
+      ? buildCaseWorkDetail(relatedCase, index)
+      : relatedEntry && item.category === "workflow"
+      ? buildWorkflowWorkDetail(relatedEntry, index)
+      : relatedEntry
+        ? buildVisualWorkDetail(relatedEntry, index)
+        : null;
+    const previewCover = relatedCase?.caseItem?.cover;
+    return <article key={item.title} className="curated-capability-card" tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)}>
+      {previewCover ? <div className="curated-media-box curated-media-box-compact"><img src={previewCover} alt={item.title} loading="lazy" decoding="async" className="curated-static-media" /></div> : preview ? renderCuratedMediaBox(preview.entry, preview.mediaEntry, { compact: true, disableInlinePreview: true, label: preview.title, key: item.title }) : <div className="curated-capability-placeholder"><Icon name="Sparkles" size={22} /></div>}
+      <div className="curated-capability-copy">
+        <span>{String(index + 1).padStart(2, "0")}</span>
+        <h3>{item.title}</h3>
+        <p>{item.description}</p>
+        <div className="curated-card-tags">
+          {item.tags.map((tag) => <span key={item.title + "-" + tag}>{tag}</span>)}
+        </div>
+      </div>
+    </article>;
+  };
+
   const renderVideoWorkCard = (item, index) => {
     const detail = buildVideoWorkDetail(item, index);
     return <article key={detail.id} className="curated-video-card" tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
@@ -4750,6 +4833,7 @@ function App() {
           {detail.tags.slice(0, 3).map((tag) => <span key={detail.id + "-" + tag}>{tag}</span>)}
           {detail.kind === "video" && <span>视频可播放</span>}
         </div>
+        <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看详情</button>
       </div>
     </article>;
   };
@@ -5129,8 +5213,8 @@ function App() {
   const renderCuratedExperience = () => {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
-    const heroSubtitle = coverSlide.subtitle || siteMeta.siteTitle;
-    const heroDescription = "用 AIGC、3D 与视频生成工作流，呈现面向商业项目的视觉作品与内容资产。";
+    const heroSubtitle = "AIGC Visual Designer / Generative Media Designer";
+    const heroDescription = "专注商业广告视觉、AI 产品渲染、短视频分镜与 ComfyUI 工作流搭建，用生成式工具完成从概念到交付的视觉方案。";
     const imageVisualEntries = displayVisualEntries.filter((item) => !isVideoMedia(normalizeMediaItem(item.mediaEntry.media)));
     const heroVisualEntry = imageVisualEntries.find((item) => hasFourKSource(normalizeMediaItem(item.mediaEntry.media))) || imageVisualEntries[0];
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
@@ -5145,11 +5229,8 @@ function App() {
         detail
       };
     });
-    const featuredVisualItems = imageVisualEntries.slice(0, 8).map(buildVisualWorkDetail);
-    const visibleVideoWorks = visibleVideoEntriesForDisplay.slice(0, visibleVideoCount);
-    const hasMoreVideos = visibleVideoCount < visibleVideoEntriesForDisplay.length;
-    const visibleVisualEntries = filteredVisualEntries.slice(0, visibleVisualCount);
-    const hasMoreVisualEntries = visibleVisualCount < filteredVisualEntries.length;
+    const visibleVisualEntries = filteredVisualEntries.slice(0, Math.min(visibleVisualCount, curatedGalleryMaxCount));
+    const hiddenVisualEntriesCount = Math.max(0, filteredVisualEntries.length - visibleVisualEntries.length);
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
       {renderCuratedLayoutStyles()}
@@ -5162,8 +5243,9 @@ function App() {
             {heroRoleTags.map((tag) => <span key={tag}>{tag}</span>)}
           </div>
           <div className="curated-hero-actions">
-            <a href="#videos" onClick={(event) => handleCuratedAnchorClick(event, "videos")}>观看视频作品</a>
             <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>查看项目案例</a>
+            <a href="#process" onClick={(event) => handleCuratedAnchorClick(event, "process")}>查看创作流程</a>
+            <a href="#contact" onClick={(event) => handleCuratedAnchorClick(event, "contact")}>联系合作</a>
           </div>
         </div>
         {renderHeroKineticStage(heroDetail, heroStageItems)}
@@ -5172,72 +5254,58 @@ function App() {
         </div>
       </section>
 
-      <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
-        {renderCuratedEyebrow(1, "视频作品")}
-        <div className="curated-section-heading">
-          <h2>生成式视频作品</h2>
-          <p>展示广告短片、产品镜头、口播封面和短剧素材的视觉控制与剪辑整理能力。</p>
-        </div>
-        <div className="curated-video-grid">{visibleVideoWorks.map(renderVideoWorkCard)}</div>
-        {hasMoreVideos && <div className="curated-load-more">
-          <button type="button" onClick={() => setVisibleVideoCount((count) => Math.min(count + 6, visibleVideoEntriesForDisplay.length))}>加载更多视频</button>
-          <span>{visibleVideoWorks.length} / {visibleVideoEntriesForDisplay.length}</span>
-        </div>}
-      </section>
-
       <section id="cases" className="curated-section" style={publishedSectionStyle}>
-        {renderCuratedEyebrow(2, "项目案例")}
+        {renderCuratedEyebrow(1, "精选案例")}
         <div className="curated-section-heading">
-          <h2>{siteMeta.caseSectionTitle || "精选项目案例"}</h2>
-          <p>{siteMeta.caseSectionDesc || "用结构化案例说明创作链路、工具选择和最终结果。"}</p>
+          <h2>{siteMeta.caseSectionTitle || "精选商业案例"}</h2>
+          <p>{siteMeta.caseSectionDesc || "用 3 个重点案例说明商业目标、工具链、个人职责和可交付成果。"}</p>
         </div>
         <div className="curated-case-stack">{featuredCases.map(renderFeaturedCaseCard)}</div>
       </section>
 
-      <section id="gallery" className="curated-section curated-section-selected" style={publishedSectionStyle}>
-        {renderCuratedEyebrow(3, "完整索引")}
+      <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(2, "能力矩阵")}
         <div className="curated-section-heading">
-          <h2>全部视觉作品</h2>
-          <p>按视频视觉、电商产品、品牌海报和视觉实验整理代表作品，点击可查看更大画面与项目信息。</p>
+          <h2>核心能力矩阵</h2>
+          <p>把招聘方最关心的商业视觉能力前置展示，不让访客从几十张图里自行猜测能力边界。</p>
         </div>
-        <div className="curated-feature-grid">
-          {featuredVisualItems.map((item) => <article key={item.id} tabIndex={0} onClick={() => openWorkDetail(item)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, item)}>
-            {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: item.title, key: item.id })}
-            <span>{item.label}</span>
-            <strong>{item.title}</strong>
-          </article>)}
+        <div className="curated-capability-grid">{capabilityHighlights.map(renderCapabilityCard)}</div>
+      </section>
+
+      <section id="gallery" className="curated-section curated-section-selected" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(3, "视觉精选")}
+        <div className="curated-section-heading">
+          <h2>视觉作品精选</h2>
+          <p>首页只保留筛选后的代表作品，按视频视觉、电商产品、品牌海报和实验视觉快速浏览，避免作品堆叠造成信息过载。</p>
         </div>
         <div className="curated-filter-bar">
           {visualFilters.map((filter) => <button key={filter.id} type="button" onClick={() => setVisualFilter(filter.id)} className={visualFilter === filter.id ? "is-active" : ""}>{filter.label}</button>)}
         </div>
         <div className="curated-visual-grid">{visibleVisualEntries.map(renderVisualIndexCard)}</div>
-        {hasMoreVisualEntries && <div className="curated-load-more">
-          <button type="button" onClick={() => setVisibleVisualCount((count) => Math.min(count + 12, filteredVisualEntries.length))}>加载更多作品</button>
-          <span>{visibleVisualEntries.length} / {filteredVisualEntries.length}</span>
-        </div>}
+        <div className="curated-load-more curated-load-more-static">
+          <span>首页精选 {visibleVisualEntries.length} / {filteredVisualEntries.length}{hiddenVisualEntriesCount > 0 ? `，其余 ${hiddenVisualEntriesCount} 个作品保留在后台素材中` : ""}</span>
+        </div>
       </section>
 
-      {(visibleWorkflowEntries.length > 0 || (IS_PORTFOLIO_ADMIN_MODE && workflowEntries.length > 0)) && <section id="workflows" className="curated-section curated-section-workflows" style={publishedSectionStyle}>
-        {renderCuratedEyebrow(4, "ComfyUI 工作流")}
+      <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
+        {renderCuratedEyebrow(4, "创作流程")}
         <div className="curated-section-heading">
-          <h2>ComfyUI 工作流拆解</h2>
-          <p>把修图、抠图、扩图、换脸、试衣、高清修复和产品精修能力拆成可读的节点流程。</p>
-        </div>
-        <div className="curated-workflow-grid">{visibleWorkflowEntries.map(renderWorkflowCard)}</div>
-        {!visibleWorkflowEntries.length && IS_PORTFOLIO_ADMIN_MODE && <div className="curated-workflow-empty">
-          <p>当前工作流卡片都已隐藏，可在后台卡片管理中恢复。</p>
-        </div>}
-      </section>}
-
-      <section id="process" className="curated-section curated-section-process" style={publishedSectionStyle}>
-        {renderCuratedEyebrow(5, "创作流程")}
-        <div className="curated-section-heading">
-          <h2>创作流程</h2>
-          <p>从需求理解到交付输出，把生成、控制、筛选和后期整理拆成可说明、可复用的工作步骤。</p>
+          <h2>AIGC 创作流程</h2>
+          <p>从 Brief 到交付，把生成、控制、筛选、ComfyUI 精修和后期整理拆成可说明、可复用的工作步骤。</p>
         </div>
         <div className="curated-process-grid">
           {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
         </div>
+        {(visibleWorkflowEntries.length > 0 || (IS_PORTFOLIO_ADMIN_MODE && workflowEntries.length > 0)) && <>
+          <div className="curated-subsection-heading">
+            <h3>ComfyUI 工作流拆解</h3>
+            <p>展示扩图、局部重绘、换脸、抠图、高清修复和产品精修等可复用节点能力。</p>
+          </div>
+          <div className="curated-workflow-grid">{visibleWorkflowEntries.map(renderWorkflowCard)}</div>
+          {!visibleWorkflowEntries.length && IS_PORTFOLIO_ADMIN_MODE && <div className="curated-workflow-empty">
+            <p>当前工作流卡片都已隐藏，可在后台卡片管理中恢复。</p>
+          </div>}
+        </>}
         <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>
       </section>
 
