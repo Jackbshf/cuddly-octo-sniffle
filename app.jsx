@@ -4441,6 +4441,7 @@ function App() {
     "images/generated/celestial-whale-city",
     "images/works/portal/poster"
   ];
+  const homepageGalleryExcludedSlots = new Set(["15:1", "24:0", "24:1", "24:3", "26:1"]);
   const normalizeCuratedSourceForCompare = (source) => String(source || "")
     .replace(/\\/g, "/")
     .replace("/images/_optimized/", "/images/")
@@ -4450,6 +4451,7 @@ function App() {
     return normalizeCuratedSourceForCompare(normalized?.poster || normalized?.draftPreviewUrl || normalized?.url || normalized?.fullUrl);
   };
   const isHomepageGalleryEligible = (item) => {
+    if (homepageGalleryExcludedSlots.has(`${item.entry.slide.id}:${item.mediaEntry.slotIndex}`)) return false;
     const previewSource = getMediaPreviewSource(item.mediaEntry.media);
     return previewSource && !homepageGalleryExcludedSources.some((source) => previewSource.includes(source));
   };
