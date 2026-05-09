@@ -122,12 +122,12 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/hotel/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/hotel/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+          "label": "作品能力概览",
+          "fullUrl": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????????"
+          "alt": "AIGC 视觉与视频作品能力概览"
         }
       ],
       "textBlocks": [
@@ -158,21 +158,21 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/earbuds/poster.webp",
-          "label": "?????????",
-          "fullUrl": "images/works/earbuds/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "label": "产品输入与结构控制",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "?????????????"
+          "alt": "产品结构输入与控制参考板"
         },
         {
           "kind": "image",
-          "url": "images/works/foundation/poster.webp",
-          "label": "?????????",
-          "fullUrl": "images/works/foundation/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "label": "产品精修输出",
+          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????"
+          "alt": "产品精修与材质光影输出板"
         }
       ]
     },
@@ -194,12 +194,12 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/hotel/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/hotel/poster.webp",
+          "url": "images/works/whale/poster.webp",
+          "label": "未来感主视觉",
+          "fullUrl": "images/works/whale/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????????"
+          "alt": "未来感品牌海报主视觉"
         }
       ],
       "textBlocks": [
@@ -216,39 +216,39 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/hotel/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/hotel/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "label": "品牌 VI 延展",
+          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????????"
+          "alt": "品牌 VI 与主视觉延展板"
         },
         {
           "kind": "image",
-          "url": "images/works/drink/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/drink/poster.webp",
+          "url": "images/works/oriental/poster.webp",
+          "label": "国风人物海报",
+          "fullUrl": "images/works/oriental/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????"
+          "alt": "国风人物品牌海报"
         },
         {
           "kind": "image",
-          "url": "images/works/giftbox/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/giftbox/poster.webp",
+          "url": "images/works/lipstick/poster.webp",
+          "label": "美妆产品海报",
+          "fullUrl": "images/works/lipstick/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "?????????????"
+          "alt": "美妆产品品牌海报"
         },
         {
           "kind": "image",
-          "url": "images/works/foundation/poster.webp",
-          "label": "?????????",
-          "fullUrl": "images/works/foundation/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "label": "包装视觉延展",
+          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????"
+          "alt": "包装与社媒物料延展板"
         }
       ]
     },
@@ -324,30 +324,30 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/portrait/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/portrait/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "label": "角色 LoRA 训练板",
+          "fullUrl": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "???????????"
+          "alt": "角色一致性 LoRA 训练输出板"
         },
         {
           "kind": "image",
-          "url": "images/works/giftbox/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/giftbox/poster.webp",
-          "width": 1600,
-          "height": 1000,
-          "alt": "?????????????"
+          "url": "images/uploads/2026/05/20260508T070809Z-9e08883aad43-ChatGPT-Image-2026-4-24-08_25_32.jpg",
+          "label": "插画角色输出",
+          "fullUrl": "images/uploads/2026/05/20260508T070809Z-9e08883aad43-ChatGPT-Image-2026-4-24-08_25_32.jpg",
+          "width": 941,
+          "height": 1672,
+          "alt": "插画角色一致性输出"
         },
         {
           "kind": "image",
-          "url": "images/works/hotel/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/hotel/poster.webp",
-          "width": 1600,
-          "height": 1000,
-          "alt": "????????????????"
+          "url": "images/uploads/2026/05/20260508T122252Z-70577ccd0f10-ChatGPT-Image-2026-4-24-08_25_22.jpg",
+          "label": "角色风格延展",
+          "fullUrl": "images/uploads/2026/05/20260508T122252Z-70577ccd0f10-ChatGPT-Image-2026-4-24-08_25_22.jpg",
+          "width": 941,
+          "height": 1672,
+          "alt": "角色风格一致性延展图"
         }
       ],
       "textBlocks": [
@@ -369,21 +369,21 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/earbuds/poster.webp",
-          "label": "?????????",
-          "fullUrl": "images/works/earbuds/poster.webp",
-          "width": 1600,
-          "height": 1000,
-          "alt": "?????????????"
+          "url": "images/uploads/2026/05/20260508T065738Z-eddfbdbfcc55-ChatGPT-Image-2026-5-8-00_28_12-3.png",
+          "label": "耳机产品 LoRA",
+          "fullUrl": "images/uploads/2026/05/20260508T065738Z-eddfbdbfcc55-ChatGPT-Image-2026-5-8-00_28_12-3.png",
+          "width": 1122,
+          "height": 1402,
+          "alt": "耳机产品风格 LoRA 输出"
         },
         {
           "kind": "image",
-          "url": "images/works/foundation/poster.webp",
-          "label": "?????????",
-          "fullUrl": "images/works/foundation/poster.webp",
-          "width": 1600,
-          "height": 1000,
-          "alt": "????????????"
+          "url": "images/uploads/2026/05/20260508T065718Z-10ab0bfabb84-ChatGPT-Image-2026-5-8-00_28_13-6.png",
+          "label": "口红产品 LoRA",
+          "fullUrl": "images/uploads/2026/05/20260508T065718Z-10ab0bfabb84-ChatGPT-Image-2026-5-8-00_28_13-6.png",
+          "width": 1122,
+          "height": 1402,
+          "alt": "口红产品风格 LoRA 输出"
         }
       ]
     },
@@ -412,10 +412,10 @@
     },
     {
       "id": 18,
-      "type": "gallery-4",
+      "type": "gallery-6",
       "title": "抖音风格短视频素材",
       "desc": "围绕口播、产品、场景和节奏做系列短视频封面与素材整理。",
-      "slots": 4,
+      "slots": 6,
       "slotType": "video",
       "media": [
         {
@@ -437,6 +437,16 @@
           "kind": "video",
           "url": "videos/a0e8e242e241cb0c0033bddea568b644.mp4",
           "poster": "images/_posters/a0e8e242e241cb0c0033bddea568b644.webp"
+        },
+        {
+          "kind": "video",
+          "url": "videos/commercial-skincare-drop.mp4",
+          "poster": "images/_posters/commercial-skincare-drop.webp"
+        },
+        {
+          "kind": "video",
+          "url": "videos/commercial-air-fryer-wings.mp4",
+          "poster": "images/_posters/commercial-air-fryer-wings.webp"
         }
       ]
     },
@@ -535,21 +545,21 @@
         },
         {
           "kind": "image",
-          "url": "images/works/portrait/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/portrait/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
+          "label": "短剧工作流拆解",
+          "fullUrl": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "???????????"
+          "alt": "AI 短剧脚本分镜配音剪辑流程板"
         },
         {
           "kind": "image",
-          "url": "images/works/hotel/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/hotel/poster.webp",
-          "width": 1600,
-          "height": 1000,
-          "alt": "????????????????"
+          "url": "images/generated/celestial-whale-city.webp",
+          "label": "短剧场景概念",
+          "fullUrl": "images/generated/celestial-whale-city.webp",
+          "width": 1122,
+          "height": 1402,
+          "alt": "AI 短剧场景概念图"
         }
       ]
     },
@@ -576,31 +586,31 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/works/giftbox/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/giftbox/poster.webp",
+          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "label": "IP 周边延展",
+          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "?????????????"
+          "alt": "原创 IP 周边视觉延展板"
         },
         {
           "kind": "image",
-          "url": "images/works/drink/poster.webp",
-          "label": "????????",
-          "fullUrl": "images/works/drink/poster.webp",
+          "url": "images/works/portal/poster.webp",
+          "label": "IP 视觉符号",
+          "fullUrl": "images/works/portal/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "????????????"
+          "alt": "原创 IP 视觉符号延展"
         }
       ]
     },
     {
       "id": 27,
-      "type": "gallery-2",
+      "type": "gallery-4",
       "title": "商业自由选题短视频",
       "desc": "适用于产品展示、空间视觉、直播间背景和平台视频素材。",
-      "slots": 2,
-      "slotType": "image",
+      "slots": 4,
+      "slotType": "video",
       "media": [
         {
           "kind": "video",
@@ -611,6 +621,16 @@
           "kind": "video",
           "url": "videos/51339bc463f2bb227aef56406ae9f0ac.mp4",
           "poster": "images/_posters/51339bc463f2bb227aef56406ae9f0ac.webp"
+        },
+        {
+          "kind": "video",
+          "url": "videos/commercial-ice-maker-refresh.mp4",
+          "poster": "images/_posters/commercial-ice-maker-refresh.webp"
+        },
+        {
+          "kind": "video",
+          "url": "videos/commercial-mattress-soft-focus.mp4",
+          "poster": "images/_posters/commercial-mattress-soft-focus.webp"
         }
       ]
     },
