@@ -62,26 +62,6 @@ const PUBLIC_APPLICATION_META_OVERRIDES = {
 };
 
 const HOMEPAGE_CURATED_WORKS = {
-  "hero-capability-wall": {
-    id: "hero-capability-wall",
-    kind: "case-board",
-    category: "workflow",
-    label: "流程证据",
-    title: "工作流证据：AIGC 综合作品墙",
-    description: "用于说明品牌视觉、产品图、角色设定和短视频视觉的策展过程，不再作为商业作品封面使用。",
-    tags: ["工作流证据", "策展板", "制作过程"],
-    media: {
-      kind: "image",
-      url: "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-      fullUrl: "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-      alt: "AIGC 商业视觉综合作品墙过程板"
-    },
-    detailRows: [
-      { label: "展示目的", value: "创作流程证据" },
-      { label: "覆盖能力", value: "品牌视觉、产品广告、角色视觉、视频封面" },
-      { label: "放置原则", value: "只进入 Workflow Evidence，不作为 Hero、商业案例或 Gallery 封面" }
-    ]
-  },
   "hero-main-visual": {
     id: "hero-main-visual",
     kind: "image",
@@ -355,16 +335,16 @@ const HOMEPAGE_CURATED_WORKS = {
   "capability-comfyui": {
     id: "capability-comfyui",
     kind: "image",
-    category: "workflow",
+    category: "brand",
     label: "ComfyUI 工作流",
     title: "ComfyUI 工作流：空间风格迁移",
     description: "通过节点工作流控制构图、角色、风格和批量产出。",
     tags: ["ComfyUI", "ControlNet", "工作流"],
     media: {
       kind: "image",
-      url: "images/workflows/comfyui/interior-style-transfer.png",
-      fullUrl: "images/workflows/comfyui/interior-style-transfer.png",
-      alt: "ComfyUI 空间风格迁移工作流"
+      url: "images/works/cybercity/poster.webp",
+      fullUrl: "images/works/cybercity/poster.webp",
+      alt: "Clean single visual used to represent workflow output"
     },
     detailRows: [
       { label: "能力方向", value: "ComfyUI 工作流" },
@@ -375,16 +355,16 @@ const HOMEPAGE_CURATED_WORKS = {
   "capability-retouch": {
     id: "capability-retouch",
     kind: "image",
-    category: "workflow",
+    category: "product",
     label: "后期精修 / 局部重绘",
     title: "后期精修 / 局部重绘：Inpaint 修复",
     description: "用于产品修图、局部替换、画面统一和交付前精修。",
     tags: ["局部重绘", "精修", "交付优化"],
     media: {
       kind: "image",
-      url: "images/workflows/comfyui/local-inpainting.png",
-      fullUrl: "images/workflows/comfyui/local-inpainting.png",
-      alt: "ComfyUI 局部重绘与精修工作流"
+      url: "images/works/lipstick/poster.webp",
+      fullUrl: "images/works/lipstick/poster.webp",
+      alt: "Clean single product retouch visual"
     },
     detailRows: [
       { label: "能力方向", value: "后期精修 / 局部重绘" },
@@ -472,16 +452,6 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["场景概念", "赛博城市", "世界观"],
     media: { kind: "image", url: "images/works/cybercity/poster.webp", fullUrl: "images/works/cybercity/poster.webp", alt: "赛博城市街景场景概念单图" }
   },
-  "gallery-product-board": {
-    id: "gallery-product-board",
-    kind: "case-board",
-    category: "workflow",
-    label: "流程证据",
-    title: "工作流证据：产品输入参考与结构控制",
-    description: "展示产品图从参考输入到商业视觉输出的控制过程，只用于 Workflow Evidence。",
-    tags: ["流程证据", "结构控制", "产品工作板"],
-    media: { kind: "image", url: "images/generated/eastern-future/zw-local-product-input-board-v1.webp", fullUrl: "images/generated/eastern-future/zw-local-product-input-board-v1.webp", alt: "产品输入参考与结构控制展示板" }
-  },
   "gallery-video-d9": {
     id: "gallery-video-d9",
     kind: "video",
@@ -492,16 +462,6 @@ const HOMEPAGE_CURATED_WORKS = {
     description: "人物口播类短视频入口，显示视频封面、时长和可播放状态。",
     tags: ["商业短视频", "口播", "可播放"],
     media: { kind: "video", url: "videos/d9c14d8520e106a0803087b55aaea7ad.mp4", poster: "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp", alt: "人物口播商业短视频封面" }
-  },
-  "gallery-character-board": {
-    id: "gallery-character-board",
-    kind: "case-board",
-    category: "workflow",
-    label: "流程证据",
-    title: "工作流证据：角色 LoRA 设定板",
-    description: "人物角色的形象、服装和场景一致性制作板，只用于流程证明。",
-    tags: ["流程证据", "角色一致性", "LoRA"],
-    media: { kind: "image", url: "images/generated/eastern-future/zw-local-character-lora-board-v1.webp", fullUrl: "images/generated/eastern-future/zw-local-character-lora-board-v1.webp", alt: "AI 人像角色 LoRA 一致性展示板" }
   },
   "gallery-video-a6537": {
     id: "gallery-video-a6537",
@@ -514,26 +474,6 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["产品短视频", "卖点节奏", "可播放"],
     media: { kind: "video", url: "videos/a6537e213935b778ba57eade8bbf142a.mp4", poster: "images/_posters/a6537e213935b778ba57eade8bbf142a.webp", alt: "产品卖点商业短视频封面" }
   },
-  "gallery-packaging-board": {
-    id: "gallery-packaging-board",
-    kind: "case-board",
-    category: "workflow",
-    label: "流程证据",
-    title: "工作流证据：饮品包装延展板",
-    description: "围绕饮品包装、冰感元素和广告主图做视觉延展，只作为制作过程图。",
-    tags: ["流程证据", "包装延展", "饮品工作板"],
-    media: { kind: "image", url: "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp", fullUrl: "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp", alt: "饮品包装商业广告视觉展示板" }
-  },
-  "gallery-workflow-product": {
-    id: "gallery-workflow-product",
-    kind: "workflow",
-    category: "workflow",
-    label: "ComfyUI 工作流",
-    title: "ComfyUI 工作流：产品精修节点",
-    description: "产品修图、高清化和光影统一的工作流展示。",
-    tags: ["ComfyUI", "产品精修", "工作流"],
-    media: { kind: "image", url: "images/workflows/comfyui/product-retouch.png", fullUrl: "images/workflows/comfyui/product-retouch.png", alt: "ComfyUI 产品精修工作流" }
-  },
   "gallery-video-a0": {
     id: "gallery-video-a0",
     kind: "video",
@@ -544,16 +484,6 @@ const HOMEPAGE_CURATED_WORKS = {
     description: "信息流广告素材入口，明确标记为可播放视频。",
     tags: ["信息流广告", "短视频", "可播放"],
     media: { kind: "video", url: "videos/a0e8e242e241cb0c0033bddea568b644.mp4", poster: "images/_posters/a0e8e242e241cb0c0033bddea568b644.webp", alt: "信息流广告短视频封面" }
-  },
-  "gallery-ip-board": {
-    id: "gallery-ip-board",
-    kind: "case-board",
-    category: "workflow",
-    label: "流程证据",
-    title: "工作流证据：IP 周边延展板",
-    description: "把原创 IP 视觉延展到海报、周边和内容物料的过程板，只进入 Workflow Evidence。",
-    tags: ["流程证据", "IP 延展", "制作过程"],
-    media: { kind: "image", url: "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp", fullUrl: "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp", alt: "原创 IP 周边商业视觉展示板" }
   },
   "gallery-video-voice": {
     id: "gallery-video-voice",
@@ -566,16 +496,6 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["产品配音", "短视频", "可播放"],
     media: { kind: "video", url: "videos/1774080806307.mp4", poster: "images/_posters/1774080806307.webp", alt: "产品配音短视频封面" }
   },
-  "gallery-workflow-cutout": {
-    id: "gallery-workflow-cutout",
-    kind: "workflow",
-    category: "workflow",
-    label: "ComfyUI 工作流",
-    title: "ComfyUI 工作流：主体抠图",
-    description: "主体分割、透明通道和边缘修正的可复用流程。",
-    tags: ["ComfyUI", "主体抠图", "工作流"],
-    media: { kind: "image", url: "images/workflows/comfyui/subject-cutout.png", fullUrl: "images/workflows/comfyui/subject-cutout.png", alt: "ComfyUI 主体抠图工作流" }
-  },
   "gallery-video-prompt": {
     id: "gallery-video-prompt",
     kind: "video",
@@ -586,16 +506,6 @@ const HOMEPAGE_CURATED_WORKS = {
     description: "用于说明短视频提示词与镜头方案的可播放素材。",
     tags: ["视频方案", "镜头提示词", "可播放"],
     media: { kind: "video", url: "videos/10s AIGC视频提示词方案.mp4", poster: "images/_posters/10s AIGC视频提示词方案.webp", alt: "AIGC 视频提示词方案演示封面" }
-  },
-  "gallery-drama-board": {
-    id: "gallery-drama-board",
-    kind: "case-board",
-    category: "workflow",
-    label: "流程证据",
-    title: "工作流证据：短剧场景分镜板",
-    description: "面向 AI 短剧的角色、场景和镜头视觉整理，只作为流程证明。",
-    tags: ["流程证据", "短剧场景", "分镜板"],
-    media: { kind: "image", url: "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp", fullUrl: "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp", alt: "AI 短剧场景与分镜工作板" }
   },
   "gallery-video-51339": {
     id: "gallery-video-51339",
@@ -608,16 +518,6 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["产品展示", "短视频", "可播放"],
     media: { kind: "video", url: "videos/51339bc463f2bb227aef56406ae9f0ac.mp4", poster: "images/_posters/51339bc463f2bb227aef56406ae9f0ac.webp", alt: "产品展示短视频封面" }
   },
-  "gallery-workflow-restore": {
-    id: "gallery-workflow-restore",
-    kind: "workflow",
-    category: "workflow",
-    label: "ComfyUI 工作流",
-    title: "ComfyUI 工作流：高清修复",
-    description: "旧图修复、细节增强和交付前清晰度优化。",
-    tags: ["ComfyUI", "高清修复", "交付优化"],
-    media: { kind: "image", url: "images/workflows/comfyui/hd-restoration.png", fullUrl: "images/workflows/comfyui/hd-restoration.png", alt: "ComfyUI 高清修复工作流" }
-  },
   "gallery-video-food": {
     id: "gallery-video-food",
     kind: "video",
@@ -629,16 +529,6 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["食品广告", "小家电", "可播放"],
     media: { kind: "video", url: "videos/commercial-air-fryer-wings.mp4", poster: "images/_posters/commercial-air-fryer-wings.webp", alt: "空气炸锅食物广告视频封面" }
   },
-  "gallery-workflow-outpaint": {
-    id: "gallery-workflow-outpaint",
-    kind: "workflow",
-    category: "workflow",
-    label: "ComfyUI 工作流",
-    title: "ComfyUI 工作流：画面扩图",
-    description: "把固定比例素材扩展为横版、竖版和投放版式。",
-    tags: ["ComfyUI", "扩图", "多比例适配"],
-    media: { kind: "image", url: "images/workflows/comfyui/canvas-outpainting.png", fullUrl: "images/workflows/comfyui/canvas-outpainting.png", alt: "ComfyUI 画面扩图工作流" }
-  }
 };
 
 const HOMEPAGE_CURATION = {
@@ -705,25 +595,12 @@ const HOMEPAGE_CURATION = {
   visualGalleryIds: [
     "gallery-drink",
     "gallery-portal",
-    "gallery-lipstick",
     "gallery-beauty-live",
     "gallery-giftbox",
     "gallery-whale",
-    "gallery-monkey",
-    "gallery-cybercity"
+    "gallery-monkey"
   ],
-  workflowEvidenceIds: [
-    "hero-capability-wall",
-    "gallery-product-board",
-    "gallery-character-board",
-    "gallery-packaging-board",
-    "gallery-ip-board",
-    "gallery-drama-board",
-    "gallery-workflow-product",
-    "gallery-workflow-cutout",
-    "gallery-workflow-restore",
-    "gallery-workflow-outpaint"
-  ]
+  workflowEvidenceIds: []
 };
 
 const colorPalettes = [
@@ -5050,16 +4927,6 @@ function App() {
   ];
   const capabilityHighlights = HOMEPAGE_CURATION.capabilityCards;
 
-  const isGeneratedBoardMedia = (media) => {
-    const normalized = normalizeMediaItem(media);
-    return [
-      normalized?.url,
-      normalized?.fullUrl,
-      normalized?.poster,
-      normalized?.draftPreviewUrl
-    ].some((source) => String(source || "").replace(/\\/g, "/").includes("images/generated/eastern-future/zw-local-"));
-  };
-
   const isWorkflowSlide = (slide) => slide?.type === "workflow-diagram";
   const isMediaCuratedHidden = (media) => normalizeMediaItem(media)?.curatedHidden === true;
   const homepageGalleryExcludedSources = [
@@ -5122,9 +4989,7 @@ function App() {
     const hasVideoSignal = work.kind === "video" || mediaIsVideo || Boolean(work.duration && media?.url);
     const hasWorkflowSignal = homepageWorkflowKinds.has(work.kind) ||
       work.category === "workflow" ||
-      normalizedSource.includes("images/workflows/") ||
       normalizedSource.includes("/comfyui/") ||
-      normalizedSource.includes("images/generated/eastern-future/zw-local-") ||
       homepageWorkflowKeywords.some((keyword) => sourceText.includes(keyword));
     const isCompositeImage = !hasVideoSignal && hasWorkflowSignal;
     const kind = hasVideoSignal
@@ -5145,6 +5010,7 @@ function App() {
     return {
       kind,
       isPlayableVideo: kind === "video" && hasVideoSource,
+      needsVideoRecovery: kind === "video" && !hasVideoSource,
       isSingleVisual,
       isCompositeImage,
       canUseAsCover: (kind === "image" && isSingleVisual) || kind === "video",
@@ -5229,8 +5095,13 @@ function App() {
   }
   const homepageVideoEntries = buildHomepageCuratedItems(HOMEPAGE_CURATION.videoFeaturedIds, "video-featured")
     .filter((item) => {
-      if (item.classification?.isPlayableVideo) return true;
-      pushHomepageCurationError(`视频精选自动移除非可播放视频: ${item.curation.id}`);
+      if (item.classification?.kind === "video") {
+        if (item.classification?.needsVideoRecovery) {
+          pushHomepageCurationWarning(`视频精选保留恢复中视频: ${item.curation.id}`);
+        }
+        return true;
+      }
+      pushHomepageCurationError(`视频精选自动移除非视频素材: ${item.curation.id}`);
       return false;
     });
   if (homepageVideoEntries.length < 3) {
@@ -5245,9 +5116,12 @@ function App() {
     const work = item?.curation;
     if (!item || !work) return null;
     const isExpectedVideoCase = HOMEPAGE_CURATION.commercialVideoCaseIds.includes(workId);
-    if (isExpectedVideoCase && !item.classification?.isPlayableVideo) {
-      pushHomepageCurationError(`商业视频案例不是可播放视频: ${workId}`);
+    if (isExpectedVideoCase && item.classification?.kind !== "video") {
+      pushHomepageCurationError(`商业视频案例不是视频素材: ${workId}`);
       return null;
+    }
+    if (isExpectedVideoCase && item.classification?.needsVideoRecovery) {
+      pushHomepageCurationWarning(`商业视频案例保留恢复中视频: ${workId}`);
     }
     if (!isExpectedVideoCase && !item.classification?.canUseInCommercialCase) {
       pushHomepageCurationError(`商业案例使用了无效封面素材: ${workId}`);
@@ -5319,13 +5193,7 @@ function App() {
       homepageGallerySeenSources.add(source);
       return true;
     });
-  const homepageWorkflowEvidenceEntries = buildHomepageCuratedItems(HOMEPAGE_CURATION.workflowEvidenceIds, "workflow-evidence")
-    .filter((item) => {
-      if (item.classification?.canUseInWorkflow) return true;
-      pushHomepageCurationWarning(`Workflow Evidence 自动移除非流程素材: ${item.curation.id}`);
-      return false;
-    });
-  warnDuplicateHomepageItems(homepageWorkflowEvidenceEntries, "Workflow Evidence");
+  const homepageWorkflowEvidenceEntries = [];
   if (typeof window !== "undefined" && (homepageCurationErrors.length || homepageCurationWarnings.length) && window.__ZHANGWEI_HOMEPAGE_CURATION_WARNED__ !== APP_BUNDLE_VERSION) {
     if (homepageCurationErrors.length) console.error("[homepage-curation]", homepageCurationErrors);
     if (homepageCurationWarnings.length) console.warn("[homepage-curation]", homepageCurationWarnings);
@@ -5344,7 +5212,7 @@ function App() {
       slideIndex,
       mediaItems: (Array.isArray(slide?.media) ? slide.media : [])
         .map((media, slotIndex) => ({ media, slotIndex }))
-        .filter(({ media }) => !isGeneratedBoardMedia(media) && predicate(normalizeMediaItem(media)))
+        .filter(({ media }) => predicate(normalizeMediaItem(media)))
     }))
     .filter((entry) => entry.slide && entry.mediaItems.length);
 
@@ -5462,6 +5330,9 @@ function App() {
     const portrait = isLikelyPortraitMedia(media);
     const isVideoCard = normalizedMedia?.kind === "video" || normalizedMedia?.kind === "youtube";
     const displayUrl = getDisplayUrl(normalizedMedia);
+    const videoSourceUrl = isVideoCard ? getSourceMediaUrl(normalizedMedia) : "";
+    const hasVideoSource = isVideoCard && Boolean(videoSourceUrl || normalizedMedia?.delivery?.hlsUrl || normalizedMedia?.delivery?.iframeUrl);
+    const showVideoRecovery = isVideoCard && !hasVideoSource;
     const label = normalizedMedia?.alt || options.label || "素材 " + String(slotIndex + 1).padStart(2, "0");
     const replaceTarget = {
       type: "slide-media",
@@ -5486,6 +5357,7 @@ function App() {
       data-media-kind={isVideoCard ? "video" : "image"}
       data-media-source={displayUrl}
       data-media-count="1"
+      data-video-state={showVideoRecovery ? "recovering" : isVideoCard ? "ready" : undefined}
     >
       {displayUrl ? <img
         src={displayUrl}
@@ -5496,9 +5368,12 @@ function App() {
         className={cx("curated-static-media", portrait && "curated-static-media-contain")}
       /> : <div className="curated-static-fallback">
         <Icon name={isVideoCard ? "Play" : "Grid"} size={22} />
-        <span>{isVideoCard ? "视频封面生成中" : "视觉素材"}</span>
+        <span>{showVideoRecovery ? "视频资源恢复中" : isVideoCard ? "视频封面生成中" : "视觉素材"}</span>
       </div>}
-      {isVideoCard && <div className="curated-media-play" aria-hidden="true">
+      {showVideoRecovery ? <div className="curated-media-recovery" aria-hidden="true">
+        <Icon name="Play" size={14} />
+        <span>视频资源恢复中</span>
+      </div> : isVideoCard && <div className="curated-media-play" aria-hidden="true">
         <Icon name="Play" size={16} />
         <span>点击播放</span>
       </div>}
@@ -5885,6 +5760,12 @@ function App() {
             preload="auto"
             className="curated-detail-player"
           />;
+        }
+        if (!sourceUrl) {
+          return <div className="curated-detail-external curated-detail-recovery">
+            {displayUrl && <img src={displayUrl} alt="" aria-hidden="true" />}
+            <span><Icon name="Play" size={16} /> 视频资源恢复中</span>
+          </div>;
         }
         return <div className="curated-detail-external">
           {displayUrl && <img src={displayUrl} alt="" aria-hidden="true" />}
@@ -6285,16 +6166,6 @@ function App() {
           <div className="curated-process-grid">
             {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
           </div>
-          {(visibleWorkflowEntries.length > 0 || (IS_PORTFOLIO_ADMIN_MODE && workflowEntries.length > 0)) && <>
-            <div className="curated-subsection-heading">
-              <h3>Workflow Evidence</h3>
-              <p>只展示 ComfyUI、分镜板、moodboard、过程板和节点截图，证明制作流程，不进入 Gallery 主视觉。</p>
-            </div>
-            <div className="curated-workflow-grid">{visibleWorkflowEntries.map(renderWorkflowEvidenceCard)}</div>
-            {!visibleWorkflowEntries.length && IS_PORTFOLIO_ADMIN_MODE && <div className="curated-workflow-empty">
-              <p>当前工作流卡片都已隐藏，可在后台卡片管理中恢复。</p>
-            </div>}
-          </>}
           <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>
         </div>
       </section>
