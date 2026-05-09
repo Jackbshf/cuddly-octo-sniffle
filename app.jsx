@@ -4435,15 +4435,19 @@ function App() {
   const isWorkflowSlide = (slide) => slide?.type === "workflow-diagram";
   const isMediaCuratedHidden = (media) => normalizeMediaItem(media)?.curatedHidden === true;
   const homepageGalleryExcludedSources = [
-    "images/uploads/2026/05/20260508T065718Z-10ab0bfabb84-ChatGPT-Image-2026-5-8-00_28_13-6.png",
-    "images/works/monkey/poster.webp",
-    "images/works/cybercity/poster.webp",
-    "images/generated/celestial-whale-city.webp",
-    "images/works/portal/poster.webp"
+    "images/uploads/2026/05/20260508T065718Z-10ab0bfabb84-ChatGPT-Image-2026-5-8-00_28_13-6",
+    "images/works/monkey/poster",
+    "images/works/cybercity/poster",
+    "images/generated/celestial-whale-city",
+    "images/works/portal/poster"
   ];
+  const normalizeCuratedSourceForCompare = (source) => String(source || "")
+    .replace(/\\/g, "/")
+    .replace("/images/_optimized/", "/images/")
+    .replace(/\.(webp|png|jpe?g)$/i, "");
   const getMediaPreviewSource = (media) => {
     const normalized = normalizeMediaItem(media);
-    return String(normalized?.poster || normalized?.draftPreviewUrl || normalized?.url || normalized?.fullUrl || "").replace(/\\/g, "/");
+    return normalizeCuratedSourceForCompare(normalized?.poster || normalized?.draftPreviewUrl || normalized?.url || normalized?.fullUrl);
   };
   const isHomepageGalleryEligible = (item) => {
     const previewSource = getMediaPreviewSource(item.mediaEntry.media);
