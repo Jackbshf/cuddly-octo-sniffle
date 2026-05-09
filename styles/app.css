@@ -6876,3 +6876,57 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+/* Homepage curation fix: keep commercial cards concise after replacing video covers with still visuals. */
+.curated-page .curated-case-copy {
+  gap: 14px;
+  padding: 24px;
+}
+
+.curated-page .curated-case-copy > p,
+.curated-page .curated-info-rows strong,
+.curated-page .curated-result-grid strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.curated-page .curated-case-copy > p {
+  -webkit-line-clamp: 2;
+}
+
+.curated-page .curated-info-rows {
+  gap: 6px;
+}
+
+.curated-page .curated-info-rows div {
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.curated-page .curated-info-rows strong {
+  -webkit-line-clamp: 2;
+  font-size: 12px;
+  line-height: 1.42;
+}
+
+.curated-page .curated-result-grid {
+  gap: 8px;
+}
+
+.curated-page .curated-result-grid div {
+  padding: 10px;
+}
+
+.curated-page .curated-result-grid strong {
+  -webkit-line-clamp: 2;
+}
+
+.curated-page .curated-case-meta {
+  gap: 8px;
+}
+
+.curated-page .curated-case-meta span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

@@ -171,56 +171,55 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "product",
     label: "商业案例 01",
-    title: "产品广告视觉：未来耳机发布",
-    description: "围绕耳机外观、声学科技感和新品发布主视觉，整理产品英雄图与广告延展。",
-    tags: ["产品广告", "材质控制", "电商主图"],
+    title: "产品广告视觉：黑色耳机新品图",
+    description: "用完整耳机产品图呈现结构、材质和新品发布主视觉。",
+    tags: ["产品广告", "新品发布", "材质光影"],
     tools: ["ComfyUI", "ControlNet", "Photoshop"],
     media: {
       kind: "image",
-      url: "images/works/earbuds/poster.webp",
-      fullUrl: "images/works/earbuds/poster.webp",
-      alt: "无线耳机产品广告主视觉"
+      url: "images/curated/commercial-earbuds-launch.webp",
+      fullUrl: "images/curated/commercial-earbuds-launch.webp",
+      alt: "黑色无线耳机新品发布产品广告主图"
     },
     detailRows: [
       { label: "项目类型", value: "产品广告视觉" },
-      { label: "我的职责", value: "产品构图、材质光影、主视觉筛选与精修" },
+      { label: "我的职责", value: "产品构图、材质光影、主图筛选" },
       { label: "工具链", value: "ComfyUI / ControlNet / Photoshop" },
       { label: "交付物", value: "产品英雄图、电商主图、广告封面" },
-      { label: "商业价值", value: "让招聘方直接看到产品结构、质感和卖点表达能力。" }
+      { label: "商业价值", value: "直接展示产品结构、质感和卖点。" }
     ],
     results: [
       { label: "输出内容", value: "产品英雄图" },
-      { label: "能力重点", value: "结构与材质控制" },
+      { label: "能力重点", value: "结构与材质" },
       { label: "使用场景", value: "电商 / 新品发布" }
     ]
   },
-  "case-video-story": {
-    id: "case-video-story",
+  "case-beauty-live": {
+    id: "case-beauty-live",
     kind: "case",
-    category: "video",
-    duration: "00:10",
+    category: "beauty",
     label: "商业案例 02",
-    title: "生成式视频：粉底液产品广告片",
-    description: "以粉底液产品特写、材质光影和广告节奏为核心，展示真实可播放短片素材的整理能力。",
-    tags: ["生成式视频", "产品广告片", "可播放"],
-    tools: ["Sora / Kling", "剪映", "Cloudflare Stream"],
+    title: "美妆视觉案例：粉底液直播场景",
+    description: "用真人出镜和产品持握画面，展示美妆直播与社媒主图。",
+    tags: ["美妆视觉", "直播场景", "产品主图"],
+    tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
-      kind: "video",
-      url: "videos/d9c14d8520e106a0803087b55aaea7ad.mp4",
-      poster: "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp",
-      alt: "粉底液产品广告短视频封面"
+      kind: "image",
+      url: "images/curated/beauty-live-demo.webp",
+      fullUrl: "images/curated/beauty-live-demo.webp",
+      alt: "美妆达人展示粉底液的商业直播主视觉"
     },
     detailRows: [
-      { label: "项目类型", value: "生成式视频 / 商业短片" },
-      { label: "我的职责", value: "产品特写分镜、镜头提示词、封面与视频入口整理" },
-      { label: "工具链", value: "视频生成 / 剪辑 / 播放发布" },
-      { label: "交付物", value: "粉底液产品视频片段、封面、短片入口" },
-      { label: "商业价值", value: "说明视频不是被藏在素材里，而是可打开、可播放、可评估。" }
+      { label: "项目类型", value: "美妆产品视觉" },
+      { label: "我的职责", value: "人物气质、产品露出、直播场景整理" },
+      { label: "工具链", value: "Midjourney / Photoshop / 版式整理" },
+      { label: "交付物", value: "直播封面、社媒主图、产品展示图" },
+      { label: "商业价值", value: "让产品、人物和使用场景一眼对应。" }
     ],
     results: [
-      { label: "输出内容", value: "短片封面与视频入口" },
-      { label: "能力重点", value: "镜头节奏与画面统一" },
-      { label: "使用场景", value: "品牌短片 / 社媒内容" }
+      { label: "输出内容", value: "美妆直播主图" },
+      { label: "能力重点", value: "人物与产品匹配" },
+      { label: "使用场景", value: "直播 / 社媒" }
     ]
   },
   "case-brand-space": {
@@ -228,27 +227,27 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "brand",
     label: "商业案例 03",
-    title: "品牌空间视觉：东方酒店场景",
-    description: "用东方空间氛围、建筑光影和品牌调性构成可延展的商业空间主视觉。",
-    tags: ["品牌空间", "东方美学", "场景包装"],
+    title: "品牌空间视觉：未来城市场景",
+    description: "用单张城市世界观图，承接品牌空间、海报和场景包装。",
+    tags: ["品牌空间", "场景包装", "世界观视觉"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
-      url: "images/works/hotel/poster.webp",
-      fullUrl: "images/works/hotel/poster.webp",
-      alt: "东方酒店品牌空间主视觉"
+      url: "images/curated/cyber-city-world.webp",
+      fullUrl: "images/curated/cyber-city-world.webp",
+      alt: "未来城市品牌空间场景主视觉"
     },
     detailRows: [
       { label: "项目类型", value: "品牌空间 / 世界观视觉" },
-      { label: "我的职责", value: "空间氛围设定、主视觉生成、品牌延展整理" },
+      { label: "我的职责", value: "空间氛围、主视觉生成、品牌延展整理" },
       { label: "工具链", value: "Midjourney / Photoshop / 版式整理" },
-      { label: "交付物", value: "品牌空间主视觉、海报延展、场景概念图" },
-      { label: "商业价值", value: "将场景图从普通风景提升为品牌空间与商业叙事资产。" }
+      { label: "交付物", value: "空间主视觉、海报延展、场景概念图" },
+      { label: "商业价值", value: "把场景图转成可用于品牌包装的资产。" }
     ],
     results: [
       { label: "输出内容", value: "品牌空间主视觉" },
-      { label: "能力重点", value: "东方美学与空间包装" },
-      { label: "使用场景", value: "酒店 / 地产 / 品牌海报" }
+      { label: "能力重点", value: "场景与调性" },
+      { label: "使用场景", value: "品牌海报 / 空间包装" }
     ]
   },
   "capability-product-foundation": {
@@ -256,40 +255,39 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "image",
     category: "product",
     label: "产品广告视觉",
-    title: "产品广告视觉：粉底液材质控制",
-    description: "用于电商主图、广告海报和产品英雄视觉的生成式产品图。",
-    tags: ["产品广告", "材质控制", "商业海报"],
+    title: "产品广告视觉：冰感饮品包装",
+    description: "用冰块、水花和罐体结构展示饮品广告主图。",
+    tags: ["产品广告", "包装视觉", "冰感材质"],
     media: {
       kind: "image",
-      url: "images/works/foundation/poster.webp",
-      fullUrl: "images/works/foundation/poster.webp",
-      alt: "粉底液产品广告材质控制主视觉"
+      url: "images/curated/beverage-ice-packshot.webp",
+      fullUrl: "images/curated/beverage-ice-packshot.webp",
+      alt: "冰感饮品包装广告产品主图"
     },
     detailRows: [
       { label: "能力方向", value: "产品广告视觉" },
-      { label: "证明内容", value: "瓶身质感、光影、卖点构图" },
+      { label: "证明内容", value: "罐体结构、冰感材质、卖点构图" },
       { label: "输出场景", value: "电商主图 / 商业海报" }
     ]
   },
-  "capability-video-storyboard": {
-    id: "capability-video-storyboard",
-    kind: "video",
-    category: "video",
-    duration: "00:10",
-    label: "商业视频分镜",
-    title: "商业视频分镜：护肤品广告片",
-    description: "将广告脚本拆成镜头、节奏和可生成的视频画面。",
-    tags: ["视频分镜", "镜头设计", "广告短片"],
+  "capability-ad-keyframe": {
+    id: "capability-ad-keyframe",
+    kind: "image",
+    category: "product",
+    label: "广告关键帧视觉",
+    title: "广告关键帧视觉：粉底液主图",
+    description: "用单张产品画面确定广告前期的风格、光线和卖点。",
+    tags: ["广告关键帧", "镜头参考", "产品主图"],
     media: {
-      kind: "video",
-      url: "videos/commercial-skincare-drop.mp4",
-      poster: "images/_posters/commercial-skincare-drop.webp",
-      alt: "护肤品广告短片视频封面"
+      kind: "image",
+      url: "images/curated/cosmetic-foundation-silk.webp",
+      fullUrl: "images/curated/cosmetic-foundation-silk.webp",
+      alt: "粉底液丝缎材质广告关键帧主图"
     },
     detailRows: [
-      { label: "能力方向", value: "商业视频分镜" },
-      { label: "证明内容", value: "产品镜头、节奏点、视频封面" },
-      { label: "输出场景", value: "广告短片 / 社媒投放" }
+      { label: "能力方向", value: "广告关键帧视觉" },
+      { label: "证明内容", value: "产品卖点、光影气质、画面风格" },
+      { label: "输出场景", value: "广告前期 / 主视觉提案" }
     ]
   },
   "capability-portrait": {
@@ -297,19 +295,19 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "image",
     category: "portrait",
     label: "AI 人像 / 数字人",
-    title: "AI 人像 / 数字人：角色视觉一致性",
-    description: "控制人物形象、服装、场景和商业呈现一致性。",
+    title: "AI 人像 / 数字人：商业肖像视觉",
+    description: "统一人物气质、妆发、服装和品牌化呈现。",
     tags: ["AI 人像", "数字人", "角色一致性"],
     media: {
       kind: "image",
-      url: "images/works/portrait/poster.webp",
-      fullUrl: "images/works/portrait/poster.webp",
-      alt: "AI 人像角色视觉一致性主图"
+      url: "images/curated/portrait-black-jacket.webp",
+      fullUrl: "images/curated/portrait-black-jacket.webp",
+      alt: "黑色西装女性商业肖像数字人主图"
     },
     detailRows: [
       { label: "能力方向", value: "AI 人像 / 数字人" },
-      { label: "证明内容", value: "人物形象、服装、电影光影" },
-      { label: "输出场景", value: "角色海报 / 数字人素材" }
+      { label: "证明内容", value: "面部气质、妆发、服装统一" },
+      { label: "输出场景", value: "数字人头像 / 角色海报" }
     ]
   },
   "capability-oriental-world": {
@@ -317,59 +315,59 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "image",
     category: "world",
     label: "东方美学 / 世界观视觉",
-    title: "东方美学 / 世界观视觉：国风角色场景",
-    description: "构建东方幻想、品牌空间和叙事场景视觉。",
+    title: "东方美学 / 世界观视觉：云海城邦",
+    description: "用东方建筑、云海和幻想生物构建叙事场景。",
     tags: ["东方美学", "场景概念", "世界观"],
     media: {
       kind: "image",
-      url: "images/works/oriental/poster.webp",
-      fullUrl: "images/works/oriental/poster.webp",
-      alt: "东方美学角色与场景概念视觉"
+      url: "images/curated/oriental-whale-world.webp",
+      fullUrl: "images/curated/oriental-whale-world.webp",
+      alt: "东方云海城邦与巨鲸世界观场景"
     },
     detailRows: [
       { label: "能力方向", value: "东方美学 / 世界观视觉" },
-      { label: "证明内容", value: "角色、场景、传统美学" },
+      { label: "证明内容", value: "建筑层次、气氛、叙事主体" },
       { label: "输出场景", value: "国风品牌 / 影视概念" }
     ]
   },
-  "capability-comfyui": {
-    id: "capability-comfyui",
+  "capability-brand-space": {
+    id: "capability-brand-space",
     kind: "image",
     category: "brand",
-    label: "ComfyUI 工作流",
-    title: "ComfyUI 工作流：空间风格迁移",
-    description: "通过节点工作流控制构图、角色、风格和批量产出。",
-    tags: ["ComfyUI", "ControlNet", "工作流"],
+    label: "品牌空间视觉",
+    title: "品牌空间视觉：城市地标场景",
+    description: "用城市地标和空间尺度包装品牌主视觉。",
+    tags: ["品牌空间", "场景包装", "城市地标"],
     media: {
       kind: "image",
-      url: "images/works/cybercity/poster.webp",
-      fullUrl: "images/works/cybercity/poster.webp",
-      alt: "Clean single visual used to represent workflow output"
+      url: "images/curated/brand-city-panorama.webp",
+      fullUrl: "images/curated/brand-city-panorama.webp",
+      alt: "城市地标品牌空间场景主视觉"
     },
     detailRows: [
-      { label: "能力方向", value: "ComfyUI 工作流" },
-      { label: "证明内容", value: "结构控制、风格参考、节点编排" },
-      { label: "输出场景", value: "空间视觉 / 批量方案" }
+      { label: "能力方向", value: "品牌空间视觉" },
+      { label: "证明内容", value: "城市尺度、空间氛围、品牌场景" },
+      { label: "输出场景", value: "空间海报 / 地产视觉" }
     ]
   },
   "capability-retouch": {
     id: "capability-retouch",
     kind: "image",
     category: "product",
-    label: "后期精修 / 局部重绘",
-    title: "后期精修 / 局部重绘：Inpaint 修复",
-    description: "用于产品修图、局部替换、画面统一和交付前精修。",
-    tags: ["局部重绘", "精修", "交付优化"],
+    label: "产品精修 / 材质控制",
+    title: "产品精修视觉：红色唇膏质感",
+    description: "用口红外壳、红色丝缎和高光控制表达美妆卖点。",
+    tags: ["产品精修", "材质光影", "美妆主图"],
     media: {
       kind: "image",
-      url: "images/works/lipstick/poster.webp",
-      fullUrl: "images/works/lipstick/poster.webp",
-      alt: "Clean single product retouch visual"
+      url: "images/curated/lipstick-red-packshot.webp",
+      fullUrl: "images/curated/lipstick-red-packshot.webp",
+      alt: "红色唇膏和丝缎材质产品精修主图"
     },
     detailRows: [
-      { label: "能力方向", value: "后期精修 / 局部重绘" },
-      { label: "证明内容", value: "遮罩、局部替换、画面统一" },
-      { label: "输出场景", value: "产品修图 / 发布前精修" }
+      { label: "能力方向", value: "产品精修 / 材质控制" },
+      { label: "证明内容", value: "瓶身质感、柔光、膏体细节" },
+      { label: "输出场景", value: "美妆主图 / 发布海报" }
     ]
   },
   "gallery-drink": {
@@ -543,53 +541,52 @@ const HOMEPAGE_CURATION = {
   ],
   commercialImageCaseIds: [
     "case-product-ad",
+    "case-beauty-live",
     "case-brand-space"
   ],
-  commercialVideoCaseIds: [
-    "case-video-story"
-  ],
+  commercialVideoCaseIds: [],
   capabilityCards: [
     {
       key: "product-ad",
       title: "产品广告视觉",
       workId: "capability-product-foundation",
-      description: "用于电商主图、广告海报和产品英雄视觉的生成式产品图。",
-      tags: ["产品广告", "材质控制", "商业海报"]
+      description: "冰感饮品包装、电商主图和商业海报主视觉。",
+      tags: ["产品广告", "包装视觉", "冰感材质"]
     },
     {
-      key: "video-storyboard",
-      title: "商业视频分镜",
-      workId: "capability-video-storyboard",
-      description: "将广告脚本拆成镜头、节奏和可生成的视频画面。",
-      tags: ["视频分镜", "镜头设计", "广告短片"]
+      key: "ad-keyframe",
+      title: "广告关键帧视觉",
+      workId: "capability-ad-keyframe",
+      description: "用单张产品画面确定广告前期的风格和卖点。",
+      tags: ["广告关键帧", "镜头参考", "产品主图"]
     },
     {
       key: "portrait-digital-human",
       title: "AI 人像 / 数字人",
       workId: "capability-portrait",
-      description: "控制人物形象、服装、场景和商业呈现一致性。",
+      description: "统一人物气质、妆发、服装和商业呈现。",
       tags: ["AI 人像", "数字人", "角色一致性"]
     },
     {
       key: "oriental-world",
       title: "东方美学 / 世界观视觉",
       workId: "capability-oriental-world",
-      description: "构建东方幻想、品牌空间和叙事场景视觉。",
+      description: "用东方建筑、云海和幻想生物构建叙事场景。",
       tags: ["东方美学", "场景概念", "世界观"]
     },
     {
-      key: "comfyui-workflow",
-      title: "ComfyUI 工作流",
-      workId: "capability-comfyui",
-      description: "通过节点工作流控制构图、角色、风格和批量产出。",
-      tags: ["ComfyUI", "ControlNet", "工作流"]
+      key: "brand-space",
+      title: "品牌空间视觉",
+      workId: "capability-brand-space",
+      description: "用城市地标和空间尺度包装品牌主视觉。",
+      tags: ["品牌空间", "场景包装", "城市地标"]
     },
     {
-      key: "retouch-inpaint",
-      title: "后期精修 / 局部重绘",
+      key: "product-retouch",
+      title: "产品精修 / 材质控制",
       workId: "capability-retouch",
-      description: "用于产品修图、局部替换、画面统一和交付前精修。",
-      tags: ["局部重绘", "精修", "交付优化"]
+      description: "用口红外壳、红色丝缎和高光控制表达美妆卖点。",
+      tags: ["产品精修", "材质光影", "美妆主图"]
     }
   ],
   visualGalleryIds: [
@@ -6066,7 +6063,7 @@ function App() {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
     const heroSubtitle = "AIGC Visual Designer / Generative Media Designer";
-    const heroDescription = "专注商业广告视觉、AI 产品渲染、短视频分镜与 ComfyUI 工作流搭建，用生成式工具完成从概念到交付的视觉方案。";
+    const heroDescription = "专注商业广告视觉、AI 产品渲染、品牌空间和人像视觉，用生成式工具完成从概念到交付的视觉方案。";
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
     const heroStageItems = (heroVisualEntry ? [heroVisualEntry] : []).map((item, index) => {
       const media = normalizeMediaItem(item.mediaEntry.media);
@@ -6122,7 +6119,7 @@ function App() {
           {renderCuratedEyebrow(2, "精选案例")}
           <div className="curated-section-heading">
             <h2>{siteMeta.caseSectionTitle || "精选商业案例"}</h2>
-            <p>只保留产品广告、生成式视频、品牌空间三个方向，每张卡片手写项目类型、职责、工具链、交付物和商业价值。</p>
+            <p>只保留产品广告、美妆场景、品牌空间三个纯图方向，视频入口只放在独立视频模块。</p>
           </div>
           <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
         </div>
@@ -6133,7 +6130,7 @@ function App() {
           {renderCuratedEyebrow(3, "能力矩阵")}
           <div className="curated-section-heading">
             <h2>核心能力矩阵</h2>
-            <p>6 个能力对应 6 张不同封面，产品、人像、世界观、视频分镜、ComfyUI 和局部重绘不再混用素材。</p>
+            <p>6 个能力对应 6 张纯图封面，产品、人像、世界观、品牌空间和材质控制各自对应图片。</p>
           </div>
           <div className="curated-capability-grid">{homepageCapabilityCards.map(renderCapabilityCard)}</div>
         </div>
