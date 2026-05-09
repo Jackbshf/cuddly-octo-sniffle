@@ -2785,12 +2785,22 @@ button.curated-hero-stage {
 }
 
 .curated-filter-bar button {
-  color: rgba(218, 236, 255, 0.64);
+  border-color: rgba(126, 208, 255, 0.18);
+  background: rgba(5, 12, 18, 0.82);
+  color: rgba(218, 236, 255, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.curated-filter-bar button:hover,
+.curated-filter-bar button:focus-visible {
+  border-color: rgba(91, 216, 255, 0.42);
+  background: rgba(91, 216, 255, 0.14);
+  color: #f6fbff;
 }
 
 .curated-filter-bar button.is-active {
   border-color: rgba(91, 216, 255, 0.48);
-  background: rgba(91, 216, 255, 0.16);
+  background: linear-gradient(135deg, rgba(32, 148, 197, 0.82), rgba(38, 89, 190, 0.72));
   color: #e9fbff;
 }
 

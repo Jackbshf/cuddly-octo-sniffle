@@ -147,7 +147,12 @@ const normalizeMediaItem = (item) => {
     width: toPositiveNumber(item.width),
     height: toPositiveNumber(item.height),
     alt: ensureString(item.alt).trim(),
-    externalProvider: ensureString(item.externalProvider).trim()
+    externalProvider: ensureString(item.externalProvider).trim(),
+    curatedHidden: item.curatedHidden === true,
+    curatedCategory: ensureString(item.curatedCategory).trim(),
+    workflowSteps: Array.isArray(item.workflowSteps) ? item.workflowSteps.map((step) => String(step ?? "").trim()).filter(Boolean) : [],
+    workflowAbility: ensureString(item.workflowAbility).trim(),
+    workflowOutcome: ensureString(item.workflowOutcome).trim()
   };
 };
 
@@ -356,7 +361,12 @@ const sanitizeMediaForWrite = (item) => {
     width: normalized.width,
     height: normalized.height,
     alt: normalized.alt,
-    externalProvider: normalized.externalProvider
+    externalProvider: normalized.externalProvider,
+    curatedHidden: normalized.curatedHidden,
+    curatedCategory: normalized.curatedCategory,
+    workflowSteps: normalized.workflowSteps,
+    workflowAbility: normalized.workflowAbility,
+    workflowOutcome: normalized.workflowOutcome
   };
   if (!cleaned.url) delete cleaned.url;
   if (!cleaned.poster) delete cleaned.poster;
@@ -367,6 +377,11 @@ const sanitizeMediaForWrite = (item) => {
   if (!cleaned.height) delete cleaned.height;
   if (!cleaned.alt) delete cleaned.alt;
   if (!cleaned.externalProvider) delete cleaned.externalProvider;
+  if (!cleaned.curatedHidden) delete cleaned.curatedHidden;
+  if (!cleaned.curatedCategory) delete cleaned.curatedCategory;
+  if (!cleaned.workflowSteps?.length) delete cleaned.workflowSteps;
+  if (!cleaned.workflowAbility) delete cleaned.workflowAbility;
+  if (!cleaned.workflowOutcome) delete cleaned.workflowOutcome;
   return cleaned;
 };
 

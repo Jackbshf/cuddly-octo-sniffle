@@ -122,9 +122,9 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+          "url": "images/works/cybercity/poster.webp",
           "label": "作品能力概览",
-          "fullUrl": "images/generated/eastern-future/zw-local-short-video-reel-v1.webp",
+          "fullUrl": "images/works/cybercity/poster.webp",
           "width": 1600,
           "height": 1000,
           "alt": "AIGC 视觉与视频作品能力概览"
@@ -158,21 +158,21 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
-          "label": "产品输入与结构控制",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-input-board-v1.webp",
+          "url": "images/works/earbuds/poster.webp",
+          "label": "耳机产品结构参考",
+          "fullUrl": "images/works/earbuds/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "产品结构输入与控制参考板"
+          "alt": "无线耳机产品结构与光影参考"
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
-          "label": "产品精修输出",
-          "fullUrl": "images/generated/eastern-future/zw-local-product-polish-board-v1.webp",
+          "url": "images/works/foundation/poster.webp",
+          "label": "美妆产品精修输出",
+          "fullUrl": "images/works/foundation/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "产品精修与材质光影输出板"
+          "alt": "粉底液产品精修与材质光影输出"
         }
       ]
     },
@@ -216,12 +216,12 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
-          "label": "品牌 VI 延展",
-          "fullUrl": "images/generated/eastern-future/zw-local-brand-vi-board-v1.webp",
+          "url": "images/works/hotel/poster.webp",
+          "label": "品牌空间主视觉",
+          "fullUrl": "images/works/hotel/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "品牌 VI 与主视觉延展板"
+          "alt": "高端酒店品牌空间主视觉"
         },
         {
           "kind": "image",
@@ -243,12 +243,12 @@
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "url": "images/works/giftbox/poster.webp",
           "label": "包装视觉延展",
-          "fullUrl": "images/generated/eastern-future/zw-local-packaging-beverage-board-v1.webp",
+          "fullUrl": "images/works/giftbox/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "包装与社媒物料延展板"
+          "alt": "东方礼盒包装视觉延展"
         }
       ]
     },
@@ -324,12 +324,12 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
-          "label": "角色 LoRA 训练板",
-          "fullUrl": "images/generated/eastern-future/zw-local-character-lora-board-v1.webp",
+          "url": "images/works/portrait/poster.webp",
+          "label": "角色肖像一致性",
+          "fullUrl": "images/works/portrait/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "角色一致性 LoRA 训练输出板"
+          "alt": "人物肖像角色一致性输出"
         },
         {
           "kind": "image",
@@ -545,12 +545,12 @@
         },
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
-          "label": "短剧工作流拆解",
-          "fullUrl": "images/generated/eastern-future/zw-local-drama-workflow-board-v1.webp",
+          "url": "images/works/oriental/poster.webp",
+          "label": "国风角色分镜",
+          "fullUrl": "images/works/oriental/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "AI 短剧脚本分镜配音剪辑流程板"
+          "alt": "国风角色短剧分镜概念图"
         },
         {
           "kind": "image",
@@ -586,12 +586,12 @@
       "media": [
         {
           "kind": "image",
-          "url": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
-          "label": "IP 周边延展",
-          "fullUrl": "images/generated/eastern-future/zw-local-ip-merch-board-v1.webp",
+          "url": "images/works/whale/poster.webp",
+          "label": "IP 视觉延展",
+          "fullUrl": "images/works/whale/poster.webp",
           "width": 1600,
           "height": 1000,
-          "alt": "原创 IP 周边视觉延展板"
+          "alt": "原创 IP 概念视觉延展"
         },
         {
           "kind": "image",
