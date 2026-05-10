@@ -5359,7 +5359,7 @@ function App() {
       {displayUrl ? <img
         src={displayUrl}
         alt={label}
-        loading={options.eager ? "eager" : "lazy"}
+        loading={options.eager || isManualEntry ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={options.eager ? "high" : "auto"}
         className={cx("curated-static-media", portrait && "curated-static-media-contain")}
