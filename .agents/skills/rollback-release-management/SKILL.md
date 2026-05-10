@@ -29,6 +29,7 @@ Use this skill before deployment, production-impacting portfolio changes, large 
 - If remote main advanced, use fetch and rebase instead of force-pushing.
 - Check dirty state before editing and before staging.
 - Stage only files that belong to the task.
+- Run `npm.cmd run qa:portfolio` before production release or release-candidate reporting; treat `BLOCKER` findings as production blockers unless explicitly approved.
 - Record content version ID for each publish, or state why none exists yet.
 - Rollback planning must cover code and content data, not only Git commits.
 
@@ -40,6 +41,7 @@ Use this skill before deployment, production-impacting portfolio changes, large 
 - Any blockers requiring user action.
 - Commit hash and pushed branch when a commit is made.
 - Confirmation that unrelated files were not staged.
+- QA report paths under `output/qa/` and whether `qa:portfolio` passed or found blockers.
 - Content version ID and data rollback path for homepage curation, media library, cases, workflow lab, and gallery-world data.
 
 ## Failure conditions

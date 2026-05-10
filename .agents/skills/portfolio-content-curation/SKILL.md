@@ -32,6 +32,7 @@ Use this skill for homepage content selection, commercial case selection, galler
 - Hide low-quality, mismatched, repeated, or ambiguous material from the homepage without deleting source files.
 - Homepage items must be `status: ready` and `rightsStatus: original` or `licensed`.
 - Keep `draft`, `hidden`, `needs-copy`, `needs-cover`, `archive`, `needs-review`, and `do-not-publish` out of production homepage curation.
+- Run `npm.cmd run qa:portfolio` before production release or release-candidate reporting; use the content report to catch invalid status, rights, duplicate covers, missing titles, missing alt text, missing bilingual copy, and incomplete commercial case fields.
 - Verify contact surfaces support job/recruiting and commercial-collaboration paths, with email fallback if no working form backend exists.
 
 ## Validation checklist
@@ -43,6 +44,7 @@ Use this skill for homepage content selection, commercial case selection, galler
 - Confirm image subject, title, description, and tags match.
 - Confirm commercial cases read like real cases, not generic asset cards.
 - Confirm selected items include valid `status` and `rightsStatus`.
+- Confirm `output/qa/qa-content.json` and `output/qa/qa-content.md` exist after release-candidate QA, or record why the toolkit could not run.
 - Confirm any form-like contact UI has a working endpoint or visible email fallback.
 - Record content version ID or the blocker when preparing release notes.
 

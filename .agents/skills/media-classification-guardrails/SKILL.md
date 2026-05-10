@@ -34,6 +34,7 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - Distinguish card `cover`, detail `source`, and archival/download `original`; do not render oversized originals in card grids.
 - Enforce `status` and `rightsStatus` eligibility before homepage or production rendering.
 - Keep naming roles clear: covers, posters, source media, originals, and workflow evidence must not share ambiguous filenames.
+- Run `npm.cmd run qa:portfolio` before production release or release-candidate reporting; use the media and reference reports to catch workflow leakage, missing assets, duplicate media, extreme aspect ratios, and unused/delete-candidate review lists.
 
 ## Validation checklist
 
@@ -45,6 +46,7 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - Confirm Video Showcase contains video data only.
 - Confirm homepage items are `status: ready` and `rightsStatus: original` or `licensed`, except intentional `missing-video` fallback entries.
 - Confirm cards use optimized covers/posters instead of originals.
+- Confirm `output/qa/qa-media-assets.json` and `output/qa/check-media-references.json` exist after release-candidate QA, or record why the toolkit could not run.
 
 ## Failure conditions
 

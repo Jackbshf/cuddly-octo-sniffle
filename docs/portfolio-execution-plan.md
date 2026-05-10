@@ -11,6 +11,7 @@ This document extends the 0-12 portfolio plan with release gates that must be ap
 - Rights review: every work must have `rightsStatus`; homepage and production allow only `original` or `licensed`.
 - Content versioning: release reports must include a content version ID for homepage curation, media library, cases, workflow lab, and gallery-world data, or state the blocker.
 - Admin/editor safety: protected content writes require authorization, sanitization, draft/preview/publish separation, schema/content validation, and rollback.
+- Lightweight QA toolkit: run `npm.cmd run qa:portfolio` before production release. Reports are written to `output/qa/` and are report-only; `BLOCKER` findings stop production unless explicitly approved.
 
 ## Phase Additions
 
@@ -18,7 +19,7 @@ This document extends the 0-12 portfolio plan with release gates that must be ap
 
 - Add these blind spot controls to `AGENTS.md` and repo skills.
 - Keep changes docs/workflow-only; do not modify runtime code or data schemas in this round.
-- Record that `scripts/qa-content.mjs`, clean checkout rebuild, content version IDs, and cache freshness checks are required future gates.
+- Record that `scripts/qa-content.mjs`, `scripts/qa-media-assets.mjs`, `scripts/check-media-references.mjs`, clean checkout rebuild, content version IDs, and cache freshness checks are required gates.
 
 ### Round 1 - Production Stop-Loss
 
@@ -31,7 +32,7 @@ This document extends the 0-12 portfolio plan with release gates that must be ap
 
 - Extend media classification to include `cover`, `source`, `original`, `poster`, `status`, and `rightsStatus`.
 - Inventory untracked media and block release if production depends on untracked files.
-- Plan or add `scripts/qa-content.mjs` to check duplicate covers, missing title/alt/source/poster, missing duration, workflow leakage, invalid status/rights, missing bilingual copy, incomplete cases, and black-card candidates.
+- Run or extend the lightweight QA toolkit to check duplicate covers, missing title/alt/source/poster, missing duration, workflow leakage, invalid status/rights, missing bilingual copy, incomplete cases, black-card candidates, media dimensions, missing references, and unused/delete-candidate review lists.
 
 ### Round 3 - Design System And MediaFrame
 
@@ -83,8 +84,9 @@ This document extends the 0-12 portfolio plan with release gates that must be ap
 ### Round 12 - Full QA, Preview Acceptance, Production Release
 
 - Run clean checkout rebuild before production.
+- Run `npm.cmd run qa:portfolio` and attach or cite `output/qa/` JSON/Markdown reports.
 - Run local and deployed Playwright QA with cache freshness checks.
-- Run content QA script when implemented, or record the explicit blocker.
+- Treat `BLOCKER` findings from the QA toolkit as production blockers unless explicitly approved.
 - Release report must include URL, commit hash, deploy ID or Worker version, content version ID, screenshots, QA JSON paths, cache/freshness result, and rollback for both code and content.
 
 ## Do Not Implement Yet

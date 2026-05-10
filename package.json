@@ -8,6 +8,10 @@
     "sync:stream": "node scripts/media/sync-cloudflare-stream.mjs",
     "prepare:static": "node scripts/prepare-static.mjs",
     "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
+    "qa:content": "node scripts/qa-content.mjs",
+    "qa:media": "node scripts/qa-media-assets.mjs",
+    "qa:refs": "node scripts/check-media-references.mjs",
+    "qa:portfolio": "node -e \"const { spawnSync } = require('node:child_process'); const npmPath = process.env.npm_execpath; const cmd = npmPath ? process.execPath : (process.platform === 'win32' ? 'npm.cmd' : 'npm'); let code = 0; for (const script of ['qa:content', 'qa:media', 'qa:refs']) { const args = npmPath ? [npmPath, 'run', script] : ['run', script]; const result = spawnSync(cmd, args, { stdio: 'inherit' }); if (result.status) code = result.status; } process.exit(code);\"",
     "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",
     "validate:prompts": "node scripts/prompts/validate-general-prompts.mjs"
   },
@@ -19,8 +23,11 @@
     "three": "^0.181.2"
   },
   "devDependencies": {
+    "blurry-detector": "^1.0.2",
     "esbuild": "0.25.4",
+    "image-size": "^2.0.2",
     "playwright": "^1.59.1",
+    "sharp-phash": "^2.2.0",
     "tailwindcss": "3.4.17"
   }
 }

@@ -190,8 +190,14 @@ These controls are mandatory gates for the 0-12 portfolio execution plan. They a
 
 ### Content QA Script
 
-- Plan and maintain `scripts/qa-content.mjs` before final release.
-- The script should check duplicate covers, missing title, missing alt, missing source, missing poster, video missing duration, Gallery containing workflow, Hero using workflow, incomplete commercial case fields, missing Chinese/English copy, black-card candidates, invalid `status`, invalid `rightsStatus`, and non-ready homepage items.
+- Maintain the lightweight portfolio QA toolkit before final release:
+  - `scripts/qa-content.mjs`
+  - `scripts/qa-media-assets.mjs`
+  - `scripts/check-media-references.mjs`
+- Run `npm.cmd run qa:portfolio` before any production release and include `output/qa/*.json` / `output/qa/*.md` paths in release notes.
+- The toolkit must report only. It must not delete files, rewrite portfolio data, auto-fix media references, or auto-publish content.
+- `qa:portfolio` is allowed to exit `1` when it finds `BLOCKER` issues. Preview/manual QA may continue only if the blockers are explicitly reported; production release is blocked until they are fixed or approved.
+- The scripts should check duplicate covers, missing title, missing alt, missing source, missing poster, video missing duration, Gallery containing workflow, Hero using workflow, incomplete commercial case fields, missing Chinese/English copy, black-card candidates, invalid `status`, invalid `rightsStatus`, non-ready homepage items, media dimensions/aspect ratios, missing referenced files, unused media candidates, and delete-candidate review lists.
 
 ### Social And SEO QA
 
@@ -420,6 +426,7 @@ For every portfolio task:
 5. Do not auto-generate homepage content from raw arrays.
 6. Do not allow composite, moodboard, case-board, stitched, or workflow screenshots into normal Gallery, Hero, commercial case covers, or video posters.
 7. Run relevant validation:
+   - `npm.cmd run qa:portfolio` before production release or release-candidate reporting
    - `npm.cmd run build:app`
    - `npm.cmd run prepare:static`
    - Playwright local QA for frontend changes.

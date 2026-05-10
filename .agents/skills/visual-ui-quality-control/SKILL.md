@@ -27,6 +27,7 @@ Use this skill before finalizing homepage, Gallery, case, detail, video, workflo
 - Check for repeated images, repeated subjects, and resource-dump behavior.
 - Check that video cards have visible video signals and durations.
 - Use or plan `scripts/qa-content.mjs` for content gates before final release.
+- Run `npm.cmd run qa:portfolio` before production release or release-candidate reporting; review `output/qa/` for duplicate covers, black-card candidates, missing media, missing references, and unused/delete-candidate lists.
 - Check black-card candidates, missing titles, missing alt text, missing sources/posters, incomplete case fields, and social preview quality when in scope.
 - Confirm contact surfaces present real job/recruiting and commercial-collaboration paths.
 
@@ -39,6 +40,7 @@ Use this skill before finalizing homepage, Gallery, case, detail, video, workflo
 - Confirm covers, titles, tags, and descriptions match.
 - Confirm the page does not look like an automated asset dump.
 - Confirm content QA script output or explain why it is not implemented yet.
+- Confirm the lightweight QA toolkit reports in `output/qa/` were reviewed when preparing release-candidate QA.
 - Confirm social preview image/copy and contact conversion paths for final release QA.
 
 ## Failure conditions
