@@ -40,7 +40,7 @@ const DEFAULT_SITE_META = {
   canonicalUrl: "https://www.zhangweivisual.cn/",
   ogTitle: "张玮｜AIGC 视觉作品集",
   ogDescription: "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
-  ogImage: "images/ai-product-control-final.png",
+  ogImage: "images/generated/celestial-whale-city.webp",
   twitterCard: "summary_large_image",
   caseSectionTitle: "商业视觉案例",
   caseSectionDesc: "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
@@ -6076,7 +6076,7 @@ function App() {
         detail
       };
     });
-    const visibleVideoEntries = homepageVideoEntries.slice(0, Math.min(visibleVideoCount, 6));
+    const visibleVideoEntries = homepageVideoEntries.slice(0, 3);
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
