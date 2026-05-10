@@ -19,6 +19,7 @@ Use this skill for homepage content selection, commercial case selection, galler
 - `data/gallery-image-library.json`
 - `src/portfolio-home-data.js`
 - Current screenshots or Playwright captures when the task is visual.
+- Content fields for `status`, `rightsStatus`, language copy, contact paths, and content version IDs when present.
 
 ## Required steps
 
@@ -29,6 +30,9 @@ Use this skill for homepage content selection, commercial case selection, galler
 - Ensure homepage curation uses explicit IDs or source entries, not raw array order.
 - Block duplicate covers across Hero, commercial cases, capability cards, and the first visible Gallery group.
 - Hide low-quality, mismatched, repeated, or ambiguous material from the homepage without deleting source files.
+- Homepage items must be `status: ready` and `rightsStatus: original` or `licensed`.
+- Keep `draft`, `hidden`, `needs-copy`, `needs-cover`, `archive`, `needs-review`, and `do-not-publish` out of production homepage curation.
+- Verify contact surfaces support job/recruiting and commercial-collaboration paths, with email fallback if no working form backend exists.
 
 ## Validation checklist
 
@@ -38,6 +42,9 @@ Use this skill for homepage content selection, commercial case selection, galler
 - Confirm no homepage section uses first-N automatic selection.
 - Confirm image subject, title, description, and tags match.
 - Confirm commercial cases read like real cases, not generic asset cards.
+- Confirm selected items include valid `status` and `rightsStatus`.
+- Confirm any form-like contact UI has a working endpoint or visible email fallback.
+- Record content version ID or the blocker when preparing release notes.
 
 ## Failure conditions
 
@@ -45,6 +52,8 @@ Use this skill for homepage content selection, commercial case selection, galler
 - A repeated cover appears in primary homepage modules without an explicit approved reason.
 - A product image is labeled as portrait/digital human, or a landscape image is labeled as AI portrait.
 - Static image work is presented as a playable video case.
+- Homepage includes non-ready, unreviewed, or do-not-publish content.
+- Contact UI pretends to submit without a backend or fallback.
 
 ## What not to do
 
@@ -52,3 +61,4 @@ Use this skill for homepage content selection, commercial case selection, galler
 - Do not delete media files to curate the homepage; remove them from public selections instead.
 - Do not fill the Gallery with weak or dirty material just to reach a numeric count.
 - Do not write generic AIGC copy that could apply to any card.
+- Do not claim resume download, business inquiry, or form submission exists unless the actual route or fallback works.

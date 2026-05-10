@@ -17,6 +17,7 @@ Use this skill when changing detail surfaces, hover/focus states, video playback
 - Existing lightbox, drawer, modal, gallery, or 3D entry code.
 - Current desktop and mobile screenshots.
 - Reduced-motion and performance-related CSS/JS paths.
+- Routing/query behavior for `/`, `?gallery=1`, `?preview=1`, `?lang=en`, detail states, and fallback paths.
 
 ## Required steps
 
@@ -26,6 +27,9 @@ Use this skill when changing detail surfaces, hover/focus states, video playback
 - Mobile defaults to the ordinary portfolio experience and offers immersive mode as an explicit choice.
 - Respect `prefers-reduced-motion` and low-performance contexts by disabling heavy motion and particles.
 - Do not hide essential content behind hover-only interactions.
+- `?gallery=1` must degrade to the normal portfolio if immersive loading fails.
+- Preview state must remain separate from production state.
+- Detail states must refresh without a hard 404, or intentionally degrade to the normal portfolio route.
 
 ## Validation checklist
 
@@ -34,6 +38,7 @@ Use this skill when changing detail surfaces, hover/focus states, video playback
 - State the mobile and reduced-motion behavior.
 - Confirm keyboard and click/tap access to essential interactions.
 - Confirm immersive entry does not replace the ordinary portfolio route.
+- Confirm route/query semantics and fallback behavior when touched.
 
 ## Failure conditions
 
@@ -41,9 +46,11 @@ Use this skill when changing detail surfaces, hover/focus states, video playback
 - Mobile defaults to a fragile immersive experience instead of stable portfolio browsing.
 - Reduced-motion users still receive large motion, particles, or auto camera movement.
 - Detail interactions make videos look like static images or workflow evidence look like finished works.
+- Preview data contaminates production data or gallery failure blocks the normal homepage.
 
 ## What not to do
 
 - Do not add motion or 3D effects before baseline content quality is fixed.
 - Do not build decorative interactions that make the site feel like a resource dump.
 - Do not sacrifice readability for cinematic effects.
+- Do not make query parameters change production content unless the route is explicitly a publish/admin action.

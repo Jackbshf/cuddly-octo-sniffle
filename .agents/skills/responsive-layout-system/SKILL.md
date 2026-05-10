@@ -16,6 +16,7 @@ Use this skill when changing layout, section widths, containers, grids, card den
 - Current section wrappers and grid classes.
 - Playwright screenshots at 390, 768, and 1440 widths.
 - Existing CSS variables for portfolio width, gutters, and dark-only theme.
+- Accessibility layout checks at 320px width and 200% text zoom when user-facing layout changes.
 
 ## Required steps
 
@@ -25,6 +26,8 @@ Use this skill when changing layout, section widths, containers, grids, card den
 - Use one-column mobile, two-column tablet, and three/four-column desktop grids where content density supports it.
 - Prevent section-specific `left`, `margin-left`, or transform hacks from defining the page layout.
 - Preserve the project dark-only visual baseline.
+- Validate 320px width and 200% text zoom for release or accessibility-sensitive changes.
+- Ensure focus-visible rings and keyboard navigation do not cause layout shift or clipped controls.
 
 ## Validation checklist
 
@@ -32,6 +35,8 @@ Use this skill when changing layout, section widths, containers, grids, card den
 - Report any remaining overflow or section width exceptions.
 - Confirm card text does not overflow.
 - Confirm section title, grid, and contact areas share the same centered container when in scope.
+- Confirm 320px and 200% text zoom results when in scope.
+- Confirm focus-visible states remain visible and within containers.
 
 ## Failure conditions
 
@@ -39,9 +44,11 @@ Use this skill when changing layout, section widths, containers, grids, card den
 - Any checked viewport has horizontal overflow.
 - A section uses one-off offsets to compensate for container mismatch.
 - Text escapes cards, buttons, nav, or panels.
+- 320px width or 200% text zoom makes primary content unusable.
 
 ## What not to do
 
 - Do not solve alignment by adding arbitrary left margins.
 - Do not change the project to a light theme.
 - Do not run a broad CSS cleanup unrelated to the requested portfolio surface.
+- Do not hide focus outlines to solve visual overlap.

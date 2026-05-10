@@ -19,6 +19,7 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - `data/cloudflare-stream-manifest.json`
 - `images/`, `videos/`, and generated poster paths referenced by data.
 - Existing classification helpers such as `classifyHomepageWork()` or validation guards.
+- Media asset fields for `cover`, `source`, `original`, `poster`, `status`, and `rightsStatus` when present.
 
 ## Required steps
 
@@ -30,6 +31,9 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - Classify every media item as `video`, `image`, `workflow`, `moodboard`, `case-board`, or `unknown`.
 - Treat `unknown` as homepage-ineligible until manually reviewed.
 - Keep videos out of ordinary image cards and keep workflow evidence out of commercial case covers.
+- Distinguish card `cover`, detail `source`, and archival/download `original`; do not render oversized originals in card grids.
+- Enforce `status` and `rightsStatus` eligibility before homepage or production rendering.
+- Keep naming roles clear: covers, posters, source media, originals, and workflow evidence must not share ambiguous filenames.
 
 ## Validation checklist
 
@@ -39,6 +43,8 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - Confirm Gallery contains only single visual images.
 - Confirm Workflow Evidence contains workflow, moodboard, board, or process material only.
 - Confirm Video Showcase contains video data only.
+- Confirm homepage items are `status: ready` and `rightsStatus: original` or `licensed`, except intentional `missing-video` fallback entries.
+- Confirm cards use optimized covers/posters instead of originals.
 
 ## Failure conditions
 
@@ -46,6 +52,8 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - Video item silently disappears because stream data is missing.
 - The same cover is reused across primary homepage modules without explicit approval.
 - `unknown` media is rendered on the homepage.
+- `needs-review`, `do-not-publish`, `draft`, `hidden`, `needs-copy`, `needs-cover`, or `archive` appears in homepage production output.
+- A workflow/source/original asset is used as an ordinary card cover without an explicit optimized cover.
 
 ## What not to do
 
@@ -53,3 +61,4 @@ Use this skill before changing gallery, video, commercial case, workflow, Hero, 
 - Do not use a workflow board as a poster for a video card.
 - Do not coerce media into the nearest card component for layout convenience.
 - Do not hide classification uncertainty; report it.
+- Do not publish third-party IP, logos, celebrity/private faces, or client-sensitive material unless rights are marked `original` or `licensed`.

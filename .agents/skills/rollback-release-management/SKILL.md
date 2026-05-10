@@ -18,6 +18,7 @@ Use this skill before deployment, production-impacting portfolio changes, large 
 - `wrangler.jsonc`
 - Prior stable deploy URL or Worker version when available.
 - Local generated artifacts that must not be staged.
+- Content version identifiers for homepage curation, media library, cases, workflow lab, and gallery-world data.
 
 ## Required steps
 
@@ -28,6 +29,8 @@ Use this skill before deployment, production-impacting portfolio changes, large 
 - If remote main advanced, use fetch and rebase instead of force-pushing.
 - Check dirty state before editing and before staging.
 - Stage only files that belong to the task.
+- Record content version ID for each publish, or state why none exists yet.
+- Rollback planning must cover code and content data, not only Git commits.
 
 ## Validation checklist
 
@@ -37,6 +40,7 @@ Use this skill before deployment, production-impacting portfolio changes, large 
 - Any blockers requiring user action.
 - Commit hash and pushed branch when a commit is made.
 - Confirmation that unrelated files were not staged.
+- Content version ID and data rollback path for homepage curation, media library, cases, workflow lab, and gallery-world data.
 
 ## Failure conditions
 
@@ -44,9 +48,11 @@ Use this skill before deployment, production-impacting portfolio changes, large 
 - Force-push or history rewrite is used without explicit approval.
 - Production release has no rollback command.
 - Remote divergence is solved by overwriting remote history.
+- Release report lacks content version or data rollback coverage.
 
 ## What not to do
 
 - Do not delete deployment assets or generated media as a rollback shortcut.
 - Do not stage `output/`, screenshots, QA JSON, or local temp files unless requested.
 - Do not treat preview and production as interchangeable.
+- Do not describe rollback as complete if it only reverts code while production content remains changed.
