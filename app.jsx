@@ -6076,7 +6076,7 @@ function App() {
         detail
       };
     });
-    const visibleVideoEntries = homepageVideoEntries.slice(0, Math.min(visibleVideoCount, 6));
+    const visibleVideoEntries = homepageVideoEntries.slice(0, 3);
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
