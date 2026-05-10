@@ -19,6 +19,11 @@ dist/
 /final-setup-current.png
 /name-field-after-paste-current-form.png
 .publish-files.txt
+/output/
+/playwright-report/
+/test-results/
+*.tmp
+*.log
 node_modules/
 .playwright-cli/
 .codex-tmp-*.js
