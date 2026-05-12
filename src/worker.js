@@ -12,9 +12,22 @@ const PORTFOLIO_API_PREFIX = "/api/portfolio-admin";
 const PORTFOLIO_JSON_PATH = "data/portfolio.json";
 const PORTFOLIO_META_PATH = "data/meta.json";
 const GALLERY_WORLDS_PATH = "data/gallery-worlds.json";
+const GALLERY_IMAGE_LIBRARY_PATH = "data/gallery-image-library.json";
 const PORTFOLIO_CASES_DIR = "data/cases";
 const PORTFOLIO_IMAGE_UPLOADS_DIR = "images/uploads";
 const PORTFOLIO_VIDEO_UPLOADS_DIR = "videos/uploads";
+const PORTFOLIO_ASSET_ROOTS = [
+  "images/uploads",
+  "images/curated",
+  "images/generated",
+  "images/works",
+  "images/_posters",
+  "videos"
+];
+const PORTFOLIO_DELETABLE_ASSET_PREFIXES = [
+  `${PORTFOLIO_IMAGE_UPLOADS_DIR}/`,
+  `${PORTFOLIO_VIDEO_UPLOADS_DIR}/`
+];
 
 const VIEW_COOKIE_NAME = "prompt_library_auth";
 const PROMPT_ADMIN_COOKIE_NAME = "prompt_library_admin_auth";
@@ -237,6 +250,14 @@ async function handlePortfolioAdminApi(request, env, url) {
 
   if (url.pathname === `${PORTFOLIO_API_PREFIX}/uploads` && request.method === "POST") {
     return uploadPortfolioAsset(request, env);
+  }
+
+  if (url.pathname === `${PORTFOLIO_API_PREFIX}/assets` && request.method === "GET") {
+    return listPortfolioAssets(env);
+  }
+
+  if (url.pathname === `${PORTFOLIO_API_PREFIX}/assets` && request.method === "DELETE") {
+    return deletePortfolioAsset(request, env);
   }
 
   return jsonResponse({ ok: false, error: "Not found." }, 404);
@@ -574,6 +595,233 @@ async function deletePortfolioCase(rawId, env) {
   } catch (error) {
     return jsonResponse({ ok: false, error: error.message || "GitHub case delete failed." }, 502);
   }
+}
+
+async function listPortfolioAssets(env) {
+  try {
+    const config = getGitHubConfig(env, PORTFOLIO_TOKEN_ENV);
+    const [files, usage] = await Promise.all([
+      listPortfolioAssetFiles(config),
+      collectPortfolioAssetUsage(config)
+    ]);
+
+    const assets = files
+      .map((entry) => normalizePortfolioAssetEntry(entry, usage))
+      .sort((a, b) => {
+        if (a.isUploaded !== b.isUploaded) return a.isUploaded ? -1 : 1;
+        if (a.used !== b.used) return a.used ? -1 : 1;
+        return String(a.path).localeCompare(String(b.path), "zh-CN");
+      });
+
+    return jsonResponse({
+      ok: true,
+      branch: config.branch,
+      assets,
+      deletablePrefixes: PORTFOLIO_DELETABLE_ASSET_PREFIXES
+    });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Failed to read portfolio assets." }, 502);
+  }
+}
+
+async function deletePortfolioAsset(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse({ ok: false, error: "Invalid JSON payload." }, 400);
+  }
+
+  const assetPath = cleanDeletablePortfolioAssetPath(payload?.path || payload?.assetPath);
+  if (!assetPath) {
+    return jsonResponse({ ok: false, error: "Only files under images/uploads/ or videos/uploads/ can be deleted from the admin asset library." }, 400);
+  }
+
+  try {
+    const config = getGitHubConfig(env, PORTFOLIO_TOKEN_ENV);
+    const usage = await collectPortfolioAssetUsage(config);
+    const references = usage.referencesByPath.get(assetPath) || [];
+    if (references.length) {
+      return jsonResponse({
+        ok: false,
+        error: "This asset is still referenced by portfolio data. Remove or replace those references before deleting it.",
+        references
+      }, 409);
+    }
+
+    const catalogResult = usage.catalogPaths.has(assetPath)
+      ? await removePortfolioAssetFromGalleryLibrary(env, assetPath)
+      : null;
+    const deleteResult = await deleteGitHubFile(env, assetPath, `Delete portfolio asset ${assetPath}`, PORTFOLIO_TOKEN_ENV);
+
+    return jsonResponse({
+      ok: true,
+      path: assetPath,
+      commit: deleteResult.commit?.sha || null,
+      catalogCommit: catalogResult?.commit?.sha || null
+    });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "GitHub asset delete failed." }, 502);
+  }
+}
+
+async function listPortfolioAssetFiles(config) {
+  const nestedLists = await Promise.all(PORTFOLIO_ASSET_ROOTS.map((root) => listGitHubFilesRecursive(config, root, 5)));
+  const seen = new Set();
+  return nestedLists
+    .flat()
+    .filter((entry) => {
+      const path = cleanPortfolioMediaPath(entry?.path || "");
+      if (!path || seen.has(path) || !isPortfolioAssetFilePath(path)) return false;
+      seen.add(path);
+      return true;
+    });
+}
+
+async function listGitHubFilesRecursive(config, dirPath, depth) {
+  if (depth < 0) return [];
+  const entries = await listGitHubDirectory(config, dirPath);
+  const files = [];
+
+  for (const entry of entries) {
+    const path = cleanPortfolioMediaPath(entry?.path || "");
+    if (!path) continue;
+    if (entry.type === "file") {
+      files.push(entry);
+    } else if (entry.type === "dir") {
+      files.push(...await listGitHubFilesRecursive(config, path, depth - 1));
+    }
+  }
+
+  return files;
+}
+
+async function collectPortfolioAssetUsage(config) {
+  const referencesByPath = new Map();
+  const catalogPaths = new Set();
+  const [portfolioJson, metaJson, galleryWorlds, galleryImageLibrary, caseEntries] = await Promise.all([
+    getOptionalGitHubJsonFile(config, PORTFOLIO_JSON_PATH),
+    getOptionalGitHubJsonFile(config, PORTFOLIO_META_PATH),
+    getOptionalGitHubJsonFile(config, GALLERY_WORLDS_PATH),
+    getOptionalGitHubJsonFile(config, GALLERY_IMAGE_LIBRARY_PATH),
+    listGitHubDirectory(config, PORTFOLIO_CASES_DIR)
+  ]);
+
+  collectPortfolioMediaReferences(portfolioJson, PORTFOLIO_JSON_PATH, referencesByPath);
+  collectPortfolioMediaReferences(metaJson, PORTFOLIO_META_PATH, referencesByPath);
+  collectPortfolioMediaReferences(galleryWorlds, GALLERY_WORLDS_PATH, referencesByPath);
+
+  const caseFiles = caseEntries
+    .filter((entry) => entry?.type === "file" && /\.json$/i.test(entry.name || ""))
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), "zh-CN"));
+  const caseItems = await Promise.all(caseFiles.map((entry) => getOptionalGitHubJsonFile(config, `${PORTFOLIO_CASES_DIR}/${entry.name}`)));
+  caseItems.forEach((caseItem, index) => {
+    const source = caseFiles[index]?.name ? `${PORTFOLIO_CASES_DIR}/${caseFiles[index].name}` : PORTFOLIO_CASES_DIR;
+    collectPortfolioMediaReferences(caseItem, source, referencesByPath);
+  });
+
+  asArray(galleryImageLibrary?.images).forEach((item) => {
+    const path = normalizePortfolioReferencePath(item?.src || item?.url || "");
+    if (path) catalogPaths.add(path);
+  });
+
+  return { referencesByPath, catalogPaths };
+}
+
+async function getOptionalGitHubJsonFile(config, filePath) {
+  try {
+    return await getGitHubJsonFile(config, filePath);
+  } catch (error) {
+    if (String(error.message || "").toLowerCase().includes("not found")) return null;
+    throw error;
+  }
+}
+
+function collectPortfolioMediaReferences(value, source, referencesByPath) {
+  if (typeof value === "string") {
+    const path = normalizePortfolioReferencePath(value);
+    if (path) {
+      const references = referencesByPath.get(path) || [];
+      if (!references.some((entry) => entry.source === source)) references.push({ source });
+      referencesByPath.set(path, references);
+    }
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectPortfolioMediaReferences(item, source, referencesByPath));
+    return;
+  }
+
+  if (value && typeof value === "object") {
+    Object.values(value).forEach((item) => collectPortfolioMediaReferences(item, source, referencesByPath));
+  }
+}
+
+function normalizePortfolioAssetEntry(entry, usage) {
+  const path = cleanPortfolioMediaPath(entry?.path || "");
+  const references = usage.referencesByPath.get(path) || [];
+  const isUploaded = PORTFOLIO_DELETABLE_ASSET_PREFIXES.some((prefix) => path.startsWith(prefix));
+  const canDelete = isUploaded && references.length === 0;
+  return {
+    path,
+    name: cleanText(entry?.name) || path.split("/").pop() || path,
+    kind: inferPortfolioAssetKind(path),
+    size: Number(entry?.size) || 0,
+    sha: cleanText(entry?.sha),
+    url: `/${path}`,
+    htmlUrl: cleanText(entry?.html_url),
+    downloadUrl: cleanText(entry?.download_url),
+    used: references.length > 0,
+    references,
+    inGalleryLibrary: usage.catalogPaths.has(path),
+    isUploaded,
+    canDelete,
+    deleteBlockedReason: canDelete ? "" : references.length ? "Asset is still referenced." : "Only uploaded assets can be deleted here."
+  };
+}
+
+async function removePortfolioAssetFromGalleryLibrary(env, assetPath) {
+  const config = getGitHubConfig(env, PORTFOLIO_TOKEN_ENV);
+  const library = await getOptionalGitHubJsonFile(config, GALLERY_IMAGE_LIBRARY_PATH);
+  if (!library || !Array.isArray(library.images)) return null;
+
+  const nextImages = library.images.filter((item) => normalizePortfolioReferencePath(item?.src || item?.url || "") !== assetPath);
+  if (nextImages.length === library.images.length) return null;
+
+  const nextLibrary = {
+    ...library,
+    updatedAt: new Date().toISOString().slice(0, 10),
+    images: nextImages
+  };
+  return putGitHubFile(
+    env,
+    GALLERY_IMAGE_LIBRARY_PATH,
+    encoder.encode(`${JSON.stringify(nextLibrary, null, 2)}\n`),
+    `Remove deleted portfolio asset ${assetPath} from gallery library`,
+    PORTFOLIO_TOKEN_ENV
+  );
+}
+
+function normalizePortfolioReferencePath(value) {
+  const normalized = cleanPortfolioMediaPath(value).split(/[?#]/)[0];
+  if (normalized.startsWith("images/") || normalized.startsWith("videos/")) return normalized;
+  return "";
+}
+
+function isPortfolioAssetFilePath(path) {
+  return /\.(png|jpe?g|webp|gif|svg|mp4|webm|mov|m4v)$/i.test(String(path || ""));
+}
+
+function inferPortfolioAssetKind(path) {
+  return /\.(mp4|webm|mov|m4v)$/i.test(String(path || "")) ? "video" : "image";
+}
+
+function cleanDeletablePortfolioAssetPath(value) {
+  const path = cleanPortfolioMediaPath(value);
+  if (!path || !isPortfolioAssetFilePath(path)) return "";
+  if (!PORTFOLIO_DELETABLE_ASSET_PREFIXES.some((prefix) => path.startsWith(prefix))) return "";
+  return path;
 }
 
 async function uploadPortfolioAsset(request, env) {

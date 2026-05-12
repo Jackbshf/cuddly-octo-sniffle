@@ -836,6 +836,22 @@ const buildPublishedAssetPath = (file) => {
   return "";
 };
 
+const normalizeRepoMediaPath = (value = "") => String(value || "")
+  .trim()
+  .replace(/^[./\\]+/, "")
+  .replace(/\\/g, "/")
+  .split(/[?#]/)[0];
+
+const formatAssetSize = (value) => {
+  const bytes = Number(value) || 0;
+  if (!bytes) return "未知大小";
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${bytes} B`;
+};
+
+const getAssetKindLabel = (kind) => kind === "video" ? "视频" : "图片";
+
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 const createFreeLayoutElement = (type) => {
@@ -2335,6 +2351,15 @@ function App() {
   const [activeCuratedDropTarget, setActiveCuratedDropTarget] = useState("");
   const [pendingMediaReplacement, setPendingMediaReplacement] = useState(null);
   const [isReplacingMedia, setIsReplacingMedia] = useState(false);
+  const [showAssetManager, setShowAssetManager] = useState(false);
+  const [assetManagerTarget, setAssetManagerTarget] = useState(null);
+  const [assetLibrary, setAssetLibrary] = useState([]);
+  const [assetLibraryBranch, setAssetLibraryBranch] = useState("");
+  const [assetLibraryStatus, setAssetLibraryStatus] = useState("");
+  const [assetFilter, setAssetFilter] = useState("uploaded");
+  const [assetSearch, setAssetSearch] = useState("");
+  const [isAssetLibraryLoading, setIsAssetLibraryLoading] = useState(false);
+  const [deletingAssetPath, setDeletingAssetPath] = useState("");
   const lightboxVideoRef = useRef(null);
   const heroCanvasRef = useRef(null);
   const importInputRef = useRef(null);
@@ -3300,6 +3325,138 @@ function App() {
         if (file) requestMediaReplacement(file, target);
       }
     };
+  };
+
+  const copyAssetPath = async (asset) => {
+    const path = normalizeRepoMediaPath(asset?.path || "");
+    if (!path) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(path);
+      } else {
+        const input = document.createElement("textarea");
+        input.value = path;
+        input.setAttribute("readonly", "true");
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        input.remove();
+      }
+      setStatusMessage(`已复制素材路径：${path}`);
+    } catch {
+      setStatusMessage(`复制失败，请手动复制：${path}`);
+    }
+  };
+
+  const loadPortfolioAssets = async () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || isAssetLibraryLoading) return;
+    setIsAssetLibraryLoading(true);
+    setAssetLibraryStatus("正在读取 GitHub 素材库...");
+    try {
+      const response = await fetch("/api/portfolio-admin/assets", { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `读取失败：${response.status}`);
+      setAssetLibrary(Array.isArray(data.assets) ? data.assets : []);
+      setAssetLibraryBranch(data.branch || "");
+      setAssetLibraryStatus(`已载入 ${Array.isArray(data.assets) ? data.assets.length : 0} 个素材。`);
+    } catch (error) {
+      setAssetLibraryStatus(error?.message || "素材库读取失败。");
+    } finally {
+      setIsAssetLibraryLoading(false);
+    }
+  };
+
+  const openAssetManager = (target = null) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return;
+    setAssetManagerTarget(target);
+    setShowAssetManager(true);
+    setAssetFilter(target?.accept === "image" ? "image" : "uploaded");
+    if (!assetLibrary.length) loadPortfolioAssets();
+  };
+
+  const closeAssetManager = () => {
+    setShowAssetManager(false);
+    setAssetManagerTarget(null);
+  };
+
+  const findPosterForVideoAsset = (assetPath) => {
+    const fileName = assetPath.split("/").pop() || "";
+    const baseName = fileName.replace(/\.[^.]+$/, "");
+    const posterPath = `images/_posters/${baseName}.webp`;
+    return assetLibrary.some((asset) => normalizeRepoMediaPath(asset.path) === posterPath) ? posterPath : "";
+  };
+
+  const buildReplacementMediaFromAsset = (asset, target) => {
+    const path = normalizeRepoMediaPath(asset?.path || "");
+    if (!path) throw new Error("素材路径无效。");
+    const kind = asset?.kind === "video" ? "video" : "image";
+    if (target?.accept === "image" && kind !== "image") {
+      throw new Error("这个位置只能使用图片素材。");
+    }
+    return {
+      kind,
+      url: path,
+      fullUrl: kind === "image" ? path : "",
+      poster: kind === "video" ? findPosterForVideoAsset(path) : "",
+      alt: asset?.name || target?.label || "作品素材",
+      label: asset?.name || path
+    };
+  };
+
+  const useAssetForTarget = (asset) => {
+    if (!assetManagerTarget) {
+      copyAssetPath(asset);
+      return;
+    }
+
+    try {
+      const replacement = buildReplacementMediaFromAsset(asset, assetManagerTarget);
+      const nextModel = replaceMediaInPortfolioModel(portfolioData, assetManagerTarget, replacement);
+      setPortfolioData(deepClone(nextModel));
+      setLoadSource("draft");
+      setStatusMessage(`已从素材库替换到本地草稿：${assetManagerTarget.label || replacement.label}。确认无误后再保存到代码仓库。`);
+      closeAssetManager();
+    } catch (error) {
+      window.alert(error?.message || "素材应用失败。");
+    }
+  };
+
+  const deletePortfolioAsset = async (asset) => {
+    const path = normalizeRepoMediaPath(asset?.path || "");
+    if (!path || deletingAssetPath) return;
+    if (!asset?.canDelete) {
+      const references = Array.isArray(asset?.references) ? asset.references.map((item) => item.source).filter(Boolean) : [];
+      const reason = references.length
+        ? `这个素材仍被引用：\n${references.join("\n")}`
+        : "这里只允许删除 images/uploads/ 或 videos/uploads/ 下的上传素材。";
+      window.alert(reason);
+      return;
+    }
+
+    const confirmed = window.confirm(`确认从代码仓库删除这个上传素材吗？\n\n${path}\n\n删除后无法在后台直接恢复。`);
+    if (!confirmed) return;
+
+    setDeletingAssetPath(path);
+    setAssetLibraryStatus(`正在删除 ${path}...`);
+    try {
+      const response = await fetch("/api/portfolio-admin/assets", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `删除失败：${response.status}`);
+      setAssetLibrary((items) => items.filter((item) => normalizeRepoMediaPath(item.path) !== path));
+      setAssetLibraryStatus(`已删除 ${path}${data.commit ? `：${data.commit.slice(0, 7)}` : ""}`);
+      setStatusMessage(`已删除上传素材：${path}。`);
+    } catch (error) {
+      window.alert(error?.message || "素材删除失败。");
+      setAssetLibraryStatus(error?.message || "素材删除失败。");
+    } finally {
+      setDeletingAssetPath("");
+    }
   };
 
   const resetDraft = () => {
@@ -5302,6 +5459,7 @@ function App() {
         <span>点击播放</span>
       </div>}
       {IS_PORTFOLIO_ADMIN_MODE && !isManualEntry && <div className="curated-admin-media-tools">
+        <button type="button" onClick={(event) => { event.stopPropagation(); openAssetManager(replaceTarget); }}><Icon name="Grid" size={14} /> 素材库</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById(uploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(replaceTarget, normalizedMedia); }}><Icon name="Link2" size={14} /> 外链</button>
       </div>}
@@ -5550,6 +5708,7 @@ function App() {
           <span className="curated-case-video-badge">视频{service.curation?.duration ? ` · ${service.curation.duration}` : ""} · 可播放</span>
         </> : caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading={index === 0 ? "eager" : "lazy"} decoding="async" /> : <div>暂无封面</div>}
         {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-admin-media-tools">
+          <button type="button" onClick={(event) => { event.stopPropagation(); openAssetManager(coverTarget); }}><Icon name="Grid" size={14} /> 素材库</button>
           <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
         </div>}
         {IS_PORTFOLIO_ADMIN_MODE && <input id={coverInputId} type="file" accept="image/*" className="hidden" onChange={(event) => {
@@ -5730,6 +5889,7 @@ function App() {
         >
           {renderDetailMedia(selectedWorkItem)}
           {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <div className="curated-admin-media-tools">
+            <button type="button" onClick={(event) => { event.stopPropagation(); openAssetManager(detailTarget); }}><Icon name="Grid" size={14} /> 素材库</button>
             <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById(detailUploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换当前媒体</button>
             {detailTarget.type !== "case-cover" && <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(detailTarget, selectedWorkItem.mediaEntry?.media); }}><Icon name="Link2" size={14} /> 外链视频</button>}
           </div>}
@@ -5859,6 +6019,7 @@ function App() {
                     <em>{item.hidden ? "已隐藏" : "首页可见"}</em>
                   </div>
                   <div className="curated-card-manager-actions">
+                    <button type="button" onClick={() => openAssetManager(item.target)}>素材库</button>
                     <button type="button" onClick={() => updateCuratedCardHidden(item.source, !item.hidden)}>{item.hidden ? "恢复" : "隐藏"}</button>
                     <button type="button" onClick={() => document.getElementById(inputId)?.click()}>替换图片</button>
                     <input id={inputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
@@ -5875,6 +6036,113 @@ function App() {
         })}
       </div>
     </aside>;
+  };
+
+  const renderAssetManager = () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || !showAssetManager) return null;
+    const query = assetSearch.trim().toLowerCase();
+    const filters = [
+      { id: "uploaded", label: "上传素材" },
+      { id: "unused", label: "未使用" },
+      { id: "used", label: "已使用" },
+      { id: "image", label: "图片" },
+      { id: "video", label: "视频" },
+      { id: "all", label: "全部" }
+    ];
+    const visibleAssets = assetLibrary.filter((asset) => {
+      if (assetFilter === "uploaded" && !asset.isUploaded) return false;
+      if (assetFilter === "unused" && asset.used) return false;
+      if (assetFilter === "used" && !asset.used) return false;
+      if (assetFilter === "image" && asset.kind !== "image") return false;
+      if (assetFilter === "video" && asset.kind !== "video") return false;
+      if (!query) return true;
+      return [asset.path, asset.name, asset.kind, ...(Array.isArray(asset.references) ? asset.references.map((item) => item.source) : [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+    const uploadedCount = assetLibrary.filter((asset) => asset.isUploaded).length;
+    const unusedCount = assetLibrary.filter((asset) => !asset.used).length;
+    const targetLabel = assetManagerTarget?.label || "未选择替换位置";
+
+    return <div className="curated-asset-manager-layer" onClick={closeAssetManager}>
+      <aside className="curated-asset-manager" onClick={(event) => event.stopPropagation()} aria-label="后台素材库">
+        <div className="curated-asset-manager-head">
+          <div>
+            <span>后台素材库</span>
+            <strong>{assetManagerTarget ? `选择素材替换：${targetLabel}` : "查看、复制路径、删除未使用上传素材"}</strong>
+            <em>{assetLibraryBranch ? `当前 GitHub 分支：${assetLibraryBranch}` : "读取当前后台配置的 GitHub 分支"}</em>
+          </div>
+          <button type="button" onClick={closeAssetManager}>关闭</button>
+        </div>
+
+        <div className="curated-asset-manager-toolbar">
+          <input
+            type="search"
+            value={assetSearch}
+            onChange={(event) => setAssetSearch(event.target.value)}
+            placeholder="搜索路径、文件名或引用来源"
+          />
+          <button type="button" onClick={loadPortfolioAssets} disabled={isAssetLibraryLoading}>
+            {isAssetLibraryLoading ? "刷新中..." : "刷新素材"}
+          </button>
+        </div>
+
+        <div className="curated-asset-manager-filters" role="tablist" aria-label="素材筛选">
+          {filters.map((filter) => <button
+            key={filter.id}
+            type="button"
+            className={assetFilter === filter.id ? "is-active" : ""}
+            onClick={() => setAssetFilter(filter.id)}
+          >{filter.label}</button>)}
+        </div>
+
+        <div className="curated-asset-manager-summary">
+          <span>全部 {assetLibrary.length}</span>
+          <span>上传 {uploadedCount}</span>
+          <span>未使用 {unusedCount}</span>
+          <span>{assetLibraryStatus || "未读取素材库"}</span>
+        </div>
+
+        <div className="curated-asset-grid">
+          {visibleAssets.map((asset) => {
+            const path = normalizeRepoMediaPath(asset.path);
+            const canUseForTarget = !assetManagerTarget || assetManagerTarget.accept !== "image" || asset.kind === "image";
+            const references = Array.isArray(asset.references) ? asset.references : [];
+            return <article key={path} className={cx("curated-asset-card", asset.used && "is-used", asset.isUploaded && "is-uploaded")}>
+              <button type="button" className="curated-asset-preview" onClick={() => useAssetForTarget(asset)} disabled={!canUseForTarget}>
+                {asset.kind === "video"
+                  ? <video src={asset.url || `/${path}`} muted playsInline preload="metadata" />
+                  : <img src={asset.url || `/${path}`} alt="" loading="lazy" decoding="async" />}
+                <span>{getAssetKindLabel(asset.kind)}</span>
+              </button>
+              <div className="curated-asset-card-body">
+                <strong title={path}>{path}</strong>
+                <div className="curated-asset-meta">
+                  <span>{formatAssetSize(asset.size)}</span>
+                  <span>{asset.used ? "已使用" : "未使用"}</span>
+                  <span>{asset.isUploaded ? "可清理目录" : "系统素材"}</span>
+                </div>
+                {references.length > 0 && <p>引用：{references.map((item) => item.source).join(" / ")}</p>}
+              </div>
+              <div className="curated-asset-actions">
+                <button type="button" onClick={() => useAssetForTarget(asset)} disabled={!canUseForTarget}>
+                  {assetManagerTarget ? "使用" : "复制路径"}
+                </button>
+                <button type="button" onClick={() => copyAssetPath(asset)}>复制</button>
+                <button type="button" className="is-danger" onClick={() => deletePortfolioAsset(asset)} disabled={!asset.canDelete || deletingAssetPath === path}>
+                  {deletingAssetPath === path ? "删除中..." : "删除"}
+                </button>
+              </div>
+            </article>;
+          })}
+          {!visibleAssets.length && <div className="curated-asset-empty">
+            <Icon name="Grid" size={24} />
+            <span>{isAssetLibraryLoading ? "正在读取素材库..." : "没有符合当前筛选的素材。"}</span>
+          </div>}
+        </div>
+      </aside>
+    </div>;
   };
 
   const renderCuratedTopbar = () => {
@@ -5943,6 +6211,7 @@ function App() {
         <span>等待添加首页主视觉</span>
       </div>}
       {IS_PORTFOLIO_ADMIN_MODE && target && <div className="curated-admin-media-tools">
+        <button type="button" onClick={(event) => { event.stopPropagation(); openAssetManager(target); }}><Icon name="Grid" size={14} /> 素材库</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById("curated-hero-upload").click(); }}><Icon name="UploadCloud" size={14} /> 替换舞台作品</button>
       </div>}
       {IS_PORTFOLIO_ADMIN_MODE && target && <input id="curated-hero-upload" type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
@@ -5966,6 +6235,10 @@ function App() {
           </div>
         </div>
         <div className="curated-admin-preview-actions">
+          <button type="button" onClick={() => openAssetManager(null)} title="查看和清理素材库">
+            <Icon name="Image" size={16} />
+            <span>素材库</span>
+          </button>
           <button type="button" onClick={() => setShowCuratedManager((value) => !value)} title="管理首页卡片数量">
             <Icon name="Grid" size={16} />
             <span>管理卡片</span>
@@ -5989,6 +6262,7 @@ function App() {
         </div>
       </div>
       {renderCuratedCardManager()}
+      {renderAssetManager()}
     </>;
   };
 

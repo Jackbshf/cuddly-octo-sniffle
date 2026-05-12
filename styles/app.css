@@ -3324,6 +3324,309 @@ button.curated-hero-stage {
   opacity: 0.54;
 }
 
+.curated-asset-manager-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 18px;
+  background: rgba(2, 4, 8, 0.42);
+  backdrop-filter: blur(10px);
+}
+
+.curated-asset-manager {
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr;
+  width: min(1120px, 100%);
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(126, 208, 255, 0.18);
+  border-radius: 18px;
+  background: rgba(5, 10, 17, 0.94);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+}
+
+.curated-asset-manager-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(126, 208, 255, 0.12);
+}
+
+.curated-asset-manager-head span,
+.curated-asset-manager-head strong,
+.curated-asset-manager-head em {
+  display: block;
+}
+
+.curated-asset-manager-head span {
+  color: var(--curated-cyan);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.curated-asset-manager-head strong {
+  margin-top: 5px;
+  color: rgba(246, 251, 255, 0.96);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  line-height: 1.18;
+}
+
+.curated-asset-manager-head em {
+  margin-top: 6px;
+  color: rgba(166, 203, 235, 0.7);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.curated-asset-manager-head button,
+.curated-asset-manager-toolbar button,
+.curated-asset-manager-filters button,
+.curated-asset-actions button {
+  min-height: 34px;
+  border: 1px solid rgba(126, 208, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(218, 236, 255, 0.88);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.curated-asset-manager-head button {
+  padding: 0 14px;
+}
+
+.curated-asset-manager-toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px 0;
+}
+
+.curated-asset-manager-toolbar input {
+  min-width: 0;
+  flex: 1 1 auto;
+  height: 38px;
+  border: 1px solid rgba(126, 208, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(246, 251, 255, 0.94);
+  padding: 0 14px;
+  outline: none;
+}
+
+.curated-asset-manager-toolbar button {
+  flex: 0 0 auto;
+  padding: 0 14px;
+}
+
+.curated-asset-manager-filters,
+.curated-asset-manager-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 20px 0;
+}
+
+.curated-asset-manager-filters button {
+  padding: 0 12px;
+}
+
+.curated-asset-manager-filters button.is-active {
+  border-color: rgba(91, 216, 255, 0.48);
+  background: rgba(91, 216, 255, 0.14);
+  color: #e8fbff;
+}
+
+.curated-asset-manager-summary {
+  padding-bottom: 14px;
+  color: rgba(166, 203, 235, 0.7);
+  font-size: 12px;
+}
+
+.curated-asset-manager-summary span {
+  min-height: 24px;
+  border: 1px solid rgba(126, 208, 255, 0.1);
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.curated-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 20px 20px;
+}
+
+.curated-asset-card {
+  display: grid;
+  grid-template-rows: 150px min-content min-content;
+  align-self: start;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(126, 208, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.curated-asset-card.is-used {
+  border-color: rgba(52, 211, 153, 0.22);
+}
+
+.curated-asset-preview {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 150px;
+  border: 0;
+  overflow: hidden;
+  padding: 0;
+  background: #020305;
+  color: inherit;
+}
+
+.curated-asset-preview img,
+.curated-asset-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.curated-asset-preview span {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(4, 6, 8, 0.74);
+  color: rgba(232, 248, 255, 0.92);
+  font-size: 11px;
+}
+
+.curated-asset-preview:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.curated-asset-card-body {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.curated-asset-card-body strong {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(246, 251, 255, 0.92);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.curated-asset-card-body p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: rgba(166, 203, 235, 0.66);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.curated-asset-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.curated-asset-meta span {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  border: 1px solid rgba(126, 208, 255, 0.1);
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: rgba(166, 203, 235, 0.74);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.curated-asset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px 12px;
+}
+
+.curated-asset-actions button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.curated-asset-actions button:first-child {
+  border-color: rgba(91, 216, 255, 0.34);
+  background: rgba(91, 216, 255, 0.12);
+  color: #e8fbff;
+}
+
+.curated-asset-actions button.is-danger {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(248, 113, 113, 0.1);
+  color: rgba(254, 202, 202, 0.92);
+}
+
+.curated-asset-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.curated-asset-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  gap: 10px;
+  border: 1px dashed rgba(126, 208, 255, 0.18);
+  border-radius: 12px;
+  color: rgba(166, 203, 235, 0.72);
+}
+
+@media (max-width: 760px) {
+  .curated-asset-manager-layer {
+    padding: 8px;
+  }
+
+  .curated-asset-manager {
+    border-radius: 12px;
+  }
+
+  .curated-asset-manager-head,
+  .curated-asset-manager-toolbar {
+    flex-direction: column;
+  }
+
+  .curated-asset-grid {
+    grid-template-columns: 1fr;
+    padding-inline: 12px;
+  }
+}
+
 .curated-contact h2 {
   font-size: clamp(2rem, 4vw, 3.6rem);
 }
