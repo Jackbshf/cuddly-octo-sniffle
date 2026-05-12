@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, startTransition } from "react";
 import { createRoot } from "react-dom/client";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Hls from "hls.js";
 import * as THREE from "three";
 import GalleryWorldHome from "./src/components/GalleryWorldHome.jsx";
@@ -609,6 +610,57 @@ const colorPalettes = [
 ];
 
 const cx = (...classNames) => classNames.filter(Boolean).join(" ");
+const motionViewport = { once: true, amount: 0.18 };
+const sectionMotionVariants = {
+  hidden: { opacity: 0, y: 28, filter: "blur(8px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.62, ease: [0.16, 1, 0.3, 1] }
+  }
+};
+const heroMotionVariants = {
+  hidden: { opacity: 0, y: 18, scale: 0.985 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.72, ease: [0.16, 1, 0.3, 1] }
+  }
+};
+const cardMotionVariants = {
+  rest: { y: 0, scale: 1 },
+  hover: {
+    y: -6,
+    scale: 1.015,
+    transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
+  }
+};
+const filterMotionVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.26, ease: [0.16, 1, 0.3, 1] } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }
+};
+const MotionSection = ({ reducedMotion = false, variants = sectionMotionVariants, children, ...props }) => {
+  const motionProps = reducedMotion ? {} : {
+    initial: "hidden",
+    whileInView: "show",
+    viewport: motionViewport,
+    variants
+  };
+  return <motion.section {...props} {...motionProps}>{children}</motion.section>;
+};
+const MotionArticle = ({ reducedMotion = false, children, ...props }) => {
+  const motionProps = reducedMotion ? {} : {
+    initial: "rest",
+    animate: "rest",
+    whileHover: "hover",
+    whileFocus: "hover",
+    variants: cardMotionVariants
+  };
+  return <motion.article {...props} {...motionProps}>{children}</motion.article>;
+};
 const deepClone = (value) => JSON.parse(JSON.stringify(value));
 const ensureString = (value, fallback = "") => typeof value === "string" ? value : fallback;
 const ensureStringArray = (value) => Array.isArray(value) ? value.map((item) => String(item ?? "").trim()).filter(Boolean) : [];
@@ -2253,6 +2305,7 @@ const applyDocumentMeta = (meta, caseItem) => {
 };
 
 function App() {
+  const prefersReducedMotion = useReducedMotion();
   const [portfolioData, setPortfolioData] = useState(() => createPortfolioModel(EMBEDDED_PORTFOLIO));
   const [publishedPortfolioData, setPublishedPortfolioData] = useState(() => createPortfolioModel(EMBEDDED_PORTFOLIO));
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -2315,6 +2368,7 @@ function App() {
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
   const useGalleryWorldHome = false;
+  const reduceHomeMotion = Boolean(prefersReducedMotion);
 
   const curatedNavItems = [
     { id: "home", label: "首页" },
@@ -2485,134 +2539,6 @@ function App() {
     }, 40);
     return () => window.clearTimeout(timeoutId);
   }, [isLoading]);
-
-  useEffect(() => {
-    if (isLoading) return undefined;
-
-    const revealTargets = Array.from(document.querySelectorAll([
-      ".curated-page .curated-hero-copy",
-      ".curated-page .curated-hero-stage-wrap",
-      ".curated-page .curated-hero-proof"
-    ].join(",")));
-    if (!revealTargets.length) return undefined;
-
-    const reducedMotion = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion || typeof IntersectionObserver !== "function") {
-      revealTargets.forEach((target) => target.classList.add("is-motion-visible"));
-      return () => revealTargets.forEach((target) => target.classList.remove("is-motion-visible"));
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-motion-visible");
-        observer.unobserve(entry.target);
-      });
-    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.12 });
-
-    revealTargets.forEach((target, index) => {
-      target.style.setProperty("--reveal-delay", `${Math.min(index * 45, 180)}ms`);
-      observer.observe(target);
-    });
-
-    return () => {
-      observer.disconnect();
-      revealTargets.forEach((target) => {
-        target.classList.remove("is-motion-visible");
-        target.style.removeProperty("--reveal-delay");
-      });
-    };
-  }, [isLoading]);
-
-  useEffect(() => {
-    if (isLoading) return undefined;
-    if (typeof window.matchMedia !== "function") return undefined;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (reducedMotion || !finePointer) return undefined;
-
-    const cardSelector = [
-      ".curated-page .curated-video-card",
-      ".curated-page .curated-case-card",
-      ".curated-page .curated-visual-card",
-      ".curated-page .curated-feature-grid article",
-      ".curated-page .curated-process-card",
-      ".curated-page .curated-skill-card"
-    ].join(",");
-    const motionTargets = Array.from(document.querySelectorAll(cardSelector));
-    const heroStage = document.querySelector(".curated-page .curated-hero-stage-wrap");
-    const disposers = [];
-
-    const resetCardMotion = (target) => {
-      target.style.setProperty("--card-rx", "0deg");
-      target.style.setProperty("--card-ry", "0deg");
-      target.style.setProperty("--spot-x", "50%");
-      target.style.setProperty("--spot-y", "50%");
-      target.style.setProperty("--media-shift-x", "0px");
-      target.style.setProperty("--media-shift-y", "0px");
-    };
-
-    motionTargets.forEach((target) => {
-      resetCardMotion(target);
-      const handlePointerMove = (event) => {
-        const rect = target.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-        const px = clamp((event.clientX - rect.left) / rect.width, 0, 1);
-        const py = clamp((event.clientY - rect.top) / rect.height, 0, 1);
-        const x = px - 0.5;
-        const y = py - 0.5;
-        target.style.setProperty("--card-ry", `${x * 7.5}deg`);
-        target.style.setProperty("--card-rx", `${-y * 5.5}deg`);
-        target.style.setProperty("--spot-x", `${px * 100}%`);
-        target.style.setProperty("--spot-y", `${py * 100}%`);
-        target.style.setProperty("--media-shift-x", `${-x * 10}px`);
-        target.style.setProperty("--media-shift-y", `${-y * 8}px`);
-      };
-      target.addEventListener("pointermove", handlePointerMove);
-      const handlePointerLeave = () => resetCardMotion(target);
-      target.addEventListener("pointerleave", handlePointerLeave);
-      disposers.push(() => {
-        target.removeEventListener("pointermove", handlePointerMove);
-        target.removeEventListener("pointerleave", handlePointerLeave);
-        resetCardMotion(target);
-      });
-    });
-
-    if (heroStage) {
-      const resetStageMotion = () => {
-        heroStage.style.setProperty("--hero-rx", "0deg");
-        heroStage.style.setProperty("--hero-ry", "0deg");
-        heroStage.style.setProperty("--stage-shift-x", "0px");
-        heroStage.style.setProperty("--stage-shift-y", "0px");
-        heroStage.style.setProperty("--stage-spot-x", "50%");
-        heroStage.style.setProperty("--stage-spot-y", "48%");
-      };
-      const handleStagePointerMove = (event) => {
-        const rect = heroStage.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-        const px = clamp((event.clientX - rect.left) / rect.width, 0, 1);
-        const py = clamp((event.clientY - rect.top) / rect.height, 0, 1);
-        const x = px - 0.5;
-        const y = py - 0.5;
-        heroStage.style.setProperty("--hero-ry", `${x * 3.2}deg`);
-        heroStage.style.setProperty("--hero-rx", `${-y * 2.4}deg`);
-        heroStage.style.setProperty("--stage-shift-x", `${x * 12}px`);
-        heroStage.style.setProperty("--stage-shift-y", `${y * 10}px`);
-        heroStage.style.setProperty("--stage-spot-x", `${px * 100}%`);
-        heroStage.style.setProperty("--stage-spot-y", `${py * 100}%`);
-      };
-      resetStageMotion();
-      heroStage.addEventListener("pointermove", handleStagePointerMove);
-      heroStage.addEventListener("pointerleave", resetStageMotion);
-      disposers.push(() => {
-        heroStage.removeEventListener("pointermove", handleStagePointerMove);
-        heroStage.removeEventListener("pointerleave", resetStageMotion);
-        resetStageMotion();
-      });
-    }
-
-    return () => disposers.forEach((dispose) => dispose());
-  }, [isLoading, visualFilter, visibleVideoCount, visibleVisualCount]);
 
   useEffect(() => {
     if (IS_EDITOR_MODE) return undefined;
@@ -4923,6 +4849,7 @@ function App() {
     { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
   ];
   const capabilityHighlights = HOMEPAGE_CURATION.capabilityCards;
+  const capabilityIconNames = ["Sparkles", "Grid", "Play", "Settings2", "Maximize2", "Sliders"];
 
   const isWorkflowSlide = (slide) => slide?.type === "workflow-diagram";
   const isMediaCuratedHidden = (media) => normalizeMediaItem(media)?.curatedHidden === true;
@@ -5549,20 +5476,21 @@ function App() {
     </div>;
   };
 
-  const renderSkillGroupCard = (group) => <article key={group.title} className="curated-skill-card">
+  const renderSkillGroupCard = (group) => <MotionArticle key={group.title} reducedMotion={reduceHomeMotion} className="curated-skill-card">
     <h3>{group.title}</h3>
     <p>{group.description}</p>
     <div>
       {group.items.map((item) => <span key={group.title + "-" + item}>{item}</span>)}
     </div>
-  </article>;
+  </MotionArticle>;
 
   const renderCapabilityCard = (item, index) => {
     const relatedEntry = item.previewItem || buildHomepageCuratedItem(item.workId, "capability", index);
     const preview = relatedEntry ? buildVisualWorkDetail(relatedEntry, index) : null;
-    return <article key={item.title} className="curated-capability-card" data-curation-section="capability" data-curation-id={preview?.curation?.id || item.workId} data-curation-category={preview?.curation?.category || ""} data-curation-kind={preview?.kind || ""} tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)}>
+    return <MotionArticle key={item.title} reducedMotion={reduceHomeMotion} className="curated-capability-card" data-curation-section="capability" data-curation-id={preview?.curation?.id || item.workId} data-curation-category={preview?.curation?.category || ""} data-curation-kind={preview?.kind || ""} tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)}>
       {preview ? renderCuratedMediaBox(preview.entry, preview.mediaEntry, { compact: true, disableInlinePreview: true, label: preview.title, key: item.title }) : <div className="curated-capability-placeholder"><Icon name="Sparkles" size={22} /></div>}
       <div className="curated-capability-copy">
+        <div className="curated-capability-icon"><Icon name={capabilityIconNames[index % capabilityIconNames.length]} size={18} /></div>
         <span>{String(index + 1).padStart(2, "0")}</span>
         <h3>{item.title}</h3>
         <p>{item.description}</p>
@@ -5570,7 +5498,7 @@ function App() {
           {item.tags.map((tag) => <span key={item.title + "-" + tag}>{tag}</span>)}
         </div>
       </div>
-    </article>;
+    </MotionArticle>;
   };
 
   const renderVideoWorkCard = (item, index) => {
@@ -5580,7 +5508,7 @@ function App() {
       return null;
     }
     const detail = buildVideoWorkDetail(item, index);
-    return <article key={detail.id} className="curated-video-card" data-curation-section="video-featured" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
+    return <MotionArticle key={detail.id} reducedMotion={reduceHomeMotion} className="curated-video-card" data-curation-section="video-featured" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title })}
       <div className="curated-video-copy">
         <span>{detail.label}</span>
@@ -5596,7 +5524,7 @@ function App() {
         </div>
         <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看详情</button>
       </div>
-    </article>;
+    </MotionArticle>;
   };
 
   const renderFeaturedCaseCard = (service, index) => {
@@ -5608,7 +5536,7 @@ function App() {
     const coverTarget = { type: "case-cover", caseId: caseItem.id, label: `${caseItem.title} 封面`, accept: "image" };
     const coverTargetKey = getCuratedDropTargetKey(coverTarget);
     const coverInputId = `curated-case-cover-${caseItem.id}`;
-    return <article key={caseItem.id} id={"case-" + caseItem.id} className="curated-case-card" data-curation-section="commercial-case" data-curation-id={caseItem.id} data-curation-category={service.curation?.category || caseItem.category} data-curation-kind={caseClassification.kind === "video" ? "video" : "case"} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
+    return <MotionArticle key={caseItem.id} reducedMotion={reduceHomeMotion} id={"case-" + caseItem.id} className="curated-case-card" data-curation-section="commercial-case" data-curation-id={caseItem.id} data-curation-category={service.curation?.category || caseItem.category} data-curation-kind={caseClassification.kind === "video" ? "video" : "case"} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
       <div
         className={cx(
           "curated-case-cover",
@@ -5651,7 +5579,7 @@ function App() {
           <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>打开详情</button>
         </div>
       </div>
-    </article>;
+    </MotionArticle>;
   };
 
   const renderVisualIndexCard = (item, index) => {
@@ -5661,7 +5589,7 @@ function App() {
       return null;
     }
     const detail = buildVisualWorkDetail(item, index);
-    return <article key={detail.id} className="curated-visual-card" data-curation-section="gallery" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
+    return <MotionArticle key={detail.id} reducedMotion={reduceHomeMotion} className="curated-visual-card" data-curation-section="gallery" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title })}
       <div className="curated-visual-copy">
         <span>{detail.label}</span>
@@ -5672,7 +5600,7 @@ function App() {
         </div>
         <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看详情</button>
       </div>
-    </article>;
+    </MotionArticle>;
   };
 
   const renderWorkflowEvidenceCard = (item, index) => {
@@ -5682,7 +5610,7 @@ function App() {
       return null;
     }
     const detail = buildWorkflowEvidenceDetail(item, index);
-    return <article key={detail.id} className="curated-workflow-card" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
+    return <MotionArticle key={detail.id} reducedMotion={reduceHomeMotion} className="curated-workflow-card" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title })}
       <div className="curated-workflow-copy">
         <span>{detail.label}</span>
@@ -5692,7 +5620,7 @@ function App() {
           {detail.workflowSteps.slice(0, 5).map((step) => <strong key={detail.id + "-" + step}>{step}</strong>)}
         </div>
       </div>
-    </article>;
+    </MotionArticle>;
   };
 
   const renderDetailMedia = (item) => {
@@ -5951,7 +5879,12 @@ function App() {
 
   const renderCuratedTopbar = () => {
     const progressWidth = Math.round(scrollProgress * 100) + "%";
-    return <div className="curated-topbar">
+    const topbarMotionProps = reduceHomeMotion ? {} : {
+      initial: { opacity: 0, y: -16 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] }
+    };
+    return <motion.div className={cx("curated-topbar", scrollProgress > 0.015 && "is-scrolled")} {...topbarMotionProps}>
       <div className="curated-topbar-inner">
         <a href="#home" className="curated-brand" onClick={(event) => handleCuratedAnchorClick(event, "home")}>张玮<span /></a>
         <nav>
@@ -5964,7 +5897,7 @@ function App() {
         </nav>
       </div>
       <div className="curated-scroll-progress"><span style={{ width: progressWidth }} /></div>
-    </div>;
+    </motion.div>;
   };
 
   const renderHeroKineticStage = (heroDetail, stageItems) => {
@@ -6081,7 +6014,8 @@ function App() {
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
       {renderCuratedLayoutStyles()}
-      <section id="home" className="curated-hero" style={publishedSectionStyle}>
+      {renderCuratedTopbar()}
+      <MotionSection id="home" className="curated-hero" style={publishedSectionStyle} reducedMotion={reduceHomeMotion} variants={heroMotionVariants}>
         <div className="portfolio-container curated-hero-container">
           <div className="curated-hero-copy">
             <h1>{heroTitle}</h1>
@@ -6101,9 +6035,9 @@ function App() {
             {curatedStats.map((item) => <div key={item.label}><span>{item.label}</span><strong>{item.value}</strong></div>)}
           </div>
         </div>
-      </section>
+      </MotionSection>
 
-      <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
+      <MotionSection id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle} reducedMotion={reduceHomeMotion}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(1, "视频精选")}
           <div className="curated-section-heading">
@@ -6112,9 +6046,9 @@ function App() {
           </div>
           <div className="curated-video-grid">{visibleVideoEntries.map(renderVideoWorkCard)}</div>
         </div>
-      </section>
+      </MotionSection>
 
-      <section id="cases" className="curated-section" style={publishedSectionStyle}>
+      <MotionSection id="cases" className="curated-section" style={publishedSectionStyle} reducedMotion={reduceHomeMotion}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(2, "精选案例")}
           <div className="curated-section-heading">
@@ -6123,9 +6057,9 @@ function App() {
           </div>
           <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
         </div>
-      </section>
+      </MotionSection>
 
-      <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
+      <MotionSection id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle} reducedMotion={reduceHomeMotion}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(3, "能力矩阵")}
           <div className="curated-section-heading">
@@ -6134,9 +6068,9 @@ function App() {
           </div>
           <div className="curated-capability-grid">{homepageCapabilityCards.map(renderCapabilityCard)}</div>
         </div>
-      </section>
+      </MotionSection>
 
-      <section id="gallery" className="curated-section curated-section-selected" style={publishedSectionStyle}>
+      <MotionSection id="gallery" className="curated-section curated-section-selected" style={publishedSectionStyle} reducedMotion={reduceHomeMotion}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(4, "视觉精选")}
           <div className="curated-section-heading">
@@ -6146,14 +6080,22 @@ function App() {
           <div className="curated-filter-bar">
             {visualFilters.map((filter) => <button key={filter.id} type="button" onClick={() => setVisualFilter(filter.id)} className={visualFilter === filter.id ? "is-active" : ""}>{filter.label}</button>)}
           </div>
-          <div className="curated-visual-grid">{visibleVisualEntries.map(renderVisualIndexCard)}</div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={visualFilter}
+              className="curated-visual-grid"
+              {...(reduceHomeMotion ? {} : filterMotionVariants)}
+            >
+              {visibleVisualEntries.map(renderVisualIndexCard)}
+            </motion.div>
+          </AnimatePresence>
           <div className="curated-load-more curated-load-more-static">
             <span>首页手动精选 {visibleVisualEntries.length} / {HOMEPAGE_CURATION.visualGalleryIds.length}</span>
           </div>
         </div>
-      </section>
+      </MotionSection>
 
-      <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
+      <MotionSection id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle} reducedMotion={reduceHomeMotion}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(5, "创作流程")}
           <div className="curated-section-heading">
@@ -6161,13 +6103,13 @@ function App() {
             <p>从 Brief 到交付，把生成、控制、筛选、ComfyUI 精修和后期整理拆成可说明、可复用的工作步骤。</p>
           </div>
           <div className="curated-process-grid">
-            {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
+            {processSteps.map((step, stepIndex) => <MotionArticle key={step.title} reducedMotion={reduceHomeMotion} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></MotionArticle>)}
           </div>
           <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>
         </div>
-      </section>
+      </MotionSection>
 
-      <section id="contact" className="curated-contact" style={publishedSectionStyle}>
+      <MotionSection id="contact" className="curated-contact" style={publishedSectionStyle} reducedMotion={reduceHomeMotion}>
         <div className="portfolio-container curated-contact-container">
           <div>
             <h2>联系我</h2>
@@ -6180,7 +6122,7 @@ function App() {
             })}
           </div>
         </div>
-      </section>
+      </MotionSection>
       {renderWorkDetailDrawer()}
       {renderMediaReplacementDialog()}
       {renderCuratedAdminDock()}
