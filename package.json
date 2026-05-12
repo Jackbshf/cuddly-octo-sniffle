@@ -7,6 +7,8 @@
     "sync:portfolio": "node scripts/sync-portfolio-json.mjs",
     "sync:stream": "node scripts/media/sync-cloudflare-stream.mjs",
     "prepare:static": "node scripts/prepare-static.mjs",
+    "deploy:worker": "wrangler deploy --config wrangler.jsonc --assets=./dist",
+    "deploy:worker:version": "wrangler versions upload --config wrangler.jsonc --assets=./dist",
     "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
     "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",
     "validate:prompts": "node scripts/prompts/validate-general-prompts.mjs"
@@ -21,6 +23,7 @@
   "devDependencies": {
     "esbuild": "0.25.4",
     "playwright": "^1.59.1",
-    "tailwindcss": "3.4.17"
+    "tailwindcss": "3.4.17",
+    "wrangler": "4.88.0"
   }
 }

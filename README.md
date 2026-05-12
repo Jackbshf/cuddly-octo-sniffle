@@ -79,6 +79,7 @@ Portfolio CMS 默认复用同一组 owner/repo/branch。必要时也可以额外
 ```powershell
 npm ci
 npm run prepare:static
+npm run deploy:worker
 ```
 
 构建会生成 `dist/`，并复制 `admin/`、`prompts/`、`prompts-data/`、`data/`、`images/` 和 `videos/`。
@@ -89,3 +90,16 @@ npm run prepare:static
 2. 提交并推送到 `main`。
 3. GitHub Actions 安装依赖、同步 Stream manifest、生成静态包、写入 Worker secrets 并部署 Worker。
 4. 部署后公开站点和两个后台入口都会读取最新代码。
+
+如果使用 Cloudflare Workers Builds 控制台部署，构建命令必须先生成 `dist/`，部署命令必须显式带上配置和静态资源目录：
+
+```bash
+npm ci && npm run prepare:static
+npm run deploy:worker
+```
+
+非生产版本上传可使用：
+
+```bash
+npm run deploy:worker:version
+```
