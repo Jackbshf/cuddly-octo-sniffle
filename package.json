@@ -8,6 +8,7 @@
     "sync:stream": "node scripts/media/sync-cloudflare-stream.mjs",
     "prepare:static": "node scripts/prepare-static.mjs",
     "deploy:worker": "wrangler deploy --config wrangler.jsonc --assets=./dist",
+    "deploy:preview": "wrangler deploy --config wrangler.jsonc --assets=./dist --name floral-leaf-4e44-preview",
     "deploy:worker:version": "wrangler versions upload --config wrangler.jsonc --assets=./dist",
     "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
     "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",

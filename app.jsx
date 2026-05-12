@@ -35,15 +35,15 @@ const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_
 
 const DEFAULT_SITE_META = {
   siteTitle: "张玮｜AIGC 视觉作品集",
-  siteDescription: "张玮的 AIGC 商业视觉作品集，展示图像生成、视频制作、电商产品图、品牌海报、短视频素材与创作流程。",
+  siteDescription: "张玮的 AIGC 视觉作品集，展示商业视觉、AI 视频、产品主图、品牌海报与 ComfyUI 工作流能力。",
   siteKeywords: ["AIGC", "作品集", "图像生成", "AI 视频制作", "商业视觉", "电商产品图", "品牌海报", "短视频素材"],
   canonicalUrl: "https://www.zhangweivisual.cn/",
   ogTitle: "张玮｜AIGC 视觉作品集",
-  ogDescription: "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
+  ogDescription: "AIGC Visual Designer 作品集，覆盖商业视觉、AI 视频与 ComfyUI Workflow。",
   ogImage: "images/generated/celestial-whale-city.webp",
   twitterCard: "summary_large_image",
   caseSectionTitle: "商业视觉案例",
-  caseSectionDesc: "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
+  caseSectionDesc: "精选能够说明产品主图、包装视觉、品牌空间和风格控制能力的项目。",
   contactSectionTitle: "联系我",
   contactSectionDesc: "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
   formspreeEndpoint: "",
@@ -68,7 +68,7 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "world",
     label: "首页主视觉",
     title: "世界观视觉：云鲸未来城市主视觉",
-    description: "用单张完整场景图承接首屏视觉，不再使用拼接图或工作板作为 Hero 主图。",
+    description: "用完整场景图建立首屏记忆点，展示场景概念、空间叙事和画面完成度。",
     tags: ["世界观视觉", "场景概念", "首页主视觉"],
     media: {
       kind: "image",
@@ -77,9 +77,9 @@ const HOMEPAGE_CURATED_WORKS = {
       alt: "云鲸未来城市单张世界观主视觉"
     },
     detailRows: [
-      { label: "展示目的", value: "首页单张主视觉" },
+      { label: "展示目的", value: "首页主视觉" },
       { label: "证明内容", value: "场景概念、空间叙事、完成度控制" },
-      { label: "放置原则", value: "只服务首屏，不重复进入商业案例或 Gallery" }
+      { label: "适用场景", value: "品牌视觉、概念海报、作品集首屏" }
     ]
   },
   "video-product-shot": {
@@ -172,13 +172,13 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "product",
     label: "商业案例 01",
     title: "产品广告视觉：黑色耳机新品图",
-    description: "用完整耳机产品图呈现结构、材质和新品发布主视觉。",
+    description: "用暗调耳机产品图呈现结构、材质和新品发布主视觉。",
     tags: ["产品广告", "新品发布", "材质光影"],
     tools: ["ComfyUI", "ControlNet", "Photoshop"],
     media: {
       kind: "image",
-      url: "images/curated/commercial-earbuds-launch.webp",
-      fullUrl: "images/curated/commercial-earbuds-launch.webp",
+      url: "images/curated/gpt-image2-commercial-earbuds.webp",
+      fullUrl: "images/curated/gpt-image2-commercial-earbuds.webp",
       alt: "黑色无线耳机新品发布产品广告主图"
     },
     detailRows: [
@@ -200,13 +200,13 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "beauty",
     label: "商业案例 02",
     title: "美妆视觉案例：粉底液直播场景",
-    description: "用真人出镜和产品持握画面，展示美妆直播与社媒主图。",
+    description: "用达人出镜、补光镜和产品展示画面，匹配美妆直播与社媒主图。",
     tags: ["美妆视觉", "直播场景", "产品主图"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
-      url: "images/curated/beauty-live-demo.webp",
-      fullUrl: "images/curated/beauty-live-demo.webp",
+      url: "images/curated/gpt-image2-beauty-demo.webp",
+      fullUrl: "images/curated/gpt-image2-beauty-demo.webp",
       alt: "美妆达人展示粉底液的商业直播主视觉"
     },
     detailRows: [
@@ -227,27 +227,55 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "brand",
     label: "商业案例 03",
-    title: "品牌空间视觉：未来城市场景",
-    description: "用单张城市世界观图，承接品牌空间、海报和场景包装。",
-    tags: ["品牌空间", "场景包装", "世界观视觉"],
+    title: "品牌空间视觉：冰蓝未来城场景",
+    description: "用冰蓝建筑、远景人物和空间纵深承接品牌空间、海报和场景包装。",
+    tags: ["品牌空间", "场景包装", "冷调世界观"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
-      url: "images/curated/cyber-city-world.webp",
-      fullUrl: "images/curated/cyber-city-world.webp",
-      alt: "未来城市品牌空间场景主视觉"
+      url: "images/curated/gpt-image2-ice-city-world.webp",
+      fullUrl: "images/curated/gpt-image2-ice-city-world.webp",
+      alt: "冰蓝未来城市品牌空间场景主视觉"
     },
     detailRows: [
       { label: "项目类型", value: "品牌空间 / 世界观视觉" },
       { label: "我的职责", value: "空间氛围、主视觉生成、品牌延展整理" },
       { label: "工具链", value: "Midjourney / Photoshop / 版式整理" },
       { label: "交付物", value: "空间主视觉、海报延展、场景概念图" },
-      { label: "商业价值", value: "把场景图转成可用于品牌包装的资产。" }
+      { label: "商业价值", value: "把完整场景图转成可用于品牌空间包装的视觉资产。" }
     ],
     results: [
       { label: "输出内容", value: "品牌空间主视觉" },
       { label: "能力重点", value: "场景与调性" },
       { label: "使用场景", value: "品牌海报 / 空间包装" }
+    ]
+  },
+  "case-fragrance-packaging": {
+    id: "case-fragrance-packaging",
+    kind: "case",
+    category: "product",
+    label: "商业案例 04",
+    title: "包装视觉案例：香氛礼盒主图",
+    description: "用礼盒结构、暗调光影和产品陈列呈现包装视觉与节日礼赠场景。",
+    tags: ["包装视觉", "香氛礼盒", "商业主图"],
+    tools: ["Midjourney", "Photoshop", "版式整理"],
+    media: {
+      kind: "image",
+      url: "images/works/giftbox/poster.webp",
+      fullUrl: "images/works/giftbox/poster.webp",
+      alt: "暗调香氛礼盒包装商业主图"
+    },
+    detailRows: [
+      { label: "项目类型", value: "包装视觉 / 礼赠主图" },
+      { label: "我的职责", value: "礼盒结构、产品陈列、光影气质整理" },
+      { label: "工具链", value: "Midjourney / Photoshop / 版式整理" },
+      { label: "交付物", value: "包装主图、节日礼盒海报、社媒封面" },
+      { label: "商业价值", value: "让产品层级、包装质感和礼赠氛围在首图中同时成立。" }
+    ],
+    results: [
+      { label: "输出内容", value: "礼盒包装主图" },
+      { label: "能力重点", value: "产品层级与材质" },
+      { label: "使用场景", value: "礼赠海报 / 产品页" }
     ]
   },
   "capability-product-foundation": {
@@ -260,8 +288,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["产品广告", "包装视觉", "冰感材质"],
     media: {
       kind: "image",
-      url: "images/curated/beverage-ice-packshot.webp",
-      fullUrl: "images/curated/beverage-ice-packshot.webp",
+      url: "images/curated/gpt-image2-ice-beverage-cans.webp",
+      fullUrl: "images/curated/gpt-image2-ice-beverage-cans.webp",
       alt: "冰感饮品包装广告产品主图"
     },
     detailRows: [
@@ -280,8 +308,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["广告关键帧", "镜头参考", "产品主图"],
     media: {
       kind: "image",
-      url: "images/curated/cosmetic-foundation-silk.webp",
-      fullUrl: "images/curated/cosmetic-foundation-silk.webp",
+      url: "images/curated/gpt-image2-foundation-silk.webp",
+      fullUrl: "images/curated/gpt-image2-foundation-silk.webp",
       alt: "粉底液丝缎材质广告关键帧主图"
     },
     detailRows: [
@@ -300,8 +328,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["AI 人像", "数字人", "角色一致性"],
     media: {
       kind: "image",
-      url: "images/curated/portrait-black-jacket.webp",
-      fullUrl: "images/curated/portrait-black-jacket.webp",
+      url: "images/curated/gpt-image2-black-portrait.webp",
+      fullUrl: "images/curated/gpt-image2-black-portrait.webp",
       alt: "黑色西装女性商业肖像数字人主图"
     },
     detailRows: [
@@ -320,8 +348,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["东方美学", "场景概念", "世界观"],
     media: {
       kind: "image",
-      url: "images/curated/oriental-whale-world.webp",
-      fullUrl: "images/curated/oriental-whale-world.webp",
+      url: "images/curated/gpt-image2-whale-world.webp",
+      fullUrl: "images/curated/gpt-image2-whale-world.webp",
       alt: "东方云海城邦与巨鲸世界观场景"
     },
     detailRows: [
@@ -335,19 +363,19 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "image",
     category: "brand",
     label: "品牌空间视觉",
-    title: "品牌空间视觉：城市地标场景",
-    description: "用城市地标和空间尺度包装品牌主视觉。",
-    tags: ["品牌空间", "场景包装", "城市地标"],
+    title: "品牌空间视觉：智能音箱展台",
+    description: "用科技产品、光带展台和空间纵深包装品牌主视觉。",
+    tags: ["品牌空间", "科技产品", "展台视觉"],
     media: {
       kind: "image",
-      url: "images/curated/brand-city-panorama.webp",
-      fullUrl: "images/curated/brand-city-panorama.webp",
-      alt: "城市地标品牌空间场景主视觉"
+      url: "images/curated/gpt-image2-smart-speaker-stage.webp",
+      fullUrl: "images/curated/gpt-image2-smart-speaker-stage.webp",
+      alt: "智能音箱科技展台品牌空间主视觉"
     },
     detailRows: [
       { label: "能力方向", value: "品牌空间视觉" },
-      { label: "证明内容", value: "城市尺度、空间氛围、品牌场景" },
-      { label: "输出场景", value: "空间海报 / 地产视觉" }
+      { label: "证明内容", value: "科技产品、展台光效、品牌场景" },
+      { label: "输出场景", value: "新品发布 / 空间海报" }
     ]
   },
   "capability-retouch": {
@@ -360,8 +388,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["产品精修", "材质光影", "美妆主图"],
     media: {
       kind: "image",
-      url: "images/curated/lipstick-red-packshot.webp",
-      fullUrl: "images/curated/lipstick-red-packshot.webp",
+      url: "images/curated/gpt-image2-red-lipstick-packshot.webp",
+      fullUrl: "images/curated/gpt-image2-red-lipstick-packshot.webp",
       alt: "红色唇膏和丝缎材质产品精修主图"
     },
     detailRows: [
@@ -375,80 +403,204 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "image",
     category: "product",
     label: "饮品产品视觉",
-    title: "产品广告视觉：冰川饮品包装",
-    description: "蓝色饮品罐的包装视觉、冰感材质和社媒主图。",
-    tags: ["饮品广告", "包装视觉", "产品主图"],
-    media: { kind: "image", url: "images/works/drink/poster.webp", fullUrl: "images/works/drink/poster.webp", alt: "蓝色冰川饮品产品广告主图" }
+    title: "产品广告视觉：蓝色能量饮品",
+    description: "蓝色罐体、水花和冷光环境共同突出清爽卖点。",
+    tags: ["饮品广告", "冰感材质", "产品主图"],
+    media: { kind: "image", url: "images/curated/gpt-image2-blue-can-energy.webp", fullUrl: "images/curated/gpt-image2-blue-can-energy.webp", alt: "蓝色能量饮品冰感产品广告主图" }
   },
   "gallery-portal": {
     id: "gallery-portal",
     kind: "image",
-    category: "world",
-    label: "场景概念",
-    title: "场景概念视觉：蓝色时空之门",
-    description: "以蓝色传送门和空间透视呈现科幻场景概念。",
-    tags: ["场景概念", "科幻空间", "世界观"],
-    media: { kind: "image", url: "images/works/portal/poster.webp", fullUrl: "images/works/portal/poster.webp", alt: "蓝色时空之门科幻场景概念" }
+    category: "product",
+    label: "香氛产品视觉",
+    title: "产品广告视觉：琥珀香氛瓶",
+    description: "暖色香氛瓶、金属装饰和暗调光影形成高端产品氛围。",
+    tags: ["香氛广告", "暖调光影", "产品主图"],
+    media: { kind: "image", url: "images/curated/gpt-image2-amber-bottle.webp", fullUrl: "images/curated/gpt-image2-amber-bottle.webp", alt: "琥珀香氛瓶高端产品广告主图" }
   },
   "gallery-lipstick": {
     id: "gallery-lipstick",
     kind: "image",
     category: "product",
-    label: "美妆产品视觉",
-    title: "产品广告视觉：霓光唇膏海报",
-    description: "唇膏主体、霓虹光影和高端美妆海报表达。",
-    tags: ["美妆广告", "商业海报", "产品视觉"],
-    media: { kind: "image", url: "images/works/lipstick/poster.webp", fullUrl: "images/works/lipstick/poster.webp", alt: "高端唇膏产品广告海报" }
+    label: "户外饮品视觉",
+    title: "产品广告视觉：山景饮品海报",
+    description: "饮品罐与山景日落结合，适合户外生活方式广告。",
+    tags: ["饮品广告", "户外场景", "商业海报"],
+    media: { kind: "image", url: "images/curated/gpt-image2-mountain-can.webp", fullUrl: "images/curated/gpt-image2-mountain-can.webp", alt: "山景饮品罐户外商业广告海报" }
   },
   "gallery-beauty-live": {
     id: "gallery-beauty-live",
     kind: "image",
-    category: "portrait",
-    label: "直播商业视觉",
-    title: "AI 人像 / 数字人：美妆直播间视觉",
-    description: "人物、产品和直播间氛围共同服务美妆内容营销。",
-    tags: ["AI 人像", "直播间", "内容营销"],
-    media: { kind: "image", url: "images/works/beauty-live/poster.webp", fullUrl: "images/works/beauty-live/poster.webp", alt: "美妆直播间人物与产品商业视觉" }
+    category: "product",
+    label: "瓶装水产品视觉",
+    title: "产品广告视觉：城市水瓶主图",
+    description: "透明瓶身、城市天际线和清透光感对应饮品广告场景。",
+    tags: ["饮品广告", "城市场景", "产品主图"],
+    media: { kind: "image", url: "images/curated/gpt-image2-skyline-water-bottle.webp", fullUrl: "images/curated/gpt-image2-skyline-water-bottle.webp", alt: "城市天际线瓶装水产品广告主图" }
   },
   "gallery-giftbox": {
     id: "gallery-giftbox",
     kind: "image",
     category: "product",
-    label: "包装商业视觉",
-    title: "产品广告视觉：东方礼盒包装",
-    description: "红金礼盒的包装主视觉、节庆氛围和品牌宣传图。",
-    tags: ["包装视觉", "礼盒海报", "品牌宣传"],
-    media: { kind: "image", url: "images/works/giftbox/poster.webp", fullUrl: "images/works/giftbox/poster.webp", alt: "东方礼盒包装商业视觉" }
+    label: "清爽饮品视觉",
+    title: "产品广告视觉：青柠气泡水",
+    description: "青柠、水花和透明瓶身组合，突出清爽口味和轻盈质感。",
+    tags: ["饮品广告", "青柠风味", "产品主图"],
+    media: { kind: "image", url: "images/curated/gpt-image2-lime-sparkling-bottle.webp", fullUrl: "images/curated/gpt-image2-lime-sparkling-bottle.webp", alt: "青柠气泡水清爽产品广告主图" }
   },
   "gallery-whale": {
     id: "gallery-whale",
     kind: "image",
-    category: "world",
-    label: "世界观视觉",
-    title: "世界观视觉：云鲸未来城市",
-    description: "用巨鲸、云端城市和宏大空间建立未来叙事场景。",
-    tags: ["世界观", "场景概念", "数字艺术"],
-    media: { kind: "image", url: "images/works/whale/poster.webp", fullUrl: "images/works/whale/poster.webp", alt: "云鲸未来城市世界观视觉" }
+    category: "portrait",
+    label: "商业人像视觉",
+    title: "AI 人像视觉：黑裙礼服海报",
+    description: "黑色礼服、酒店走廊和暖色光源形成商务活动人像。",
+    tags: ["AI 人像", "礼服海报", "商业肖像"],
+    media: { kind: "image", url: "images/curated/gpt-image2-black-dress-portrait.webp", fullUrl: "images/curated/gpt-image2-black-dress-portrait.webp", alt: "黑裙礼服女性商业人像海报" }
   },
   "gallery-monkey": {
     id: "gallery-monkey",
     kind: "image",
     category: "portrait",
     label: "角色视觉",
-    title: "角色视觉：悟空神话主视觉",
-    description: "东方神话角色的电影感海报，不作为产品或数字人案例混用。",
-    tags: ["角色视觉", "东方神话", "电影感"],
-    media: { kind: "image", url: "images/works/monkey/poster.webp", fullUrl: "images/works/monkey/poster.webp", alt: "悟空东方神话角色主视觉" }
+    title: "角色视觉：月夜城市人物",
+    description: "月夜、城市灯火和披风人物形成电影感角色主视觉。",
+    tags: ["角色视觉", "电影感", "夜景海报"],
+    media: { kind: "image", url: "images/curated/gpt-image2-moonlit-character-scene.webp", fullUrl: "images/curated/gpt-image2-moonlit-character-scene.webp", alt: "月夜城市人物电影感角色主视觉" }
   },
   "gallery-cybercity": {
     id: "gallery-cybercity",
     kind: "image",
-    category: "world",
-    label: "场景概念",
-    title: "场景概念视觉：赛博城市街景",
-    description: "以霓虹街区、城市纵深和冷色科技氛围构建单张场景概念图。",
-    tags: ["场景概念", "赛博城市", "世界观"],
-    media: { kind: "image", url: "images/works/cybercity/poster.webp", fullUrl: "images/works/cybercity/poster.webp", alt: "赛博城市街景场景概念单图" }
+    category: "portrait",
+    label: "商业人像视觉",
+    title: "AI 人像视觉：白色礼服海报",
+    description: "白色礼服、干净背景和高挑姿态适合作为时尚人像展示。",
+    tags: ["AI 人像", "时尚海报", "商业肖像"],
+    media: { kind: "image", url: "images/curated/gpt-image2-white-dress-portrait.webp", fullUrl: "images/curated/gpt-image2-white-dress-portrait.webp", alt: "白色礼服女性商业人像海报" }
+  },
+  "gallery-beverage-packshot": {
+    id: "gallery-beverage-packshot",
+    kind: "image",
+    category: "product",
+    label: "饮品产品视觉",
+    title: "产品广告视觉：冰感饮品主图",
+    description: "罐体、冰块和冷光环境强化产品清爽感，适合饮品广告和电商主图。",
+    tags: ["饮品广告", "冰感包装", "产品主图"],
+    media: { kind: "image", url: "images/curated/beverage-ice-packshot.webp", fullUrl: "images/curated/beverage-ice-packshot.webp", alt: "冰感饮品包装产品广告主图" }
+  },
+  "gallery-brand-city": {
+    id: "gallery-brand-city",
+    kind: "image",
+    category: "brand",
+    label: "品牌空间视觉",
+    title: "品牌空间视觉：未来城市远景",
+    description: "城市尺度、冷光建筑和空间纵深适合品牌视觉、展览海报和场景包装。",
+    tags: ["品牌空间", "未来城市", "场景海报"],
+    media: { kind: "image", url: "images/curated/brand-city-panorama.webp", fullUrl: "images/curated/brand-city-panorama.webp", alt: "未来城市品牌空间远景海报" }
+  },
+  "gallery-cosmetic-silk": {
+    id: "gallery-cosmetic-silk",
+    kind: "image",
+    category: "product",
+    label: "美妆产品视觉",
+    title: "产品广告视觉：丝缎粉底液",
+    description: "柔光、丝缎和瓶身高光突出美妆产品的质感和精致度。",
+    tags: ["美妆广告", "粉底液", "材质光影"],
+    media: { kind: "image", url: "images/curated/cosmetic-foundation-silk.webp", fullUrl: "images/curated/cosmetic-foundation-silk.webp", alt: "丝缎粉底液美妆产品广告主图" }
+  },
+  "gallery-earbuds-launch": {
+    id: "gallery-earbuds-launch",
+    kind: "image",
+    category: "product",
+    label: "科技产品视觉",
+    title: "产品广告视觉：耳机新品发布",
+    description: "深色背景和产品高光突出科技新品的结构、质感和发布氛围。",
+    tags: ["科技产品", "耳机广告", "新品发布"],
+    media: { kind: "image", url: "images/curated/commercial-earbuds-launch.webp", fullUrl: "images/curated/commercial-earbuds-launch.webp", alt: "黑色无线耳机新品发布广告主图" }
+  },
+  "workflow-proof-overview": {
+    id: "workflow-proof-overview",
+    kind: "workflow",
+    category: "workflow",
+    label: "工作流证明 01",
+    title: "ComfyUI 工作流：节点总览",
+    description: "展示从素材输入、结构控制到结果筛选的节点编排能力。",
+    tags: ["ComfyUI Workflow", "节点编排", "流程总览"],
+    media: {
+      kind: "image",
+      url: "images/curated/workflow-proof-01-overview.webp",
+      fullUrl: "images/curated/workflow-proof-01-overview.webp",
+      alt: "ComfyUI 节点工作流总览截图"
+    },
+    detailRows: [
+      { label: "流程路径", value: "输入素材 -> 节点编排 -> 多版本输出" },
+      { label: "能力体现", value: "把参考图、控制节点和输出结果组织成可复用链路。" },
+      { label: "最终用途", value: "用于面试说明生成流程、节点控制和作品整理方式。" }
+    ],
+    workflowSteps: ["输入素材", "节点编排", "多版本输出"]
+  },
+  "workflow-proof-control-chain": {
+    id: "workflow-proof-control-chain",
+    kind: "workflow",
+    category: "workflow",
+    label: "工作流证明 02",
+    title: "ComfyUI 工作流：人物与遮罩控制",
+    description: "展示人物参考、遮罩处理和局部调整在同一链路中的组织方式。",
+    tags: ["人物控制", "Mask", "局部修正"],
+    media: {
+      kind: "image",
+      url: "images/curated/workflow-proof-02-control-chain.webp",
+      fullUrl: "images/curated/workflow-proof-02-control-chain.webp",
+      alt: "人物参考和遮罩控制 ComfyUI 工作流截图"
+    },
+    detailRows: [
+      { label: "流程路径", value: "人物参考 -> 遮罩控制 -> 局部修正" },
+      { label: "能力体现", value: "通过分区处理保持人物主体、服装和背景关系稳定。" },
+      { label: "最终用途", value: "用于人像、数字人和角色视觉的可控生成说明。" }
+    ],
+    workflowSteps: ["人物参考", "遮罩控制", "局部修正"]
+  },
+  "workflow-proof-style-variation": {
+    id: "workflow-proof-style-variation",
+    kind: "workflow",
+    category: "workflow",
+    label: "工作流证明 03",
+    title: "ComfyUI 工作流：风格与场景变化",
+    description: "展示在同一流程中进行场景参考、风格变化和结果对照。",
+    tags: ["风格控制", "场景参考", "结果对照"],
+    media: {
+      kind: "image",
+      url: "images/curated/workflow-proof-03-style-variation.webp",
+      fullUrl: "images/curated/workflow-proof-03-style-variation.webp",
+      alt: "场景参考和风格变化 ComfyUI 工作流截图"
+    },
+    detailRows: [
+      { label: "流程路径", value: "场景参考 -> 参数调节 -> 结果对照" },
+      { label: "能力体现", value: "通过多版本对照判断构图、光影和风格稳定性。" },
+      { label: "最终用途", value: "用于品牌空间、世界观视觉和海报风格探索。" }
+    ],
+    workflowSteps: ["场景参考", "参数调节", "结果对照"]
+  },
+  "workflow-proof-delivery-review": {
+    id: "workflow-proof-delivery-review",
+    kind: "workflow",
+    category: "workflow",
+    label: "工作流证明 04",
+    title: "ComfyUI 工作流：筛选与交付整理",
+    description: "展示将多轮生成结果整理成可复盘、可讲解的作品证据。",
+    tags: ["结果筛选", "交付整理", "复盘说明"],
+    media: {
+      kind: "image",
+      url: "images/curated/workflow-proof-04-delivery-review.webp",
+      fullUrl: "images/curated/workflow-proof-04-delivery-review.webp",
+      alt: "多版本生成结果筛选与交付整理工作流截图"
+    },
+    detailRows: [
+      { label: "流程路径", value: "多版本生成 -> 筛选标记 -> 输出整理" },
+      { label: "能力体现", value: "把生成结果转化为能解释决策过程的面试作品证据。" },
+      { label: "最终用途", value: "用于说明从过程到作品集展示的整理能力。" }
+    ],
+    workflowSteps: ["多版本生成", "筛选标记", "输出整理"]
   },
   "gallery-video-d9": {
     id: "gallery-video-d9",
@@ -456,10 +608,10 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：人物口播节奏",
-    description: "人物口播类短视频入口，显示视频封面、时长和可播放状态。",
-    tags: ["商业短视频", "口播", "可播放"],
-    media: { kind: "video", url: "videos/d9c14d8520e106a0803087b55aaea7ad.mp4", poster: "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp", alt: "人物口播商业短视频封面" }
+    title: "美妆产品短片：粉底液质感镜头",
+    description: "粉底液瓶身在大理石台面上的近景展示，重点呈现产品材质和柔光质感。",
+    tags: ["美妆产品", "粉底液", "可播放"],
+    media: { kind: "video", url: "videos/d9c14d8520e106a0803087b55aaea7ad.mp4", poster: "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp", alt: "粉底液产品质感短视频封面" }
   },
   "gallery-video-a6537": {
     id: "gallery-video-a6537",
@@ -467,10 +619,10 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：产品卖点节奏",
-    description: "用于社媒投放的产品卖点短视频片段。",
-    tags: ["产品短视频", "卖点节奏", "可播放"],
-    media: { kind: "video", url: "videos/a6537e213935b778ba57eade8bbf142a.mp4", poster: "images/_posters/a6537e213935b778ba57eade8bbf142a.webp", alt: "产品卖点商业短视频封面" }
+    title: "直播短视频：饮品带货口播",
+    description: "主播出镜展示桌面饮品，适合作为直播切片和社媒转化素材。",
+    tags: ["直播口播", "饮品展示", "可播放"],
+    media: { kind: "video", url: "videos/a6537e213935b778ba57eade8bbf142a.mp4", poster: "images/_posters/a6537e213935b778ba57eade8bbf142a.webp", alt: "饮品直播带货口播短视频封面" }
   },
   "gallery-video-a0": {
     id: "gallery-video-a0",
@@ -478,10 +630,10 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：信息流广告片段",
-    description: "信息流广告素材入口，明确标记为可播放视频。",
-    tags: ["信息流广告", "短视频", "可播放"],
-    media: { kind: "video", url: "videos/a0e8e242e241cb0c0033bddea568b644.mp4", poster: "images/_posters/a0e8e242e241cb0c0033bddea568b644.webp", alt: "信息流广告短视频封面" }
+    title: "美妆产品短片：粉底液瓶身展示",
+    description: "粉底液瓶身横向近景，适合产品详情页、开屏短片和信息流素材。",
+    tags: ["粉底液", "产品展示", "可播放"],
+    media: { kind: "video", url: "videos/a0e8e242e241cb0c0033bddea568b644.mp4", poster: "images/_posters/a0e8e242e241cb0c0033bddea568b644.webp", alt: "粉底液瓶身展示短视频封面" }
   },
   "gallery-video-voice": {
     id: "gallery-video-voice",
@@ -489,10 +641,10 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：产品配音素材",
-    description: "产品讲解配音与视频片段配套展示。",
-    tags: ["产品配音", "短视频", "可播放"],
-    media: { kind: "video", url: "videos/1774080806307.mp4", poster: "images/_posters/1774080806307.webp", alt: "产品配音短视频封面" }
+    title: "萌系角色短片：庭院美食镜头",
+    description: "卡通角色在庭院餐桌前用餐，适合作为轻剧情、表情和生活方式短视频素材。",
+    tags: ["角色短片", "美食场景", "可播放"],
+    media: { kind: "video", url: "videos/1774080806307.mp4", poster: "images/_posters/1774080806307.webp", alt: "萌系角色庭院美食短视频封面" }
   },
   "gallery-video-prompt": {
     id: "gallery-video-prompt",
@@ -500,10 +652,10 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：提示词方案演示",
-    description: "用于说明短视频提示词与镜头方案的可播放素材。",
-    tags: ["视频方案", "镜头提示词", "可播放"],
-    media: { kind: "video", url: "videos/10s AIGC视频提示词方案.mp4", poster: "images/_posters/10s AIGC视频提示词方案.webp", alt: "AIGC 视频提示词方案演示封面" }
+    title: "国风细节短片：发饰近景镜头",
+    description: "玉石发饰与发丝细节的近景展示，适合古风角色、饰品和材质细节素材。",
+    tags: ["国风发饰", "细节镜头", "可播放"],
+    media: { kind: "video", url: "videos/10s AIGC视频提示词方案.mp4", poster: "images/_posters/10s AIGC视频提示词方案.webp", alt: "国风发饰细节短视频封面" }
   },
   "gallery-video-51339": {
     id: "gallery-video-51339",
@@ -511,10 +663,10 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：产品展示片段",
-    description: "商品展示类短视频入口，封面与标题都围绕产品展示。",
-    tags: ["产品展示", "短视频", "可播放"],
-    media: { kind: "video", url: "videos/51339bc463f2bb227aef56406ae9f0ac.mp4", poster: "images/_posters/51339bc463f2bb227aef56406ae9f0ac.webp", alt: "产品展示短视频封面" }
+    title: "珠宝香氛短片：蓝发人物海报",
+    description: "蓝发人物与金色饰品的高端广告画面，适合珠宝、香氛和时尚海报动效。",
+    tags: ["珠宝香氛", "时尚海报", "可播放"],
+    media: { kind: "video", url: "videos/51339bc463f2bb227aef56406ae9f0ac.mp4", poster: "images/_posters/51339bc463f2bb227aef56406ae9f0ac.webp", alt: "蓝发人物珠宝香氛短视频封面" }
   },
   "gallery-video-food": {
     id: "gallery-video-food",
@@ -522,8 +674,8 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "商业短视频：空气炸锅食物广告",
-    description: "食品与小家电广告片段，明确作为可播放商业短视频。",
+    title: "食品广告短片：空气炸锅鸡翅",
+    description: "空气炸锅中食物加热冒汽的近景片段，适合小家电和食品广告素材。",
     tags: ["食品广告", "小家电", "可播放"],
     media: { kind: "video", url: "videos/commercial-air-fryer-wings.mp4", poster: "images/_posters/commercial-air-fryer-wings.webp", alt: "空气炸锅食物广告视频封面" }
   },
@@ -537,12 +689,20 @@ const HOMEPAGE_CURATION = {
     "video-product-shot",
     "video-social-series",
     "video-digital-human",
-    "video-packaging-motion"
+    "video-packaging-motion",
+    "gallery-video-d9",
+    "gallery-video-a6537",
+    "gallery-video-a0",
+    "gallery-video-voice",
+    "gallery-video-prompt",
+    "gallery-video-51339",
+    "gallery-video-food"
   ],
   commercialImageCaseIds: [
     "case-product-ad",
     "case-beauty-live",
-    "case-brand-space"
+    "case-brand-space",
+    "case-fragrance-packaging"
   ],
   commercialVideoCaseIds: [],
   capabilityCards: [
@@ -578,8 +738,8 @@ const HOMEPAGE_CURATION = {
       key: "brand-space",
       title: "品牌空间视觉",
       workId: "capability-brand-space",
-      description: "用城市地标和空间尺度包装品牌主视觉。",
-      tags: ["品牌空间", "场景包装", "城市地标"]
+      description: "用科技展台和产品光效包装品牌主视觉。",
+      tags: ["品牌空间", "科技产品", "展台视觉"]
     },
     {
       key: "product-retouch",
@@ -592,12 +752,23 @@ const HOMEPAGE_CURATION = {
   visualGalleryIds: [
     "gallery-drink",
     "gallery-portal",
+    "gallery-lipstick",
     "gallery-beauty-live",
     "gallery-giftbox",
     "gallery-whale",
-    "gallery-monkey"
+    "gallery-monkey",
+    "gallery-cybercity",
+    "gallery-beverage-packshot",
+    "gallery-brand-city",
+    "gallery-cosmetic-silk",
+    "gallery-earbuds-launch"
   ],
-  workflowEvidenceIds: []
+  workflowEvidenceIds: [
+    "workflow-proof-overview",
+    "workflow-proof-control-chain",
+    "workflow-proof-style-variation",
+    "workflow-proof-delivery-review"
+  ]
 };
 
 const colorPalettes = [
@@ -608,7 +779,156 @@ const colorPalettes = [
   { id: "amber", a: "bg-amber-600/20", b: "bg-red-600/15", c: "bg-orange-600/20", line: "bg-amber-500/50", text: "text-amber-100/60" }
 ];
 
+const HOMEPAGE_FONT_PRESETS = [
+  { id: "system", label: "系统清爽", css: 'Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+  { id: "editorial", label: "杂志标题", css: 'Georgia, "Songti SC", "SimSun", "PingFang SC", serif' },
+  { id: "condensed", label: "窄体展览", css: '"Arial Narrow", "Roboto Condensed", "PingFang SC", "Microsoft YaHei", sans-serif' },
+  { id: "mono", label: "工业等宽", css: '"SFMono-Regular", Consolas, "Liberation Mono", "PingFang SC", monospace' }
+];
+
+const HOMEPAGE_COLOR_PRESETS = [
+  {
+    id: "cyan-amber",
+    label: "冷青 / 金色",
+    swatches: ["#66d9ff", "#e3c979", "#07121b"],
+    style: {
+      "--portfolio-accent": "#66d9ff",
+      "--portfolio-border": "rgba(120, 210, 255, 0.14)",
+      "--curated-accent": "#66d9ff",
+      "--curated-accent-2": "#e3c979",
+      "--curated-border": "rgba(120, 210, 255, 0.14)",
+      "--curated-cyan": "#8ee8ff",
+      "--curated-gold": "#e3c979",
+      "--curated-line-strong": "rgba(120, 210, 255, 0.28)",
+      "--curated-card-bg": "linear-gradient(180deg, rgba(12, 30, 44, 0.94), rgba(5, 14, 22, 0.96))",
+      "--curated-card-bg-strong": "linear-gradient(180deg, rgba(15, 38, 54, 0.96), rgba(7, 18, 28, 0.98))"
+    }
+  },
+  {
+    id: "jade-crimson",
+    label: "青玉 / 绯红",
+    swatches: ["#48d8c6", "#b94131", "#09120f"],
+    style: {
+      "--portfolio-accent": "#48d8c6",
+      "--portfolio-border": "rgba(72, 216, 198, 0.16)",
+      "--curated-accent": "#48d8c6",
+      "--curated-accent-2": "#b94131",
+      "--curated-border": "rgba(72, 216, 198, 0.16)",
+      "--curated-cyan": "#82f1e3",
+      "--curated-gold": "#e0b277",
+      "--curated-line-strong": "rgba(72, 216, 198, 0.3)",
+      "--curated-card-bg": "linear-gradient(180deg, rgba(13, 32, 29, 0.94), rgba(6, 14, 13, 0.96))",
+      "--curated-card-bg-strong": "linear-gradient(180deg, rgba(18, 45, 40, 0.96), rgba(7, 18, 16, 0.98))"
+    }
+  },
+  {
+    id: "white-coral",
+    label: "白光 / 珊瑚",
+    swatches: ["#f8fbff", "#ff8a7a", "#111318"],
+    style: {
+      "--portfolio-accent": "#f8fbff",
+      "--portfolio-border": "rgba(255, 138, 122, 0.16)",
+      "--curated-accent": "#f8fbff",
+      "--curated-accent-2": "#ff8a7a",
+      "--curated-border": "rgba(255, 138, 122, 0.16)",
+      "--curated-cyan": "#bfefff",
+      "--curated-gold": "#ffbd8a",
+      "--curated-line-strong": "rgba(255, 138, 122, 0.3)",
+      "--curated-card-bg": "linear-gradient(180deg, rgba(29, 31, 38, 0.94), rgba(10, 12, 16, 0.97))",
+      "--curated-card-bg-strong": "linear-gradient(180deg, rgba(38, 40, 48, 0.96), rgba(15, 17, 22, 0.98))"
+    }
+  },
+  {
+    id: "ink-lime",
+    label: "墨黑 / 荧绿",
+    swatches: ["#b8ff6d", "#5bd8ff", "#050806"],
+    style: {
+      "--portfolio-accent": "#b8ff6d",
+      "--portfolio-border": "rgba(184, 255, 109, 0.15)",
+      "--curated-accent": "#b8ff6d",
+      "--curated-accent-2": "#5bd8ff",
+      "--curated-border": "rgba(184, 255, 109, 0.15)",
+      "--curated-cyan": "#8ee8ff",
+      "--curated-gold": "#d4ff8a",
+      "--curated-line-strong": "rgba(184, 255, 109, 0.26)",
+      "--curated-card-bg": "linear-gradient(180deg, rgba(18, 31, 18, 0.94), rgba(6, 10, 7, 0.97))",
+      "--curated-card-bg-strong": "linear-gradient(180deg, rgba(25, 44, 24, 0.96), rgba(8, 14, 9, 0.98))"
+    }
+  }
+];
+
+const HOMEPAGE_RADIUS_PRESETS = [
+  { id: "sharp", label: "硬朗", value: "8px" },
+  { id: "soft", label: "柔和", value: "14px" },
+  { id: "poster", label: "海报", value: "22px" }
+];
+
+const HOMEPAGE_DENSITY_PRESETS = [
+  { id: "compact", label: "紧凑", sectionPadding: "clamp(48px, 5.6vw, 78px)", headingGap: "18px", cardGap: "12px" },
+  { id: "comfortable", label: "常规", sectionPadding: "clamp(62px, 7vw, 104px)", headingGap: "26px", cardGap: "18px" },
+  { id: "spacious", label: "留白", sectionPadding: "clamp(78px, 8.4vw, 126px)", headingGap: "34px", cardGap: "24px" }
+];
+
+const HOMEPAGE_ELEMENT_STYLE_PRESETS = [
+  { id: "default", label: "默认" },
+  { id: "featured", label: "重点" },
+  { id: "quiet", label: "低调" },
+  { id: "compact", label: "紧凑" }
+];
+
+const getPresetById = (presets, presetId, fallbackId) => presets.find((preset) => preset.id === presetId) || presets.find((preset) => preset.id === fallbackId) || presets[0];
+
+const normalizeHomepageDesignerTheme = (theme = {}) => ({
+  fontPreset: getPresetById(HOMEPAGE_FONT_PRESETS, theme?.fontPreset, "system").id,
+  colorPreset: getPresetById(HOMEPAGE_COLOR_PRESETS, theme?.colorPreset, "cyan-amber").id,
+  radiusPreset: getPresetById(HOMEPAGE_RADIUS_PRESETS, theme?.radiusPreset, "soft").id,
+  densityPreset: getPresetById(HOMEPAGE_DENSITY_PRESETS, theme?.densityPreset, "comfortable").id
+});
+
+const getHomepageDesignerThemeStyle = (theme = {}) => {
+  const normalized = normalizeHomepageDesignerTheme(theme);
+  const font = getPresetById(HOMEPAGE_FONT_PRESETS, normalized.fontPreset, "system");
+  const color = getPresetById(HOMEPAGE_COLOR_PRESETS, normalized.colorPreset, "cyan-amber");
+  const radius = getPresetById(HOMEPAGE_RADIUS_PRESETS, normalized.radiusPreset, "soft");
+  const density = getPresetById(HOMEPAGE_DENSITY_PRESETS, normalized.densityPreset, "comfortable");
+  return {
+    "--curated-font-family": font.css,
+    "--portfolio-radius-card": radius.value,
+    "--curated-radius": radius.value,
+    "--curated-section-padding": density.sectionPadding,
+    "--curated-heading-gap": density.headingGap,
+    "--curated-card-gap": density.cardGap,
+    ...color.style
+  };
+};
+
 const cx = (...classNames) => classNames.filter(Boolean).join(" ");
+
+const normalizeRepoMediaPath = (value = "") => String(value || "")
+  .trim()
+  .replace(/^https?:\/\/www\.zhangweivisual\.cn\//i, "")
+  .replace(/^\/+/, "")
+  .replace(/\\/g, "/")
+  .split(/[?#]/)[0];
+
+const parseDesignerTags = (value = "") => String(value || "")
+  .split(/[,，、/]/)
+  .map((item) => item.trim())
+  .filter(Boolean);
+const reportIgnoredError = (error) => {
+  if (error && typeof console !== "undefined") console.warn("[portfolio-nonblocking]", error);
+};
+const parseDesignerDetailRows = (value = "") => String(value || "")
+  .split(/\r?\n/)
+  .map((line) => {
+    const [label, ...rest] = line.split(/[:：]/);
+    return { label: String(label || "").trim(), value: rest.join("：").trim() };
+  })
+  .filter((row) => row.label || row.value);
+const formatDesignerDetailRows = (rows = []) => (Array.isArray(rows) ? rows : [])
+  .map((row) => `${row?.label || ""}：${row?.value || ""}`.trim())
+  .filter(Boolean)
+  .join("\n");
 const deepClone = (value) => JSON.parse(JSON.stringify(value));
 const ensureString = (value, fallback = "") => typeof value === "string" ? value : fallback;
 const ensureStringArray = (value) => Array.isArray(value) ? value.map((item) => String(item ?? "").trim()).filter(Boolean) : [];
@@ -1133,7 +1453,7 @@ const warmVideoSourceInBackground = async (src, signal) => {
     } finally {
       reader.releaseLock?.();
     }
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
 };
 
 const getViewportOrientation = () => {
@@ -1190,14 +1510,14 @@ const rememberInlineAudioPreference = (nextMuted) => {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(INLINE_AUDIO_PREFERENCE_KEY, nextMuted ? "muted" : "audible");
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
 };
 
 const markInlineAudioUnlocked = () => {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(INLINE_AUDIO_SESSION_KEY, "1");
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
 };
 
 const hasUnlockedInlineAudio = () => {
@@ -1226,7 +1546,7 @@ const setInlineVideoMutedState = (video, nextMuted, onMutedChange) => {
     video.defaultMuted = nextMuted;
     video.muted = nextMuted;
     if (!nextMuted) video.volume = 1;
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
   if (typeof onMutedChange === "function") onMutedChange(nextMuted);
 };
 
@@ -1278,7 +1598,7 @@ const attemptInlineVideoPlayback = (video, options = {}) => {
   if (video.readyState < 2 && !isManagedHlsVideo(video)) {
     try {
       video.load();
-    } catch (error) {}
+    } catch (error) { reportIgnoredError(error); }
   }
   if (preferAudible) {
     return playInlineVideoAudible(video, onMutedChange).then((playedAudible) => {
@@ -1298,7 +1618,7 @@ const stopInlineVideoPlayback = (video, options = {}) => {
     const resetTime = () => {
       try {
         video.currentTime = 0;
-      } catch (error) {}
+      } catch (error) { reportIgnoredError(error); }
     };
     if (video.readyState >= 1) resetTime();
     else video.addEventListener("loadedmetadata", resetTime, { once: true });
@@ -1337,7 +1657,7 @@ const ensureVideoPreloadHint = (src, priority = "auto") => {
   let absoluteUrl = src;
   try {
     absoluteUrl = new URL(src, window.location.href).toString();
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
   if (!isHlsManifestUrl(absoluteUrl)) return;
   try {
     const origin = new URL(absoluteUrl).origin;
@@ -1349,7 +1669,7 @@ const ensureVideoPreloadHint = (src, priority = "auto") => {
       document.head.appendChild(preconnectLink);
       videoPreconnectHintMap.set(origin, preconnectLink);
     }
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
   let link = videoPreloadHintMap.get(absoluteUrl);
   if (!link) {
     link = document.createElement("link");
@@ -1636,7 +1956,7 @@ const probeUrl = async (url) => {
   try {
     const response = await fetch(url, { method: "HEAD", cache: "no-store" });
     if (response.ok) return true;
-  } catch (error) {}
+  } catch (error) { reportIgnoredError(error); }
 
   try {
     const response = await fetch(url, { cache: "no-store" });
@@ -2274,6 +2594,22 @@ function App() {
   const [pageJumpValue, setPageJumpValue] = useState("1");
   const [showStructureEditor, setShowStructureEditor] = useState(false);
   const [showCuratedManager, setShowCuratedManager] = useState(false);
+  const [selectedDesignerId, setSelectedDesignerId] = useState("section:home");
+  const [showAssetManager, setShowAssetManager] = useState(false);
+  const [assetManagerTarget, setAssetManagerTarget] = useState(null);
+  const [assetLibrary, setAssetLibrary] = useState([]);
+  const [assetLibraryBranch, setAssetLibraryBranch] = useState("");
+  const [assetLibraryStatus, setAssetLibraryStatus] = useState("");
+  const [assetFilter, setAssetFilter] = useState("uploaded");
+  const [assetSearch, setAssetSearch] = useState("");
+  const [isAssetLibraryLoading, setIsAssetLibraryLoading] = useState(false);
+  const [deletingAssetPath, setDeletingAssetPath] = useState("");
+  const [adminCapabilities, setAdminCapabilities] = useState(null);
+  const [adminCapabilityStatus, setAdminCapabilityStatus] = useState("");
+  const [isCapabilitiesLoading, setIsCapabilitiesLoading] = useState(false);
+  const [assetDiagnostics, setAssetDiagnostics] = useState(null);
+  const [isApplyingAsset, setIsApplyingAsset] = useState(false);
+  const [deploymentStatus, setDeploymentStatus] = useState(null);
   const [metaEditorValue, setMetaEditorValue] = useState("");
   const [metaEditorError, setMetaEditorError] = useState("");
   const [casesEditorValue, setCasesEditorValue] = useState("");
@@ -2298,6 +2634,7 @@ function App() {
   const currentSlideRef = useRef(0);
   const inlinePreviewRegistryRef = useRef(new Map());
   const activeInlinePreviewOwnerRef = useRef("");
+  const deploymentPollTimerRef = useRef(null);
   const currentTheme = colorPalettes[currentSlide % colorPalettes.length] || colorPalettes[0];
   const slidesData = portfolioData.slides;
   const casesData = portfolioData.cases;
@@ -2315,9 +2652,16 @@ function App() {
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
   const useGalleryWorldHome = false;
+  const assetCapabilities = adminCapabilities?.capabilities?.assets || {};
+  const deploymentCapabilities = adminCapabilities?.capabilities?.deployment || {};
+  const canListAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.list === true;
+  const canWriteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.upload === true && assetCapabilities.replace === true;
+  const canDeleteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.delete === true;
+  const assetCapabilityReason = assetCapabilities.reason || adminCapabilityStatus || "Asset tools are not ready yet.";
 
   const curatedNavItems = [
     { id: "home", label: "首页" },
+    { id: "featured", label: "入口" },
     { id: "videos", label: "视频" },
     { id: "cases", label: "案例" },
     { id: "capabilities", label: "能力" },
@@ -2369,6 +2713,99 @@ function App() {
     ...prev,
     meta: typeof updater === "function" ? updater(prev.meta) : updater
   }));
+
+  const describeDeployment = (deployment) => {
+    if (!deployment) return "";
+    if (deployment.available === false) return deployment.error || "Deployment status is unavailable.";
+    if (deployment.status === "completed") {
+      return deployment.conclusion === "success"
+        ? `Deployment succeeded${deployment.runNumber ? `: #${deployment.runNumber}` : ""}.`
+        : `Deployment finished with ${deployment.conclusion || "unknown result"}${deployment.runNumber ? `: #${deployment.runNumber}` : ""}.`;
+    }
+    if (deployment.status === "not_found") return deployment.message || "Deployment run has not appeared yet.";
+    return `Deployment ${deployment.status || "pending"}${deployment.runNumber ? `: #${deployment.runNumber}` : ""}.`;
+  };
+
+  const pollDeploymentStatus = (commit, attempt = 0) => {
+    if (!commit || !deploymentCapabilities.status) return;
+    if (deploymentPollTimerRef.current) {
+      window.clearTimeout(deploymentPollTimerRef.current);
+      deploymentPollTimerRef.current = null;
+    }
+    const delay = attempt === 0 ? 2500 : Math.min(12000, 3500 + attempt * 1500);
+    deploymentPollTimerRef.current = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/portfolio-admin/deployment-status?commit=${encodeURIComponent(commit)}`, { cache: "no-store" });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) throw new Error(data.error || `Deployment status failed: ${response.status}`);
+        setDeploymentStatus(data.deployment || null);
+        const description = describeDeployment(data.deployment);
+        if (description) setStatusMessage(description);
+        const finished = data.deployment?.status === "completed" || attempt >= 10;
+        if (!finished) pollDeploymentStatus(commit, attempt + 1);
+      } catch (error) {
+        const message = error?.message || "Deployment status failed.";
+        setDeploymentStatus({ available: false, error: message, commit });
+        setStatusMessage(message);
+      }
+    }, delay);
+  };
+
+  const applyPublishResult = (data, model) => {
+    if (!data?.ok || !data.commit) {
+      throw new Error(data?.error || "GitHub save did not return a commit.");
+    }
+    if (model) {
+      const normalized = createPortfolioModel(model);
+      setPublishedPortfolioData(deepClone(normalized));
+      setPortfolioData(deepClone(normalized));
+    }
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setLoadSource("published");
+    setDeploymentStatus(data.deployment || { commit: data.commit, status: "queued" });
+    const deploymentText = describeDeployment(data.deployment);
+    setStatusMessage(`Saved to GitHub: ${data.commit.slice(0, 7)}${deploymentText ? `; ${deploymentText}` : "; waiting for deployment."}`);
+    pollDeploymentStatus(data.commit);
+  };
+
+  const loadAdminCapabilities = async (options = {}) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || isCapabilitiesLoading) return null;
+    setIsCapabilitiesLoading(true);
+    setAdminCapabilityStatus("Checking admin capabilities...");
+    try {
+      const endpoint = options.diagnostics ? "/api/portfolio-admin/assets/diagnostics" : "/api/portfolio-admin/capabilities";
+      const response = await fetch(endpoint, { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `Capability check failed: ${response.status}`);
+      setAdminCapabilities(data);
+      if (options.diagnostics) setAssetDiagnostics(data);
+      const assetReason = data.capabilities?.assets?.reason || "";
+      setAdminCapabilityStatus(data.ready ? "Admin tools ready." : (assetReason || "Admin tools are not ready."));
+      return data;
+    } catch (error) {
+      const message = error?.message || "Capability check failed.";
+      setAdminCapabilityStatus(message);
+      setAdminCapabilities({
+        ok: false,
+        ready: false,
+        capabilities: {
+          assets: { list: false, upload: false, delete: false, replace: false, reason: message },
+          deployment: { status: false, reason: message }
+        }
+      });
+      return null;
+    } finally {
+      setIsCapabilitiesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return undefined;
+    loadAdminCapabilities();
+    return () => {
+      if (deploymentPollTimerRef.current) window.clearTimeout(deploymentPollTimerRef.current);
+    };
+  }, []);
 
   const setSlideSectionRef = (index, node) => {
     if (node) slideSectionRefs.current.set(index, node);
@@ -3130,9 +3567,107 @@ function App() {
     setStatusMessage("已新增占位卡片，请替换媒体并补充说明。");
   };
 
+  const getHomepageDesignerState = (model = portfolioData) => {
+    const meta = normalizeSiteMeta(model?.meta);
+    const designer = meta.homepageDesigner && typeof meta.homepageDesigner === "object" ? meta.homepageDesigner : {};
+    return {
+      ...designer,
+      sections: designer.sections && typeof designer.sections === "object" ? designer.sections : {},
+      works: designer.works && typeof designer.works === "object" ? designer.works : {},
+      theme: normalizeHomepageDesignerTheme(designer.theme)
+    };
+  };
+
+  const cleanDesignerWorkPatch = (patch = {}) => {
+    const next = { ...patch };
+    if (next.media) next.media = normalizeMediaItem(next.media);
+    if (next.tags !== undefined) next.tags = ensureStringArray(next.tags);
+    if (next.detailRows !== undefined) {
+      next.detailRows = Array.isArray(next.detailRows)
+        ? next.detailRows.map((row) => ({ label: ensureString(row?.label), value: ensureString(row?.value) })).filter((row) => row.label || row.value)
+        : [];
+    }
+    Object.keys(next).forEach((key) => {
+      if (next[key] === undefined) delete next[key];
+    });
+    return next;
+  };
+
+  const replaceHomepageWorkInPortfolioModel = (model, workId, patch) => {
+    const next = createPortfolioModel(model);
+    const meta = normalizeSiteMeta(next.meta);
+    const designer = getHomepageDesignerState(next);
+    const works = { ...designer.works };
+    works[workId] = cleanDesignerWorkPatch({
+      ...(works[workId] && typeof works[workId] === "object" ? works[workId] : {}),
+      ...patch
+    });
+    next.meta = {
+      ...meta,
+      homepageDesigner: {
+        ...designer,
+        works
+      }
+    };
+    return next;
+  };
+
+  const updateHomepageDesignerWork = (workId, patch) => {
+    if (!workId) return;
+    setPortfolioData((current) => replaceHomepageWorkInPortfolioModel(current, workId, patch));
+    setLoadSource("draft");
+    setStatusMessage("已更新后台设计器草稿，保存后才会上线。");
+  };
+
+  const updateHomepageDesignerSection = (sectionId, patch) => {
+    if (!sectionId) return;
+    setPortfolioData((current) => {
+      const next = createPortfolioModel(current);
+      const meta = normalizeSiteMeta(next.meta);
+      const designer = getHomepageDesignerState(next);
+      const sections = { ...designer.sections };
+      sections[sectionId] = {
+        ...(sections[sectionId] && typeof sections[sectionId] === "object" ? sections[sectionId] : {}),
+        ...patch
+      };
+      next.meta = {
+        ...meta,
+        homepageDesigner: {
+          ...designer,
+          sections
+        }
+      };
+      return next;
+    });
+    setLoadSource("draft");
+    setStatusMessage("已更新页面文案草稿，保存后才会上线。");
+  };
+
+  const updateHomepageDesignerTheme = (patch) => {
+    setPortfolioData((current) => {
+      const next = createPortfolioModel(current);
+      const meta = normalizeSiteMeta(next.meta);
+      const designer = getHomepageDesignerState(next);
+      next.meta = {
+        ...meta,
+        homepageDesigner: {
+          ...designer,
+          theme: normalizeHomepageDesignerTheme({
+            ...designer.theme,
+            ...patch
+          })
+        }
+      };
+      return next;
+    });
+    setLoadSource("draft");
+    setStatusMessage("已更新全站设计预设，保存后才会上线。");
+  };
+
   const getCuratedDropTargetKey = (target = {}) => [
     target.type,
     target.slideId || "",
+    target.workId || "",
     target.slotIndex ?? "",
     target.caseId || "",
     target.elementId || ""
@@ -3140,6 +3675,9 @@ function App() {
 
   const replaceMediaInPortfolioModel = (model, target, replacement) => {
     const next = createPortfolioModel(model);
+    if (target.type === "homepage-work") {
+      return replaceHomepageWorkInPortfolioModel(next, target.workId, { media: replacement });
+    }
     if (target.type === "case-cover") {
       next.cases = next.cases.map((caseItem) => caseItem.id === target.caseId
         ? { ...caseItem, cover: replacement.url || replacement.fullUrl || caseItem.cover }
@@ -3222,11 +3760,7 @@ function App() {
         throw new Error(data.error || `保存失败：${response.status}`);
       }
 
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
-      setPublishedPortfolioData(deepClone(exportModel));
-      setPortfolioData(deepClone(exportModel));
-      setLoadSource("published");
-      setStatusMessage(`已保存 data/portfolio.json 到 GitHub${data.commit ? `：${data.commit.slice(0, 7)}` : ""}，等待 Actions 自动部署。`);
+      applyPublishResult(data, exportModel);
       return data;
     } catch (error) {
       const messageText = error?.message || "GitHub 保存失败。";
@@ -3255,10 +3789,43 @@ function App() {
     };
   };
 
+  const replacePortfolioMediaOnServer = async (target, asset, options = {}) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) throw new Error("Portfolio admin mode is required.");
+    if (!canWriteAssets) throw new Error(assetCapabilityReason || "Asset replacement is not available.");
+    if (!target || !asset) throw new Error("Replacement target and asset are required.");
+    setIsApplyingAsset(true);
+    setAssetLibraryStatus("Saving replacement to GitHub...");
+    try {
+      const response = await fetch("/api/portfolio-admin/media-replacement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target,
+          asset,
+          message: options.message || `Replace portfolio media ${target.label || ""}`.trim()
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `Replacement failed: ${response.status}`);
+      applyPublishResult(data, data.portfolio);
+      setAssetLibraryStatus(`Saved replacement: ${data.commit ? data.commit.slice(0, 7) : "no commit"}`);
+      return data;
+    } finally {
+      setIsApplyingAsset(false);
+    }
+  };
+
   const requestMediaReplacement = (file, target) => {
     if (!file) return;
     if (!IS_PORTFOLIO_ADMIN_MODE) {
       setStatusMessage("请在 /admin 登录后拖拽上传，公开页不会启用上传。");
+      return;
+    }
+    if (!canWriteAssets) {
+      const message = assetCapabilityReason || "Upload replacement is not available.";
+      window.alert(message);
+      setStatusMessage(message);
+      loadAdminCapabilities({ diagnostics: true });
       return;
     }
     const kind = getFileMediaKind(file);
@@ -3295,12 +3862,11 @@ function App() {
         width: measured.width,
         height: measured.height
       });
-      const replacement = buildReplacementMediaFromUpload(upload, pending.file, measured);
-      const nextModel = replaceMediaInPortfolioModel(portfolioData, pending.target, replacement);
-      setPortfolioData(deepClone(nextModel));
-      setLoadSource("draft");
-      setStatusMessage(`已替换到本地草稿：${pending.target.label || pending.file.name}。确认无误后再点击保存到代码仓库发布。`);
+      await replacePortfolioMediaOnServer(pending.target, upload, {
+        message: `Upload and replace portfolio media ${pending.target.label || pending.file.name}`
+      });
       setPendingMediaReplacement(null);
+      loadPortfolioAssets();
       if (pending.previewUrl) URL.revokeObjectURL(pending.previewUrl);
     } catch (error) {
       setStatusMessage(error?.message || "媒体替换失败，已保留原作品数据。");
@@ -3409,12 +3975,18 @@ function App() {
     if (!IS_PORTFOLIO_ADMIN_MODE || isPublishingPortfolio) return;
     try {
       await publishPortfolioModel(portfolioData, "Update portfolio JSON");
-    } catch (error) {}
+    } catch (error) {
+      setStatusMessage(error?.message || "Portfolio publish failed.");
+    }
   };
 
   const uploadPortfolioFile = async (file, options = {}) => {
     if (!IS_PORTFOLIO_ADMIN_MODE) {
       throw new Error("只有 /admin 登录后的后台可以上传并写入仓库。");
+    }
+    if (!canWriteAssets) {
+      await loadAdminCapabilities({ diagnostics: true });
+      throw new Error(assetCapabilityReason || "Upload is not available.");
     }
     if (!file) throw new Error("请选择要上传的媒体文件。");
 
@@ -3434,6 +4006,144 @@ function App() {
       throw new Error(data.error || `上传失败：${response.status}`);
     }
     return data.upload;
+  };
+
+  const loadPortfolioAssets = async () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || isAssetLibraryLoading) return;
+    if (!canListAssets) {
+      const diagnostics = await loadAdminCapabilities({ diagnostics: true });
+      const reason = diagnostics?.capabilities?.assets?.reason || assetCapabilityReason;
+      setAssetLibraryStatus(`Asset library unavailable: ${reason}`);
+      setAssetDiagnostics(diagnostics);
+      return;
+    }
+    setIsAssetLibraryLoading(true);
+    setAssetLibraryStatus("正在读取 GitHub 素材库...");
+    try {
+      const response = await fetch("/api/portfolio-admin/assets", { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `读取失败：${response.status}`);
+      const assets = Array.isArray(data.assets) ? data.assets : [];
+      setAssetLibrary(assets);
+      setAssetLibraryBranch(data.branch || "");
+      setAssetLibraryStatus(`已载入 ${assets.length} 个素材，可直接选择替换。`);
+    } catch (error) {
+      const diagnostics = await loadAdminCapabilities({ diagnostics: true });
+      setAssetDiagnostics(diagnostics);
+      setAssetLibraryStatus(error?.message || "素材库读取失败。");
+    } finally {
+      setIsAssetLibraryLoading(false);
+    }
+  };
+
+  const openAssetManager = (target = null) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return;
+    setAssetManagerTarget(target);
+    setShowAssetManager(true);
+    setAssetFilter(target?.accept === "image" ? "image" : "uploaded");
+    if (!canListAssets) {
+      loadAdminCapabilities({ diagnostics: true });
+      setAssetLibraryStatus(`Asset library unavailable: ${assetCapabilityReason}`);
+      return;
+    }
+    if (!assetLibrary.length) loadPortfolioAssets();
+  };
+
+  const closeAssetManager = () => {
+    setShowAssetManager(false);
+    setAssetManagerTarget(null);
+  };
+
+  const copyAssetPath = async (asset) => {
+    const path = normalizeRepoMediaPath(asset?.path || asset?.url || "");
+    if (!path) return;
+    try {
+      await navigator.clipboard?.writeText(path);
+      setAssetLibraryStatus(`已复制素材路径：${path}`);
+    } catch {
+      window.prompt("复制素材路径", path);
+    }
+  };
+
+  const findPosterForVideoAsset = (assetPath) => {
+    const fileName = assetPath.split("/").pop() || "";
+    const baseName = fileName.replace(/\.[^.]+$/, "");
+    const posterPath = `images/_posters/${baseName}.webp`;
+    return assetLibrary.some((asset) => normalizeRepoMediaPath(asset.path) === posterPath) ? posterPath : "";
+  };
+
+  const buildReplacementMediaFromAsset = (asset, target) => {
+    const path = normalizeRepoMediaPath(asset?.path || "");
+    if (!path) throw new Error("素材路径无效。");
+    const kind = asset?.kind === "video" ? "video" : "image";
+    if (target?.accept === "image" && kind !== "image") {
+      throw new Error("这个位置只能使用图片素材。");
+    }
+    return {
+      kind,
+      url: path,
+      fullUrl: kind === "image" ? path : "",
+      poster: kind === "video" ? findPosterForVideoAsset(path) : "",
+      alt: asset?.name || target?.label || "作品素材",
+      label: asset?.name || path
+    };
+  };
+
+  const useAssetForTarget = async (asset) => {
+    if (!assetManagerTarget) {
+      copyAssetPath(asset);
+      return;
+    }
+
+    try {
+      await replacePortfolioMediaOnServer(assetManagerTarget, asset);
+      closeAssetManager();
+    } catch (error) {
+      window.alert(error?.message || "素材应用失败。");
+      setAssetLibraryStatus(error?.message || "素材应用失败。");
+    }
+  };
+
+  const deletePortfolioAsset = async (asset) => {
+    const path = normalizeRepoMediaPath(asset?.path || "");
+    if (!path || deletingAssetPath) return;
+    if (!canDeleteAssets) {
+      const message = assetCapabilityReason || "Asset deletion is not available.";
+      window.alert(message);
+      setAssetLibraryStatus(message);
+      return;
+    }
+    if (!asset?.canDelete) {
+      const references = Array.isArray(asset?.references) ? asset.references.map((item) => item.source).filter(Boolean) : [];
+      const reason = references.length
+        ? `这个素材仍被引用：\n${references.join("\n")}`
+        : "这里只允许删除 images/uploads/ 或 videos/uploads/ 下的未引用上传素材。";
+      window.alert(reason);
+      return;
+    }
+
+    const confirmed = window.confirm(`确认从代码仓库删除这个上传素材吗？\n\n${path}\n\n删除后无法在后台直接恢复。`);
+    if (!confirmed) return;
+
+    setDeletingAssetPath(path);
+    setAssetLibraryStatus(`正在删除 ${path}...`);
+    try {
+      const response = await fetch("/api/portfolio-admin/assets", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `删除失败：${response.status}`);
+      setAssetLibrary((items) => items.filter((item) => normalizeRepoMediaPath(item.path) !== path));
+      setAssetLibraryStatus(`已删除 ${path}${data.commit ? `：${data.commit.slice(0, 7)}` : ""}`);
+      setStatusMessage(`已删除上传素材：${path}。`);
+    } catch (error) {
+      window.alert(error?.message || "素材删除失败。");
+      setAssetLibraryStatus(error?.message || "素材删除失败。");
+    } finally {
+      setDeletingAssetPath("");
+    }
   };
 
   const importDraft = async (event) => {
@@ -4134,7 +4844,7 @@ function App() {
       if (nextPreload === "auto" && video.readyState < 1) {
         try {
           video.load();
-        } catch (error) {}
+        } catch (error) { reportIgnoredError(error); }
       }
     }, [directVideo, isInViewport, isNearViewport, shouldInlinePreviewPlay, showEditor, videoSource]);
 
@@ -4608,7 +5318,7 @@ function App() {
       if (nextPreload === "auto" && video.readyState < 1) {
         try {
           video.load();
-        } catch (error) {}
+        } catch (error) { reportIgnoredError(error); }
       }
     }, [directVideo, isInViewport, isNearViewport, shouldInlinePreviewPlay, showEditor, videoSource]);
 
@@ -5025,7 +5735,21 @@ function App() {
     const logger = level === "error" ? console.error : console.warn;
     logger("[homepage-curation]", message, payload || "");
   };
-  const getHomepageWork = (workId) => HOMEPAGE_CURATED_WORKS[workId] || null;
+  const getHomepageWork = (workId) => {
+    const base = HOMEPAGE_CURATED_WORKS[workId];
+    if (!base) return null;
+    const override = getHomepageDesignerState().works?.[workId];
+    if (!override || typeof override !== "object") return base;
+    return {
+      ...base,
+      ...override,
+      tags: override.tags !== undefined ? ensureStringArray(override.tags) : base.tags,
+      detailRows: Array.isArray(override.detailRows) ? override.detailRows : base.detailRows,
+      results: override.results || base.results,
+      tools: override.tools || base.tools,
+      media: normalizeMediaItem(override.media || base.media) || normalizeMediaItem(base.media)
+    };
+  };
   const getHomepageWorkCover = (work) => getDisplayUrl(work?.media) || work?.media?.url || work?.media?.poster || "";
   const getHomepageDetailValue = (work, label, fallback = "") => {
     const found = Array.isArray(work?.detailRows) ? work.detailRows.find((item) => item?.label === label) : null;
@@ -5190,7 +5914,38 @@ function App() {
       homepageGallerySeenSources.add(source);
       return true;
     });
-  const homepageWorkflowEvidenceEntries = [];
+  const homepageWorkflowEvidenceEntries = buildHomepageCuratedItems(HOMEPAGE_CURATION.workflowEvidenceIds, "workflow-evidence")
+    .filter((item) => {
+      if (item.classification?.canUseInWorkflow) return true;
+      pushHomepageCurationError(`工作流证明使用了非流程素材: ${item.curation.id}`);
+      return false;
+    });
+  const homepageWorkflowLabCards = [
+    {
+      key: "input-reference",
+      label: "INPUT",
+      title: "输入图 / 参考素材",
+      description: "用产品结构、风格参考和商业目标锁定画面方向，避免生成结果失焦。",
+      item: buildHomepageCuratedItem("case-product-ad", "workflow-lab", 0),
+      tags: ["Reference", "ControlNet", "Brief"]
+    },
+    {
+      key: "node-flow",
+      label: "COMFYUI",
+      title: "节点流程 / 批量控制",
+      description: "把结构控制、批量出图、局部重绘和后期筛选拆成可复用链路。",
+      nodes: ["Input", "ControlNet", "Batch", "Inpaint", "Output"],
+      tags: ["Node Flow", "Inpaint", "Batch"]
+    },
+    {
+      key: "output-result",
+      label: "OUTPUT",
+      title: "输出结果 / 精修交付",
+      description: "将可用版本收敛为电商主图、广告关键帧或可继续剪辑的视频素材。",
+      item: buildHomepageCuratedItem("capability-ad-keyframe", "workflow-lab", 2),
+      tags: ["Retouch", "Delivery", "Gallery Ready"]
+    }
+  ].filter((card) => card.nodes || card.item);
   if (typeof window !== "undefined" && (homepageCurationErrors.length || homepageCurationWarnings.length) && window.__ZHANGWEI_HOMEPAGE_CURATION_WARNED__ !== APP_BUNDLE_VERSION) {
     if (homepageCurationErrors.length) console.error("[homepage-curation]", homepageCurationErrors);
     if (homepageCurationWarnings.length) console.warn("[homepage-curation]", homepageCurationWarnings);
@@ -5230,12 +5985,16 @@ function App() {
     })));
   const chapterSlides = slidesData.filter((slide) => slide?.type === "chapter");
   const contactSlide = slidesData.find((slide) => slide?.id === 30);
-  const totalImageCount = imageEntries.reduce((sum, entry) => sum + entry.mediaItems.length, 0);
-  const totalVideoCount = videoEntries.reduce((sum, entry) => sum + entry.mediaItems.length, 0);
+  const homepageStaticVisualCount = [
+    heroVisualEntry,
+    ...homepageCommercialCases.map((item) => item.curatedItem),
+    ...homepageCapabilityCards.map((item) => item.previewItem),
+    ...homepageGalleryEntries
+  ].filter(Boolean).length;
   const curatedStats = [
-    { label: "视频入口", value: `${homepageVideoEntries.length} 个` },
-    { label: "商业案例", value: `${homepageCommercialCases.length} 类` },
-    { label: "首页精选", value: `${homepageGalleryEntries.length} 张` }
+    { label: "视频作品", value: `${homepageVideoEntries.length} 条` },
+    { label: "主视觉图片", value: `${homepageStaticVisualCount} 张` },
+    { label: "工作流证明", value: `${homepageWorkflowEvidenceEntries.length} 类` }
   ];
   const caseToolValues = [...new Set(homepageCommercialCases.flatMap(({ caseItem }) => ensureStringArray(caseItem?.tools)))];
   const pickTools = (...keywords) => caseToolValues.filter((tool) => keywords.some((keyword) => tool.includes(keyword)));
@@ -5305,6 +6064,48 @@ function App() {
   ];
   const displayVisualEntries = visualFilter === "all" ? homepageGalleryEntries : homepageGalleryEntries.filter((item) => item.category === visualFilter);
   const filteredVisualEntries = displayVisualEntries;
+  const homepageEntryCards = [
+    {
+      key: "video-entry",
+      target: "videos",
+      eyebrow: "VIDEO",
+      title: "AI 视频作品",
+      description: `${homepageVideoEntries.length} 条可播放视频，覆盖产品、人物、场景和短片素材。`,
+      item: homepageVideoEntries[0]
+    },
+    {
+      key: "case-entry",
+      target: "cases",
+      eyebrow: "CASE",
+      title: "商业案例",
+      description: `${homepageCommercialCases.length} 个方向展示产品、包装、美妆和品牌空间能力。`,
+      item: homepageCommercialCases[0]?.curatedItem
+    },
+    {
+      key: "capability-entry",
+      target: "capabilities",
+      eyebrow: "SKILL",
+      title: "能力矩阵",
+      description: "6 个能力入口对应岗位常见的图像、产品、人像和场景任务。",
+      item: homepageCapabilityCards[0]?.previewItem
+    },
+    {
+      key: "gallery-entry",
+      target: "gallery",
+      eyebrow: "VISUAL",
+      title: "视觉精选",
+      description: `${homepageGalleryEntries.length} 张单图作品，按产品、人像、场景和品牌方向归类。`,
+      item: homepageGalleryEntries[0]
+    },
+    {
+      key: "workflow-entry",
+      target: "process",
+      eyebrow: "WORKFLOW",
+      title: "ComfyUI 工作流",
+      description: `${homepageWorkflowEvidenceEntries.length} 类流程证明，展示节点组织、控制和筛选方式。`,
+      item: homepageWorkflowEvidenceEntries[0]
+    }
+  ].filter((card) => card.item);
 
   const renderCuratedLayoutStyles = () => null;
 
@@ -5320,6 +6121,100 @@ function App() {
     openWorkDetail(item);
   };
 
+  const renderHomepageEntryCard = (card, index) => {
+    const detail = card.item ? buildHomepageCuratedDetail(card.item, index) : null;
+    return <article
+      key={card.key}
+      className="curated-entry-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => scrollToCuratedSection(card.target)}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        scrollToCuratedSection(card.target);
+      }}
+    >
+      {card.item && renderCuratedMediaBox(card.item.entry, card.item.mediaEntry, {
+        compact: true,
+        disableInlinePreview: true,
+        label: card.title,
+        variant: card.item.classification?.kind === "video" ? "video" : card.item.classification?.canUseInWorkflow ? "workflow" : "gallery",
+        workId: card.item.curation?.id
+      })}
+      <span>{card.eyebrow}</span>
+      <strong>{card.title}</strong>
+      <p>{card.description || detail?.description}</p>
+    </article>;
+  };
+
+  const selectDesignerNode = (nodeId, status = "已选中可编辑元素。") => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return false;
+    setSelectedDesignerId(nodeId);
+    setStatusMessage(status);
+    return true;
+  };
+
+  const selectDesignerWork = (workId, label = "作品元素") => {
+    if (!workId) return false;
+    return selectDesignerNode(`work:${workId}`, `已选中「${label}」，可在右侧修改文字、素材和显示状态。`);
+  };
+
+  const selectDesignerSection = (sectionId, label = "页面模块") => {
+    if (!sectionId) return false;
+    return selectDesignerNode(`section:${sectionId}`, `已选中「${label}」模块，可在右侧修改标题和说明。`);
+  };
+
+  const getDesignerWorkProps = (workId, label) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || !workId) return {};
+    const nodeId = `work:${workId}`;
+    const stylePreset = getHomepageDesignerState().works?.[workId]?.stylePreset;
+    return {
+      "data-designer-node": nodeId,
+      "data-designer-selected": selectedDesignerId === nodeId ? "true" : undefined,
+      "data-designer-style": stylePreset && stylePreset !== "default" ? stylePreset : undefined,
+      onClick: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        selectDesignerWork(workId, label);
+      },
+      onKeyDown: (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        event.stopPropagation();
+        selectDesignerWork(workId, label);
+      }
+    };
+  };
+
+  const getDesignerSectionProps = (sectionId, label = "页面模块") => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || !sectionId) return {};
+    const nodeId = `section:${sectionId}`;
+    const stylePreset = getHomepageDesignerState().sections?.[sectionId]?.stylePreset;
+    return {
+      "data-designer-node": nodeId,
+      "data-designer-selected": selectedDesignerId === nodeId ? "true" : undefined,
+      "data-designer-style": stylePreset && stylePreset !== "default" ? stylePreset : undefined,
+      tabIndex: 0,
+      onClick: (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        selectDesignerSection(sectionId, label);
+      },
+      onKeyDown: (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        event.stopPropagation();
+        selectDesignerSection(sectionId, label);
+      }
+    };
+  };
+
+  const getDesignerSection = (sectionId, fallback = {}) => {
+    const section = getHomepageDesignerState().sections?.[sectionId];
+    return { ...fallback, ...(section && typeof section === "object" ? section : {}) };
+  };
+
   const renderCuratedMediaBox = (entry, mediaEntry, options = {}) => {
     const { media, slotIndex } = mediaEntry;
     const normalizedMedia = normalizeMediaItem(media);
@@ -5330,8 +6225,16 @@ function App() {
     const videoSourceUrl = isVideoCard ? getSourceMediaUrl(normalizedMedia) : "";
     const hasVideoSource = isVideoCard && Boolean(videoSourceUrl || normalizedMedia?.delivery?.hlsUrl || normalizedMedia?.delivery?.iframeUrl);
     const showVideoRecovery = isVideoCard && !hasVideoSource;
+    const videoDuration = options.duration || normalizedMedia?.duration || "";
     const label = normalizedMedia?.alt || options.label || "素材 " + String(slotIndex + 1).padStart(2, "0");
-    const replaceTarget = {
+    const designerWorkId = options.workId || "";
+    const canEditMedia = !isManualEntry || Boolean(designerWorkId);
+    const replaceTarget = isManualEntry ? {
+      type: "homepage-work",
+      workId: designerWorkId,
+      label,
+      accept: options.accept || ""
+    } : {
       type: "slide-media",
       slideId: entry.slide.id,
       slotIndex,
@@ -5345,11 +6248,12 @@ function App() {
         "curated-media-box",
         options.large && "curated-media-box-large",
         options.compact && "curated-media-box-compact",
+        options.variant && `curated-media-box-${options.variant}`,
         portrait && "curated-media-box-portrait",
-        IS_PORTFOLIO_ADMIN_MODE && !isManualEntry && "curated-admin-drop-target",
+        IS_PORTFOLIO_ADMIN_MODE && canEditMedia && "curated-admin-drop-target",
         activeCuratedDropTarget === replaceTargetKey && "is-drag-active"
       )}
-      {...(!isManualEntry ? getCuratedDropHandlers(replaceTarget) : {})}
+      {...(canEditMedia ? getCuratedDropHandlers(replaceTarget) : {})}
       data-media-card="true"
       data-media-kind={isVideoCard ? "video" : "image"}
       data-media-source={displayUrl}
@@ -5360,25 +6264,27 @@ function App() {
         src={displayUrl}
         alt={label}
         loading={options.eager || isManualEntry ? "eager" : "lazy"}
-        decoding="async"
-        fetchPriority={options.eager ? "high" : "auto"}
+        decoding={options.eager || isManualEntry ? "sync" : "async"}
+        fetchPriority={options.eager || isManualEntry ? "high" : "auto"}
         className={cx("curated-static-media", portrait && "curated-static-media-contain")}
       /> : <div className="curated-static-fallback">
         <Icon name={isVideoCard ? "Play" : "Grid"} size={22} />
         <span>{showVideoRecovery ? "视频资源恢复中" : isVideoCard ? "视频封面生成中" : "视觉素材"}</span>
       </div>}
+      {isVideoCard && <span className="curated-video-badge">VIDEO</span>}
+      {isVideoCard && videoDuration && <span className="curated-video-duration">{videoDuration}</span>}
       {showVideoRecovery ? <div className="curated-media-recovery" aria-hidden="true">
         <Icon name="Play" size={14} />
         <span>视频资源恢复中</span>
-      </div> : isVideoCard && <div className="curated-media-play" aria-hidden="true">
-        <Icon name="Play" size={16} />
-        <span>点击播放</span>
+      </div> : isVideoCard && <div className="curated-media-play curated-media-play-center" aria-hidden="true">
+        <Icon name="Play" size={20} />
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && !isManualEntry && <div className="curated-admin-media-tools">
-        <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById(uploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换</button>
+      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <div className="curated-admin-media-tools">
+        <button type="button" disabled={!canListAssets || isCapabilitiesLoading} title={canListAssets ? "素材库" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); openAssetManager(replaceTarget); }}><Icon name="Grid" size={14} /> 素材库</button>
+        <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(uploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(replaceTarget, normalizedMedia); }}><Icon name="Link2" size={14} /> 外链</button>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && !isManualEntry && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) requestMediaReplacement(file, replaceTarget);
         event.target.value = "";
@@ -5560,14 +6466,17 @@ function App() {
   const renderCapabilityCard = (item, index) => {
     const relatedEntry = item.previewItem || buildHomepageCuratedItem(item.workId, "capability", index);
     const preview = relatedEntry ? buildVisualWorkDetail(relatedEntry, index) : null;
-    return <article key={item.title} className="curated-capability-card" data-curation-section="capability" data-curation-id={preview?.curation?.id || item.workId} data-curation-category={preview?.curation?.category || ""} data-curation-kind={preview?.kind || ""} tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)}>
-      {preview ? renderCuratedMediaBox(preview.entry, preview.mediaEntry, { compact: true, disableInlinePreview: true, label: preview.title, key: item.title }) : <div className="curated-capability-placeholder"><Icon name="Sparkles" size={22} /></div>}
+    const displayTitle = preview?.title || item.title;
+    const displayDescription = preview?.description || item.description;
+    const displayTags = preview?.tags?.length ? preview.tags : item.tags;
+    return <article key={item.title} className="curated-capability-card" data-curation-section="capability" data-curation-id={preview?.curation?.id || item.workId} data-curation-category={preview?.curation?.category || ""} data-curation-kind={preview?.kind || ""} tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)} {...getDesignerWorkProps(preview?.curation?.id || item.workId, preview?.title || item.title)}>
+      {preview ? renderCuratedMediaBox(preview.entry, preview.mediaEntry, { compact: true, disableInlinePreview: true, label: preview.title, key: item.title, variant: "capability", workId: preview.curation?.id }) : <div className="curated-capability-placeholder"><Icon name="Sparkles" size={22} /></div>}
       <div className="curated-capability-copy">
         <span>{String(index + 1).padStart(2, "0")}</span>
-        <h3>{item.title}</h3>
-        <p>{item.description}</p>
+        <h3>{displayTitle}</h3>
+        <p>{displayDescription}</p>
         <div className="curated-card-tags">
-          {item.tags.map((tag) => <span key={item.title + "-" + tag}>{tag}</span>)}
+          {displayTags.map((tag) => <span key={item.title + "-" + tag}>{tag}</span>)}
         </div>
       </div>
     </article>;
@@ -5580,8 +6489,8 @@ function App() {
       return null;
     }
     const detail = buildVideoWorkDetail(item, index);
-    return <article key={detail.id} className="curated-video-card" data-curation-section="video-featured" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
-      {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title })}
+    return <article key={detail.id} className="curated-video-card" data-curation-section="video-featured" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+      {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, duration: detail.duration, variant: "video", workId: detail.curation?.id })}
       <div className="curated-video-copy">
         <span>{detail.label}</span>
         <h3>{detail.title}</h3>
@@ -5590,9 +6499,6 @@ function App() {
           <span>视频</span>
           {detail.duration && <span>{detail.duration}</span>}
           <span>可播放</span>
-        </div>
-        <div className="curated-info-rows">
-          {detail.detailRows.map((row) => <div key={row.label}><span>{row.label}</span><strong>{row.value}</strong></div>)}
         </div>
         <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看详情</button>
       </div>
@@ -5608,7 +6514,7 @@ function App() {
     const coverTarget = { type: "case-cover", caseId: caseItem.id, label: `${caseItem.title} 封面`, accept: "image" };
     const coverTargetKey = getCuratedDropTargetKey(coverTarget);
     const coverInputId = `curated-case-cover-${caseItem.id}`;
-    return <article key={caseItem.id} id={"case-" + caseItem.id} className="curated-case-card" data-curation-section="commercial-case" data-curation-id={caseItem.id} data-curation-category={service.curation?.category || caseItem.category} data-curation-kind={caseClassification.kind === "video" ? "video" : "case"} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
+    return <article key={caseItem.id} id={"case-" + caseItem.id} className="curated-case-card" data-curation-section="commercial-case" data-curation-id={caseItem.id} data-curation-category={service.curation?.category || caseItem.category} data-curation-kind={caseClassification.kind === "video" ? "video" : "case"} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(service.curation?.id || caseItem.id, caseItem.title)}>
       <div
         className={cx(
           "curated-case-cover",
@@ -5618,11 +6524,11 @@ function App() {
         {...getCuratedDropHandlers(coverTarget)}
       >
         {caseClassification.kind === "video" && service.curatedItem ? <>
-          {renderCuratedMediaBox(service.curatedItem.entry, service.curatedItem.mediaEntry, { compact: true, disableInlinePreview: true, label: caseItem.title })}
+          {renderCuratedMediaBox(service.curatedItem.entry, service.curatedItem.mediaEntry, { compact: true, disableInlinePreview: true, label: caseItem.title, duration: service.curation?.duration || "", variant: "case", workId: service.curation?.id })}
           <span className="curated-case-video-badge">视频{service.curation?.duration ? ` · ${service.curation.duration}` : ""} · 可播放</span>
         </> : caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading={index === 0 ? "eager" : "lazy"} decoding="async" /> : <div>暂无封面</div>}
         {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-admin-media-tools">
-          <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
+          <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换封面" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
         </div>}
         {IS_PORTFOLIO_ADMIN_MODE && <input id={coverInputId} type="file" accept="image/*" className="hidden" onChange={(event) => {
           const file = event.target.files && event.target.files[0];
@@ -5634,10 +6540,6 @@ function App() {
         <span>项目案例 {String(index + 1).padStart(2, "0")}</span>
         <h3>{caseItem.title}</h3>
         <p>{caseItem.description || service.ability}</p>
-        <div className="curated-info-rows">
-          {detail.detailRows.map((row) => <div key={row.label}><span>{row.label}</span><strong>{row.value}</strong></div>)}
-        </div>
-        {renderCaseResultItems(caseItem)}
         <div className="curated-case-meta">
           {service.curation ? <>
             <span>{caseItem.category}</span>
@@ -5661,8 +6563,8 @@ function App() {
       return null;
     }
     const detail = buildVisualWorkDetail(item, index);
-    return <article key={detail.id} className="curated-visual-card" data-curation-section="gallery" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
-      {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title })}
+    return <article key={detail.id} className="curated-visual-card" data-curation-section="gallery" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+      {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, variant: "gallery", workId: detail.curation?.id })}
       <div className="curated-visual-copy">
         <span>{detail.label}</span>
         <h3>{detail.title}</h3>
@@ -5682,14 +6584,36 @@ function App() {
       return null;
     }
     const detail = buildWorkflowEvidenceDetail(item, index);
-    return <article key={detail.id} className="curated-workflow-card" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}>
-      {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title })}
+    return <article key={detail.id} className="curated-workflow-card" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+      {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, variant: "workflow", workId: detail.curation?.id })}
       <div className="curated-workflow-copy">
         <span>{detail.label}</span>
         <h3>{detail.title}</h3>
         <p>{detail.description}</p>
         <div className="curated-workflow-steps">
           {detail.workflowSteps.slice(0, 5).map((step) => <strong key={detail.id + "-" + step}>{step}</strong>)}
+        </div>
+      </div>
+    </article>;
+  };
+
+  const renderWorkflowLabCard = (card, index) => {
+    const detail = card.item ? buildHomepageCuratedDetail(card.item, index) : null;
+    const commonProps = detail ? {
+      tabIndex: 0,
+      onClick: () => openWorkDetail(detail),
+      onKeyDown: (event) => openWorkDetailFromKeyboard(event, detail)
+    } : {};
+    return <article key={card.key} className="curated-workflow-card curated-workflow-lab-card" data-curation-section="workflow-lab" data-curation-id={card.key} data-curation-kind={detail?.kind || "workflow"} {...commonProps}>
+      {card.item ? renderCuratedMediaBox(card.item.entry, card.item.mediaEntry, { compact: true, disableInlinePreview: true, label: card.title, variant: "workflow", workId: card.item.curation?.id }) : <div className="curated-workflow-node-frame" aria-label="ComfyUI node flow">
+        {card.nodes.map((node, nodeIndex) => <span key={card.key + "-" + node} data-node-index={nodeIndex + 1}>{node}</span>)}
+      </div>}
+      <div className="curated-workflow-copy">
+        <span>{card.label}</span>
+        <h3>{card.title}</h3>
+        <p>{card.description}</p>
+        <div className="curated-card-tags">
+          {card.tags.slice(0, 3).map((tag) => <span key={card.key + "-" + tag}>{tag}</span>)}
         </div>
       </div>
     </article>;
@@ -5802,7 +6726,7 @@ function App() {
         >
           {renderDetailMedia(selectedWorkItem)}
           {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <div className="curated-admin-media-tools">
-            <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById(detailUploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换当前媒体</button>
+            <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换当前媒体" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(detailUploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换当前媒体</button>
             {detailTarget.type !== "case-cover" && <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(detailTarget, selectedWorkItem.mediaEntry?.media); }}><Icon name="Link2" size={14} /> 外链视频</button>}
           </div>}
           {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <input id={detailUploadInputId} type="file" accept={detailTarget.type === "case-cover" ? "image/*" : "image/*,video/*"} className="hidden" onChange={(event) => {
@@ -5932,7 +6856,7 @@ function App() {
                   </div>
                   <div className="curated-card-manager-actions">
                     <button type="button" onClick={() => updateCuratedCardHidden(item.source, !item.hidden)}>{item.hidden ? "恢复" : "隐藏"}</button>
-                    <button type="button" onClick={() => document.getElementById(inputId)?.click()}>替换图片</button>
+                    <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换图片" : assetCapabilityReason} onClick={() => document.getElementById(inputId)?.click()}>替换图片</button>
                     <input id={inputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
                       const file = event.target.files && event.target.files[0];
                       if (file) requestMediaReplacement(file, item.target);
@@ -5946,6 +6870,172 @@ function App() {
           </section>;
         })}
       </div>
+      </aside>;
+  };
+
+  const renderHomepageDesignInspector = (sectionDefaults) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return null;
+    const [nodeType, ...nodeRest] = String(selectedDesignerId || "section:home").split(":");
+    const nodeId = nodeRest.join(":");
+    const designer = getHomepageDesignerState();
+    const theme = designer.theme;
+    const selectedSectionDefaults = nodeType === "section" ? sectionDefaults?.[nodeId] : null;
+    const selectedSection = selectedSectionDefaults ? getDesignerSection(nodeId, selectedSectionDefaults) : null;
+    const selectedWork = nodeType === "work" ? getHomepageWork(nodeId) : null;
+    const selectedWorkMedia = selectedWork ? normalizeMediaItem(selectedWork.media) || normalizeMediaItem({ kind: "image", url: "", poster: "", label: "" }) : null;
+    const stylePreset = selectedWork?.stylePreset || selectedSection?.stylePreset || "default";
+    const selectedTitle = selectedWork?.title || selectedSection?.title || selectedSection?.label || "未选择元素";
+    const uploadInputId = selectedWork ? `designer-inspector-upload-${selectedWork.id}`.replace(/[^a-zA-Z0-9_-]/g, "-") : "";
+    const mediaTarget = selectedWork ? { type: "homepage-work", workId: selectedWork.id, label: selectedWork.title || selectedWork.label || selectedWork.id } : null;
+
+    const renderPresetGroup = (label, presets, value, field, options = {}) => <div className="curated-inspector-group">
+      <span>{label}</span>
+      <div className={cx("curated-preset-row", options.colors && "curated-preset-row-colors")}>
+        {presets.map((preset) => <button
+          key={preset.id}
+          type="button"
+          className={cx("curated-preset-button", value === preset.id && "is-active")}
+          onClick={() => updateHomepageDesignerTheme({ [field]: preset.id })}
+        >
+          {options.colors && <i>{preset.swatches.map((color) => <b key={preset.id + color} style={{ background: color }} />)}</i>}
+          <em>{preset.label}</em>
+        </button>)}
+      </div>
+    </div>;
+
+    const renderStylePresetGroup = (onChange) => <div className="curated-inspector-group">
+      <span>元素强调</span>
+      <div className="curated-preset-row">
+        {HOMEPAGE_ELEMENT_STYLE_PRESETS.map((preset) => <button
+          key={preset.id}
+          type="button"
+          className={cx("curated-preset-button", stylePreset === preset.id && "is-active")}
+          onClick={() => onChange(preset.id)}
+        >
+          <em>{preset.label}</em>
+        </button>)}
+      </div>
+    </div>;
+
+    const updateSelectedWorkMedia = (patch) => {
+      if (!selectedWork || !selectedWorkMedia) return;
+      updateHomepageDesignerWork(selectedWork.id, {
+        media: normalizeMediaItem({
+          ...selectedWorkMedia,
+          ...patch
+        })
+      });
+    };
+
+    return <aside className="curated-designer-inspector" aria-label="页面元素属性面板">
+      <header>
+        <div>
+          <span>Inspector</span>
+          <strong>{selectedTitle}</strong>
+        </div>
+        <button type="button" onClick={() => setSelectedDesignerId("section:home")} title="回到首页设置"><Icon name="Home" size={16} /></button>
+      </header>
+
+      <section className="curated-inspector-section">
+        <h3>全站预设</h3>
+        {renderPresetGroup("字体", HOMEPAGE_FONT_PRESETS, theme.fontPreset, "fontPreset")}
+        {renderPresetGroup("颜色", HOMEPAGE_COLOR_PRESETS, theme.colorPreset, "colorPreset", { colors: true })}
+        {renderPresetGroup("圆角", HOMEPAGE_RADIUS_PRESETS, theme.radiusPreset, "radiusPreset")}
+        {renderPresetGroup("密度", HOMEPAGE_DENSITY_PRESETS, theme.densityPreset, "densityPreset")}
+      </section>
+
+      {selectedSection && <section className="curated-inspector-section">
+        <h3>模块内容</h3>
+        {selectedSection.eyebrow !== undefined && <label>眉标
+          <input value={selectedSection.eyebrow || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { eyebrow: event.target.value })} />
+        </label>}
+        <label>标题
+          <input value={selectedSection.title || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { title: event.target.value })} />
+        </label>
+        {selectedSection.subtitle !== undefined && <label>副标题
+          <input value={selectedSection.subtitle || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { subtitle: event.target.value })} />
+        </label>}
+        <label>描述
+          <textarea value={selectedSection.description || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { description: event.target.value })} />
+        </label>
+        {selectedSection.tags !== undefined && <label>标签预设
+          <input value={ensureStringArray(selectedSection.tags).join("，")} onChange={(event) => updateHomepageDesignerSection(nodeId, { tags: parseDesignerTags(event.target.value) })} />
+        </label>}
+        {renderStylePresetGroup((presetId) => updateHomepageDesignerSection(nodeId, { stylePreset: presetId }))}
+      </section>}
+
+      {selectedWork && <section className="curated-inspector-section">
+        <h3>作品元素</h3>
+        <label>标签
+          <input value={selectedWork.label || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { label: event.target.value })} />
+        </label>
+        <label>标题
+          <input value={selectedWork.title || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { title: event.target.value })} />
+        </label>
+        <label>描述
+          <textarea value={selectedWork.description || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { description: event.target.value })} />
+        </label>
+        <label>标签预设
+          <input value={ensureStringArray(selectedWork.tags).join("，")} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { tags: parseDesignerTags(event.target.value) })} />
+        </label>
+        <div className="curated-inspector-two">
+          <label>类型
+            <select value={selectedWork.kind || "image"} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { kind: event.target.value })}>
+              <option value="image">图片</option>
+              <option value="video">视频</option>
+              <option value="case">案例</option>
+              <option value="workflow">流程</option>
+            </select>
+          </label>
+          <label>分类
+            <select value={selectedWork.category || "brand"} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { category: event.target.value })}>
+              <option value="product">产品</option>
+              <option value="portrait">人像</option>
+              <option value="world">世界观</option>
+              <option value="brand">品牌</option>
+              <option value="video">视频</option>
+              <option value="workflow">流程</option>
+            </select>
+          </label>
+        </div>
+        {(selectedWork.kind === "video" || selectedWorkMedia?.kind === "video") && <label>时长
+          <input value={selectedWork.duration || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { duration: event.target.value })} placeholder="00:10" />
+        </label>}
+        {renderStylePresetGroup((presetId) => updateHomepageDesignerWork(selectedWork.id, { stylePreset: presetId }))}
+      </section>}
+
+      {selectedWork && selectedWorkMedia && <section className="curated-inspector-section">
+        <h3>素材</h3>
+        <div className="curated-inspector-media-actions">
+          <button type="button" disabled={!canListAssets || isCapabilitiesLoading} title={canListAssets ? "素材库" : assetCapabilityReason} onClick={() => openAssetManager(mediaTarget)}><Icon name="Grid" size={14} /> 素材库</button>
+          <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={() => document.getElementById(uploadInputId)?.click()}><Icon name="UploadCloud" size={14} /> 上传替换</button>
+          <button type="button" onClick={() => requestExternalVideoReplacement(mediaTarget, selectedWorkMedia)}><Icon name="Link2" size={14} /> 外链视频</button>
+        </div>
+        <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+          const file = event.target.files && event.target.files[0];
+          if (file) requestMediaReplacement(file, mediaTarget);
+          event.target.value = "";
+        }} />
+        <label>素材类型
+          <select value={selectedWorkMedia.kind || "image"} onChange={(event) => updateSelectedWorkMedia({ kind: event.target.value })}>
+            <option value="image">图片</option>
+            <option value="video">视频</option>
+            <option value="youtube">YouTube</option>
+          </select>
+        </label>
+        <label>资源链接
+          <input value={selectedWorkMedia.url || ""} onChange={(event) => updateSelectedWorkMedia(applyMediaFieldChange(selectedWorkMedia, "url", event.target.value))} />
+        </label>
+        <label>封面 / 海报
+          <input value={selectedWorkMedia.poster || ""} onChange={(event) => updateSelectedWorkMedia({ poster: event.target.value })} />
+        </label>
+        <label>替代文本
+          <input value={selectedWorkMedia.alt || ""} onChange={(event) => updateSelectedWorkMedia({ alt: event.target.value })} />
+        </label>
+        <label>详情行
+          <textarea value={formatDesignerDetailRows(selectedWork.detailRows)} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { detailRows: parseDesignerDetailRows(event.target.value) })} />
+        </label>
+      </section>}
     </aside>;
   };
 
@@ -5997,8 +7087,10 @@ function App() {
         {renderCuratedMediaBox(heroItem.entry, heroItem.mediaEntry, {
           large: true,
           eager: true,
+          variant: "hero",
           key: "curated-hero-single",
-          label: heroItem.title || "首页主视觉"
+          label: heroItem.title || "首页主视觉",
+          workId: heroItem.curation?.id
         })}
         <div className="curated-hero-single-copy">
           <span>{heroItem.label}</span>
@@ -6010,7 +7102,7 @@ function App() {
         <span>等待添加首页主视觉</span>
       </div>}
       {IS_PORTFOLIO_ADMIN_MODE && target && <div className="curated-admin-media-tools">
-        <button type="button" onClick={(event) => { event.stopPropagation(); document.getElementById("curated-hero-upload").click(); }}><Icon name="UploadCloud" size={14} /> 替换舞台作品</button>
+        <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换舞台作品" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById("curated-hero-upload").click(); }}><Icon name="UploadCloud" size={14} /> 替换舞台作品</button>
       </div>}
       {IS_PORTFOLIO_ADMIN_MODE && target && <input id="curated-hero-upload" type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
@@ -6049,7 +7141,7 @@ function App() {
             <Icon name="Download" size={16} />
             <span>下载 JSON</span>
           </button>
-          <button type="button" onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className="is-primary" title={isPublishingPortfolio ? "正在保存到代码仓库" : "确认发布上线"}>
+          <button type="button" onClick={publishPortfolioJson} disabled={isPublishingPortfolio || !canWriteAssets} className="is-primary" title={!canWriteAssets ? assetCapabilityReason : isPublishingPortfolio ? "正在保存到代码仓库" : "确认发布上线"}>
             <Icon name="Save" size={16} />
             <span>{isPublishingPortfolio ? "保存中..." : "确认发布上线"}</span>
           </button>
@@ -6062,8 +7154,8 @@ function App() {
   const renderCuratedExperience = () => {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
-    const heroSubtitle = "AIGC Visual Designer / Generative Media Designer";
-    const heroDescription = "专注商业广告视觉、AI 产品渲染、品牌空间和人像视觉，用生成式工具完成从概念到交付的视觉方案。";
+    const heroSubtitle = "AIGC Visual Designer / AI Video & Commercial Visual / ComfyUI Workflow";
+    const heroDescription = "面向 AIGC 视觉设计岗位，集中展示商业主图、生成式视频、品牌空间、人像角色和可复盘工作流。";
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
     const heroStageItems = (heroVisualEntry ? [heroVisualEntry] : []).map((item, index) => {
       const media = normalizeMediaItem(item.mediaEntry.media);
@@ -6076,24 +7168,47 @@ function App() {
         detail
       };
     });
-    const visibleVideoEntries = homepageVideoEntries.slice(0, 3);
+    const visibleVideoEntries = homepageVideoEntries;
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
-    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
+    const sectionDefaults = {
+      home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
+      featured: { label: "精选入口", eyebrow: "精选入口", title: "面试官最先需要看到的能力入口", description: "按视频、商业案例、能力矩阵、视觉作品和工作流拆分，快速建立作品集结构。" },
+      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频 / 商业短片精选", description: "11 条视频作品集中展示，每张卡片都有视频标识、时长、播放入口和详情抽屉。" },
+      cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "精选商业案例", description: "用产品广告、美妆场景、品牌空间和包装礼盒四个方向说明商业视觉能力。" },
+      capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "6 个能力对应 6 张纯图封面，产品、人像、世界观、品牌空间和材质控制各自对应图片。" },
+      gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
+      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI Workflow / 创作流程", description: "用工作流截图和步骤卡说明从输入、控制、筛选到作品整理的可复盘过程。" },
+      contact: { label: "联系", title: siteMeta.contactSectionTitle || "联系我", description: siteMeta.contactSectionDesc || "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。" }
+    };
+    const homeSection = getDesignerSection("home", sectionDefaults.home);
+    const featuredSection = getDesignerSection("featured", sectionDefaults.featured);
+    const videoSection = getDesignerSection("videos", sectionDefaults.videos);
+    const caseSection = getDesignerSection("cases", sectionDefaults.cases);
+    const capabilitySection = getDesignerSection("capabilities", sectionDefaults.capabilities);
+    const gallerySection = getDesignerSection("gallery", sectionDefaults.gallery);
+    const processSection = getDesignerSection("process", sectionDefaults.process);
+    const contactSection = getDesignerSection("contact", sectionDefaults.contact);
+    const homeTags = ensureStringArray(homeSection.tags).length ? ensureStringArray(homeSection.tags) : heroRoleTags;
+    const designerThemeStyle = getHomepageDesignerThemeStyle(getHomepageDesignerState().theme);
+
+    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
       {renderCuratedLayoutStyles()}
       <section id="home" className="curated-hero" style={publishedSectionStyle}>
         <div className="portfolio-container curated-hero-container">
           <div className="curated-hero-copy">
-            <h1>{heroTitle}</h1>
-            <h2>{heroSubtitle}</h2>
-            <p>{heroDescription}</p>
-            <div className="curated-hero-tags">
-              {heroRoleTags.map((tag) => <span key={tag}>{tag}</span>)}
+            <div className="curated-hero-copy-editable" {...getDesignerSectionProps("home", "首页首屏")}>
+              <h1>{homeSection.title}</h1>
+              <h2>{homeSection.subtitle}</h2>
+              <p>{homeSection.description}</p>
+              <div className="curated-hero-tags">
+                {homeTags.map((tag) => <span key={tag}>{tag}</span>)}
+              </div>
             </div>
             <div className="curated-hero-actions">
+              <a href="#featured" onClick={(event) => handleCuratedAnchorClick(event, "featured")}>查看精选入口</a>
               <a href="#videos" onClick={(event) => handleCuratedAnchorClick(event, "videos")}>查看视频精选</a>
               <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>查看项目案例</a>
-              <a href="#process" onClick={(event) => handleCuratedAnchorClick(event, "process")}>查看创作流程</a>
             </div>
           </div>
           {renderHeroKineticStage(heroDetail, heroStageItems)}
@@ -6103,12 +7218,23 @@ function App() {
         </div>
       </section>
 
+      <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(1, featuredSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("featured", "精选入口")}>
+            <h2>{featuredSection.title}</h2>
+            <p>{featuredSection.description}</p>
+          </div>
+          <div className="curated-feature-grid">{homepageEntryCards.map(renderHomepageEntryCard)}</div>
+        </div>
+      </section>
+
       <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(1, "视频精选")}
-          <div className="curated-section-heading">
-            <h2>生成式视频 / 商业短片精选</h2>
-            <p>视频作品独立前置展示，每张卡片都有视频标识、时长、播放入口和详情抽屉，不再被混在静态图里。</p>
+          {renderCuratedEyebrow(2, videoSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("videos", "视频精选")}>
+            <h2>{videoSection.title}</h2>
+            <p>{videoSection.description}</p>
           </div>
           <div className="curated-video-grid">{visibleVideoEntries.map(renderVideoWorkCard)}</div>
         </div>
@@ -6116,10 +7242,10 @@ function App() {
 
       <section id="cases" className="curated-section" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(2, "精选案例")}
-          <div className="curated-section-heading">
-            <h2>{siteMeta.caseSectionTitle || "精选商业案例"}</h2>
-            <p>只保留产品广告、美妆场景、品牌空间三个纯图方向，视频入口只放在独立视频模块。</p>
+          {renderCuratedEyebrow(3, caseSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
+            <h2>{caseSection.title}</h2>
+            <p>{caseSection.description}</p>
           </div>
           <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
         </div>
@@ -6127,10 +7253,10 @@ function App() {
 
       <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(3, "能力矩阵")}
-          <div className="curated-section-heading">
-            <h2>核心能力矩阵</h2>
-            <p>6 个能力对应 6 张纯图封面，产品、人像、世界观、品牌空间和材质控制各自对应图片。</p>
+          {renderCuratedEyebrow(4, capabilitySection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
+            <h2>{capabilitySection.title}</h2>
+            <p>{capabilitySection.description}</p>
           </div>
           <div className="curated-capability-grid">{homepageCapabilityCards.map(renderCapabilityCard)}</div>
         </div>
@@ -6138,28 +7264,30 @@ function App() {
 
       <section id="gallery" className="curated-section curated-section-selected" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(4, "视觉精选")}
-          <div className="curated-section-heading">
-            <h2>视觉作品精选</h2>
-            <p>Gallery 改为手动精选，封面不重复，标题、描述和标签都按图片主体重新归类。</p>
+          {renderCuratedEyebrow(5, gallerySection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("gallery", "视觉精选")}>
+            <h2>{gallerySection.title}</h2>
+            <p>{gallerySection.description}</p>
           </div>
           <div className="curated-filter-bar">
             {visualFilters.map((filter) => <button key={filter.id} type="button" onClick={() => setVisualFilter(filter.id)} className={visualFilter === filter.id ? "is-active" : ""}>{filter.label}</button>)}
           </div>
           <div className="curated-visual-grid">{visibleVisualEntries.map(renderVisualIndexCard)}</div>
           <div className="curated-load-more curated-load-more-static">
-            <span>首页手动精选 {visibleVisualEntries.length} / {HOMEPAGE_CURATION.visualGalleryIds.length}</span>
+            <span>视觉精选 {visibleVisualEntries.length} / {HOMEPAGE_CURATION.visualGalleryIds.length}</span>
           </div>
         </div>
       </section>
 
       <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(5, "创作流程")}
-          <div className="curated-section-heading">
-            <h2>AIGC 创作流程</h2>
-            <p>从 Brief 到交付，把生成、控制、筛选、ComfyUI 精修和后期整理拆成可说明、可复用的工作步骤。</p>
+          {renderCuratedEyebrow(6, processSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
+            <h2>{processSection.title}</h2>
+            <p>{processSection.description}</p>
           </div>
+          <div className="curated-workflow-grid curated-workflow-evidence-grid">{visibleWorkflowEntries.map(renderWorkflowEvidenceCard)}</div>
+          <div className="curated-workflow-grid">{homepageWorkflowLabCards.map(renderWorkflowLabCard)}</div>
           <div className="curated-process-grid">
             {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
           </div>
@@ -6169,9 +7297,9 @@ function App() {
 
       <section id="contact" className="curated-contact" style={publishedSectionStyle}>
         <div className="portfolio-container curated-contact-container">
-          <div>
-            <h2>联系我</h2>
-            <p>面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。</p>
+          <div {...getDesignerSectionProps("contact", "联系")}>
+            <h2>{contactSection.title}</h2>
+            <p>{contactSection.description}</p>
           </div>
           <div className="curated-contact-grid">
             {contactItems.map((item) => {
@@ -6184,6 +7312,7 @@ function App() {
       {renderWorkDetailDrawer()}
       {renderMediaReplacementDialog()}
       {renderCuratedAdminDock()}
+      {renderHomepageDesignInspector(sectionDefaults)}
     </div>;
   };
 
@@ -6450,7 +7579,7 @@ function App() {
           <button onClick={() => { importInputRef.current && importInputRef.current.click(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="UploadCloud" size={16} /> 导入 JSON</button>
           <button onClick={() => { resetDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="RotateCcw" size={16} /> 重置草稿</button>
           <button onClick={() => { exportDraft(); setShowMobileMoreMenu(false); }} className="portfolio-mobile-menu-button"><Icon name="Download" size={16} /> 导出 JSON</button>
-          {IS_PORTFOLIO_ADMIN_MODE && <button onClick={() => { publishPortfolioJson(); setShowMobileMoreMenu(false); }} disabled={isPublishingPortfolio} className="portfolio-mobile-menu-button text-emerald-100"><Icon name="Save" size={16} /> {isPublishingPortfolio ? "保存中..." : "保存到代码仓库"}</button>}
+          {IS_PORTFOLIO_ADMIN_MODE && <button onClick={() => { publishPortfolioJson(); setShowMobileMoreMenu(false); }} disabled={isPublishingPortfolio || !canWriteAssets} title={!canWriteAssets ? assetCapabilityReason : ""} className="portfolio-mobile-menu-button text-emerald-100"><Icon name="Save" size={16} /> {isPublishingPortfolio ? "保存中..." : "保存到代码仓库"}</button>}
           <button onClick={deleteCurrentSlide} className="portfolio-mobile-menu-button text-red-200"><Icon name="Trash2" size={16} /> 删除当前页</button>
         </div>
       </div>}
@@ -6519,11 +7648,100 @@ function App() {
       <button onClick={() => importInputRef.current && importInputRef.current.click()} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="导入 JSON"><Icon name="UploadCloud" size={16} /></button>
       <button onClick={resetDraft} className="p-2 text-white/65 hover:text-white hover:bg-white/10 rounded-full" title="重置草稿"><Icon name="RotateCcw" size={16} /></button>
       <button onClick={exportDraft} className="p-2 text-cyan-300/80 hover:text-cyan-200 hover:bg-cyan-500/20 rounded-full" title="导出 JSON"><Icon name="Download" size={16} /></button>
-      {IS_PORTFOLIO_ADMIN_MODE && <button onClick={publishPortfolioJson} disabled={isPublishingPortfolio} className={`p-2 rounded-full transition ${isPublishingPortfolio ? "text-emerald-100/35" : "text-emerald-200/85 hover:bg-emerald-500/20 hover:text-emerald-100"}`} title={isPublishingPortfolio ? "正在保存到代码仓库" : "保存作品集数据到代码仓库"}><Icon name="Save" size={16} /></button>}
+      {IS_PORTFOLIO_ADMIN_MODE && <button onClick={publishPortfolioJson} disabled={isPublishingPortfolio || !canWriteAssets} className={`p-2 rounded-full transition ${isPublishingPortfolio || !canWriteAssets ? "text-emerald-100/35" : "text-emerald-200/85 hover:bg-emerald-500/20 hover:text-emerald-100"}`} title={!canWriteAssets ? assetCapabilityReason : isPublishingPortfolio ? "正在保存到代码仓库" : "保存作品集数据到代码仓库"}><Icon name="Save" size={16} /></button>}
       <div className={`h-2.5 w-2.5 rounded-full ${loadSource.includes("draft") ? "bg-emerald-400" : "bg-cyan-400"}`} title={statusMessage} />
     </div>)}
     {IS_EDITOR_MODE && !useGalleryWorldHome && <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />}
     {IS_EDITOR_MODE && !useGalleryWorldHome && <div className="fixed top-0 left-0 w-full h-[2px] bg-white/[0.02] z-50"><div className={`h-full ${currentTheme.line} transition-all duration-500 ease-out`} style={{ width: `${((currentSlide + 1) / slidesData.length) * 100}%` }} /></div>}
+    {showAssetManager && IS_EDITOR_MODE && !useGalleryWorldHome && (() => {
+      const searchKeyword = String(assetSearch || "").trim().toLowerCase();
+      const visibleAssets = assetLibrary
+        .filter((item) => {
+          if (assetFilter === "all") return true;
+          if (assetFilter === "uploaded" && !item?.isUploaded) return false;
+          if (assetFilter === "image" && item?.kind !== "image") return false;
+          if (assetFilter === "video" && item?.kind !== "video") return false;
+          return true;
+        })
+        .filter((item) => {
+          if (!searchKeyword) return true;
+          const value = `${item?.name || ""} ${item?.path || ""} ${item?.url || ""}`.toLowerCase();
+          return value.includes(searchKeyword);
+        });
+      const readableSize = (value) => {
+        const size = Number(value || 0);
+        if (!Number.isFinite(size) || size <= 0) return "0 B";
+        if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+        if (size >= 1024) return `${(size / 1024).toFixed(1)} KB`;
+        return `${size} B`;
+      };
+      return <div className="fixed inset-0 z-[65] flex items-start justify-center bg-black/85 backdrop-blur-lg p-4 sm:p-6 overflow-y-auto" onClick={closeAssetManager}>
+        <div className="relative w-full max-w-5xl bg-[#0d1116] border border-white/10 rounded-2xl shadow-2xl" onClick={(event) => event.stopPropagation()}>
+          <div className="sticky top-0 z-10 border-b border-white/10 bg-[#0d1116]/95 rounded-t-2xl px-4 py-3 sm:px-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-white">素材库管理</h3>
+                <p className="text-xs text-white/55">选择素材后可直接替换当前媒体位，或复制路径用于手工粘贴。</p>
+              </div>
+              <button type="button" onClick={closeAssetManager} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/80 hover:bg-white/10">关闭</button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/70">
+              <span className="inline-flex items-center rounded-full border border-white/15 px-2.5 py-1">当前分支：{assetLibraryBranch || "unknown"}</span>
+              <span className="inline-flex items-center rounded-full border border-white/15 px-2.5 py-1">目标：{assetManagerTarget ? `${assetManagerTarget.label || "媒体位"}` : "仅复制路径"}</span>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <input value={assetSearch} onChange={(event) => setAssetSearch(event.target.value)} placeholder="搜索文件名/路径" className="w-full sm:w-64 rounded-xl border border-white/15 bg-white/5 text-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-cyan-300/40" />
+              <button type="button" onClick={loadPortfolioAssets} disabled={!canListAssets || isAssetLibraryLoading} title={canListAssets ? "刷新素材库" : assetCapabilityReason} className="rounded-xl border border-cyan-300/20 bg-cyan-500/10 text-cyan-100 px-3 py-2 hover:bg-cyan-500/20 text-sm disabled:opacity-60">刷新</button>
+              <div className="ml-auto flex items-center gap-2">
+                {["all", "uploaded", "image", "video"].map((filter) => <button
+                  type="button"
+                  key={filter}
+                  onClick={() => setAssetFilter(filter)}
+                  className={`rounded-full border px-2.5 py-1 text-xs ${assetFilter === filter ? "border-cyan-300/40 bg-cyan-500/20 text-cyan-100" : "border-white/15 text-white/70 hover:bg-white/10"}`}>
+                  {filter === "all" ? "全部" : filter === "uploaded" ? "仅可删" : filter === "image" ? "图片" : "视频"}
+                </button>)}
+              </div>
+            </div>
+            <div className="mt-2 text-[11px] text-white/50">{assetLibraryStatus || adminCapabilityStatus || "已就绪"}，共 {visibleAssets.length} 项</div>
+            {assetDiagnostics?.diagnostics?.length ? <div className="mt-2 grid gap-1 text-[11px] text-white/45">
+              {assetDiagnostics.diagnostics.slice(0, 4).map((item) => <span key={`${item.code}-${item.message}`} className={item.level === "error" ? "text-rose-300/80" : item.level === "warn" ? "text-amber-200/80" : "text-cyan-100/65"}>{item.message}</span>)}
+            </div> : null}
+          </div>
+          <div className="max-h-[62vh] overflow-auto divide-y divide-white/10">
+            {visibleAssets.length === 0 && <div className="p-6 text-sm text-white/60">当前过滤条件下暂无素材。</div>}
+            {visibleAssets.map((asset, assetIndex) => {
+              const assetPath = normalizeRepoMediaPath(asset?.path || asset?.url || "");
+              const references = Array.isArray(asset?.references) ? asset.references : [];
+              const hasReferences = references.length > 0;
+              return <div key={assetPath || `asset-${assetIndex}`} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 flex items-start gap-3">
+                  <span className="mt-1 inline-flex h-2 w-2 rounded-full bg-cyan-400/80" />
+                  <div className="min-w-0">
+                    <div className="text-sm text-white font-mono break-all">{asset?.name || assetPath || "未命名素材"}</div>
+                    <div className="text-xs text-white/55 break-all">
+                      {assetPath || "路径为空"}
+                      <span className="ml-2 inline-flex rounded-full border border-white/15 px-2 py-0.5">{asset?.kind || "image"}</span>
+                      <span className="ml-2 text-white/45">{readableSize(asset?.size)}</span>
+                      {asset?.isUploaded ? <span className="ml-2 text-emerald-200/80">可删除</span> : <span className="ml-2 text-white/35">仅预览</span>}
+                      {asset?.inGalleryLibrary ? <span className="ml-2 text-cyan-200/80">素材库引用</span> : null}
+                    </div>
+                    {hasReferences && <div className="text-[11px] text-white/45">引用来源：{references.map((entry) => entry?.source).filter(Boolean).slice(0, 3).join("；")}{references.length > 3 ? `；等 ${references.length - 3} 项` : ""}</div>}
+                    {asset?.deleteBlockedReason ? <div className="text-[11px] text-rose-300/80">{asset.deleteBlockedReason}</div> : null}
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button type="button" onClick={() => copyAssetPath(asset)} className="rounded-full border border-white/15 px-3 py-1.5 text-xs text-white/75 hover:bg-white/10"><Icon name="Copy" size={12} /> 复制</button>
+                  <button type="button" onClick={() => useAssetForTarget(asset)} disabled={assetManagerTarget ? (!canWriteAssets || isApplyingAsset) : false} title={assetManagerTarget && !canWriteAssets ? assetCapabilityReason : ""} className={`rounded-full border px-3 py-1.5 text-xs disabled:opacity-60 ${assetManagerTarget ? "border-cyan-300/30 bg-cyan-500/15 text-cyan-100 hover:bg-cyan-500/25" : "border-white/15 text-white/75 hover:bg-white/10"}`}>
+                    <Icon name="UploadCloud" size={12} /> {assetManagerTarget ? (isApplyingAsset ? "保存中..." : "替换上线") : "复制路径"}
+                  </button>
+                  {asset?.canDelete && <button type="button" onClick={() => deletePortfolioAsset(asset)} disabled={!canDeleteAssets || deletingAssetPath === assetPath} title={canDeleteAssets ? "删除未引用上传素材" : assetCapabilityReason} className="rounded-full border border-rose-300/25 bg-rose-500/10 px-3 py-1.5 text-xs text-rose-100 hover:bg-rose-500/20 disabled:opacity-60">{deletingAssetPath === assetPath ? "删除中..." : "删除"}</button>}
+                </div>
+              </div>;
+            })}
+          </div>
+        </div>
+      </div>;
+    })()}
   </div>;
 }
 

@@ -776,7 +776,7 @@ export async function syncPortfolioArtifacts(options = {}) {
   const sourceMeta = importedModel
     ? importedModel.meta
     : metaSource
-      ? normalizeSiteMeta(metaSource)
+      ? normalizeSiteMeta({ ...repoPortfolioModel.meta, ...metaSource })
       : repoPortfolioModel.meta;
   const sourceCases = importedModel
     ? importedModel.cases

@@ -2,6 +2,7 @@
 Thumbs.db
 desktop.ini
 dist/
+output/
 .dp/
 /.desktop-*.json
 /after-*.png

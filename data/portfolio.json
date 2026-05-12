@@ -1,7 +1,7 @@
 {
   "meta": {
     "siteTitle": "张玮｜AIGC 视觉作品集",
-    "siteDescription": "张玮的 AIGC 商业视觉作品集，展示图像生成、视频制作、电商产品图、品牌海报、短视频素材与创作流程。",
+    "siteDescription": "张玮的 AIGC 视觉作品集，展示商业视觉、AI 视频、产品主图、品牌海报与 ComfyUI 工作流能力。",
     "siteKeywords": [
       "AIGC",
       "作品集",
@@ -14,11 +14,11 @@
     ],
     "canonicalUrl": "https://www.zhangweivisual.cn/",
     "ogTitle": "张玮｜AIGC 视觉作品集",
-    "ogDescription": "用 AIGC、3D 与视频生成工作流呈现商业视觉作品。",
+    "ogDescription": "AIGC Visual Designer 作品集，覆盖商业视觉、AI 视频与 ComfyUI Workflow。",
     "ogImage": "images/works/hotel/poster.webp",
     "twitterCard": "summary_large_image",
     "caseSectionTitle": "商业视觉案例",
-    "caseSectionDesc": "精选能够说明图像生成、视频生成、风格控制与交付整理能力的项目。",
+    "caseSectionDesc": "精选能够说明产品主图、包装视觉、品牌空间和风格控制能力的项目。",
     "contactSectionTitle": "联系我",
     "contactSectionDesc": "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
     "formspreeEndpoint": "",
@@ -136,7 +136,7 @@
       "id": 2,
       "type": "split",
       "title": "Profile | 个人简介",
-      "text": "AIGC 视觉与视频创作经历说明，后台保留为资料页，公开作品集不作为主展示区。",
+      "text": "AIGC 视觉与视频创作经历说明，聚焦商业视觉、生成式视频和作品整理能力。",
       "slots": 1,
       "slotType": "image",
       "media": [
@@ -151,7 +151,7 @@
         }
       ],
       "textBlocks": [
-        "AIGC 视觉与视频创作经历说明，后台保留为资料页，公开作品集不作为主展示区。"
+        "AIGC 视觉与视频创作经历说明，聚焦商业视觉、生成式视频和作品整理能力。"
       ]
     },
     {
