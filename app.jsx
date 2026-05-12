@@ -6009,7 +6009,7 @@ function App() {
         detail
       };
     });
-    const visibleVideoEntries = homepageVideoEntries.slice(0, 3);
+    const visibleVideoEntries = homepageVideoEntries;
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")}>
