@@ -22,7 +22,27 @@
     "contactSectionTitle": "联系我",
     "contactSectionDesc": "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
     "formspreeEndpoint": "",
-    "contactCtaLabel": "查看联系方式"
+    "contactCtaLabel": "查看联系方式",
+    "homepageDesigner": {
+      "works": {
+        "gallery-portal": {
+          "media": {
+            "kind": "image",
+            "url": "images/uploads/2026/05/20260512T185918Z-8198787bc650-ChatGPT-Image-2026-5-13-00_17_53-2.png",
+            "fullUrl": "images/uploads/2026/05/20260512T185918Z-8198787bc650-ChatGPT-Image-2026-5-13-00_17_53-2.png",
+            "poster": "",
+            "alt": "ChatGPT Image 2026年5月13日 00_17_53 (2).png",
+            "label": "ChatGPT Image 2026年5月13日 00_17_53 (2).png",
+            "width": 1672,
+            "height": 941,
+            "curatedHidden": false,
+            "curatedCategory": "",
+            "workflowAbility": "",
+            "workflowOutcome": ""
+          }
+        }
+      }
+    }
   },
   "cases": [
     {
