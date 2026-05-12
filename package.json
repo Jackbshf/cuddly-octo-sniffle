@@ -8,12 +8,15 @@
     "sync:stream": "node scripts/media/sync-cloudflare-stream.mjs",
     "prepare:static": "node scripts/prepare-static.mjs",
     "deploy:worker": "wrangler deploy --config wrangler.jsonc --assets=./dist",
+    "deploy:preview": "wrangler deploy --config wrangler.jsonc --assets=./dist --name floral-leaf-4e44-preview",
     "deploy:worker:version": "wrangler versions upload --config wrangler.jsonc --assets=./dist",
+    "qa:homepage:preview": "node scripts/qa/homepage-preview-qa.mjs",
     "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
     "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",
     "validate:prompts": "node scripts/prompts/validate-general-prompts.mjs"
   },
   "dependencies": {
+    "framer-motion": "12.38.0",
     "hls.js": "^1.6.16",
     "react": "18.3.1",
     "react-dom": "18.3.1",
