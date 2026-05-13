@@ -754,7 +754,10 @@ const HOMEPAGE_CURATION = {
     "video-skincare-elixir-water",
     "video-ev-studio-lighting",
     "video-ice-maker-cubes",
-    "video-mattress-healing-bedroom"
+    "video-mattress-healing-bedroom",
+    "gallery-video-d9",
+    "video-social-series",
+    "video-digital-human"
   ],
   commercialImageCaseIds: [
     "case-product-ad",
@@ -827,6 +830,13 @@ const HOMEPAGE_CURATION = {
     "workflow-proof-style-variation",
     "workflow-proof-delivery-review"
   ]
+};
+
+const WORKFLOW_EVIDENCE_NOTES = {
+  "workflow-proof-overview": "用于说明素材输入、节点组织和结果筛选链路。",
+  "workflow-proof-control-chain": "用于说明人物参考、遮罩控制和局部修正方式。",
+  "workflow-proof-style-variation": "用于说明场景参考、参数调整和风格对照过程。",
+  "workflow-proof-delivery-review": "用于说明多版本筛选、标记和交付整理方法。"
 };
 
 const colorPalettes = [
@@ -6243,7 +6253,7 @@ function App() {
       description: `${homepageWorkflowEvidenceEntries.length} 类流程证明，展示节点组织、控制和筛选方式。`,
       item: homepageWorkflowEvidenceEntries[0]
     }
-  ].filter((card) => card.item);
+  ].filter((card) => card.item && card.key !== "gallery-entry");
 
   const renderCuratedLayoutStyles = () => null;
 
@@ -6874,9 +6884,9 @@ function App() {
             const isActive = index === normalizedActiveIndex;
             const isDistant = distance > 3;
             const style = {
-              "--video-wheel-x": `${offset * 72}px`,
-              "--video-wheel-z": `${-distance * 70}px`,
-              "--video-wheel-rotate": `${offset * -18}deg`,
+              "--video-wheel-x": `${offset * 60}px`,
+              "--video-wheel-z": `${-distance * 62}px`,
+              "--video-wheel-rotate": `${offset * -14}deg`,
               "--video-wheel-scale": Math.max(0.68, 1 - distance * 0.08),
               "--video-wheel-opacity": isDistant ? 0 : Math.max(0.28, 1 - distance * 0.18),
               "--video-wheel-layer": String(20 - distance)
@@ -6999,8 +7009,10 @@ function App() {
       return null;
     }
     const detail = buildWorkflowEvidenceDetail(item, index);
+    const workflowNote = WORKFLOW_EVIDENCE_NOTES[detail.curation?.id || detail.id] || detail.description;
     return <article key={detail.id} className="curated-workflow-card curated-workflow-card-image-only" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} aria-label={detail.title} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, variant: "workflow", workId: detail.curation?.id })}
+      {workflowNote && <p className="curated-workflow-note">{workflowNote}</p>}
     </article>;
   };
 
@@ -7626,12 +7638,12 @@ function App() {
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
-      featured: { label: "精选入口", eyebrow: "精选入口", title: "面试官最先需要看到的能力入口", description: "按视频、商业案例、能力矩阵、视觉作品和工作流拆分，快速建立作品集结构。" },
+      featured: { label: "精选入口", eyebrow: "精选入口", title: "面试官最先需要看到的能力入口", description: "按视频、商业案例、能力矩阵和工作流拆分，快速建立作品集结构。" },
       videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频 / 商业短片精选", description: `精选 ${homepageVideoEntries.length} 条 AI 视频，涵盖人物、产品、场景与商业短片。` },
       cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "精选商业案例", description: "用产品广告、美妆场景、品牌空间和包装礼盒四个方向说明商业视觉能力。" },
       capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "6 个能力对应 6 套商业案例板，完整展示策略、创意、到视觉落地的闭环。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
-      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI Workflow / 创作流程", description: "用工作流截图和步骤卡说明从输入、控制、筛选到作品整理的可复盘过程。" },
+      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI Workflow / 创作流程", description: "用工作流截图说明从输入、控制、筛选到作品整理的可复盘过程。" },
       contact: { label: "联系", title: siteMeta.contactSectionTitle || "联系我", description: siteMeta.contactSectionDesc || "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。" }
     };
     const homeSection = getDesignerSection("home", sectionDefaults.home);
@@ -7725,7 +7737,7 @@ function App() {
 
       {!isHomepageSectionHidden("process") && <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(6, processSection.eyebrow)}
+          {renderCuratedEyebrow(5, processSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
             <h2>{processSection.title}</h2>
             <p>{processSection.description}</p>
