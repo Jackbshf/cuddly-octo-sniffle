@@ -7822,6 +7822,8 @@ html {
 
 .curated-page .curated-hero {
   padding: 0;
+  background:
+    linear-gradient(180deg, rgba(6, 17, 26, 0.98) 0%, rgba(3, 9, 13, 0.98) 58%, #02070a 100%);
 }
 
 .curated-page .curated-hero-container {
@@ -7939,6 +7941,7 @@ html {
   border-radius: 999px;
   border-color: rgba(120, 210, 255, 0.3);
   background: rgba(5, 14, 22, 0.68);
+  color: rgba(246, 251, 255, 0.94);
 }
 
 .curated-page .curated-hero-actions a:first-child {
