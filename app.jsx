@@ -2642,6 +2642,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("正在载入发布数据...");
   const [visualFilter, setVisualFilter] = useState("all");
   const [visibleVideoCount, setVisibleVideoCount] = useState(6);
+  const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [visibleVisualCount, setVisibleVisualCount] = useState(24);
   const [activeCuratedSection, setActiveCuratedSection] = useState("home");
   const [selectedWorkItem, setSelectedWorkItem] = useState(null);
@@ -6581,6 +6582,145 @@ function App() {
     </article>;
   };
 
+  const renderVideoSelectorPreview = (item, detail, options = {}) => {
+    const media = normalizeMediaItem(item?.mediaEntry?.media);
+    const previewSource = getDisplayUrl(media);
+    const label = detail?.title || media?.alt || "视频预览";
+    return <div className={cx("curated-video-selector-preview", options.compact && "is-compact")}>
+      {previewSource ? <img src={previewSource} alt={label} loading="lazy" decoding="async" /> : <div className="curated-static-fallback">
+        <Icon name="Play" size={18} />
+        <span>视频预览</span>
+      </div>}
+      <span className="curated-video-badge">VIDEO</span>
+      {detail?.duration && <span className="curated-video-duration">{detail.duration}</span>}
+    </div>;
+  };
+
+  const renderVideoWheelSelector = (items) => {
+    const videoItems = items.filter((item) => {
+      const classification = item?.classification || classifyHomepageWork(item);
+      if (classification?.isPlayableVideo) return true;
+      reportHomepageCurationGuard("error", "VideoWheelSelector received non-video work", item?.curation || item);
+      return false;
+    });
+    const itemCount = videoItems.length;
+    if (!itemCount) return null;
+    const normalizedActiveIndex = ((activeVideoIndex % itemCount) + itemCount) % itemCount;
+    const details = videoItems.map((item, index) => buildVideoWorkDetail(item, index));
+    const activeItem = videoItems[normalizedActiveIndex];
+    const activeDetail = details[normalizedActiveIndex];
+    const selectVideoIndex = (index) => setActiveVideoIndex(((index % itemCount) + itemCount) % itemCount);
+    const moveVideoIndex = (offset) => selectVideoIndex(normalizedActiveIndex + offset);
+    const getWheelOffset = (index) => {
+      let offset = index - normalizedActiveIndex;
+      if (offset > itemCount / 2) offset -= itemCount;
+      if (offset < -itemCount / 2) offset += itemCount;
+      return offset;
+    };
+    const handleWheelCardKeyDown = (event, index) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectVideoIndex(index);
+      } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        moveVideoIndex(1);
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        moveVideoIndex(-1);
+      }
+    };
+
+    return <div className="curated-video-wheel" data-video-count={itemCount}>
+      <article
+        key={activeDetail.id}
+        className="curated-video-feature"
+        data-curation-section="video-featured"
+        data-curation-id={activeDetail.curation?.id || activeDetail.id}
+        data-curation-category={activeDetail.curation?.category || ""}
+        data-curation-kind={activeDetail.kind}
+        tabIndex={0}
+        onClick={() => openWorkDetail(activeDetail)}
+        onKeyDown={(event) => openWorkDetailFromKeyboard(event, activeDetail)}
+        {...getDesignerWorkProps(activeDetail.curation?.id, activeDetail.title)}
+      >
+        {renderCuratedMediaBox(activeItem.entry, activeItem.mediaEntry, {
+          compact: true,
+          disableInlinePreview: true,
+          label: activeDetail.title,
+          duration: activeDetail.duration,
+          variant: "video",
+          workId: activeDetail.curation?.id
+        })}
+        <div className="curated-video-copy curated-video-feature-copy">
+          <span>{activeDetail.label}</span>
+          <h3>{activeDetail.title}</h3>
+          <p>{activeDetail.description}</p>
+          <div className="curated-card-tags">
+            <span>视频</span>
+            {activeDetail.duration && <span>{activeDetail.duration}</span>}
+            <span>可播放</span>
+          </div>
+          <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(activeDetail); }}>查看详情</button>
+        </div>
+      </article>
+      <div className="curated-video-wheel-panel" aria-label="视频选择器">
+        <div className="curated-video-wheel-controls">
+          <button type="button" onClick={() => moveVideoIndex(-1)} aria-label="上一个视频"><Icon name="ChevronLeft" size={15} />上一个</button>
+          <strong>{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(itemCount).padStart(2, "0")}</strong>
+          <button type="button" onClick={() => moveVideoIndex(1)} aria-label="下一个视频">下一个<Icon name="ChevronRight" size={15} /></button>
+        </div>
+        <div className="curated-video-stage" aria-label="3D 视频滚轮">
+          {videoItems.map((item, index) => {
+            const detail = details[index];
+            const offset = getWheelOffset(index);
+            const distance = Math.abs(offset);
+            const isActive = index === normalizedActiveIndex;
+            const isDistant = distance > 3;
+            const style = {
+              "--video-wheel-x": `${offset * 72}px`,
+              "--video-wheel-z": `${-distance * 70}px`,
+              "--video-wheel-rotate": `${offset * -18}deg`,
+              "--video-wheel-scale": Math.max(0.68, 1 - distance * 0.08),
+              "--video-wheel-opacity": isDistant ? 0 : Math.max(0.28, 1 - distance * 0.18),
+              "--video-wheel-layer": String(20 - distance)
+            };
+            return <article
+              key={detail.id}
+              className={cx("curated-video-wheel-card", isActive && "is-active", isDistant && "is-distant")}
+              style={style}
+              tabIndex={isDistant ? -1 : 0}
+              aria-hidden={isDistant ? "true" : undefined}
+              aria-label={`选择视频：${detail.title}`}
+              onClick={() => selectVideoIndex(index)}
+              onKeyDown={(event) => handleWheelCardKeyDown(event, index)}
+            >
+              {renderVideoSelectorPreview(item, detail)}
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{detail.title}</strong>
+            </article>;
+          })}
+        </div>
+      </div>
+      <div className="curated-video-strip" role="listbox" aria-label="选择视频">
+        {videoItems.map((item, index) => {
+          const detail = details[index];
+          const isActive = index === normalizedActiveIndex;
+          return <button
+            key={detail.id}
+            type="button"
+            role="option"
+            aria-selected={isActive}
+            className={isActive ? "is-active" : ""}
+            onClick={() => selectVideoIndex(index)}
+          >
+            {renderVideoSelectorPreview(item, detail, { compact: true })}
+            <span>{String(index + 1).padStart(2, "0")}</span>
+          </button>;
+        })}
+      </div>
+    </div>;
+  };
+
   const renderFeaturedCaseCard = (service, index) => {
     const { caseItem } = service;
     const caseClassification = service.curatedItem?.classification || classifyHomepageWork(service.curation);
@@ -7358,7 +7498,7 @@ function App() {
             <h2>{videoSection.title}</h2>
             <p>{videoSection.description}</p>
           </div>
-          <div className="curated-video-grid">{visibleVideoEntries.map(renderVideoWorkCard)}</div>
+          {renderVideoWheelSelector(visibleVideoEntries)}
         </div>
       </section>}
 
