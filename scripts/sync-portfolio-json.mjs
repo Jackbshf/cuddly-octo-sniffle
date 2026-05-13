@@ -261,6 +261,30 @@ const normalizeSlide = (slide) => {
 
 const normalizeSlides = (slides) => Array.isArray(slides) ? slides.map(normalizeSlide) : [];
 
+const normalizeHomepageDesignerBlocks = (blocks = {}) => {
+  const source = blocks && typeof blocks === "object" ? blocks : {};
+  return Object.fromEntries(Object.entries(source)
+    .map(([blockId, block]) => [
+      ensureString(blockId).trim(),
+      {
+        ...(block && typeof block === "object" ? block : {}),
+        hidden: block?.hidden === true
+      }
+    ])
+    .filter(([blockId]) => blockId));
+};
+
+const normalizeHomepageDesigner = (designer = {}) => {
+  const source = designer && typeof designer === "object" ? designer : {};
+  return {
+    ...source,
+    sections: source.sections && typeof source.sections === "object" ? source.sections : {},
+    works: source.works && typeof source.works === "object" ? source.works : {},
+    blocks: normalizeHomepageDesignerBlocks(source.blocks),
+    theme: source.theme && typeof source.theme === "object" ? source.theme : {}
+  };
+};
+
 const normalizeSiteMeta = (meta) => ({
   ...DEFAULT_SITE_META,
   ...(meta && typeof meta === "object" ? meta : {}),
@@ -277,7 +301,8 @@ const normalizeSiteMeta = (meta) => ({
   contactSectionTitle: ensureString(meta?.contactSectionTitle, DEFAULT_SITE_META.contactSectionTitle),
   contactSectionDesc: ensureString(meta?.contactSectionDesc, DEFAULT_SITE_META.contactSectionDesc),
   formspreeEndpoint: ensureString(meta?.formspreeEndpoint, DEFAULT_SITE_META.formspreeEndpoint),
-  contactCtaLabel: ensureString(meta?.contactCtaLabel, DEFAULT_SITE_META.contactCtaLabel)
+  contactCtaLabel: ensureString(meta?.contactCtaLabel, DEFAULT_SITE_META.contactCtaLabel),
+  homepageDesigner: normalizeHomepageDesigner(meta?.homepageDesigner)
 });
 
 const normalizeResults = (value) => {

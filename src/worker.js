@@ -1216,6 +1216,30 @@ function normalizeLibrary(raw) {
   };
 }
 
+function normalizePortfolioHomepageBlocks(blocks = {}) {
+  const source = blocks && typeof blocks === "object" ? blocks : {};
+  return Object.fromEntries(Object.entries(source)
+    .map(([blockId, block]) => [
+      cleanText(blockId),
+      {
+        ...(block && typeof block === "object" ? block : {}),
+        hidden: block?.hidden === true
+      }
+    ])
+    .filter(([blockId]) => blockId));
+}
+
+function normalizePortfolioHomepageDesigner(designer = {}) {
+  const source = designer && typeof designer === "object" ? designer : {};
+  return {
+    ...source,
+    sections: source.sections && typeof source.sections === "object" ? source.sections : {},
+    works: source.works && typeof source.works === "object" ? source.works : {},
+    blocks: normalizePortfolioHomepageBlocks(source.blocks),
+    theme: source.theme && typeof source.theme === "object" ? source.theme : {}
+  };
+}
+
 function normalizePortfolioMeta(raw) {
   const source = raw && typeof raw === "object" ? raw : {};
   return {
@@ -1233,7 +1257,8 @@ function normalizePortfolioMeta(raw) {
     contactSectionTitle: cleanText(source.contactSectionTitle),
     contactSectionDesc: cleanText(source.contactSectionDesc),
     formspreeEndpoint: cleanText(source.formspreeEndpoint),
-    contactCtaLabel: cleanText(source.contactCtaLabel)
+    contactCtaLabel: cleanText(source.contactCtaLabel),
+    homepageDesigner: normalizePortfolioHomepageDesigner(source.homepageDesigner)
   };
 }
 

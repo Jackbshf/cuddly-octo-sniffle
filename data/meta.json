@@ -23,6 +23,11 @@
   "formspreeEndpoint": "",
   "contactCtaLabel": "查看联系方式",
   "homepageDesigner": {
+    "blocks": {
+      "process.workflowLab": {
+        "hidden": true
+      }
+    },
     "works": {
       "gallery-portal": {
         "media": {
@@ -40,6 +45,8 @@
           "workflowOutcome": ""
         }
       }
-    }
+    },
+    "sections": {},
+    "theme": {}
   }
 }

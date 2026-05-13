@@ -24,6 +24,11 @@ window.__EMBEDDED_PORTFOLIO__ = {
     "formspreeEndpoint": "",
     "contactCtaLabel": "查看联系方式",
     "homepageDesigner": {
+      "blocks": {
+        "process.workflowLab": {
+          "hidden": true
+        }
+      },
       "works": {
         "gallery-portal": {
           "media": {
@@ -41,7 +46,9 @@ window.__EMBEDDED_PORTFOLIO__ = {
             "workflowOutcome": ""
           }
         }
-      }
+      },
+      "sections": {},
+      "theme": {}
     }
   },
   "cases": [

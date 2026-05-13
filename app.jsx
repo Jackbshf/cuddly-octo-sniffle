@@ -876,6 +876,29 @@ const HOMEPAGE_ELEMENT_STYLE_PRESETS = [
   { id: "compact", label: "紧凑" }
 ];
 
+const HOMEPAGE_SECTION_VISIBILITY_OPTIONS = [
+  { id: "featured", label: "精选入口" },
+  { id: "videos", label: "视频精选" },
+  { id: "cases", label: "精选案例" },
+  { id: "capabilities", label: "能力矩阵" },
+  { id: "process", label: "工作流模块" },
+  { id: "contact", label: "联系模块" }
+];
+
+const HOMEPAGE_PROCESS_BLOCKS = [
+  { id: "process.workflowEvidence", label: "工作流证明" },
+  { id: "process.workflowLab", label: "三步流程卡" },
+  { id: "process.steps", label: "流程步骤" },
+  { id: "process.skills", label: "技能标签" }
+];
+
+const HOMEPAGE_BLOCK_DEFAULTS = {
+  "process.workflowEvidence": { hidden: false },
+  "process.workflowLab": { hidden: true },
+  "process.steps": { hidden: false },
+  "process.skills": { hidden: false }
+};
+
 const getPresetById = (presets, presetId, fallbackId) => presets.find((preset) => preset.id === presetId) || presets.find((preset) => preset.id === fallbackId) || presets[0];
 
 const normalizeHomepageDesignerTheme = (theme = {}) => ({
@@ -899,6 +922,38 @@ const getHomepageDesignerThemeStyle = (theme = {}) => {
     "--curated-heading-gap": density.headingGap,
     "--curated-card-gap": density.cardGap,
     ...color.style
+  };
+};
+
+const normalizeHomepageDesignerBlocks = (blocks = {}) => {
+  const source = blocks && typeof blocks === "object" ? blocks : {};
+  const normalized = {};
+  Object.entries(HOMEPAGE_BLOCK_DEFAULTS).forEach(([blockId, defaults]) => {
+    const current = source[blockId] && typeof source[blockId] === "object" ? source[blockId] : {};
+    normalized[blockId] = {
+      ...defaults,
+      ...current,
+      hidden: current.hidden === undefined ? defaults.hidden === true : current.hidden === true
+    };
+  });
+  Object.entries(source).forEach(([blockId, block]) => {
+    if (normalized[blockId]) return;
+    normalized[blockId] = {
+      ...(block && typeof block === "object" ? block : {}),
+      hidden: block?.hidden === true
+    };
+  });
+  return normalized;
+};
+
+const normalizeHomepageDesignerConfig = (designer = {}) => {
+  const source = designer && typeof designer === "object" ? designer : {};
+  return {
+    ...source,
+    sections: source.sections && typeof source.sections === "object" ? source.sections : {},
+    works: source.works && typeof source.works === "object" ? source.works : {},
+    blocks: normalizeHomepageDesignerBlocks(source.blocks),
+    theme: normalizeHomepageDesignerTheme(source.theme)
   };
 };
 
@@ -1257,7 +1312,8 @@ const normalizeSiteMeta = (meta) => ({
   contactSectionTitle: ensureString(meta?.contactSectionTitle, DEFAULT_SITE_META.contactSectionTitle),
   contactSectionDesc: ensureString(meta?.contactSectionDesc, DEFAULT_SITE_META.contactSectionDesc),
   formspreeEndpoint: ensureString(meta?.formspreeEndpoint, DEFAULT_SITE_META.formspreeEndpoint),
-  contactCtaLabel: ensureString(meta?.contactCtaLabel, DEFAULT_SITE_META.contactCtaLabel)
+  contactCtaLabel: ensureString(meta?.contactCtaLabel, DEFAULT_SITE_META.contactCtaLabel),
+  homepageDesigner: normalizeHomepageDesignerConfig(meta?.homepageDesigner)
 });
 
 const normalizeCaseItem = (item) => {
@@ -2658,6 +2714,9 @@ function App() {
   const canWriteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.upload === true && assetCapabilities.replace === true;
   const canDeleteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.delete === true;
   const assetCapabilityReason = assetCapabilities.reason || adminCapabilityStatus || "Asset tools are not ready yet.";
+  const homepageDesignerState = normalizeHomepageDesignerConfig(normalizeSiteMeta(portfolioData?.meta).homepageDesigner);
+  const isHomepageSectionHidden = (sectionId) => sectionId !== "home" && homepageDesignerState.sections?.[sectionId]?.hidden === true;
+  const isHomepageBlockHidden = (blockId) => homepageDesignerState.blocks?.[blockId]?.hidden === true;
 
   const curatedNavItems = [
     { id: "home", label: "首页" },
@@ -2667,7 +2726,7 @@ function App() {
     { id: "capabilities", label: "能力" },
     { id: "process", label: "流程" },
     { id: "contact", label: "联系" }
-  ];
+  ].filter((item) => !isHomepageSectionHidden(item.id));
   const curatedSectionIds = curatedNavItems.map((item) => item.id);
 
   const closeMediaLightbox = () => setLightboxData(null);
@@ -3568,13 +3627,7 @@ function App() {
 
   const getHomepageDesignerState = (model = portfolioData) => {
     const meta = normalizeSiteMeta(model?.meta);
-    const designer = meta.homepageDesigner && typeof meta.homepageDesigner === "object" ? meta.homepageDesigner : {};
-    return {
-      ...designer,
-      sections: designer.sections && typeof designer.sections === "object" ? designer.sections : {},
-      works: designer.works && typeof designer.works === "object" ? designer.works : {},
-      theme: normalizeHomepageDesignerTheme(designer.theme)
-    };
+    return normalizeHomepageDesignerConfig(meta.homepageDesigner);
   };
 
   const cleanDesignerWorkPatch = (patch = {}) => {
@@ -3640,6 +3693,30 @@ function App() {
     });
     setLoadSource("draft");
     setStatusMessage("已更新页面文案草稿，保存后才会上线。");
+  };
+
+  const updateHomepageDesignerBlock = (blockId, patch) => {
+    if (!blockId) return;
+    setPortfolioData((current) => {
+      const next = createPortfolioModel(current);
+      const meta = normalizeSiteMeta(next.meta);
+      const designer = getHomepageDesignerState(next);
+      const blocks = { ...designer.blocks };
+      blocks[blockId] = {
+        ...(blocks[blockId] && typeof blocks[blockId] === "object" ? blocks[blockId] : {}),
+        hidden: patch?.hidden === true
+      };
+      next.meta = {
+        ...meta,
+        homepageDesigner: {
+          ...designer,
+          blocks
+        }
+      };
+      return next;
+    });
+    setLoadSource("draft");
+    setStatusMessage("已更新页面模块显示草稿，保存后才会上线。");
   };
 
   const updateHomepageDesignerTheme = (patch) => {
@@ -6916,6 +6993,49 @@ function App() {
       </div>
     </div>;
 
+    const renderVisibilityToggle = (label, isVisible, onToggle) => <div className="curated-inspector-group">
+      <span>{label}</span>
+      <div className="curated-preset-row">
+        <button type="button" className={cx("curated-preset-button", isVisible && "is-active")} onClick={() => onToggle(!isVisible)}>
+          <em>{isVisible ? "显示中" : "已隐藏"}</em>
+        </button>
+      </div>
+    </div>;
+
+    const renderSectionVisibilityGroup = () => <div className="curated-inspector-group">
+      <span>页面模块显示</span>
+      <div className="curated-preset-row">
+        {HOMEPAGE_SECTION_VISIBILITY_OPTIONS.map((section) => {
+          const visible = !isHomepageSectionHidden(section.id);
+          return <button
+            key={section.id}
+            type="button"
+            className={cx("curated-preset-button", visible && "is-active")}
+            onClick={() => updateHomepageDesignerSection(section.id, { hidden: visible })}
+          >
+            <em>{section.label} / {visible ? "显示" : "隐藏"}</em>
+          </button>;
+        })}
+      </div>
+    </div>;
+
+    const renderProcessBlockVisibilityGroup = () => <div className="curated-inspector-group">
+      <span>流程子模块显示</span>
+      <div className="curated-preset-row">
+        {HOMEPAGE_PROCESS_BLOCKS.map((block) => {
+          const visible = !isHomepageBlockHidden(block.id);
+          return <button
+            key={block.id}
+            type="button"
+            className={cx("curated-preset-button", visible && "is-active")}
+            onClick={() => updateHomepageDesignerBlock(block.id, { hidden: visible })}
+          >
+            <em>{block.label} / {visible ? "显示" : "隐藏"}</em>
+          </button>;
+        })}
+      </div>
+    </div>;
+
     const updateSelectedWorkMedia = (patch) => {
       if (!selectedWork || !selectedWorkMedia) return;
       updateHomepageDesignerWork(selectedWork.id, {
@@ -6941,10 +7061,12 @@ function App() {
         {renderPresetGroup("颜色", HOMEPAGE_COLOR_PRESETS, theme.colorPreset, "colorPreset", { colors: true })}
         {renderPresetGroup("圆角", HOMEPAGE_RADIUS_PRESETS, theme.radiusPreset, "radiusPreset")}
         {renderPresetGroup("密度", HOMEPAGE_DENSITY_PRESETS, theme.densityPreset, "densityPreset")}
+        {renderSectionVisibilityGroup()}
       </section>
 
       {selectedSection && <section className="curated-inspector-section">
         <h3>模块内容</h3>
+        {nodeId !== "home" && renderVisibilityToggle("当前模块显示", !isHomepageSectionHidden(nodeId), (visible) => updateHomepageDesignerSection(nodeId, { hidden: !visible }))}
         {selectedSection.eyebrow !== undefined && <label>眉标
           <input value={selectedSection.eyebrow || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { eyebrow: event.target.value })} />
         </label>}
@@ -6961,6 +7083,7 @@ function App() {
           <input value={ensureStringArray(selectedSection.tags).join("，")} onChange={(event) => updateHomepageDesignerSection(nodeId, { tags: parseDesignerTags(event.target.value) })} />
         </label>}
         {renderStylePresetGroup((presetId) => updateHomepageDesignerSection(nodeId, { stylePreset: presetId }))}
+        {nodeId === "process" && renderProcessBlockVisibilityGroup()}
       </section>}
 
       {selectedWork && <section className="curated-inspector-section">
@@ -7173,7 +7296,7 @@ function App() {
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
       featured: { label: "精选入口", eyebrow: "精选入口", title: "面试官最先需要看到的能力入口", description: "按视频、商业案例、能力矩阵、视觉作品和工作流拆分，快速建立作品集结构。" },
-      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频 / 商业短片精选", description: "11 条视频作品集中展示，每张卡片都有视频标识、时长、播放入口和详情抽屉。" },
+      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频 / 商业短片精选", description: `精选 ${homepageVideoEntries.length} 条 AI 视频，涵盖人物、产品、场景与商业短片。` },
       cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "精选商业案例", description: "用产品广告、美妆场景、品牌空间和包装礼盒四个方向说明商业视觉能力。" },
       capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "6 个能力对应 6 套商业案例板，完整展示策略、创意、到视觉落地的闭环。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
@@ -7217,7 +7340,7 @@ function App() {
         </div>
       </section>
 
-      <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("featured") && <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(1, featuredSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("featured", "精选入口")}>
@@ -7226,9 +7349,9 @@ function App() {
           </div>
           <div className="curated-feature-grid">{homepageEntryCards.map(renderHomepageEntryCard)}</div>
         </div>
-      </section>
+      </section>}
 
-      <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("videos") && <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(2, videoSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("videos", "视频精选")}>
@@ -7237,9 +7360,9 @@ function App() {
           </div>
           <div className="curated-video-grid">{visibleVideoEntries.map(renderVideoWorkCard)}</div>
         </div>
-      </section>
+      </section>}
 
-      <section id="cases" className="curated-section" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("cases") && <section id="cases" className="curated-section" style={publishedSectionStyle}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(3, caseSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
@@ -7248,9 +7371,9 @@ function App() {
           </div>
           <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
         </div>
-      </section>
+      </section>}
 
-      <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("capabilities") && <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(4, capabilitySection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
@@ -7267,24 +7390,25 @@ function App() {
             />
           </figure>
         </div>
-      </section>
+      </section>}
 
-      <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("process") && <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(6, processSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
             <h2>{processSection.title}</h2>
             <p>{processSection.description}</p>
           </div>
-          <div className="curated-workflow-grid curated-workflow-evidence-grid">{visibleWorkflowEntries.map(renderWorkflowEvidenceCard)}</div>
-          <div className="curated-process-grid">
+          {!isHomepageBlockHidden("process.workflowEvidence") && <div className="curated-workflow-grid curated-workflow-evidence-grid">{visibleWorkflowEntries.map(renderWorkflowEvidenceCard)}</div>}
+          {!isHomepageBlockHidden("process.workflowLab") && <div className="curated-workflow-grid">{homepageWorkflowLabCards.map(renderWorkflowLabCard)}</div>}
+          {!isHomepageBlockHidden("process.steps") && <div className="curated-process-grid">
             {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
-          </div>
-          <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>
+          </div>}
+          {!isHomepageBlockHidden("process.skills") && <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>}
         </div>
-      </section>
+      </section>}
 
-      <section id="contact" className="curated-contact" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("contact") && <section id="contact" className="curated-contact" style={publishedSectionStyle}>
         <div className="portfolio-container curated-contact-container">
           <div {...getDesignerSectionProps("contact", "联系")}>
             <h2>{contactSection.title}</h2>
@@ -7297,7 +7421,7 @@ function App() {
             })}
           </div>
         </div>
-      </section>
+      </section>}
       {renderWorkDetailDrawer()}
       {renderMediaReplacementDialog()}
       {renderCuratedAdminDock()}
