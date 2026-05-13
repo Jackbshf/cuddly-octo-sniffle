@@ -2173,7 +2173,8 @@ const StreamVideoElement = ({
   onVideoPause,
   onVideoTimeUpdate,
   handleSurfaceClick,
-  audiblePreviewActive = false
+  audiblePreviewActive = false,
+  loop = true
 }) => {
   const internalVideoRef = useRef(null);
   const [nativeVideoSrc, setNativeVideoSrc] = useState("");
@@ -2228,7 +2229,7 @@ const StreamVideoElement = ({
     ref={internalVideoRef}
     src={nativeVideoSrc || undefined}
     data-media-source={sourceUrl || playbackUrl || ""}
-    loop
+    loop={loop}
     controls={showNativeVideoControls}
     data-audible-preview-active={audiblePreviewActive ? "true" : "false"}
     playsInline
@@ -2643,6 +2644,8 @@ function App() {
   const [visualFilter, setVisualFilter] = useState("all");
   const [visibleVideoCount, setVisibleVideoCount] = useState(6);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
+  const featuredVideoRef = useRef(null);
+  const [featuredVideoPlayback, setFeaturedVideoPlayback] = useState({ id: "", status: "poster", hasPlayed: false });
   const [visibleVisualCount, setVisibleVisualCount] = useState(24);
   const [activeCuratedSection, setActiveCuratedSection] = useState("home");
   const [selectedWorkItem, setSelectedWorkItem] = useState(null);
@@ -6582,12 +6585,152 @@ function App() {
     </article>;
   };
 
+  const getFeaturedVideoPlaybackState = (id) => featuredVideoPlayback.id === id
+    ? featuredVideoPlayback
+    : { id, status: "poster", hasPlayed: false };
+
+  const updateFeaturedVideoPlayback = (id, patch = {}) => {
+    setFeaturedVideoPlayback((current) => {
+      const isSameVideo = current.id === id;
+      return {
+        id,
+        status: patch.status || (isSameVideo ? current.status : "poster"),
+        hasPlayed: patch.hasPlayed ?? (isSameVideo ? current.hasPlayed : false)
+      };
+    });
+  };
+
+  const resetFeaturedVideoPlayback = (id = "") => {
+    if (featuredVideoRef.current) {
+      stopInlineVideoPlayback(featuredVideoRef.current, { resetTime: true });
+    }
+    setFeaturedVideoPlayback({ id, status: "poster", hasPlayed: false });
+  };
+
+  const playFeaturedVideo = (event, id) => {
+    if (event) event.stopPropagation();
+    const video = featuredVideoRef.current;
+    if (!video) return;
+    updateFeaturedVideoPlayback(id, { status: "loading" });
+    video.preload = "auto";
+    if (video.readyState < 2 && !isManagedHlsVideo(video)) {
+      try {
+        video.load();
+      } catch (error) { reportIgnoredError(error); }
+    }
+    video.play().then(() => {
+      updateFeaturedVideoPlayback(id, { status: "playing", hasPlayed: true });
+    }).catch(() => {
+      updateFeaturedVideoPlayback(id, { status: "error", hasPlayed: false });
+    });
+  };
+
+  const handleFeaturedVideoSurfaceClick = (event, id) => {
+    event.stopPropagation();
+    const video = featuredVideoRef.current;
+    if (video && video.paused) playFeaturedVideo(event, id);
+  };
+
+  const renderFeaturedInlineVideoPlayer = (item, detail) => {
+    const media = normalizeMediaItem(item?.mediaEntry?.media);
+    const posterUrl = getDisplayUrl(media);
+    const sourceUrl = getSourceMediaUrl(media);
+    const playbackUrl = getPrimaryMediaUrl(media);
+    const streamPlayerUrl = getLightboxVideoPlayerUrl(media);
+    const embedUrl = getVideoEmbedUrl(sourceUrl);
+    const isBilibiliEmbed = isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl);
+    const playbackState = getFeaturedVideoPlaybackState(detail.id);
+    const hasDirectPlayback = isDirectVideoSource(playbackUrl) || isDirectVideoSource(sourceUrl);
+    const playerState = playbackState.status || "poster";
+    const showPlayButton = hasDirectPlayback && !playbackState.hasPlayed && playerState !== "error";
+
+    if (streamPlayerUrl) {
+      return <div className="curated-video-inline-player" data-video-inline-player="true" data-video-inline-state="ready">
+        {posterUrl && <img className="curated-video-inline-poster-preload" src={posterUrl} alt="" aria-hidden="true" loading="eager" decoding="sync" fetchPriority="high" />}
+        <iframe
+          src={`${streamPlayerUrl}?autoplay=false`}
+          title={detail.title}
+          className="curated-video-inline-frame"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+        <span className="curated-video-badge">VIDEO</span>
+        {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
+      </div>;
+    }
+
+    if (embedUrl && !isBilibiliEmbed && !hasDirectPlayback) {
+      return <div className="curated-video-inline-player" data-video-inline-player="true" data-video-inline-state="ready">
+        {posterUrl && <img className="curated-video-inline-poster-preload" src={posterUrl} alt="" aria-hidden="true" loading="eager" decoding="sync" fetchPriority="high" />}
+        <iframe
+          src={withEmbedPlaybackParams(embedUrl, false)}
+          title={detail.title}
+          className="curated-video-inline-frame"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+        <span className="curated-video-badge">VIDEO</span>
+        {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
+      </div>;
+    }
+
+    if (!hasDirectPlayback) {
+      return <div className="curated-video-inline-player curated-video-inline-fallback" data-video-inline-player="true" data-video-inline-state="error">
+        {posterUrl && <img src={posterUrl} alt="" aria-hidden="true" loading="eager" decoding="sync" fetchPriority="high" />}
+        <span className="curated-video-badge">VIDEO</span>
+        {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
+        <div>
+          <Icon name="Play" size={18} />
+          <span>视频资源恢复中</span>
+          {(sourceUrl || playbackUrl) && <a href={sourceUrl || playbackUrl} target="_blank" rel="noreferrer">打开视频链接</a>}
+        </div>
+      </div>;
+    }
+
+    return <div className="curated-video-inline-player" data-video-inline-player="true" data-video-inline-state={playerState} data-video-inline-played={playbackState.hasPlayed ? "true" : "false"}>
+      {posterUrl && <img className="curated-video-inline-poster-preload" src={posterUrl} alt="" aria-hidden="true" loading="eager" decoding="sync" fetchPriority="high" />}
+      <StreamVideoElement
+        playbackUrl={playbackUrl || sourceUrl}
+        sourceUrl={sourceUrl}
+        videoRef={featuredVideoRef}
+        mediaClassName="curated-video-inline-video"
+        muted={false}
+        showNativeVideoControls
+        videoPreloadMode="metadata"
+        poster={posterUrl || undefined}
+        onMediaLoad={() => setFeaturedVideoPlayback((current) => current.id === detail.id && current.hasPlayed
+          ? current
+          : { id: detail.id, status: "ready", hasPlayed: false })}
+        onMediaError={() => updateFeaturedVideoPlayback(detail.id, { status: "error", hasPlayed: false })}
+        onVideoPlay={() => updateFeaturedVideoPlayback(detail.id, { status: "playing", hasPlayed: true })}
+        onVideoPause={(event) => updateFeaturedVideoPlayback(detail.id, {
+          status: event.currentTarget.currentTime > 0 ? "paused" : "ready",
+          hasPlayed: event.currentTarget.currentTime > 0
+        })}
+        handleSurfaceClick={(event) => handleFeaturedVideoSurfaceClick(event, detail.id)}
+        loop={false}
+      />
+      <span className="curated-video-badge">VIDEO</span>
+      {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
+      {showPlayButton && <button type="button" className="curated-video-inline-play" onClick={(event) => playFeaturedVideo(event, detail.id)} aria-label={`播放视频：${detail.title}`}>
+        <Icon name="Play" size={22} />
+        <span>{playerState === "loading" ? "加载中" : "播放"}</span>
+      </button>}
+      {playerState === "error" && <div className="curated-video-inline-error">
+        <Icon name="Play" size={16} />
+        <span>视频暂时无法播放，已保留封面</span>
+      </div>}
+    </div>;
+  };
+
   const renderVideoSelectorPreview = (item, detail, options = {}) => {
     const media = normalizeMediaItem(item?.mediaEntry?.media);
     const previewSource = getDisplayUrl(media);
     const label = detail?.title || media?.alt || "视频预览";
     return <div className={cx("curated-video-selector-preview", options.compact && "is-compact")}>
-      {previewSource ? <img src={previewSource} alt={label} loading="lazy" decoding="async" /> : <div className="curated-static-fallback">
+      {previewSource ? <img src={previewSource} alt={label} loading={options.eager ? "eager" : "lazy"} decoding={options.eager ? "sync" : "async"} fetchPriority={options.eager ? "high" : "auto"} /> : <div className="curated-static-fallback">
         <Icon name="Play" size={18} />
         <span>视频预览</span>
       </div>}
@@ -6609,7 +6752,13 @@ function App() {
     const details = videoItems.map((item, index) => buildVideoWorkDetail(item, index));
     const activeItem = videoItems[normalizedActiveIndex];
     const activeDetail = details[normalizedActiveIndex];
-    const selectVideoIndex = (index) => setActiveVideoIndex(((index % itemCount) + itemCount) % itemCount);
+    const selectVideoIndex = (index) => {
+      const nextIndex = ((index % itemCount) + itemCount) % itemCount;
+      if (nextIndex !== normalizedActiveIndex) {
+        resetFeaturedVideoPlayback(details[nextIndex]?.id || "");
+      }
+      setActiveVideoIndex(nextIndex);
+    };
     const moveVideoIndex = (offset) => selectVideoIndex(normalizedActiveIndex + offset);
     const getWheelOffset = (index) => {
       let offset = index - normalizedActiveIndex;
@@ -6638,19 +6787,9 @@ function App() {
         data-curation-id={activeDetail.curation?.id || activeDetail.id}
         data-curation-category={activeDetail.curation?.category || ""}
         data-curation-kind={activeDetail.kind}
-        tabIndex={0}
-        onClick={() => openWorkDetail(activeDetail)}
-        onKeyDown={(event) => openWorkDetailFromKeyboard(event, activeDetail)}
         {...getDesignerWorkProps(activeDetail.curation?.id, activeDetail.title)}
       >
-        {renderCuratedMediaBox(activeItem.entry, activeItem.mediaEntry, {
-          compact: true,
-          disableInlinePreview: true,
-          label: activeDetail.title,
-          duration: activeDetail.duration,
-          variant: "video",
-          workId: activeDetail.curation?.id
-        })}
+        {renderFeaturedInlineVideoPlayer(activeItem, activeDetail)}
         <div className="curated-video-copy curated-video-feature-copy">
           <span>{activeDetail.label}</span>
           <h3>{activeDetail.title}</h3>
@@ -6660,7 +6799,6 @@ function App() {
             {activeDetail.duration && <span>{activeDetail.duration}</span>}
             <span>可播放</span>
           </div>
-          <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(activeDetail); }}>查看详情</button>
         </div>
       </article>
       <div className="curated-video-wheel-panel" aria-label="视频选择器">
