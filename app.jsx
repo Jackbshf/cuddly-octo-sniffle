@@ -7277,7 +7277,6 @@ function App() {
             <p>{processSection.description}</p>
           </div>
           <div className="curated-workflow-grid curated-workflow-evidence-grid">{visibleWorkflowEntries.map(renderWorkflowEvidenceCard)}</div>
-          <div className="curated-workflow-grid">{homepageWorkflowLabCards.map(renderWorkflowLabCard)}</div>
           <div className="curated-process-grid">
             {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
           </div>
