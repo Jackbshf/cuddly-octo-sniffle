@@ -7827,8 +7827,9 @@ html {
 .curated-page .curated-hero-container {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(620px, calc(100dvh - 62px));
-  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 620px;
+  min-height: max(620px, calc(100dvh - 62px));
   padding-top: 92px;
   padding-bottom: 34px;
 }
@@ -7837,10 +7838,14 @@ html {
 .curated-page .curated-hero-stage-wrap,
 .curated-page .curated-hero-proof {
   grid-column: 1;
+}
+
+.curated-page .curated-hero-copy {
   grid-row: 1;
 }
 
 .curated-page .curated-hero-stage-wrap {
+  grid-row: 1 / -1;
   z-index: 1;
   min-height: 100%;
   overflow: hidden;
@@ -7880,7 +7885,7 @@ html {
 }
 
 .curated-page .curated-hero-copy {
-  z-index: 3;
+  z-index: 4;
   align-self: center;
   width: min(680px, calc(100% - 40px));
   padding-left: clamp(22px, 4vw, 60px);
@@ -7942,10 +7947,12 @@ html {
 }
 
 .curated-page .curated-hero-proof {
-  z-index: 3;
+  grid-row: 2;
+  z-index: 2;
   align-self: end;
   width: min(560px, calc(100% - 48px));
   margin: 0 0 clamp(20px, 3vw, 42px) clamp(22px, 4vw, 60px);
+  pointer-events: none;
 }
 
 .curated-page .curated-section-entry {
@@ -8095,6 +8102,19 @@ html {
   }
 }
 
+@media (min-width: 721px) and (max-width: 820px) {
+  .curated-page .curated-hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 260px;
+  }
+
+  .curated-page .curated-hero-actions a {
+    width: 100%;
+    flex: none;
+  }
+}
+
 @media (max-width: 720px) {
   .curated-page .curated-topbar nav {
     overflow-x: auto;
@@ -8102,7 +8122,9 @@ html {
   }
 
   .curated-page .curated-hero-container {
-    grid-template-rows: minmax(640px, auto);
+    grid-template-rows: minmax(390px, 1fr) auto;
+    min-height: 700px;
+    min-height: max(700px, calc(100dvh - 62px));
     padding-top: 82px;
     padding-bottom: 24px;
   }
