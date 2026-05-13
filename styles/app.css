@@ -8483,8 +8483,31 @@ html {
   margin-top: 18px;
 }
 
+.curated-page .curated-workflow-evidence-grid {
+  gap: 16px;
+}
+
+.curated-page .curated-workflow-evidence-grid .curated-workflow-card-image-only {
+  display: block;
+  padding: 0;
+  background: rgba(5, 12, 18, 0.82);
+}
+
 .curated-page .curated-workflow-evidence-grid .curated-workflow-card .curated-media-box {
   aspect-ratio: 16 / 9;
+}
+
+.curated-page .curated-workflow-evidence-grid .curated-workflow-card-image-only .curated-media-box {
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: inherit;
+  background: rgba(8, 13, 17, 0.96);
+}
+
+.curated-page .curated-workflow-evidence-grid .curated-workflow-card-image-only .curated-media-box img {
+  object-fit: contain;
+  background: rgba(8, 13, 17, 0.96);
 }
 
 .curated-page .curated-process-grid {

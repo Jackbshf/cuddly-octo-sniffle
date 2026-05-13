@@ -679,6 +679,70 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["食品广告", "小家电", "可播放"],
     media: { kind: "video", url: "videos/commercial-air-fryer-wings.mp4", poster: "images/_posters/commercial-air-fryer-wings.webp", alt: "空气炸锅食物广告视频封面" }
   },
+  "video-skincare-elixir-water": {
+    id: "video-skincare-elixir-water",
+    kind: "video",
+    category: "video",
+    duration: "00:10",
+    label: "视频入口",
+    title: "美妆广告短片：精华液水感主视觉",
+    description: "用银色精华瓶、液滴肌理和冷调水感画面建立护肤产品广告气质，适合美妆电商与社媒短片。",
+    tags: ["美妆护肤", "精华液", "可播放"],
+    media: { kind: "video", url: "videos/commercial-skincare-elixir-water.mp4", poster: "images/_posters/commercial-skincare-elixir-water.webp", alt: "银色精华液水感美妆广告短视频封面" },
+    detailRows: [
+      { label: "项目类型", value: "美妆产品广告短片" },
+      { label: "我的职责", value: "产品氛围、镜头筛选、封面与短片整理" },
+      { label: "输出内容", value: "精华液广告短视频、封面和社媒素材" }
+    ]
+  },
+  "video-ev-studio-lighting": {
+    id: "video-ev-studio-lighting",
+    kind: "video",
+    category: "video",
+    duration: "00:10",
+    label: "视频入口",
+    title: "汽车产品短片：暗棚电动车光影",
+    description: "用低调棚拍、车身反光和内饰切换呈现新能源车型的科技感，适合汽车广告关键帧和发布短片。",
+    tags: ["汽车广告", "科技光影", "可播放"],
+    media: { kind: "video", url: "videos/commercial-ev-studio-lighting.mp4", poster: "images/_posters/commercial-ev-studio-lighting.webp", alt: "暗棚电动车光影产品广告短视频封面" },
+    detailRows: [
+      { label: "项目类型", value: "汽车产品广告短片" },
+      { label: "我的职责", value: "棚拍光影、车身质感、动态镜头整理" },
+      { label: "输出内容", value: "电动车产品短视频、广告关键帧和封面" }
+    ]
+  },
+  "video-ice-maker-cubes": {
+    id: "video-ice-maker-cubes",
+    kind: "video",
+    category: "video",
+    duration: "00:10",
+    label: "视频入口",
+    title: "小家电短片：制冰机冰感演示",
+    description: "通过冰块、倒水和制冰机机身近景呈现清爽功能卖点，适合厨房小家电和夏季饮品广告素材。",
+    tags: ["小家电", "冰感饮品", "可播放"],
+    media: { kind: "video", url: "videos/commercial-ice-maker-cubes.mp4", poster: "images/_posters/commercial-ice-maker-cubes.webp", alt: "制冰机冰感功能演示短视频封面" },
+    detailRows: [
+      { label: "项目类型", value: "小家电功能广告短片" },
+      { label: "我的职责", value: "功能镜头筛选、冰感卖点整理、封面输出" },
+      { label: "输出内容", value: "制冰机产品短视频、详情页动效素材" }
+    ]
+  },
+  "video-mattress-healing-bedroom": {
+    id: "video-mattress-healing-bedroom",
+    kind: "video",
+    category: "video",
+    duration: "00:10",
+    label: "视频入口",
+    title: "家居广告短片：床垫治愈风场景",
+    description: "用柔和卧室、织物细节和床垫陈列表现舒适睡眠氛围，适合家居产品广告与详情页视频。",
+    tags: ["家居产品", "床垫广告", "可播放"],
+    media: { kind: "video", url: "videos/commercial-mattress-healing-bedroom.mp4", poster: "images/_posters/commercial-mattress-healing-bedroom.webp", alt: "柔和卧室床垫家居广告短视频封面" },
+    detailRows: [
+      { label: "项目类型", value: "家居产品广告短片" },
+      { label: "我的职责", value: "卧室场景、材质细节、生活方式镜头整理" },
+      { label: "输出内容", value: "床垫宣传短视频、详情页封面和社媒素材" }
+    ]
+  },
 };
 
 const HOMEPAGE_CURATION = {
@@ -686,17 +750,11 @@ const HOMEPAGE_CURATION = {
     featuredId: "hero-main-visual"
   },
   videoFeaturedIds: [
-    "video-product-shot",
-    "video-social-series",
-    "video-digital-human",
-    "video-packaging-motion",
-    "gallery-video-d9",
-    "gallery-video-a6537",
-    "gallery-video-a0",
-    "gallery-video-voice",
-    "gallery-video-prompt",
-    "gallery-video-51339",
-    "gallery-video-food"
+    "gallery-video-food",
+    "video-skincare-elixir-water",
+    "video-ev-studio-lighting",
+    "video-ice-maker-cubes",
+    "video-mattress-healing-bedroom"
   ],
   commercialImageCaseIds: [
     "case-product-ad",
@@ -895,8 +953,8 @@ const HOMEPAGE_PROCESS_BLOCKS = [
 const HOMEPAGE_BLOCK_DEFAULTS = {
   "process.workflowEvidence": { hidden: false },
   "process.workflowLab": { hidden: true },
-  "process.steps": { hidden: false },
-  "process.skills": { hidden: false }
+  "process.steps": { hidden: true },
+  "process.skills": { hidden: true }
 };
 
 const getPresetById = (presets, presetId, fallbackId) => presets.find((preset) => preset.id === presetId) || presets.find((preset) => preset.id === fallbackId) || presets[0];
@@ -6799,6 +6857,7 @@ function App() {
             {activeDetail.duration && <span>{activeDetail.duration}</span>}
             <span>可播放</span>
           </div>
+          <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(activeDetail); }}>查看详情</button>
         </div>
       </article>
       <div className="curated-video-wheel-panel" aria-label="视频选择器">
@@ -6848,6 +6907,8 @@ function App() {
             type="button"
             role="option"
             aria-selected={isActive}
+            aria-label={`选择视频：${detail.title}`}
+            title={detail.title}
             className={isActive ? "is-active" : ""}
             onClick={() => selectVideoIndex(index)}
           >
@@ -6938,16 +6999,8 @@ function App() {
       return null;
     }
     const detail = buildWorkflowEvidenceDetail(item, index);
-    return <article key={detail.id} className="curated-workflow-card" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+    return <article key={detail.id} className="curated-workflow-card curated-workflow-card-image-only" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} aria-label={detail.title} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, variant: "workflow", workId: detail.curation?.id })}
-      <div className="curated-workflow-copy">
-        <span>{detail.label}</span>
-        <h3>{detail.title}</h3>
-        <p>{detail.description}</p>
-        <div className="curated-workflow-steps">
-          {detail.workflowSteps.slice(0, 5).map((step) => <strong key={detail.id + "-" + step}>{step}</strong>)}
-        </div>
-      </div>
     </article>;
   };
 
