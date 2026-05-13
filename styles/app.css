@@ -8050,6 +8050,23 @@ html {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.curated-page .curated-capability-matrix-figure {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--portfolio-border);
+  border-radius: 12px;
+  background: var(--portfolio-surface);
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.34);
+}
+
+.curated-page .curated-capability-matrix-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1677 / 938;
+  object-fit: contain;
+}
+
 .curated-page .curated-workflow-grid + .curated-workflow-grid {
   margin-top: 18px;
 }
@@ -8112,6 +8129,17 @@ html {
   .curated-page .curated-hero-proof {
     width: calc(100% - 32px);
     margin: 0 16px 18px;
+  }
+
+  .curated-page .curated-capability-matrix-figure {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-color: rgba(127, 215, 244, 0.38) rgba(255, 255, 255, 0.05);
+  }
+
+  .curated-page .curated-capability-matrix-figure img {
+    width: max(760px, 100%);
+    max-width: none;
   }
 
   .curated-page .curated-feature-grid,
