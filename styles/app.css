@@ -8128,22 +8128,3 @@ html {
     grid-column: span 1;
   }
 }
-
-/* Keep video cards visually equal; the first item should not become a featured tile. */
-.curated-page .curated-video-card:first-child {
-  grid-column: auto;
-  grid-row: auto;
-}
-
-.curated-page .curated-video-card:first-child .curated-media-box {
-  aspect-ratio: 16 / 9;
-}
-
-.curated-page .curated-video-card:first-child .curated-video-copy {
-  padding: 18px;
-}
-
-.curated-page .curated-video-card:first-child .curated-video-copy h3 {
-  font-size: clamp(15px, 1.1vw, 18px);
-  line-height: 1.35;
-}
