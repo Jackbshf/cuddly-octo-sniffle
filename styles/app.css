@@ -6996,9 +6996,9 @@ html {
 }
 
 .curated-page .curated-section-heading {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(260px, 0.52fr);
   align-items: end;
-  justify-content: space-between;
   gap: 24px;
   min-width: 0;
   margin-bottom: 26px;
@@ -7010,22 +7010,27 @@ html {
   margin: 0;
   color: var(--portfolio-text);
   font-size: clamp(30px, 4vw, 56px);
-  line-height: 0.98;
+  line-height: 1;
   font-weight: 760;
   letter-spacing: 0;
   text-wrap: balance;
-  word-break: keep-all;
-  overflow-wrap: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .curated-page .curated-section-heading p,
 .curated-page .curated-contact p {
   max-width: 520px;
+  margin: 0;
   color: var(--portfolio-muted);
   font-size: 14px;
   line-height: 1.7;
   word-break: normal;
   overflow-wrap: break-word;
+}
+
+.curated-page .curated-section-heading p {
+  justify-self: end;
 }
 
 .curated-page .curated-video-card,
@@ -7445,8 +7450,12 @@ html {
 
 @media (max-width: 1024px) {
   .curated-page .curated-section-heading {
+    grid-template-columns: 1fr;
     align-items: start;
-    flex-direction: column;
+  }
+
+  .curated-page .curated-section-heading p {
+    justify-self: start;
   }
 
   .curated-page .curated-video-grid,
@@ -7964,7 +7973,7 @@ html {
 
 .curated-page .curated-feature-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -7979,6 +7988,16 @@ html {
   color: var(--portfolio-text);
   cursor: pointer;
   box-shadow: var(--curated-shadow);
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.curated-page .curated-entry-card:hover,
+.curated-page .curated-entry-card:focus-visible {
+  border-color: rgba(102, 217, 255, 0.36);
+  background: var(--curated-card-bg-strong);
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.38);
+  outline: none;
+  transform: translateY(-2px);
 }
 
 .curated-page .curated-entry-card .curated-media-box {
@@ -8004,7 +8023,7 @@ html {
 
 .curated-page .curated-entry-card > strong {
   margin-top: 6px;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.3;
 }
 
@@ -8052,8 +8071,8 @@ html {
 
 .curated-page .curated-video-wheel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(330px, 0.72fr);
+  gap: 20px;
   align-items: stretch;
   width: 100%;
   max-width: 100%;
@@ -8242,7 +8261,7 @@ html {
   overflow: hidden;
   border: 1px solid rgba(120, 210, 255, 0.12);
   border-radius: var(--portfolio-radius-card);
-  background: radial-gradient(circle at 50% 42%, rgba(102, 217, 255, 0.12), transparent 38%), rgba(5, 14, 22, 0.48);
+  background: radial-gradient(circle at 50% 42%, rgba(102, 217, 255, 0.14), transparent 36%), rgba(5, 14, 22, 0.54);
 }
 
 .curated-page .curated-video-wheel-controls {
@@ -8289,7 +8308,7 @@ html {
 
 .curated-page .curated-video-stage {
   position: relative;
-  min-height: 390px;
+  min-height: 410px;
   overflow: hidden;
   perspective: 980px;
   transform-style: preserve-3d;
@@ -8310,22 +8329,23 @@ html {
   z-index: var(--video-wheel-layer);
   display: grid;
   grid-template-rows: auto auto 1fr;
-  width: min(300px, 70%);
+  width: min(278px, 68%);
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(120, 210, 255, 0.18);
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(3, 8, 13, 0.92);
   box-shadow: 0 22px 58px rgba(0, 0, 0, 0.42);
   cursor: pointer;
   opacity: var(--video-wheel-opacity);
   transform: translate3d(calc(-50% + var(--video-wheel-x)), -50%, var(--video-wheel-z)) rotateY(var(--video-wheel-rotate)) scale(var(--video-wheel-scale));
   transform-style: preserve-3d;
-  transition: transform 220ms ease, opacity 220ms ease, border-color 160ms ease;
+  transition: transform 220ms ease, opacity 220ms ease, border-color 160ms ease, box-shadow 180ms ease;
 }
 
 .curated-page .curated-video-wheel-card.is-active {
   border-color: rgba(102, 217, 255, 0.56);
+  box-shadow: 0 26px 68px rgba(0, 0, 0, 0.46), 0 0 0 1px rgba(102, 217, 255, 0.16);
   opacity: 1;
 }
 
@@ -8404,20 +8424,20 @@ html {
 .curated-page .curated-video-strip {
   grid-column: 1 / -1;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  padding: 2px 2px 8px;
+  padding: 3px 2px 8px;
   scrollbar-color: rgba(127, 215, 244, 0.38) rgba(255, 255, 255, 0.05);
 }
 
 .curated-page .curated-video-strip button {
   position: relative;
-  flex: 0 0 76px;
-  width: 76px;
-  height: 58px;
+  flex: 0 0 82px;
+  width: 82px;
+  height: 62px;
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(120, 210, 255, 0.16);
@@ -8429,6 +8449,7 @@ html {
 .curated-page .curated-video-strip button.is-active,
 .curated-page .curated-video-strip button:focus-visible {
   border-color: rgba(102, 217, 255, 0.6);
+  box-shadow: 0 0 0 1px rgba(102, 217, 255, 0.16), 0 12px 28px rgba(0, 0, 0, 0.24);
   outline: none;
 }
 
@@ -8488,7 +8509,8 @@ html {
 }
 
 .curated-page .curated-workflow-evidence-grid .curated-workflow-card-image-only {
-  display: block;
+  display: grid;
+  grid-template-rows: auto minmax(44px, auto);
   padding: 0;
   background: rgba(5, 12, 18, 0.82);
 }
@@ -8498,16 +8520,30 @@ html {
 }
 
 .curated-page .curated-workflow-evidence-grid .curated-workflow-card-image-only .curated-media-box {
-  height: 100%;
+  height: auto;
   min-height: 0;
   border: 0;
+  border-bottom: 1px solid rgba(120, 210, 255, 0.1);
   border-radius: inherit;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
   background: rgba(8, 13, 17, 0.96);
 }
 
 .curated-page .curated-workflow-evidence-grid .curated-workflow-card-image-only .curated-media-box img {
   object-fit: contain;
   background: rgba(8, 13, 17, 0.96);
+}
+
+.curated-page .curated-workflow-note {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  margin: 0;
+  padding: 10px 12px 12px;
+  color: rgba(214, 232, 244, 0.78);
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 .curated-page .curated-process-grid {
@@ -8657,7 +8693,11 @@ html {
     display: none;
   }
 
+  .curated-page .curated-entry-card,
+  .curated-page .curated-entry-card:hover,
+  .curated-page .curated-entry-card:focus-visible,
   .curated-page .curated-video-wheel-card {
+    transform: none;
     transition: none;
   }
 }
