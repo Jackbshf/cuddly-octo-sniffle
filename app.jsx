@@ -177,9 +177,9 @@ const HOMEPAGE_CURATED_WORKS = {
     tools: ["ComfyUI", "ControlNet", "Photoshop"],
     media: {
       kind: "image",
-      url: "images/curated/gpt-image2-commercial-earbuds.webp",
-      fullUrl: "images/curated/gpt-image2-commercial-earbuds.webp",
-      alt: "黑色无线耳机新品发布产品广告主图"
+      url: "images/curated/case-product-earbuds-black-rock.webp",
+      fullUrl: "images/curated/case-product-earbuds-black-rock.webp",
+      alt: "黑色无线耳机岩石暗调产品广告主图"
     },
     detailRows: [
       { label: "项目类型", value: "产品广告视觉" },
@@ -205,9 +205,9 @@ const HOMEPAGE_CURATED_WORKS = {
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
-      url: "images/curated/gpt-image2-beauty-demo.webp",
-      fullUrl: "images/curated/gpt-image2-beauty-demo.webp",
-      alt: "美妆达人展示粉底液的商业直播主视觉"
+      url: "images/curated/case-beauty-foundation-live.webp",
+      fullUrl: "images/curated/case-beauty-foundation-live.webp",
+      alt: "美妆达人在直播补光场景展示粉底液"
     },
     detailRows: [
       { label: "项目类型", value: "美妆产品视觉" },
@@ -233,9 +233,9 @@ const HOMEPAGE_CURATED_WORKS = {
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
-      url: "images/curated/gpt-image2-ice-city-world.webp",
-      fullUrl: "images/curated/gpt-image2-ice-city-world.webp",
-      alt: "冰蓝未来城市品牌空间场景主视觉"
+      url: "images/curated/case-brand-ice-city-space.webp",
+      fullUrl: "images/curated/case-brand-ice-city-space.webp",
+      alt: "冰蓝未来城市与玻璃建筑品牌空间主视觉"
     },
     detailRows: [
       { label: "项目类型", value: "品牌空间 / 世界观视觉" },
@@ -253,24 +253,24 @@ const HOMEPAGE_CURATED_WORKS = {
   "case-fragrance-packaging": {
     id: "case-fragrance-packaging",
     kind: "case",
-    category: "product",
+    category: "packaging",
     label: "商业案例 04",
     title: "包装视觉案例：香氛礼盒主图",
-    description: "用礼盒结构、暗调光影和产品陈列呈现包装视觉与节日礼赠场景。",
+    description: "用香氛套装、黑金礼盒、丝带和烛光氛围呈现包装视觉与节日礼赠场景。",
     tags: ["包装视觉", "香氛礼盒", "商业主图"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
-      url: "images/works/giftbox/poster.webp",
-      fullUrl: "images/works/giftbox/poster.webp",
-      alt: "暗调香氛礼盒包装商业主图"
+      url: "images/curated/case-fragrance-giftbox-set.webp",
+      fullUrl: "images/curated/case-fragrance-giftbox-set.webp",
+      alt: "黑金香氛礼盒套装包装商业主图"
     },
     detailRows: [
       { label: "项目类型", value: "包装视觉 / 礼赠主图" },
-      { label: "我的职责", value: "礼盒结构、产品陈列、光影气质整理" },
+      { label: "我的职责", value: "香氛套装陈列、礼盒结构、黑金光影气质整理" },
       { label: "工具链", value: "Midjourney / Photoshop / 版式整理" },
       { label: "交付物", value: "包装主图、节日礼盒海报、社媒封面" },
-      { label: "商业价值", value: "让产品层级、包装质感和礼赠氛围在首图中同时成立。" }
+      { label: "商业价值", value: "让香氛产品层级、包装质感和礼赠氛围在首图中同时成立。" }
     ],
     results: [
       { label: "输出内容", value: "礼盒包装主图" },
@@ -6525,7 +6525,7 @@ function App() {
         {caseClassification.kind === "video" && service.curatedItem ? <>
           {renderCuratedMediaBox(service.curatedItem.entry, service.curatedItem.mediaEntry, { compact: true, disableInlinePreview: true, label: caseItem.title, duration: service.curation?.duration || "", variant: "case", workId: service.curation?.id })}
           <span className="curated-case-video-badge">视频{service.curation?.duration ? ` · ${service.curation.duration}` : ""} · 可播放</span>
-        </> : caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading={index === 0 ? "eager" : "lazy"} decoding="async" /> : <div>暂无封面</div>}
+        </> : caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading="eager" decoding="async" fetchPriority={index < 4 ? "high" : "auto"} /> : <div>暂无封面</div>}
         {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-admin-media-tools">
           <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换封面" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
         </div>}
