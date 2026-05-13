@@ -1062,6 +1062,32 @@ const formatBytes = (bytes) => {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
+const stableJson = (value) => JSON.stringify(value ?? null);
+const getChangedListCount = (before = [], after = [], idField = "id") => {
+  const keys = new Set([
+    ...before.map((item, index) => String(item?.[idField] ?? index)),
+    ...after.map((item, index) => String(item?.[idField] ?? index))
+  ]);
+  let count = 0;
+  keys.forEach((key) => {
+    const beforeItem = before.find((item, index) => String(item?.[idField] ?? index) === key);
+    const afterItem = after.find((item, index) => String(item?.[idField] ?? index) === key);
+    if (stableJson(beforeItem) !== stableJson(afterItem)) count += 1;
+  });
+  return count;
+};
+const buildPortfolioChangeSummary = (beforeModel, afterModel) => {
+  const before = sanitizePortfolioModelForExport(createPortfolioModel(beforeModel));
+  const after = sanitizePortfolioModelForExport(createPortfolioModel(afterModel));
+  const changes = [];
+  if (stableJson(before.meta) !== stableJson(after.meta)) changes.push("首页文案、主题或 SEO 设置有改动");
+  const changedCases = getChangedListCount(before.cases, after.cases, "id");
+  if (changedCases) changes.push(`${changedCases} 个案例配置有改动`);
+  const changedSlides = getChangedListCount(before.slides, after.slides, "id");
+  if (changedSlides) changes.push(`${changedSlides} 个作品页或媒体位有改动`);
+  if (!changes.length) changes.push("当前草稿与已发布数据没有检测到结构性差异");
+  return changes;
+};
 const getPortfolioSizeTone = (bytes) => bytes > PORTFOLIO_BLOCK_BYTES ? "danger" : bytes >= PORTFOLIO_WARN_BYTES ? "warning" : "safe";
 const inferMediaKind = (value = "") => {
   const normalized = String(value || "").trim().toLowerCase();
@@ -2723,6 +2749,13 @@ function App() {
   const [showStructureEditor, setShowStructureEditor] = useState(false);
   const [showCuratedManager, setShowCuratedManager] = useState(false);
   const [selectedDesignerId, setSelectedDesignerId] = useState("section:home");
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState("content");
+  const [adminPreviewMode, setAdminPreviewMode] = useState(false);
+  const [adminViewportMode, setAdminViewportMode] = useState("desktop");
+  const [publishReviewOpen, setPublishReviewOpen] = useState(false);
+  const [publishReviewState, setPublishReviewState] = useState({ checking: false, issues: [], changes: [] });
+  const [designerToolbarStyle, setDesignerToolbarStyle] = useState(null);
   const [showAssetManager, setShowAssetManager] = useState(false);
   const [assetManagerTarget, setAssetManagerTarget] = useState(null);
   const [assetLibrary, setAssetLibrary] = useState([]);
@@ -2750,6 +2783,7 @@ function App() {
   const heroCanvasRef = useRef(null);
   const importInputRef = useRef(null);
   const pageJumpInputRef = useRef(null);
+  const publishAfterReviewRef = useRef(false);
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
   const hasHydrated = useRef(false);
@@ -2777,6 +2811,8 @@ function App() {
   const prefersHoverControls = supportsHoverInteractions();
   const sectionScrollOffset = IS_EDITOR_MODE ? 132 : 92;
   const portfolioExportModel = sanitizePortfolioModelForExport(portfolioData);
+  const publishedExportModel = sanitizePortfolioModelForExport(publishedPortfolioData);
+  const hasUnpublishedChanges = stableJson(portfolioExportModel) !== stableJson(publishedExportModel);
   const portfolioByteSize = getByteSize(portfolioExportModel);
   const portfolioSizeTone = getPortfolioSizeTone(portfolioByteSize);
   const useGalleryWorldHome = false;
@@ -2936,6 +2972,41 @@ function App() {
       if (deploymentPollTimerRef.current) window.clearTimeout(deploymentPollTimerRef.current);
     };
   }, []);
+
+  const syncDesignerToolbarPosition = () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || adminPreviewMode || !selectedDesignerId) {
+      setDesignerToolbarStyle(null);
+      return;
+    }
+    const target = Array.from(document.querySelectorAll("[data-designer-node]"))
+      .find((node) => node.getAttribute("data-designer-node") === selectedDesignerId);
+    if (!target) {
+      setDesignerToolbarStyle(null);
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const safeLeft = Math.min(Math.max(rect.left + rect.width / 2, 128), Math.max(128, viewportWidth - 128));
+    const placeAbove = rect.top > 96;
+    const top = placeAbove ? Math.max(74, rect.top - 12) : Math.min((window.innerHeight || 0) - 80, rect.bottom + 12);
+    setDesignerToolbarStyle({
+      left: `${safeLeft}px`,
+      top: `${top}px`,
+      transform: placeAbove ? "translate(-50%, -100%)" : "translate(-50%, 0)"
+    });
+  };
+
+  useEffect(() => {
+    if (!IS_PORTFOLIO_ADMIN_MODE) return undefined;
+    syncDesignerToolbarPosition();
+    const handlePositionChange = () => syncDesignerToolbarPosition();
+    window.addEventListener("scroll", handlePositionChange, { passive: true });
+    window.addEventListener("resize", handlePositionChange);
+    return () => {
+      window.removeEventListener("scroll", handlePositionChange);
+      window.removeEventListener("resize", handlePositionChange);
+    };
+  }, [selectedDesignerId, adminPreviewMode, activeCuratedSection, inspectorOpen, adminViewportMode]);
 
   const setSlideSectionRef = (index, node) => {
     if (node) slideSectionRefs.current.set(index, node);
@@ -4097,6 +4168,12 @@ function App() {
     setStatusMessage(`草稿已重置为 ${DATA_FILE_PATH} 的发布内容。`);
   };
 
+  const saveLocalDraft = () => {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(portfolioExportModel));
+    setLoadSource("draft");
+    setStatusMessage(`草稿已保存到本机浏览器：${formatBytes(getByteSize(portfolioExportModel))}。不会影响线上站点。`);
+  };
+
   const exportDraft = async () => {
     const issues = await validateSlidesBeforeExport(slidesData);
     const blockingIssues = issues.filter((issue) => issue.includes("未绑定发布路径"));
@@ -4119,13 +4196,52 @@ function App() {
     setStatusMessage(issues.length ? `已导出 portfolio.json，但仍有 ${issues.length} 个待修复问题。` : "当前草稿已导出为 portfolio.json，可覆盖 data/portfolio.json 后提交到 GitHub。");
   };
 
-  const publishPortfolioJson = async () => {
+  const openPublishReview = async () => {
     if (!IS_PORTFOLIO_ADMIN_MODE || isPublishingPortfolio) return;
+    setPublishReviewOpen(true);
+    setPublishReviewState({
+      checking: true,
+      issues: [],
+      blockingIssues: [],
+      changes: buildPortfolioChangeSummary(publishedPortfolioData, portfolioData)
+    });
+    try {
+      const issues = await validateSlidesBeforeExport(portfolioExportModel.slides);
+      const blockingIssues = issues.filter((issue) => issue.includes("未绑定发布路径"));
+      setPublishReviewState({
+        checking: false,
+        issues,
+        blockingIssues,
+        changes: buildPortfolioChangeSummary(publishedPortfolioData, portfolioData)
+      });
+    } catch (error) {
+      setPublishReviewState({
+        checking: false,
+        issues: [error?.message || "发布前检查失败。"],
+        blockingIssues: [error?.message || "发布前检查失败。"],
+        changes: buildPortfolioChangeSummary(publishedPortfolioData, portfolioData)
+      });
+    }
+  };
+
+  const publishPortfolioJson = async (options = {}) => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || isPublishingPortfolio) return;
+    if (!options.skipReview && !publishAfterReviewRef.current) {
+      await openPublishReview();
+      return;
+    }
+    publishAfterReviewRef.current = false;
     try {
       await publishPortfolioModel(portfolioData, "Update portfolio JSON");
+      setPublishReviewOpen(false);
     } catch (error) {
       setStatusMessage(error?.message || "Portfolio publish failed.");
     }
+  };
+
+  const confirmPublishFromReview = () => {
+    publishAfterReviewRef.current = true;
+    publishPortfolioJson({ skipReview: true });
   };
 
   const uploadPortfolioFile = async (file, options = {}) => {
@@ -6298,23 +6414,26 @@ function App() {
 
   const selectDesignerNode = (nodeId, status = "已选中可编辑元素。") => {
     if (!IS_PORTFOLIO_ADMIN_MODE) return false;
+    setAdminPreviewMode(false);
     setSelectedDesignerId(nodeId);
+    setInspectorOpen(true);
+    setInspectorTab("content");
     setStatusMessage(status);
     return true;
   };
 
   const selectDesignerWork = (workId, label = "作品元素") => {
     if (!workId) return false;
-    return selectDesignerNode(`work:${workId}`, `已选中「${label}」，可在右侧修改文字、素材和显示状态。`);
+    return selectDesignerNode(`work:${workId}`, `已选中「${label}」，可在底部编辑内容、素材和显示状态。`);
   };
 
   const selectDesignerSection = (sectionId, label = "页面模块") => {
     if (!sectionId) return false;
-    return selectDesignerNode(`section:${sectionId}`, `已选中「${label}」模块，可在右侧修改标题和说明。`);
+    return selectDesignerNode(`section:${sectionId}`, `已选中「${label}」模块，可在底部编辑标题和说明。`);
   };
 
   const getDesignerWorkProps = (workId, label) => {
-    if (!IS_PORTFOLIO_ADMIN_MODE || !workId) return {};
+    if (!IS_PORTFOLIO_ADMIN_MODE || adminPreviewMode || !workId) return {};
     const nodeId = `work:${workId}`;
     const stylePreset = getHomepageDesignerState().works?.[workId]?.stylePreset;
     return {
@@ -6336,7 +6455,7 @@ function App() {
   };
 
   const getDesignerSectionProps = (sectionId, label = "页面模块") => {
-    if (!IS_PORTFOLIO_ADMIN_MODE || !sectionId) return {};
+    if (!IS_PORTFOLIO_ADMIN_MODE || adminPreviewMode || !sectionId) return {};
     const nodeId = `section:${sectionId}`;
     const stylePreset = getHomepageDesignerState().sections?.[sectionId]?.stylePreset;
     return {
@@ -6398,10 +6517,10 @@ function App() {
         options.compact && "curated-media-box-compact",
         options.variant && `curated-media-box-${options.variant}`,
         portrait && "curated-media-box-portrait",
-        IS_PORTFOLIO_ADMIN_MODE && canEditMedia && "curated-admin-drop-target",
+        IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && canEditMedia && "curated-admin-drop-target",
         activeCuratedDropTarget === replaceTargetKey && "is-drag-active"
       )}
-      {...(canEditMedia ? getCuratedDropHandlers(replaceTarget) : {})}
+      {...(!adminPreviewMode && canEditMedia ? getCuratedDropHandlers(replaceTarget) : {})}
       data-media-card="true"
       data-media-kind={isVideoCard ? "video" : "image"}
       data-media-source={displayUrl}
@@ -6427,12 +6546,12 @@ function App() {
       </div> : isVideoCard && <div className="curated-media-play curated-media-play-center" aria-hidden="true">
         <Icon name="Play" size={20} />
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <div className="curated-admin-media-tools">
+      {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && canEditMedia && <div className="curated-admin-media-tools">
         <button type="button" disabled={!canListAssets || isCapabilitiesLoading} title={canListAssets ? "素材库" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); openAssetManager(replaceTarget); }}><Icon name="Grid" size={14} /> 素材库</button>
         <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(uploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(replaceTarget, normalizedMedia); }}><Icon name="Link2" size={14} /> 外链</button>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && canEditMedia && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) requestMediaReplacement(file, replaceTarget);
         event.target.value = "";
@@ -6943,19 +7062,19 @@ function App() {
       <div
         className={cx(
           "curated-case-cover",
-          IS_PORTFOLIO_ADMIN_MODE && "curated-admin-drop-target",
+          IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && "curated-admin-drop-target",
           activeCuratedDropTarget === coverTargetKey && "is-drag-active"
         )}
-        {...getCuratedDropHandlers(coverTarget)}
+        {...(!adminPreviewMode ? getCuratedDropHandlers(coverTarget) : {})}
       >
         {caseClassification.kind === "video" && service.curatedItem ? <>
           {renderCuratedMediaBox(service.curatedItem.entry, service.curatedItem.mediaEntry, { compact: true, disableInlinePreview: true, label: caseItem.title, duration: service.curation?.duration || "", variant: "case", workId: service.curation?.id })}
           <span className="curated-case-video-badge">视频{service.curation?.duration ? ` · ${service.curation.duration}` : ""} · 可播放</span>
         </> : caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading="eager" decoding="async" fetchPriority={index < 4 ? "high" : "auto"} /> : <div>暂无封面</div>}
-        {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-admin-media-tools">
+        {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && <div className="curated-admin-media-tools">
           <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换封面" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
         </div>}
-        {IS_PORTFOLIO_ADMIN_MODE && <input id={coverInputId} type="file" accept="image/*" className="hidden" onChange={(event) => {
+        {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && <input id={coverInputId} type="file" accept="image/*" className="hidden" onChange={(event) => {
           const file = event.target.files && event.target.files[0];
           if (file) requestMediaReplacement(file, coverTarget);
           event.target.value = "";
@@ -7138,17 +7257,17 @@ function App() {
         <div
           className={cx(
             "curated-detail-media",
-            IS_PORTFOLIO_ADMIN_MODE && detailTarget && "curated-admin-drop-target",
+            IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && detailTarget && "curated-admin-drop-target",
             activeCuratedDropTarget === detailTargetKey && "is-drag-active"
           )}
-          {...(detailTarget ? getCuratedDropHandlers(detailTarget) : {})}
+          {...(!adminPreviewMode && detailTarget ? getCuratedDropHandlers(detailTarget) : {})}
         >
           {renderDetailMedia(selectedWorkItem)}
-          {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <div className="curated-admin-media-tools">
+          {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && detailTarget && <div className="curated-admin-media-tools">
             <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换当前媒体" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(detailUploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换当前媒体</button>
             {detailTarget.type !== "case-cover" && <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(detailTarget, selectedWorkItem.mediaEntry?.media); }}><Icon name="Link2" size={14} /> 外链视频</button>}
           </div>}
-          {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <input id={detailUploadInputId} type="file" accept={detailTarget.type === "case-cover" ? "image/*" : "image/*,video/*"} className="hidden" onChange={(event) => {
+          {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && detailTarget && <input id={detailUploadInputId} type="file" accept={detailTarget.type === "case-cover" ? "image/*" : "image/*,video/*"} className="hidden" onChange={(event) => {
             const file = event.target.files && event.target.files[0];
             if (file) requestMediaReplacement(file, detailTarget);
             event.target.value = "";
@@ -7389,119 +7508,102 @@ function App() {
       });
     };
 
-    return <aside className="curated-designer-inspector" aria-label="页面元素属性面板">
-      <header>
-        <div>
-          <span>Inspector</span>
-          <strong>{selectedTitle}</strong>
+    const openInspectorTab = (tab) => {
+      setInspectorTab(tab);
+      setInspectorOpen(true);
+    };
+    const selectedWorkHidden = selectedWorkMedia?.curatedHidden === true;
+    const selectedSectionVisible = selectedSection ? !isHomepageSectionHidden(nodeId) : true;
+    const canToggleSelectedVisibility = Boolean(selectedWork || (selectedSection && nodeId !== "home"));
+    const toggleSelectedVisibility = () => {
+      if (selectedWork && selectedWorkMedia) {
+        updateSelectedWorkMedia({ curatedHidden: !selectedWorkHidden });
+        return;
+      }
+      if (selectedSection && nodeId !== "home") updateHomepageDesignerSection(nodeId, { hidden: selectedSectionVisible });
+    };
+    const inspectorTabs = [["content", "内容", "FileJson"], ["media", "素材", "Grid"], ["style", "样式", "Sliders"], ["display", "显示", "Settings2"]];
+    const hasMediaControls = Boolean(selectedWork && selectedWorkMedia);
+
+    return <>
+      {!adminPreviewMode && designerToolbarStyle && <div className="curated-designer-toolbar" style={designerToolbarStyle} role="toolbar" aria-label="页面元素快捷编辑工具">
+        <strong>{selectedTitle}</strong>
+        <button type="button" onClick={() => openInspectorTab("content")}><Icon name="FileJson" size={14} /> 编辑内容</button>
+        <button type="button" disabled={!hasMediaControls} onClick={() => hasMediaControls ? openInspectorTab("media") : openInspectorTab("content")}><Icon name="Grid" size={14} /> 替换素材</button>
+        <button type="button" disabled={!canToggleSelectedVisibility} onClick={toggleSelectedVisibility}><Icon name="Settings2" size={14} /> {selectedWorkHidden || !selectedSectionVisible ? "恢复显示" : "显示/隐藏"}</button>
+        <button type="button" onClick={() => openInspectorTab("style")}><Icon name="Sliders" size={14} /> 样式</button>
+        <button type="button" onClick={() => openInspectorTab("display")}><Icon name="MoreHorizontal" size={14} /> 更多</button>
+      </div>}
+
+      {inspectorOpen && !adminPreviewMode && <aside className="curated-designer-inspector" aria-label="页面元素属性面板">
+        <header>
+          <div><span>Inspector</span><strong>{selectedTitle}</strong></div>
+          <div className="curated-inspector-header-actions">
+            <button type="button" onClick={() => setSelectedDesignerId("section:home")} title="回到首页设置"><Icon name="Home" size={16} /></button>
+            <button type="button" onClick={() => setInspectorOpen(false)} title="收起编辑抽屉"><Icon name="Minimize" size={16} /></button>
+          </div>
+        </header>
+        <div className="curated-inspector-tabs" role="tablist" aria-label="编辑分组">
+          {inspectorTabs.map(([tab, label, icon]) => <button key={tab} type="button" className={inspectorTab === tab ? "is-active" : ""} onClick={() => setInspectorTab(tab)}><Icon name={icon} size={14} /> {label}</button>)}
         </div>
-        <button type="button" onClick={() => setSelectedDesignerId("section:home")} title="回到首页设置"><Icon name="Home" size={16} /></button>
-      </header>
-
-      <section className="curated-inspector-section">
-        <h3>全站预设</h3>
-        {renderPresetGroup("字体", HOMEPAGE_FONT_PRESETS, theme.fontPreset, "fontPreset")}
-        {renderPresetGroup("颜色", HOMEPAGE_COLOR_PRESETS, theme.colorPreset, "colorPreset", { colors: true })}
-        {renderPresetGroup("圆角", HOMEPAGE_RADIUS_PRESETS, theme.radiusPreset, "radiusPreset")}
-        {renderPresetGroup("密度", HOMEPAGE_DENSITY_PRESETS, theme.densityPreset, "densityPreset")}
-        {renderSectionVisibilityGroup()}
-      </section>
-
-      {selectedSection && <section className="curated-inspector-section">
-        <h3>模块内容</h3>
-        {nodeId !== "home" && renderVisibilityToggle("当前模块显示", !isHomepageSectionHidden(nodeId), (visible) => updateHomepageDesignerSection(nodeId, { hidden: !visible }))}
-        {selectedSection.eyebrow !== undefined && <label>眉标
-          <input value={selectedSection.eyebrow || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { eyebrow: event.target.value })} />
-        </label>}
-        <label>标题
-          <input value={selectedSection.title || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { title: event.target.value })} />
-        </label>
-        {selectedSection.subtitle !== undefined && <label>副标题
-          <input value={selectedSection.subtitle || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { subtitle: event.target.value })} />
-        </label>}
-        <label>描述
-          <textarea value={selectedSection.description || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { description: event.target.value })} />
-        </label>
-        {selectedSection.tags !== undefined && <label>标签预设
-          <input value={ensureStringArray(selectedSection.tags).join("，")} onChange={(event) => updateHomepageDesignerSection(nodeId, { tags: parseDesignerTags(event.target.value) })} />
-        </label>}
-        {renderStylePresetGroup((presetId) => updateHomepageDesignerSection(nodeId, { stylePreset: presetId }))}
-        {nodeId === "process" && renderProcessBlockVisibilityGroup()}
-      </section>}
-
-      {selectedWork && <section className="curated-inspector-section">
-        <h3>作品元素</h3>
-        <label>标签
-          <input value={selectedWork.label || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { label: event.target.value })} />
-        </label>
-        <label>标题
-          <input value={selectedWork.title || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { title: event.target.value })} />
-        </label>
-        <label>描述
-          <textarea value={selectedWork.description || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { description: event.target.value })} />
-        </label>
-        <label>标签预设
-          <input value={ensureStringArray(selectedWork.tags).join("，")} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { tags: parseDesignerTags(event.target.value) })} />
-        </label>
-        <div className="curated-inspector-two">
-          <label>类型
-            <select value={selectedWork.kind || "image"} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { kind: event.target.value })}>
-              <option value="image">图片</option>
-              <option value="video">视频</option>
-              <option value="case">案例</option>
-              <option value="workflow">流程</option>
-            </select>
-          </label>
-          <label>分类
-            <select value={selectedWork.category || "brand"} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { category: event.target.value })}>
-              <option value="product">产品</option>
-              <option value="portrait">人像</option>
-              <option value="world">世界观</option>
-              <option value="brand">品牌</option>
-              <option value="video">视频</option>
-              <option value="workflow">流程</option>
-            </select>
-          </label>
+        <div className="curated-inspector-body">
+          {inspectorTab === "content" && <>
+            {selectedSection && <section className="curated-inspector-section">
+              <h3>模块内容</h3>
+              {selectedSection.eyebrow !== undefined && <label>眉标<input value={selectedSection.eyebrow || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { eyebrow: event.target.value })} /></label>}
+              <label>标题<input value={selectedSection.title || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { title: event.target.value })} /></label>
+              {selectedSection.subtitle !== undefined && <label>副标题<input value={selectedSection.subtitle || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { subtitle: event.target.value })} /></label>}
+              <label>描述<textarea value={selectedSection.description || ""} onChange={(event) => updateHomepageDesignerSection(nodeId, { description: event.target.value })} /></label>
+              {selectedSection.tags !== undefined && <label>标签预设<input value={ensureStringArray(selectedSection.tags).join("，")} onChange={(event) => updateHomepageDesignerSection(nodeId, { tags: parseDesignerTags(event.target.value) })} /></label>}
+            </section>}
+            {selectedWork && <section className="curated-inspector-section">
+              <h3>作品元素</h3>
+              <label>标签<input value={selectedWork.label || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { label: event.target.value })} /></label>
+              <label>标题<input value={selectedWork.title || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { title: event.target.value })} /></label>
+              <label>描述<textarea value={selectedWork.description || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { description: event.target.value })} /></label>
+              <label>标签预设<input value={ensureStringArray(selectedWork.tags).join("，")} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { tags: parseDesignerTags(event.target.value) })} /></label>
+              <div className="curated-inspector-two">
+                <label>类型<select value={selectedWork.kind || "image"} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { kind: event.target.value })}><option value="image">图片</option><option value="video">视频</option><option value="case">案例</option><option value="workflow">流程</option></select></label>
+                <label>分类<select value={selectedWork.category || "brand"} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { category: event.target.value })}><option value="product">产品</option><option value="portrait">人像</option><option value="world">世界观</option><option value="brand">品牌</option><option value="video">视频</option><option value="workflow">流程</option></select></label>
+              </div>
+              {(selectedWork.kind === "video" || selectedWorkMedia?.kind === "video") && <label>时长<input value={selectedWork.duration || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { duration: event.target.value })} placeholder="00:10" /></label>}
+              <label>详情行<textarea value={formatDesignerDetailRows(selectedWork.detailRows)} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { detailRows: parseDesignerDetailRows(event.target.value) })} /></label>
+            </section>}
+          </>}
+          {inspectorTab === "media" && <section className="curated-inspector-section">
+            <h3>素材</h3>
+            {selectedWork && selectedWorkMedia ? <>
+              <div className="curated-inspector-media-actions">
+                <button type="button" disabled={!canListAssets || isCapabilitiesLoading} title={canListAssets ? "素材库" : assetCapabilityReason} onClick={() => openAssetManager(mediaTarget)}><Icon name="Grid" size={14} /> 素材库</button>
+                <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={() => document.getElementById(uploadInputId)?.click()}><Icon name="UploadCloud" size={14} /> 上传替换</button>
+                <button type="button" onClick={() => requestExternalVideoReplacement(mediaTarget, selectedWorkMedia)}><Icon name="Link2" size={14} /> 外链视频</button>
+              </div>
+              <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => { const file = event.target.files && event.target.files[0]; if (file) requestMediaReplacement(file, mediaTarget); event.target.value = ""; }} />
+              <label>素材类型<select value={selectedWorkMedia.kind || "image"} onChange={(event) => updateSelectedWorkMedia({ kind: event.target.value })}><option value="image">图片</option><option value="video">视频</option><option value="youtube">YouTube</option></select></label>
+              <label>资源链接<input value={selectedWorkMedia.url || ""} onChange={(event) => updateSelectedWorkMedia(applyMediaFieldChange(selectedWorkMedia, "url", event.target.value))} /></label>
+              <label>封面 / 海报<input value={selectedWorkMedia.poster || ""} onChange={(event) => updateSelectedWorkMedia({ poster: event.target.value })} /></label>
+              <label>替代文本<input value={selectedWorkMedia.alt || ""} onChange={(event) => updateSelectedWorkMedia({ alt: event.target.value })} /></label>
+            </> : <p className="curated-inspector-empty">当前模块没有可替换素材。请选择作品卡片或视频卡片。</p>}
+          </section>}
+          {inspectorTab === "style" && <section className="curated-inspector-section">
+            <h3>样式</h3>
+            {renderPresetGroup("字体", HOMEPAGE_FONT_PRESETS, theme.fontPreset, "fontPreset")}
+            {renderPresetGroup("颜色", HOMEPAGE_COLOR_PRESETS, theme.colorPreset, "colorPreset", { colors: true })}
+            {renderPresetGroup("圆角", HOMEPAGE_RADIUS_PRESETS, theme.radiusPreset, "radiusPreset")}
+            {renderPresetGroup("密度", HOMEPAGE_DENSITY_PRESETS, theme.densityPreset, "densityPreset")}
+            {selectedSection && renderStylePresetGroup((presetId) => updateHomepageDesignerSection(nodeId, { stylePreset: presetId }))}
+            {selectedWork && renderStylePresetGroup((presetId) => updateHomepageDesignerWork(selectedWork.id, { stylePreset: presetId }))}
+          </section>}
+          {inspectorTab === "display" && <section className="curated-inspector-section">
+            <h3>显示</h3>
+            {selectedSection && nodeId !== "home" && renderVisibilityToggle("当前模块显示", !isHomepageSectionHidden(nodeId), (visible) => updateHomepageDesignerSection(nodeId, { hidden: !visible }))}
+            {selectedWork && selectedWorkMedia && renderVisibilityToggle("当前作品显示", !selectedWorkHidden, (visible) => updateSelectedWorkMedia({ curatedHidden: !visible }))}
+            {renderSectionVisibilityGroup()}
+            {nodeId === "process" && renderProcessBlockVisibilityGroup()}
+          </section>}
         </div>
-        {(selectedWork.kind === "video" || selectedWorkMedia?.kind === "video") && <label>时长
-          <input value={selectedWork.duration || ""} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { duration: event.target.value })} placeholder="00:10" />
-        </label>}
-        {renderStylePresetGroup((presetId) => updateHomepageDesignerWork(selectedWork.id, { stylePreset: presetId }))}
-      </section>}
-
-      {selectedWork && selectedWorkMedia && <section className="curated-inspector-section">
-        <h3>素材</h3>
-        <div className="curated-inspector-media-actions">
-          <button type="button" disabled={!canListAssets || isCapabilitiesLoading} title={canListAssets ? "素材库" : assetCapabilityReason} onClick={() => openAssetManager(mediaTarget)}><Icon name="Grid" size={14} /> 素材库</button>
-          <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={() => document.getElementById(uploadInputId)?.click()}><Icon name="UploadCloud" size={14} /> 上传替换</button>
-          <button type="button" onClick={() => requestExternalVideoReplacement(mediaTarget, selectedWorkMedia)}><Icon name="Link2" size={14} /> 外链视频</button>
-        </div>
-        <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
-          const file = event.target.files && event.target.files[0];
-          if (file) requestMediaReplacement(file, mediaTarget);
-          event.target.value = "";
-        }} />
-        <label>素材类型
-          <select value={selectedWorkMedia.kind || "image"} onChange={(event) => updateSelectedWorkMedia({ kind: event.target.value })}>
-            <option value="image">图片</option>
-            <option value="video">视频</option>
-            <option value="youtube">YouTube</option>
-          </select>
-        </label>
-        <label>资源链接
-          <input value={selectedWorkMedia.url || ""} onChange={(event) => updateSelectedWorkMedia(applyMediaFieldChange(selectedWorkMedia, "url", event.target.value))} />
-        </label>
-        <label>封面 / 海报
-          <input value={selectedWorkMedia.poster || ""} onChange={(event) => updateSelectedWorkMedia({ poster: event.target.value })} />
-        </label>
-        <label>替代文本
-          <input value={selectedWorkMedia.alt || ""} onChange={(event) => updateSelectedWorkMedia({ alt: event.target.value })} />
-        </label>
-        <label>详情行
-          <textarea value={formatDesignerDetailRows(selectedWork.detailRows)} onChange={(event) => updateHomepageDesignerWork(selectedWork.id, { detailRows: parseDesignerDetailRows(event.target.value) })} />
-        </label>
-      </section>}
-    </aside>;
+      </aside>}
+    </>;
   };
 
   const renderCuratedTopbar = () => {
@@ -7532,11 +7634,11 @@ function App() {
       label: "首页动态舞台"
     } : null;
     const targetKey = target ? getCuratedDropTargetKey(target) : "";
-    const handlers = target ? getCuratedDropHandlers(target) : {};
+    const handlers = target && !adminPreviewMode ? getCuratedDropHandlers(target) : {};
     return <div
       className={cx(
         "curated-hero-stage-wrap",
-        IS_PORTFOLIO_ADMIN_MODE && "curated-admin-drop-target",
+        IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && "curated-admin-drop-target",
         activeCuratedDropTarget === targetKey && "is-drag-active"
       )}
       {...handlers}
@@ -7566,10 +7668,10 @@ function App() {
         <Icon name="Image" size={26} />
         <span>等待添加首页主视觉</span>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && target && <div className="curated-admin-media-tools">
+      {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && target && <div className="curated-admin-media-tools">
         <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换舞台作品" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById("curated-hero-upload").click(); }}><Icon name="UploadCloud" size={14} /> 替换舞台作品</button>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && target && <input id="curated-hero-upload" type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      {IS_PORTFOLIO_ADMIN_MODE && !adminPreviewMode && target && <input id="curated-hero-upload" type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) requestMediaReplacement(file, target);
         event.target.value = "";
@@ -7579,20 +7681,53 @@ function App() {
 
   const renderCuratedAdminDock = () => {
     if (!IS_PORTFOLIO_ADMIN_MODE) return null;
+    if (adminPreviewMode) {
+      return <button type="button" className="curated-admin-preview-exit" onClick={() => setAdminPreviewMode(false)}>
+        <Icon name="Minimize" size={16} />
+        <span>退出招聘官预览</span>
+      </button>;
+    }
+    const viewportOptions = [
+      ["desktop", "桌面", "Maximize"],
+      ["tablet", "平板", "LayoutTemplate"],
+      ["mobile", "手机", "Minimize"]
+    ];
+    const isDraftState = hasUnpublishedChanges || loadSource.includes("draft");
     return <>
       <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" onChange={importDraft} />
       <div className="curated-admin-preview-dock" role="toolbar" aria-label="作品集后台可视化编辑工具">
         <div className="curated-admin-preview-status">
-          <span className={loadSource.includes("draft") ? "is-draft" : "is-published"} />
+          <span className={isDraftState ? "is-draft" : "is-published"} />
           <div>
             <strong>后台可视化编辑</strong>
-            <em>{statusMessage || "当前画面与公开首页使用同一套布局。"}</em>
+            <em>{statusMessage || (isDraftState ? "当前有未发布草稿，先保存草稿或发起发布检查。" : "当前画面与已发布数据一致。")}</em>
           </div>
+        </div>
+        <div className="curated-admin-viewport-switch" aria-label="设备预览">
+          {viewportOptions.map(([mode, label, icon]) => <button
+            key={mode}
+            type="button"
+            className={adminViewportMode === mode ? "is-active" : ""}
+            aria-pressed={adminViewportMode === mode}
+            onClick={() => setAdminViewportMode(mode)}
+            title={`${label}预览`}
+          >
+            <Icon name={icon} size={15} />
+            <span>{label}</span>
+          </button>)}
         </div>
         <div className="curated-admin-preview-actions">
           <button type="button" onClick={() => setShowCuratedManager((value) => !value)} title="管理首页卡片数量">
             <Icon name="Grid" size={16} />
             <span>管理卡片</span>
+          </button>
+          <button type="button" onClick={saveLocalDraft} title="保存到当前浏览器，不发布上线">
+            <Icon name="Save" size={16} />
+            <span>保存草稿</span>
+          </button>
+          <button type="button" onClick={() => setInspectorOpen((value) => !value)} title="展开或收起底部编辑抽屉">
+            <Icon name="Settings2" size={16} />
+            <span>{inspectorOpen ? "收起编辑" : "打开编辑"}</span>
           </button>
           <button type="button" onClick={() => importInputRef.current && importInputRef.current.click()} title="导入 JSON">
             <Icon name="UploadCloud" size={16} />
@@ -7606,14 +7741,64 @@ function App() {
             <Icon name="Download" size={16} />
             <span>下载 JSON</span>
           </button>
-          <button type="button" onClick={publishPortfolioJson} disabled={isPublishingPortfolio || !canWriteAssets} className="is-primary" title={!canWriteAssets ? assetCapabilityReason : isPublishingPortfolio ? "正在保存到代码仓库" : "确认发布上线"}>
+          <button type="button" onClick={() => { setInspectorOpen(false); setAdminPreviewMode(true); }} title="隐藏后台控件，以公开站视角查看当前草稿">
+            <Icon name="ExternalLink" size={16} />
+            <span>招聘官预览</span>
+          </button>
+          <button type="button" onClick={openPublishReview} disabled={isPublishingPortfolio || !canWriteAssets} className="is-primary" title={!canWriteAssets ? assetCapabilityReason : isPublishingPortfolio ? "正在保存到代码仓库" : "发布前检查并上线"}>
             <Icon name="Save" size={16} />
-            <span>{isPublishingPortfolio ? "保存中..." : "确认发布上线"}</span>
+            <span>{isPublishingPortfolio ? "发布中..." : "发布上线"}</span>
           </button>
         </div>
       </div>
       {renderCuratedCardManager()}
     </>;
+  };
+
+  const renderPublishReviewDialog = () => {
+    if (!IS_PORTFOLIO_ADMIN_MODE || !publishReviewOpen) return null;
+    const issues = publishReviewState.issues || [];
+    const blockingIssues = publishReviewState.blockingIssues || [];
+    const changes = publishReviewState.changes || [];
+    const hasBlockingIssues = blockingIssues.length > 0;
+    return <div className="curated-publish-review-layer" role="dialog" aria-modal="true" aria-label="发布上线前检查">
+      <aside className="curated-publish-review">
+        <header>
+          <div>
+            <span>发布前检查</span>
+            <h2>确认后会写入 GitHub 并触发现有 Cloudflare 部署链路</h2>
+          </div>
+          <button type="button" onClick={() => setPublishReviewOpen(false)} disabled={isPublishingPortfolio}>关闭</button>
+        </header>
+        <div className="curated-publish-review-grid">
+          <section>
+            <h3>改动摘要</h3>
+            <ul>{changes.map((item) => <li key={item}>{item}</li>)}</ul>
+          </section>
+          <section className={hasBlockingIssues ? "is-danger" : issues.length ? "is-warning" : "is-ok"}>
+            <h3>{publishReviewState.checking ? "正在检查" : hasBlockingIssues ? "阻断项" : issues.length ? "提醒项" : "检查通过"}</h3>
+            {publishReviewState.checking ? <p>正在检查缺图、断链和本地预览媒体。</p> : issues.length ? <ul>
+              {issues.slice(0, 8).map((issue) => <li key={issue}>{issue}</li>)}
+              {issues.length > 8 && <li>还有 {issues.length - 8} 项未展开。</li>}
+            </ul> : <p>未发现缺图、断链或本地预览媒体阻断项。</p>}
+          </section>
+          <section>
+            <h3>发布后 QA</h3>
+            <p>发布成功后继续使用底部状态查看 commit、部署状态和线上 QA 链接；公开首页不会显示后台 overlay 或编辑 dock。</p>
+          </section>
+        </div>
+        <footer>
+          <div>
+            <span>目标环境</span>
+            <strong>Production · https://www.zhangweivisual.cn/</strong>
+          </div>
+          <button type="button" onClick={saveLocalDraft} disabled={isPublishingPortfolio}>只保存草稿</button>
+          <button type="button" className="is-primary" onClick={confirmPublishFromReview} disabled={publishReviewState.checking || hasBlockingIssues || isPublishingPortfolio || !canWriteAssets}>
+            {isPublishingPortfolio ? "发布中..." : "确认发布上线"}
+          </button>
+        </footer>
+      </aside>
+    </div>;
   };
 
   const renderCuratedExperience = () => {
@@ -7657,7 +7842,12 @@ function App() {
     const homeTags = ensureStringArray(homeSection.tags).length ? ensureStringArray(homeSection.tags) : heroRoleTags;
     const designerThemeStyle = getHomepageDesignerThemeStyle(getHomepageDesignerState().theme);
 
-    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
+    return <div className={cx(
+      "curated-page curated-shell",
+      IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview",
+      IS_PORTFOLIO_ADMIN_MODE && `curated-admin-viewport-${adminViewportMode}`,
+      adminPreviewMode && "curated-admin-clean-preview"
+    )} style={designerThemeStyle}>
       {renderCuratedLayoutStyles()}
       <section id="home" className="curated-hero" style={publishedSectionStyle}>
         <div className="portfolio-container curated-hero-container">
@@ -7769,6 +7959,7 @@ function App() {
       {renderMediaReplacementDialog()}
       {renderCuratedAdminDock()}
       {renderHomepageDesignInspector(sectionDefaults)}
+      {renderPublishReviewDialog()}
     </div>;
   };
 
