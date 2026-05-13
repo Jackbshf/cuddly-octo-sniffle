@@ -688,11 +688,21 @@ const HOMEPAGE_CURATION = {
   videoFeaturedIds: [
     "video-product-shot",
     "video-social-series",
-    "gallery-video-d9"
+    "video-digital-human",
+    "video-packaging-motion",
+    "gallery-video-d9",
+    "gallery-video-a6537",
+    "gallery-video-a0",
+    "gallery-video-voice",
+    "gallery-video-prompt",
+    "gallery-video-51339",
+    "gallery-video-food"
   ],
   commercialImageCaseIds: [
     "case-product-ad",
-    "case-beauty-live"
+    "case-beauty-live",
+    "case-brand-space",
+    "case-fragrance-packaging"
   ],
   commercialVideoCaseIds: [],
   capabilityCards: [
@@ -741,10 +751,23 @@ const HOMEPAGE_CURATION = {
   ],
   visualGalleryIds: [
     "gallery-drink",
+    "gallery-portal",
     "gallery-lipstick",
-    "gallery-brand-city"
+    "gallery-beauty-live",
+    "gallery-giftbox",
+    "gallery-whale",
+    "gallery-monkey",
+    "gallery-cybercity",
+    "gallery-beverage-packshot",
+    "gallery-brand-city",
+    "gallery-cosmetic-silk",
+    "gallery-earbuds-launch"
   ],
   workflowEvidenceIds: [
+    "workflow-proof-overview",
+    "workflow-proof-control-chain",
+    "workflow-proof-style-variation",
+    "workflow-proof-delivery-review"
   ]
 };
 
@@ -2638,8 +2661,10 @@ function App() {
 
   const curatedNavItems = [
     { id: "home", label: "首页" },
-    { id: "work", label: "作品" },
-    { id: "ability", label: "能力" },
+    { id: "featured", label: "入口" },
+    { id: "videos", label: "视频" },
+    { id: "cases", label: "案例" },
+    { id: "capabilities", label: "能力" },
     { id: "process", label: "流程" },
     { id: "contact", label: "联系" }
   ];
@@ -2938,7 +2963,6 @@ function App() {
   useEffect(() => {
     if (isLoading) return undefined;
     if (typeof window.matchMedia !== "function") return undefined;
-    if (!IS_PORTFOLIO_ADMIN_MODE) return undefined;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (reducedMotion || !finePointer) return undefined;
@@ -5902,12 +5926,6 @@ function App() {
       title: "输入图 / 参考素材",
       description: "用产品结构、风格参考和商业目标锁定画面方向，避免生成结果失焦。",
       item: buildHomepageCuratedItem("case-product-ad", "workflow-lab", 0),
-      media: {
-        kind: "image",
-        url: "images/curated/workflow-lab-input-reference.webp",
-        fullUrl: "images/curated/workflow-lab-input-reference.webp",
-        alt: "输入图与参考素材阶段说明"
-      },
       tags: ["Reference", "ControlNet", "Brief"]
     },
     {
@@ -5915,12 +5933,6 @@ function App() {
       label: "COMFYUI",
       title: "节点流程 / 批量控制",
       description: "把结构控制、批量出图、局部重绘和后期筛选拆成可复用链路。",
-      media: {
-        kind: "image",
-        url: "images/curated/workflow-lab-node-flow.webp",
-        fullUrl: "images/curated/workflow-lab-node-flow.webp",
-        alt: "节点流程与批量控制阶段说明"
-      },
       nodes: ["Input", "ControlNet", "Batch", "Inpaint", "Output"],
       tags: ["Node Flow", "Inpaint", "Batch"]
     },
@@ -5930,12 +5942,6 @@ function App() {
       title: "输出结果 / 精修交付",
       description: "将可用版本收敛为电商主图、广告关键帧或可继续剪辑的视频素材。",
       item: buildHomepageCuratedItem("capability-ad-keyframe", "workflow-lab", 2),
-      media: {
-        kind: "image",
-        url: "images/curated/workflow-lab-output-delivery.webp",
-        fullUrl: "images/curated/workflow-lab-output-delivery.webp",
-        alt: "输出结果与精修交付阶段说明"
-      },
       tags: ["Retouch", "Delivery", "Gallery Ready"]
     }
   ].filter((card) => card.nodes || card.item);
@@ -6214,10 +6220,7 @@ function App() {
     const isManualEntry = entry?.manualCuration === true;
     const portrait = isLikelyPortraitMedia(media);
     const isVideoCard = normalizedMedia?.kind === "video" || normalizedMedia?.kind === "youtube";
-    const rawDisplayUrl = getDisplayUrl(normalizedMedia);
-    const displayUrl = isVideoCard
-      ? (normalizedMedia?.poster || normalizedMedia?.delivery?.thumbnailUrl || normalizedMedia?.thumbnailUrl || "")
-      : rawDisplayUrl;
+    const displayUrl = getDisplayUrl(normalizedMedia);
     const videoSourceUrl = isVideoCard ? getSourceMediaUrl(normalizedMedia) : "";
     const hasVideoSource = isVideoCard && Boolean(videoSourceUrl || normalizedMedia?.delivery?.hlsUrl || normalizedMedia?.delivery?.iframeUrl);
     const showVideoRecovery = isVideoCard && !hasVideoSource;
@@ -6246,10 +6249,10 @@ function App() {
         options.compact && "curated-media-box-compact",
         options.variant && `curated-media-box-${options.variant}`,
         portrait && "curated-media-box-portrait",
-        IS_PORTFOLIO_ADMIN_MODE && showStructureEditor && canEditMedia && "curated-admin-drop-target",
+        IS_PORTFOLIO_ADMIN_MODE && canEditMedia && "curated-admin-drop-target",
         activeCuratedDropTarget === replaceTargetKey && "is-drag-active"
       )}
-      {...(showStructureEditor && canEditMedia ? getCuratedDropHandlers(replaceTarget) : {})}
+      {...(canEditMedia ? getCuratedDropHandlers(replaceTarget) : {})}
       data-media-card="true"
       data-media-kind={isVideoCard ? "video" : "image"}
       data-media-source={displayUrl}
@@ -6275,12 +6278,12 @@ function App() {
       </div> : isVideoCard && <div className="curated-media-play curated-media-play-center" aria-hidden="true">
         <Icon name="Play" size={20} />
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && showStructureEditor && canEditMedia && <div className="curated-admin-media-tools">
+      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <div className="curated-admin-media-tools">
         <button type="button" disabled={!canListAssets || isCapabilitiesLoading} title={canListAssets ? "素材库" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); openAssetManager(replaceTarget); }}><Icon name="Grid" size={14} /> 素材库</button>
         <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(uploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(replaceTarget, normalizedMedia); }}><Icon name="Link2" size={14} /> 外链</button>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && showStructureEditor && canEditMedia && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) requestMediaReplacement(file, replaceTarget);
         event.target.value = "";
@@ -6594,35 +6597,14 @@ function App() {
   };
 
   const renderWorkflowLabCard = (card, index) => {
-    const media = card.media ? normalizeMediaItem(card.media) : null;
-    const fallbackEntry = {
-      manualCuration: true,
-      slide: { id: "workflow-lab-" + card.key, title: card.title },
-      slideIndex: index
-    };
-    const mediaEntry = media ? { media, slotIndex: 0 } : card.item?.mediaEntry;
-    const detail = media ? {
-      id: "workflow-lab-" + card.key,
-      kind: "image",
-      label: card.label,
-      title: card.title,
-      description: card.description,
-      tags: ensureStringArray(card.tags).slice(0, 5),
-      entry: fallbackEntry,
-      mediaEntry,
-      curation: { id: card.key, kind: "workflow", label: card.label, title: card.title, description: card.description, tags: card.tags },
-      detailRows: [
-        { label: "阶段", value: card.label },
-        { label: "说明", value: card.description }
-      ]
-    } : card.item ? buildHomepageCuratedDetail(card.item, index) : null;
+    const detail = card.item ? buildHomepageCuratedDetail(card.item, index) : null;
     const commonProps = detail ? {
       tabIndex: 0,
       onClick: () => openWorkDetail(detail),
       onKeyDown: (event) => openWorkDetailFromKeyboard(event, detail)
     } : {};
     return <article key={card.key} className="curated-workflow-card curated-workflow-lab-card" data-curation-section="workflow-lab" data-curation-id={card.key} data-curation-kind={detail?.kind || "workflow"} {...commonProps}>
-      {media ? renderCuratedMediaBox(detail.entry, mediaEntry, { compact: true, disableInlinePreview: true, label: card.title, variant: "workflow-lab", workId: card.key }) : card.item ? renderCuratedMediaBox(card.item.entry, card.item.mediaEntry, { compact: true, disableInlinePreview: true, label: card.title, variant: "workflow", workId: card.item.curation?.id }) : <div className="curated-workflow-node-frame" aria-label="ComfyUI node flow">
+      {card.item ? renderCuratedMediaBox(card.item.entry, card.item.mediaEntry, { compact: true, disableInlinePreview: true, label: card.title, variant: "workflow", workId: card.item.curation?.id }) : <div className="curated-workflow-node-frame" aria-label="ComfyUI node flow">
         {card.nodes.map((node, nodeIndex) => <span key={card.key + "-" + node} data-node-index={nodeIndex + 1}>{node}</span>)}
       </div>}
       <div className="curated-workflow-copy">
@@ -6632,56 +6614,6 @@ function App() {
         <div className="curated-card-tags">
           {card.tags.slice(0, 3).map((tag) => <span key={card.key + "-" + tag}>{tag}</span>)}
         </div>
-      </div>
-    </article>;
-  };
-
-  const homepageAbilityStatements = [
-    {
-      title: "商业主图与产品质感",
-      description: "用少量强作品说明构图、材质、光影和卖点表达，避免用堆图稀释判断。"
-    },
-    {
-      title: "AI 视频与封面化预览",
-      description: "列表页只显示封面和时长，视频在详情中由观看者主动播放，减少首屏负担。"
-    },
-    {
-      title: "ComfyUI 工作流整理",
-      description: "工作流作为能力证据进入详情说明，不在首页用大图遮挡作品观看。"
-    }
-  ];
-
-  const renderQuietWorkCard = (detail) => {
-    if (!detail?.entry || !detail?.mediaEntry) return null;
-    const media = normalizeMediaItem(detail.mediaEntry.media);
-    const isVideoCard = detail.kind === "video" || media?.kind === "video" || media?.kind === "youtube";
-    const tags = ensureStringArray(detail.tags).slice(0, 3);
-    return <article
-      key={detail.id}
-      className={cx("curated-showcase-card", isVideoCard && "is-video")}
-      role="button"
-      tabIndex={0}
-      onClick={() => openWorkDetail(detail)}
-      onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)}
-      data-curation-id={detail.curation?.id || detail.id}
-      data-curation-kind={isVideoCard ? "video" : "image"}
-      {...getDesignerWorkProps(detail.curation?.id, detail.title)}
-    >
-      {renderCuratedMediaBox(detail.entry, detail.mediaEntry, {
-        compact: true,
-        disableInlinePreview: true,
-        duration: detail.duration,
-        label: detail.title,
-        variant: isVideoCard ? "showcase-video" : "showcase",
-        workId: detail.curation?.id
-      })}
-      <div className="curated-showcase-copy">
-        <span>{isVideoCard ? "VIDEO" : detail.label}</span>
-        <h3>{detail.title}</h3>
-        <p>{detail.description}</p>
-        {tags.length > 0 && <div className="curated-card-tags">
-          {tags.map((tag) => <span key={detail.id + "-" + tag}>{tag}</span>)}
-        </div>}
       </div>
     </article>;
   };
@@ -6702,7 +6634,7 @@ function App() {
         const embedUrl = getYouTubeEmbedUrl(media.url);
         return embedUrl ? <iframe
           ref={lightboxVideoRef}
-          src={withEmbedPlaybackParams(embedUrl, false)}
+          src={withEmbedPlaybackParams(embedUrl, true)}
           title={item.title}
           className="curated-detail-player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -6718,7 +6650,7 @@ function App() {
         if (streamPlayerUrl) {
           return <iframe
             ref={lightboxVideoRef}
-            src={`${streamPlayerUrl}?autoplay=false`}
+            src={`${streamPlayerUrl}?autoplay=true`}
             title={item.title}
             className="curated-detail-player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -6729,7 +6661,7 @@ function App() {
         if (embedUrl && !isDirectVideoSource(sourceUrl) && !isBilibiliEmbed) {
           return <iframe
             ref={lightboxVideoRef}
-            src={withEmbedPlaybackParams(embedUrl, false)}
+            src={withEmbedPlaybackParams(embedUrl, true)}
             title={item.title}
             className="curated-detail-player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -6743,8 +6675,9 @@ function App() {
             src={sourceUrl}
             poster={displayUrl || undefined}
             controls
+            autoPlay
             playsInline
-            preload="metadata"
+            preload="auto"
             className="curated-detail-player"
           />;
         }
@@ -6791,11 +6724,11 @@ function App() {
           {...(detailTarget ? getCuratedDropHandlers(detailTarget) : {})}
         >
           {renderDetailMedia(selectedWorkItem)}
-          {IS_PORTFOLIO_ADMIN_MODE && showStructureEditor && detailTarget && <div className="curated-admin-media-tools">
+          {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <div className="curated-admin-media-tools">
             <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换当前媒体" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(detailUploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换当前媒体</button>
             {detailTarget.type !== "case-cover" && <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(detailTarget, selectedWorkItem.mediaEntry?.media); }}><Icon name="Link2" size={14} /> 外链视频</button>}
           </div>}
-          {IS_PORTFOLIO_ADMIN_MODE && showStructureEditor && detailTarget && <input id={detailUploadInputId} type="file" accept={detailTarget.type === "case-cover" ? "image/*" : "image/*,video/*"} className="hidden" onChange={(event) => {
+          {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <input id={detailUploadInputId} type="file" accept={detailTarget.type === "case-cover" ? "image/*" : "image/*,video/*"} className="hidden" onChange={(event) => {
             const file = event.target.files && event.target.files[0];
             if (file) requestMediaReplacement(file, detailTarget);
             event.target.value = "";
@@ -7207,10 +7140,6 @@ function App() {
             <Icon name="Download" size={16} />
             <span>下载 JSON</span>
           </button>
-          <button type="button" onClick={() => setShowStructureEditor((value) => !value)} className={showStructureEditor ? "is-active" : ""} title="高级维护：页面文案、预设与素材字段">
-            <Icon name="Sliders" size={16} />
-            <span>高级维护</span>
-          </button>
           <button type="button" onClick={publishPortfolioJson} disabled={isPublishingPortfolio || !canWriteAssets} className="is-primary" title={!canWriteAssets ? assetCapabilityReason : isPublishingPortfolio ? "正在保存到代码仓库" : "确认发布上线"}>
             <Icon name="Save" size={16} />
             <span>{isPublishingPortfolio ? "保存中..." : "确认发布上线"}</span>
@@ -7225,7 +7154,7 @@ function App() {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
     const heroSubtitle = "AIGC Visual Designer / AI Video & Commercial Visual / ComfyUI Workflow";
-    const heroDescription = "面向 AIGC 视觉设计岗位，用少量精选作品说明商业视觉、AI 视频和可复盘工作流能力。";
+    const heroDescription = "面向 AIGC 视觉设计岗位，集中展示商业主图、生成式视频、品牌空间、人像角色和可复盘工作流。";
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
     const heroStageItems = (heroVisualEntry ? [heroVisualEntry] : []).map((item, index) => {
       const media = normalizeMediaItem(item.mediaEntry.media);
@@ -7238,27 +7167,31 @@ function App() {
         detail
       };
     });
-    const homepageShowcaseEntries = [
-      ...homepageVideoEntries.slice(0, 2).map((item, index) => buildVideoWorkDetail(item, index)),
-      ...homepageCommercialCases.slice(0, 2).map((item, index) => buildCaseWorkDetail(item, index)),
-      ...homepageGalleryEntries.slice(0, 3).map((item, index) => buildVisualWorkDetail(item, index))
-    ].filter(Boolean).slice(0, 8);
+    const visibleVideoEntries = homepageVideoEntries;
+    const visibleVisualEntries = filteredVisualEntries;
+    const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
-      work: { label: "精选作品", eyebrow: "精选作品", title: "精选作品索引", description: "保留 6-8 个最能代表能力的入口，点击卡片后再查看详情和视频。" },
-      ability: { label: "能力说明", eyebrow: "能力说明", title: "我能交付什么", description: "用简短文字说明岗位相关能力，不用大图矩阵打断观看路径。" },
-      process: { label: "创作流程", eyebrow: "创作流程", title: "AIGC 创作流程", description: "用 3 个阶段说明从参考输入、结构控制到精修交付的链路，图片仅作为流程示意入口。" },
+      featured: { label: "精选入口", eyebrow: "精选入口", title: "面试官最先需要看到的能力入口", description: "按视频、商业案例、能力矩阵、视觉作品和工作流拆分，快速建立作品集结构。" },
+      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频 / 商业短片精选", description: "11 条视频作品集中展示，每张卡片都有视频标识、时长、播放入口和详情抽屉。" },
+      cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "精选商业案例", description: "用产品广告、美妆场景、品牌空间和包装礼盒四个方向说明商业视觉能力。" },
+      capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "6 个能力对应 6 张纯图封面，产品、人像、世界观、品牌空间和材质控制各自对应图片。" },
+      gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
+      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI Workflow / 创作流程", description: "用工作流截图和步骤卡说明从输入、控制、筛选到作品整理的可复盘过程。" },
       contact: { label: "联系", title: siteMeta.contactSectionTitle || "联系我", description: siteMeta.contactSectionDesc || "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。" }
     };
     const homeSection = getDesignerSection("home", sectionDefaults.home);
-    const workSection = getDesignerSection("work", sectionDefaults.work);
-    const abilitySection = getDesignerSection("ability", sectionDefaults.ability);
+    const featuredSection = getDesignerSection("featured", sectionDefaults.featured);
+    const videoSection = getDesignerSection("videos", sectionDefaults.videos);
+    const caseSection = getDesignerSection("cases", sectionDefaults.cases);
+    const capabilitySection = getDesignerSection("capabilities", sectionDefaults.capabilities);
+    const gallerySection = getDesignerSection("gallery", sectionDefaults.gallery);
     const processSection = getDesignerSection("process", sectionDefaults.process);
     const contactSection = getDesignerSection("contact", sectionDefaults.contact);
     const homeTags = ensureStringArray(homeSection.tags).length ? ensureStringArray(homeSection.tags) : heroRoleTags;
     const designerThemeStyle = getHomepageDesignerThemeStyle(getHomepageDesignerState().theme);
 
-    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview", showStructureEditor && "curated-advanced-open")} style={designerThemeStyle}>
+    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
       {renderCuratedLayoutStyles()}
       <section id="home" className="curated-hero" style={publishedSectionStyle}>
         <div className="portfolio-container curated-hero-container">
@@ -7272,50 +7205,75 @@ function App() {
               </div>
             </div>
             <div className="curated-hero-actions">
-              <a href="#work" onClick={(event) => handleCuratedAnchorClick(event, "work")}>查看精选作品</a>
-              <a href="#contact" onClick={(event) => handleCuratedAnchorClick(event, "contact")}>联系我</a>
+              <a href="#featured" onClick={(event) => handleCuratedAnchorClick(event, "featured")}>查看精选入口</a>
+              <a href="#videos" onClick={(event) => handleCuratedAnchorClick(event, "videos")}>查看视频精选</a>
+              <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>查看项目案例</a>
             </div>
           </div>
           {renderHeroKineticStage(heroDetail, heroStageItems)}
-        </div>
-      </section>
-
-      <section id="work" className="curated-section curated-section-work" style={publishedSectionStyle}>
-        <div className="portfolio-container">
-          {renderCuratedEyebrow(1, workSection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("work", "精选作品")}>
-            <h2>{workSection.title}</h2>
-            <p>{workSection.description}</p>
-          </div>
-          <div className="curated-showcase-grid">{homepageShowcaseEntries.map(renderQuietWorkCard)}</div>
-        </div>
-      </section>
-
-      <section id="ability" className="curated-section curated-section-ability" style={publishedSectionStyle}>
-        <div className="portfolio-container">
-          {renderCuratedEyebrow(2, abilitySection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("ability", "能力说明")}>
-            <h2>{abilitySection.title}</h2>
-            <p>{abilitySection.description}</p>
-          </div>
-          <div className="curated-ability-list">
-            {homepageAbilityStatements.map((item, index) => <article key={item.title} className="curated-ability-card">
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </article>)}
+          <div className="curated-hero-proof">
+            {curatedStats.map((item) => <div key={item.label}><span>{item.label}</span><strong>{item.value}</strong></div>)}
           </div>
         </div>
       </section>
 
-      <section id="process" className="curated-section curated-section-workflows curated-section-process-compact" style={publishedSectionStyle}>
+      <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(3, processSection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("process", "创作流程")}>
+          {renderCuratedEyebrow(1, featuredSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("featured", "精选入口")}>
+            <h2>{featuredSection.title}</h2>
+            <p>{featuredSection.description}</p>
+          </div>
+          <div className="curated-feature-grid">{homepageEntryCards.map(renderHomepageEntryCard)}</div>
+        </div>
+      </section>
+
+      <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(2, videoSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("videos", "视频精选")}>
+            <h2>{videoSection.title}</h2>
+            <p>{videoSection.description}</p>
+          </div>
+          <div className="curated-video-grid">{visibleVideoEntries.map(renderVideoWorkCard)}</div>
+        </div>
+      </section>
+
+      <section id="cases" className="curated-section" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(3, caseSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
+            <h2>{caseSection.title}</h2>
+            <p>{caseSection.description}</p>
+          </div>
+          <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
+        </div>
+      </section>
+
+      <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(4, capabilitySection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
+            <h2>{capabilitySection.title}</h2>
+            <p>{capabilitySection.description}</p>
+          </div>
+          <div className="curated-capability-grid">{homepageCapabilityCards.map(renderCapabilityCard)}</div>
+        </div>
+      </section>
+
+      <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(6, processSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
             <h2>{processSection.title}</h2>
             <p>{processSection.description}</p>
           </div>
+          <div className="curated-workflow-grid curated-workflow-evidence-grid">{visibleWorkflowEntries.map(renderWorkflowEvidenceCard)}</div>
           <div className="curated-workflow-grid">{homepageWorkflowLabCards.map(renderWorkflowLabCard)}</div>
+          <div className="curated-process-grid">
+            {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
+          </div>
+          <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>
         </div>
       </section>
 
@@ -7336,7 +7294,7 @@ function App() {
       {renderWorkDetailDrawer()}
       {renderMediaReplacementDialog()}
       {renderCuratedAdminDock()}
-      {showStructureEditor && renderHomepageDesignInspector(sectionDefaults)}
+      {renderHomepageDesignInspector(sectionDefaults)}
     </div>;
   };
 
