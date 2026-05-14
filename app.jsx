@@ -797,6 +797,139 @@ const HOMEPAGE_CURATED_WORKS = {
   },
 };
 
+const DETAIL_PAGE_SHOWCASE_ITEMS = [
+  {
+    id: "detail-electric-toothbrush",
+    label: "详情图 01",
+    title: "声波电动牙刷详情图",
+    shortTitle: "电动牙刷",
+    category: "口腔护理详情页",
+    image: "images/curated/detail-pages/detail-electric-toothbrush.webp",
+    description: "用清洁场景、刷头细节、模式说明和参数表组织完整电商详情页，强调清新、温和和日常护理感。",
+    tags: ["口腔护理", "产品详情", "清新质感"]
+  },
+  {
+    id: "detail-handheld-vacuum",
+    label: "详情图 02",
+    title: "轻巧无线手持吸尘器详情图",
+    shortTitle: "手持吸尘器",
+    category: "清洁电器详情页",
+    image: "images/curated/detail-pages/detail-handheld-vacuum.webp",
+    description: "围绕吸力、过滤、续航、刷头和生活场景拆解卖点，适合展示家电类产品的详情页节奏。",
+    tags: ["清洁电器", "卖点拆解", "生活场景"]
+  },
+  {
+    id: "detail-hair-dryer",
+    label: "详情图 03",
+    title: "轻音吹风机详情图",
+    shortTitle: "吹风机",
+    category: "个护电器详情页",
+    image: "images/curated/detail-pages/detail-hair-dryer.webp",
+    description: "用柔和风感、护发场景、出风结构和包装参数表达个护产品的温柔质感与功能可信度。",
+    tags: ["个护电器", "护发场景", "功能说明"]
+  },
+  {
+    id: "detail-eye-care-desk-lamp",
+    label: "详情图 04",
+    title: "全光谱护眼台灯详情图",
+    shortTitle: "护眼台灯",
+    category: "学习办公详情页",
+    image: "images/curated/detail-pages/detail-eye-care-desk-lamp.webp",
+    description: "以桌面主视觉、光源对比、调节结构和认证信息建立护眼台灯的功能层级。",
+    tags: ["护眼台灯", "学习办公", "认证信息"]
+  },
+  {
+    id: "detail-travel-suitcase",
+    label: "详情图 05",
+    title: "轻奢质感旅行箱详情图",
+    shortTitle: "旅行箱",
+    category: "旅行用品详情页",
+    image: "images/curated/detail-pages/detail-travel-suitcase.webp",
+    description: "通过箱体、万向轮、收纳结构、拉杆细节和旅行场景，完整呈现出行产品的使用价值。",
+    tags: ["旅行用品", "结构细节", "出行场景"]
+  },
+  {
+    id: "detail-aroma-diffuser",
+    label: "详情图 06",
+    title: "便携香薰机详情图",
+    shortTitle: "香薰机",
+    category: "生活方式详情页",
+    image: "images/curated/detail-pages/detail-aroma-diffuser.webp",
+    description: "用香氛、雾化、灯光氛围和供电方式组织小家电详情页，突出舒缓生活方式。",
+    tags: ["香薰机", "生活方式", "氛围灯光"]
+  },
+  {
+    id: "detail-thermal-cup",
+    label: "详情图 07",
+    title: "便携保温杯详情图",
+    shortTitle: "保温杯",
+    category: "杯壶详情页",
+    image: "images/curated/detail-pages/detail-thermal-cup.webp",
+    description: "以保温保冷、密封防漏、材质安全和出行场景构建日用杯壶产品的信任感。",
+    tags: ["杯壶", "出行场景", "材质安全"]
+  },
+  {
+    id: "detail-aurora-earbuds",
+    label: "详情图 08",
+    title: "AURORA 真无线降噪耳机详情图",
+    shortTitle: "降噪耳机",
+    category: "数码音频详情页",
+    image: "images/curated/detail-pages/detail-aurora-earbuds.webp",
+    description: "将降噪、音质、芯片、续航、防水和认证组合成数码产品详情页，突出专业与轻便。",
+    tags: ["数码音频", "降噪耳机", "参数说明"]
+  },
+  {
+    id: "detail-memory-foam-seat-cushion",
+    label: "详情图 09",
+    title: "慢回弹记忆棉坐垫详情图",
+    shortTitle: "记忆棉坐垫",
+    category: "家居健康详情页",
+    image: "images/curated/detail-pages/detail-memory-foam-seat-cushion.webp",
+    description: "围绕坐姿支撑、材质触感、防滑底部、收纳细节和多场景使用呈现家居健康卖点。",
+    tags: ["家居健康", "人体工学", "材质细节"]
+  },
+  {
+    id: "detail-laptop-stand",
+    label: "详情图 10",
+    title: "轻薄笔记本支架详情图",
+    shortTitle: "笔记本支架",
+    category: "办公配件详情页",
+    image: "images/curated/detail-pages/detail-laptop-stand.webp",
+    description: "以抬高视角、散热结构、折叠便携和金属工艺说明办公配件的实用性。",
+    tags: ["办公配件", "结构设计", "便携收纳"]
+  },
+  {
+    id: "detail-zero-pressure-pillow",
+    label: "详情图 11",
+    title: "慢回弹 0 压枕详情图",
+    shortTitle: "0 压枕",
+    category: "睡眠家居详情页",
+    image: "images/curated/detail-pages/detail-zero-pressure-pillow.webp",
+    description: "通过颈椎支撑、透气网孔、双向高度和认证参数，表达睡眠产品的舒适与安全。",
+    tags: ["睡眠家居", "颈椎支撑", "安全认证"]
+  },
+  {
+    id: "detail-bath-gift-set",
+    label: "详情图 12",
+    title: "植萃润养洗护沐浴礼盒详情图",
+    shortTitle: "洗护礼盒",
+    category: "洗护礼盒详情页",
+    image: "images/curated/detail-pages/detail-bath-gift-set.webp",
+    description: "用植萃成分、泡沫清洁、香气层次、礼盒包装和送礼场景体现洗护套装的礼赠感。",
+    tags: ["洗护礼盒", "植萃配方", "礼赠场景"]
+  },
+  {
+    id: "detail-nonstick-pan",
+    label: "详情图 13",
+    title: "不粘煎锅详情图",
+    shortTitle: "不粘煎锅",
+    category: "厨房用品详情页",
+    image: "images/curated/detail-pages/detail-nonstick-pan.webp",
+    description: "以烹饪主图、不粘涂层、均匀导热、适配炉具和包装参数组织厨房用品详情页。",
+    tags: ["厨房用品", "不粘锅", "烹饪场景"]
+  }
+];
+
 const HOMEPAGE_CURATION = {
   hero: {
     featuredId: "hero-main-visual"
@@ -1003,6 +1136,7 @@ const HOMEPAGE_SECTION_VISIBILITY_OPTIONS = [
   { id: "featured", label: "精选入口" },
   { id: "videos", label: "视频精选" },
   { id: "cases", label: "精选案例" },
+  { id: "details", label: "详情图展示" },
   { id: "capabilities", label: "能力矩阵" },
   { id: "process", label: "工作流模块" },
   { id: "contact", label: "联系模块" }
@@ -2789,6 +2923,7 @@ function App() {
   const [featuredVideoPlayback, setFeaturedVideoPlayback] = useState({ id: "", status: "poster", hasPlayed: false });
   const [visibleVisualCount, setVisibleVisualCount] = useState(24);
   const [activeCuratedSection, setActiveCuratedSection] = useState("home");
+  const [activeDetailPageIndex, setActiveDetailPageIndex] = useState(0);
   const [selectedWorkItem, setSelectedWorkItem] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isPageJumpEditing, setIsPageJumpEditing] = useState(false);
@@ -2874,8 +3009,9 @@ function App() {
     { id: "featured", label: "入口" },
     { id: "videos", label: "视频" },
     { id: "cases", label: "案例" },
-    { id: "capabilities", label: "能力" },
+    { id: "details", label: "详情图" },
     { id: "process", label: "流程" },
+    { id: "capabilities", label: "能力" },
     { id: "contact", label: "联系" }
   ].filter((item) => !isHomepageSectionHidden(item.id));
   const curatedSectionIds = curatedNavItems.map((item) => item.id);
@@ -6487,6 +6623,82 @@ function App() {
     </article>;
   };
 
+  const buildDetailPageShowcaseDetail = (item, index) => ({
+    id: item.id,
+    kind: "image",
+    label: `${item.label} · ${item.category}`,
+    title: item.title,
+    description: item.description,
+    cover: item.image,
+    tags: ensureStringArray(item.tags),
+    detailRows: [
+      { label: "展示类型", value: item.category },
+      { label: "页面编号", value: `${String(index + 1).padStart(2, "0")} / ${String(DETAIL_PAGE_SHOWCASE_ITEMS.length).padStart(2, "0")}` },
+      { label: "能力重点", value: "详情页版式、卖点拆解、产品一致性与参数组织" }
+    ]
+  });
+
+  const renderDetailPageShowcase = (items, section) => {
+    const showcaseItems = (Array.isArray(items) ? items : []).filter((item) => item?.image);
+    if (!showcaseItems.length) return null;
+    const normalizedIndex = ((activeDetailPageIndex % showcaseItems.length) + showcaseItems.length) % showcaseItems.length;
+    const activeItem = showcaseItems[normalizedIndex];
+    const activeDetail = buildDetailPageShowcaseDetail(activeItem, normalizedIndex);
+    const selectItem = (index) => setActiveDetailPageIndex(((index % showcaseItems.length) + showcaseItems.length) % showcaseItems.length);
+    const moveItem = (offset) => selectItem(normalizedIndex + offset);
+
+    return <div className="curated-detail-page-showcase" data-detail-page-count={showcaseItems.length}>
+      <div className="curated-detail-page-tabs" role="tablist" aria-label="选择详情图">
+        {showcaseItems.map((item, index) => {
+          const isActive = index === normalizedIndex;
+          return <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            className={isActive ? "is-active" : ""}
+            onClick={() => selectItem(index)}
+          >
+            <img src={item.image} alt="" loading={index < 4 ? "eager" : "lazy"} decoding="async" />
+            <span>{item.label}</span>
+            <strong>{item.shortTitle}</strong>
+            <em>{item.category}</em>
+          </button>;
+        })}
+      </div>
+      <article className="curated-detail-page-reader" data-detail-page-active={activeItem.id}>
+        <div className="curated-detail-page-media">
+          <img src={activeItem.image} alt={activeItem.title} loading="eager" decoding="async" />
+        </div>
+        <div className="curated-detail-page-copy" {...getDesignerSectionProps("details", "详情图展示")}>
+          <span>{activeItem.category}</span>
+          <h3>{activeItem.title}</h3>
+          <p>{activeItem.description || section.description}</p>
+          <div className="curated-detail-page-meta">
+            <span>{activeItem.label}</span>
+            <span>{String(normalizedIndex + 1).padStart(2, "0")} / {String(showcaseItems.length).padStart(2, "0")}</span>
+          </div>
+          <div className="curated-detail-page-actions">
+            <button type="button" onClick={() => moveItem(-1)} aria-label="上一张详情图"><Icon name="ChevronLeft" size={15} />上一张</button>
+            <button type="button" onClick={() => openWorkDetail(activeDetail)}>查看大图</button>
+            <button type="button" onClick={() => moveItem(1)} aria-label="下一张详情图">下一张<Icon name="ChevronRight" size={15} /></button>
+          </div>
+          <div className="curated-detail-page-thumbs" aria-label="详情图缩略图">
+            {showcaseItems.map((item, index) => <button
+              key={item.id + "-thumb"}
+              type="button"
+              className={index === normalizedIndex ? "is-active" : ""}
+              onClick={() => selectItem(index)}
+              title={item.title}
+            >
+              <img src={item.image} alt="" loading="lazy" decoding="async" />
+            </button>)}
+          </div>
+        </div>
+      </article>
+    </div>;
+  };
+
   const selectDesignerNode = (nodeId, status = "已选中可编辑元素。") => {
     if (!IS_PORTFOLIO_ADMIN_MODE) return false;
     setSelectedDesignerId(nodeId);
@@ -7834,11 +8046,13 @@ function App() {
     const visibleVideoEntries = homepageVideoEntries;
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
+    const visibleDetailPages = DETAIL_PAGE_SHOWCASE_ITEMS;
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
       featured: { label: "精选入口", eyebrow: "精选入口", title: "核心能力快速入口", description: "从视频、商业视觉、能力矩阵到 ComfyUI 工作流，快速了解我的 AIGC 视觉生产能力。" },
       videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频与商业短片精选", description: "精选 AI 视频案例，覆盖食品广告、产品展示、场景氛围与镜头运动控制。" },
       cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "商业视觉案例", description: siteMeta.caseSectionDesc || "覆盖产品广告、美妆人像、未来场景与包装陈列，展示商业审美、质感控制与视觉一致性。" },
+      details: { label: "详情图展示", eyebrow: "详情图展示", title: "产品详情图展示", description: "集中展示多品类电商详情页长图，覆盖口腔护理、个护电器、旅行用品、数码音频、家居健康和厨房用品。" },
       capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "以商业项目流程为核心，拆解从需求分析、视觉生成、局部优化到视频输出的完整 AIGC 生产能力。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
       process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI 工作流 / 创作流程", description: "通过节点化流程搭建，实现从图像生成、角色一致性、局部重绘到视频输出的可复用生产流程。" },
@@ -7848,6 +8062,7 @@ function App() {
     const featuredSection = getDesignerSection("featured", sectionDefaults.featured);
     const videoSection = getDesignerSection("videos", sectionDefaults.videos);
     const caseSection = getDesignerSection("cases", sectionDefaults.cases);
+    const detailSection = getDesignerSection("details", sectionDefaults.details);
     const capabilitySection = getDesignerSection("capabilities", sectionDefaults.capabilities);
     const gallerySection = getDesignerSection("gallery", sectionDefaults.gallery);
     const processSection = getDesignerSection("process", sectionDefaults.process);
@@ -7914,24 +8129,14 @@ function App() {
         </div>
       </section>}
 
-      {!isHomepageSectionHidden("capabilities") && <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
+      {!isHomepageSectionHidden("details") && <section id="details" className="curated-section curated-section-details" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(4, capabilitySection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
-            <h2>{capabilitySection.title}</h2>
-            <p>{capabilitySection.description}</p>
+          {renderCuratedEyebrow(4, detailSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("details", "详情图展示")}>
+            <h2>{detailSection.title}</h2>
+            <p>{detailSection.description}</p>
           </div>
-          <div className="curated-capability-matrix" aria-label="核心能力矩阵">
-            {capabilityMatrixItems.map((item, index) => <article key={item.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </article>)}
-            <div className="curated-capability-flow">
-              <span>商业项目流程</span>
-              <strong>{capabilityProcessFlow}</strong>
-            </div>
-          </div>
+          {renderDetailPageShowcase(visibleDetailPages, detailSection)}
         </div>
       </section>}
 
@@ -7948,6 +8153,27 @@ function App() {
             {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
           </div>}
           {!isHomepageBlockHidden("process.skills") && <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>}
+        </div>
+      </section>}
+
+      {!isHomepageSectionHidden("capabilities") && <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(6, capabilitySection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
+            <h2>{capabilitySection.title}</h2>
+            <p>{capabilitySection.description}</p>
+          </div>
+          <div className="curated-capability-matrix" aria-label="核心能力矩阵">
+            {capabilityMatrixItems.map((item, index) => <article key={item.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>)}
+            <div className="curated-capability-flow">
+              <span>商业项目流程</span>
+              <strong>{capabilityProcessFlow}</strong>
+            </div>
+          </div>
         </div>
       </section>}
 
