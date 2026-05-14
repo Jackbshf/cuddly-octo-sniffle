@@ -35,17 +35,17 @@ const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_
 
 const DEFAULT_SITE_META = {
   siteTitle: "张玮｜AIGC 视觉作品集",
-  siteDescription: "张玮的 AIGC 视觉作品集，展示商业视觉、AI 视频、产品主图、品牌海报与 ComfyUI 工作流能力。",
-  siteKeywords: ["AIGC", "作品集", "图像生成", "AI 视频制作", "商业视觉", "电商产品图", "品牌海报", "短视频素材"],
+  siteDescription: "张玮的 AIGC 视觉作品集，专注 AIGC 商业视觉、AI 视频短片与 ComfyUI 工作流搭建。",
+  siteKeywords: ["AIGC", "作品集", "图像生成", "AI 视频创作", "商业视觉设计", "ComfyUI 工作流", "产品广告", "角色一致性"],
   canonicalUrl: "https://www.zhangweivisual.cn/",
   ogTitle: "张玮｜AIGC 视觉作品集",
-  ogDescription: "AIGC Visual Designer 作品集，覆盖商业视觉、AI 视频与 ComfyUI Workflow。",
+  ogDescription: "AIGC Visual Designer 作品集，覆盖商业视觉、AI 视频短片与 ComfyUI 工作流搭建。",
   ogImage: "images/generated/celestial-whale-city.webp",
   twitterCard: "summary_large_image",
   caseSectionTitle: "商业视觉案例",
-  caseSectionDesc: "精选能够说明产品主图、包装视觉、品牌空间和风格控制能力的项目。",
+  caseSectionDesc: "覆盖产品广告、美妆人像、未来场景与包装陈列，展示商业审美、质感控制与视觉一致性。",
   contactSectionTitle: "联系我",
-  contactSectionDesc: "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。",
+  contactSectionDesc: "目前专注 AIGC 商业视觉、AI 视频短片与 ComfyUI 工作流搭建。欢迎交流项目合作、岗位机会或作品集相关需求。",
   formspreeEndpoint: "",
   contactCtaLabel: "查看联系方式"
 };
@@ -171,9 +171,9 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "product",
     label: "商业案例 01",
-    title: "产品广告视觉：黑色耳机新品图",
-    description: "用暗调耳机产品图呈现结构、材质和新品发布主视觉。",
-    tags: ["产品广告", "新品发布", "材质光影"],
+    title: "黑色耳机｜产品广告视觉",
+    description: "强化产品质感、光影层次与高级感构图，适用于品牌 KV、电商主图与详情页视觉。",
+    tags: ["产品广告", "品牌 KV", "材质光影"],
     tools: ["ComfyUI", "ControlNet", "Photoshop"],
     media: {
       kind: "image",
@@ -199,9 +199,9 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "beauty",
     label: "商业案例 02",
-    title: "美妆视觉案例：粉底液直播场景",
-    description: "用达人出镜、补光镜和产品展示画面，匹配美妆直播与社媒主图。",
-    tags: ["美妆视觉", "直播场景", "产品主图"],
+    title: "美妆人像｜产品海报视觉",
+    description: "结合人物肤质、产品质感与画面氛围，呈现精致、干净的美妆广告风格。",
+    tags: ["美妆人像", "产品海报", "肤质细节"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
@@ -227,9 +227,9 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "brand",
     label: "商业案例 03",
-    title: "品牌空间视觉：冰蓝未来城场景",
-    description: "用冰蓝建筑、远景人物和空间纵深承接品牌空间、海报和场景包装。",
-    tags: ["品牌空间", "场景包装", "冷调世界观"],
+    title: "冰蓝未来城市｜场景概念视觉",
+    description: "通过空间透视、色彩氛围与建筑细节，构建具有科技感的未来城市画面。",
+    tags: ["场景概念", "未来城市", "空间透视"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
@@ -255,9 +255,9 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "case",
     category: "packaging",
     label: "商业案例 04",
-    title: "包装视觉案例：香氛礼盒主图",
-    description: "用香氛套装、黑金礼盒、丝带和烛光氛围呈现包装视觉与节日礼赠场景。",
-    tags: ["包装视觉", "香氛礼盒", "商业主图"],
+    title: "香氛礼盒｜包装陈列视觉",
+    description: "以礼盒、香氛、道具和环境光影组合，呈现高端礼赠场景与品牌调性。",
+    tags: ["包装陈列", "香氛礼盒", "品牌调性"],
     tools: ["Midjourney", "Photoshop", "版式整理"],
     media: {
       kind: "image",
@@ -523,8 +523,8 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "workflow",
     category: "workflow",
     label: "工作流证明 01",
-    title: "ComfyUI 工作流：节点总览",
-    description: "展示从素材输入、结构控制到结果筛选的节点编排能力。",
+    title: "基础生成流程",
+    description: "通过文生图 / 图生图完成构图、风格与基础画面生成。",
     tags: ["ComfyUI Workflow", "节点编排", "流程总览"],
     media: {
       kind: "image",
@@ -544,8 +544,8 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "workflow",
     category: "workflow",
     label: "工作流证明 02",
-    title: "ComfyUI 工作流：人物与遮罩控制",
-    description: "展示人物参考、遮罩处理和局部调整在同一链路中的组织方式。",
+    title: "角色一致性控制",
+    description: "使用参考图、LoRA、IP-Adapter 等方式稳定人物特征与风格。",
     tags: ["人物控制", "Mask", "局部修正"],
     media: {
       kind: "image",
@@ -565,8 +565,8 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "workflow",
     category: "workflow",
     label: "工作流证明 03",
-    title: "ComfyUI 工作流：风格与场景变化",
-    description: "展示在同一流程中进行场景参考、风格变化和结果对照。",
+    title: "产品与场景优化",
+    description: "结合局部重绘、遮罩控制与细节修复，提升画面完成度。",
     tags: ["风格控制", "场景参考", "结果对照"],
     media: {
       kind: "image",
@@ -586,8 +586,8 @@ const HOMEPAGE_CURATED_WORKS = {
     kind: "workflow",
     category: "workflow",
     label: "工作流证明 04",
-    title: "ComfyUI 工作流：筛选与交付整理",
-    description: "展示将多轮生成结果整理成可复盘、可讲解的作品证据。",
+    title: "视频动态输出",
+    description: "基于分镜、关键帧和运动控制，完成 AI 视频片段生成。",
     tags: ["结果筛选", "交付整理", "复盘说明"],
     media: {
       kind: "image",
@@ -674,9 +674,9 @@ const HOMEPAGE_CURATED_WORKS = {
     category: "video",
     duration: "00:10",
     label: "视频入口",
-    title: "食品广告短片：空气炸锅鸡翅",
-    description: "空气炸锅中食物加热冒汽的近景片段，适合小家电和食品广告素材。",
-    tags: ["食品广告", "小家电", "可播放"],
+    title: "空气炸锅鸡翅｜食品广告短片",
+    description: "基于分镜脚本、画面生成、动态控制与后期剪辑，完成从视觉概念到成片输出的完整流程。",
+    tags: ["食品广告", "AI 视频", "商业短片", "镜头控制"],
     media: { kind: "video", url: "videos/commercial-air-fryer-wings.mp4", poster: "images/_posters/commercial-air-fryer-wings.webp", alt: "空气炸锅食物广告视频封面" }
   },
   "video-skincare-elixir-water": {
@@ -833,10 +833,10 @@ const HOMEPAGE_CURATION = {
 };
 
 const WORKFLOW_EVIDENCE_NOTES = {
-  "workflow-proof-overview": "用于说明素材输入、节点组织和结果筛选链路。",
-  "workflow-proof-control-chain": "用于说明人物参考、遮罩控制和局部修正方式。",
-  "workflow-proof-style-variation": "用于说明场景参考、参数调整和风格对照过程。",
-  "workflow-proof-delivery-review": "用于说明多版本筛选、标记和交付整理方法。"
+  "workflow-proof-overview": "基础生成流程｜通过文生图 / 图生图完成构图、风格与基础画面生成。",
+  "workflow-proof-control-chain": "角色一致性控制｜使用参考图、LoRA、IP-Adapter 等方式稳定人物特征与风格。",
+  "workflow-proof-style-variation": "产品与场景优化｜结合局部重绘、遮罩控制与细节修复，提升画面完成度。",
+  "workflow-proof-delivery-review": "视频动态输出｜基于分镜、关键帧和运动控制，完成 AI 视频片段生成。"
 };
 
 const colorPalettes = [
@@ -5765,7 +5765,7 @@ function App() {
     return parts.length ? parts.join(" / ") : `${stats.total} 组视觉素材`;
   };
 
-  const heroRoleTags = ["AIGC 视觉设计", "AI 视频制作", "品牌海报", "电商主图", "短视频内容"];
+  const heroRoleTags = ["AI 视频生成", "商业视觉设计", "ComfyUI 工作流", "产品广告", "角色一致性", "场景概念"];
   const processSteps = [
     { title: "需求理解", description: "明确项目目标、使用场景、受众和画面比例。" },
     { title: "风格设定", description: "确定关键词、参考方向、色彩、构图和视觉气质。" },
@@ -5775,7 +5775,7 @@ function App() {
     { title: "交付输出", description: "根据使用场景输出海报、产品图、短视频和社媒素材。" }
   ];
   const contactItems = [
-    { label: "求职方向", value: "AIGC 视觉设计师 / AI 视频制作 / 生成式内容设计" },
+    { label: "职业方向", value: "AIGC 视觉设计师 / AI 视频创作者 / ComfyUI 工作流设计" },
     { label: "邮箱", value: "2453193338@qq.com", href: "mailto:2453193338@qq.com" },
     { label: "所在地", value: "广东" },
     { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
@@ -6140,10 +6140,19 @@ function App() {
     ...homepageGalleryEntries
   ].filter(Boolean).length;
   const curatedStats = [
-    { label: "视频作品", value: `${homepageVideoEntries.length} 条` },
-    { label: "主视觉图片", value: `${homepageStaticVisualCount} 张` },
-    { label: "工作流证明", value: `${homepageWorkflowEvidenceEntries.length} 类` }
+    { label: "AI 视频", value: `${homepageVideoEntries.length} 条` },
+    { label: "商业视觉", value: `${homepageStaticVisualCount} 张` },
+    { label: "能力方向", value: "4 类" }
   ];
+  const capabilityMatrixItems = [
+    { title: "产品广告视觉", description: "卖点表达、材质塑造、光影控制、商业构图。" },
+    { title: "美妆产品视觉", description: "肤质细节、产品质感、色彩统一、海报氛围。" },
+    { title: "角色与人像视觉", description: "角色一致性、面部控制、服装造型、批量延展。" },
+    { title: "场景概念设计", description: "世界观设定、环境氛围、空间透视、镜头感构图。" },
+    { title: "产品动态视频", description: "分镜规划、运镜设计、动态控制、成片输出。" },
+    { title: "品牌视觉延展", description: "KV 主视觉、社媒物料、包装展示、系列化输出。" }
+  ];
+  const capabilityProcessFlow = "需求拆解 → 参考收集 → Prompt 设计 → 工作流搭建 → 批量生成 → 局部优化 → 视频输出 → 商业交付";
   const caseToolValues = [...new Set(homepageCommercialCases.flatMap(({ caseItem }) => ensureStringArray(caseItem?.tools)))];
   const pickTools = (...keywords) => caseToolValues.filter((tool) => keywords.some((keyword) => tool.includes(keyword)));
   const skillGroups = [
@@ -6218,15 +6227,15 @@ function App() {
       target: "videos",
       eyebrow: "VIDEO",
       title: "AI 视频作品",
-      description: `${homepageVideoEntries.length} 条可播放视频，覆盖产品、人物、场景和短片素材。`,
+      description: "食品广告、产品展示、场景短片等生成式视频精选。",
       item: homepageVideoEntries[0]
     },
     {
       key: "case-entry",
       target: "cases",
       eyebrow: "CASE",
-      title: "商业案例",
-      description: `${homepageCommercialCases.length} 个方向展示产品、包装、美妆和品牌空间能力。`,
+      title: "商业视觉案例",
+      description: "产品 KV、电商海报、包装视觉与品牌物料展示。",
       item: homepageCommercialCases[0]?.curatedItem
     },
     {
@@ -6234,7 +6243,7 @@ function App() {
       target: "capabilities",
       eyebrow: "SKILL",
       title: "能力矩阵",
-      description: "6 个能力入口对应岗位常见的图像、产品、人像和场景任务。",
+      description: "拆解产品、角色、场景、视频与工作流等核心能力。",
       item: homepageCapabilityCards[0]?.previewItem
     },
     {
@@ -6250,7 +6259,7 @@ function App() {
       target: "process",
       eyebrow: "WORKFLOW",
       title: "ComfyUI 工作流",
-      description: `${homepageWorkflowEvidenceEntries.length} 类流程证明，展示节点组织、控制和筛选方式。`,
+      description: "展示节点搭建、角色一致性、局部重绘与视频流程实践。",
       item: homepageWorkflowEvidenceEntries[0]
     }
   ].filter((card) => card.item && card.key !== "gallery-entry");
@@ -6863,9 +6872,7 @@ function App() {
           <h3>{activeDetail.title}</h3>
           <p>{activeDetail.description}</p>
           <div className="curated-card-tags">
-            <span>视频</span>
-            {activeDetail.duration && <span>{activeDetail.duration}</span>}
-            <span>可播放</span>
+            {(activeDetail.tags.length ? activeDetail.tags.slice(0, 4) : ["AI 视频", "商业短片", "可播放"]).map((tag) => <span key={activeDetail.id + "-" + tag}>{tag}</span>)}
           </div>
           <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(activeDetail); }}>查看详情</button>
         </div>
@@ -6975,7 +6982,7 @@ function App() {
             <span>{stats.images} 张图像</span>
             <span>{stats.videos} 条视频</span>
           </>}
-          <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>打开详情</button>
+          <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看案例</button>
         </div>
       </div>
     </article>;
@@ -7619,8 +7626,8 @@ function App() {
   const renderCuratedExperience = () => {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
-    const heroSubtitle = "AIGC Visual Designer / AI Video & Commercial Visual / ComfyUI Workflow";
-    const heroDescription = "面向 AIGC 视觉设计岗位，集中展示商业主图、生成式视频、品牌空间、人像角色和可复盘工作流。";
+    const heroSubtitle = "AIGC Visual Designer\nAI Video Creator / Commercial Visual Designer / ComfyUI Workflow Builder";
+    const heroDescription = "专注 AIGC 商业视觉、AI 视频短片与 ComfyUI 工作流搭建，覆盖产品广告、品牌视觉、角色一致性与场景概念设计。";
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
     const heroStageItems = (heroVisualEntry ? [heroVisualEntry] : []).map((item, index) => {
       const media = normalizeMediaItem(item.mediaEntry.media);
@@ -7638,12 +7645,12 @@ function App() {
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
-      featured: { label: "精选入口", eyebrow: "精选入口", title: "面试官最先需要看到的能力入口", description: "按视频、商业案例、能力矩阵和工作流拆分，快速建立作品集结构。" },
-      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频 / 商业短片精选", description: `精选 ${homepageVideoEntries.length} 条 AI 视频，涵盖人物、产品、场景与商业短片。` },
-      cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "精选商业案例", description: "用产品广告、美妆场景、品牌空间和包装礼盒四个方向说明商业视觉能力。" },
-      capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "6 个能力对应 6 套商业案例板，完整展示策略、创意、到视觉落地的闭环。" },
+      featured: { label: "精选入口", eyebrow: "精选入口", title: "核心能力快速入口", description: "从视频、商业视觉、能力矩阵到 ComfyUI 工作流，快速了解我的 AIGC 视觉生产能力。" },
+      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频与商业短片精选", description: "精选 AI 视频案例，覆盖食品广告、产品展示、场景氛围与镜头运动控制。" },
+      cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "商业视觉案例", description: siteMeta.caseSectionDesc || "覆盖产品广告、美妆人像、未来场景与包装陈列，展示商业审美、质感控制与视觉一致性。" },
+      capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "以商业项目流程为核心，拆解从需求分析、视觉生成、局部优化到视频输出的完整 AIGC 生产能力。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
-      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI Workflow / 创作流程", description: "用工作流截图说明从输入、控制、筛选到作品整理的可复盘过程。" },
+      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI 工作流 / 创作流程", description: "通过节点化流程搭建，实现从图像生成、角色一致性、局部重绘到视频输出的可复用生产流程。" },
       contact: { label: "联系", title: siteMeta.contactSectionTitle || "联系我", description: siteMeta.contactSectionDesc || "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。" }
     };
     const homeSection = getDesignerSection("home", sectionDefaults.home);
@@ -7664,16 +7671,16 @@ function App() {
           <div className="curated-hero-copy">
             <div className="curated-hero-copy-editable" {...getDesignerSectionProps("home", "首页首屏")}>
               <h1>{homeSection.title}</h1>
-              <h2>{homeSection.subtitle}</h2>
+              <h2>{String(homeSection.subtitle || "").split("\n").map((line) => <span key={line}>{line}</span>)}</h2>
               <p>{homeSection.description}</p>
               <div className="curated-hero-tags">
                 {homeTags.map((tag) => <span key={tag}>{tag}</span>)}
               </div>
             </div>
             <div className="curated-hero-actions">
-              <a href="#featured" onClick={(event) => handleCuratedAnchorClick(event, "featured")}>查看精选入口</a>
-              <a href="#videos" onClick={(event) => handleCuratedAnchorClick(event, "videos")}>查看视频精选</a>
-              <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>查看项目案例</a>
+              <a href="#featured" onClick={(event) => handleCuratedAnchorClick(event, "featured")}>查看作品集</a>
+              <a href="#capabilities" onClick={(event) => handleCuratedAnchorClick(event, "capabilities")}>核心能力</a>
+              <a href="#contact" onClick={(event) => handleCuratedAnchorClick(event, "contact")}>联系我</a>
             </div>
           </div>
           {renderHeroKineticStage(heroDetail, heroStageItems)}
@@ -7723,15 +7730,17 @@ function App() {
             <h2>{capabilitySection.title}</h2>
             <p>{capabilitySection.description}</p>
           </div>
-          <figure className="curated-capability-matrix-figure">
-            <img
-              src="images/curated/core-capability-matrix.webp"
-              alt="核心能力矩阵：产品广告视觉、广告关键帧视觉、AI 人像数字人、东方美学世界观、品牌空间视觉、产品精修视觉六个能力板块"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-          </figure>
+          <div className="curated-capability-matrix" aria-label="核心能力矩阵">
+            {capabilityMatrixItems.map((item, index) => <article key={item.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>)}
+            <div className="curated-capability-flow">
+              <span>商业项目流程</span>
+              <strong>{capabilityProcessFlow}</strong>
+            </div>
+          </div>
         </div>
       </section>}
 
