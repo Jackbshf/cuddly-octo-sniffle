@@ -6,7 +6,8 @@
   "vars": {
     "PROMPTS_GITHUB_OWNER": "Jackbshf",
     "PROMPTS_GITHUB_REPO": "cuddly-octo-sniffle",
-    "PROMPTS_GITHUB_BRANCH": "main"
+    "PROMPTS_GITHUB_BRANCH": "main",
+    "CLOUDFLARE_STREAM_ACCOUNT_ID": "8ad8f870010a1f1de2a2bf7ca8220d4a"
   },
   "assets": {
     "binding": "ASSETS",

@@ -117,6 +117,7 @@ jobs:
           PROMPTS_GITHUB_TOKEN: ${{ secrets.PROMPTS_GITHUB_TOKEN }}
           PORTFOLIO_ADMIN_PASSWORD: ${{ secrets.PORTFOLIO_ADMIN_PASSWORD }}
           PORTFOLIO_GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
+          CLOUDFLARE_STREAM_API_TOKEN: ${{ secrets.CLOUDFLARE_STREAM_API_TOKEN }}
         run: |
           set -euo pipefail
           required=(
@@ -146,7 +147,8 @@ jobs:
             "PROMPT_LIBRARY_ADMIN_PASSWORD",
             "PROMPTS_GITHUB_TOKEN",
             "PORTFOLIO_ADMIN_PASSWORD",
-            "PORTFOLIO_GITHUB_TOKEN"
+            "PORTFOLIO_GITHUB_TOKEN",
+            "CLOUDFLARE_STREAM_API_TOKEN"
           ];
           const payload = Object.fromEntries(keys.map((key) => [key, process.env[key] || ""]));
           writeFileSync(`${process.env.RUNNER_TEMP}/preview-worker-secrets.json`, JSON.stringify(payload), {

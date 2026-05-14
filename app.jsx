@@ -30,6 +30,10 @@ const SLIDE_TRANSITION_OUT_MS = 120;
 const SLIDE_TRANSITION_IN_MS = 180;
 const PORTFOLIO_WARN_BYTES = 500 * 1024;
 const PORTFOLIO_BLOCK_BYTES = 1024 * 1024;
+const DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES = 25 * 1024 * 1024;
+const DEFAULT_STREAM_DIRECT_UPLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
+const STREAM_UPLOAD_POLL_INTERVAL_MS = 4000;
+const STREAM_UPLOAD_MAX_POLLS = 90;
 const INLINE_AUDIO_SESSION_KEY = "zhangwei_portfolio_inline_audio_unlocked_v1";
 const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_v1";
 
@@ -1946,6 +1950,9 @@ const getFileMediaKind = (file) => {
   return String(file?.type || "").startsWith("video/") || publishedPath.startsWith("videos/") ? "video" : "image";
 };
 
+const getMediaAcceptFromKind = (kind) => kind === "video" ? "video" : kind === "image" ? "image" : "";
+const getUploadAcceptAttr = (accept) => accept === "video" ? "video/*" : accept === "image" ? "image/*" : "image/*,video/*";
+
 const getReplacementFileSummary = (file) => {
   if (!file) return "";
   const kind = getFileMediaKind(file) === "video" ? "视频" : "图片";
@@ -1993,7 +2000,8 @@ const sanitizeSlidesForExport = (slides) => normalizeSlides(slides).map((slide) 
           curatedCategory: media.curatedCategory,
           workflowSteps: media.workflowSteps,
           workflowAbility: media.workflowAbility,
-          workflowOutcome: media.workflowOutcome
+          workflowOutcome: media.workflowOutcome,
+          delivery: media.delivery
         }
       };
     }
@@ -2029,7 +2037,8 @@ const sanitizeSlidesForExport = (slides) => normalizeSlides(slides).map((slide) 
       curatedCategory: normalized.curatedCategory,
       workflowSteps: normalized.workflowSteps,
       workflowAbility: normalized.workflowAbility,
-      workflowOutcome: normalized.workflowOutcome
+      workflowOutcome: normalized.workflowOutcome,
+      delivery: normalized.delivery
     };
     if (!cleaned.poster) delete cleaned.poster;
     if (!cleaned.meta) delete cleaned.meta;
@@ -2044,6 +2053,7 @@ const sanitizeSlidesForExport = (slides) => normalizeSlides(slides).map((slide) 
     if (!cleaned.workflowSteps?.length) delete cleaned.workflowSteps;
     if (!cleaned.workflowAbility) delete cleaned.workflowAbility;
     if (!cleaned.workflowOutcome) delete cleaned.workflowOutcome;
+    if (!cleaned.delivery?.provider || (!cleaned.delivery?.uid && !cleaned.delivery?.hlsUrl && !cleaned.delivery?.iframeUrl)) delete cleaned.delivery;
     if (!cleaned.url) delete cleaned.url;
     return cleaned;
   }).filter(Boolean) : []
@@ -2156,6 +2166,16 @@ const getMediaBindingInfo = (item) => {
 
   const urlValue = String(mediaItem.url || "").trim();
   const previewValue = String(mediaItem.draftPreviewUrl || "").trim();
+  const streamDelivery = mediaItem.kind === "video" && mediaItem.delivery?.provider === "cloudflare-stream" ? mediaItem.delivery : null;
+
+  if (streamDelivery?.hlsUrl || streamDelivery?.iframeUrl) {
+    const shortValue = streamDelivery.uid || streamDelivery.hlsUrl || streamDelivery.iframeUrl;
+    return {
+      state: "linked",
+      text: `已绑定：Cloudflare Stream ${shortValue.length > 24 ? `${shortValue.slice(0, 21)}...` : shortValue}`,
+      detail: "这个视频会通过 Cloudflare Stream 播放，并随导出的 JSON 一起发布。"
+    };
+  }
 
   if (urlValue) {
     const shortValue = urlValue.length > 42 ? `${urlValue.slice(0, 39)}...` : urlValue;
@@ -2232,13 +2252,14 @@ const validateSlidesBeforeExport = async (slides) => {
 
       const slotLabel = `${pageLabel} 第 ${mediaIndex + 1} 个媒体框`;
       const urlValue = String(item.url || "").trim();
+      const hasStreamDelivery = item.kind === "video" && item.delivery?.provider === "cloudflare-stream" && Boolean(item.delivery.hlsUrl || item.delivery.iframeUrl);
 
-      if (!urlValue && item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && item.draftPreviewUrl) {
         issues.push(`${slotLabel} 仍是本地预览，未绑定发布路径。请重新拖入正式素材，直到出现“已绑定：images/... / videos/...”后再导出。`);
         continue;
       }
 
-      if (!urlValue && !item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && !item.draftPreviewUrl) {
         issues.push(`${slotLabel} 没有填写资源链接`);
         continue;
       }
@@ -2269,13 +2290,14 @@ const validateSlidesBeforeExport = async (slides) => {
       if (!item) continue;
       const slotLabel = `${pageLabel} 自由布局媒体 ${elementIndex + 1}`;
       const urlValue = String(item.url || "").trim();
+      const hasStreamDelivery = item.kind === "video" && item.delivery?.provider === "cloudflare-stream" && Boolean(item.delivery.hlsUrl || item.delivery.iframeUrl);
 
-      if (!urlValue && item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && item.draftPreviewUrl) {
         issues.push(`${slotLabel} 仍是本地预览，未绑定发布路径。请重新拖入正式素材，直到出现“已绑定：images/... / videos/...”后再导出。`);
         continue;
       }
 
-      if (!urlValue && !item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && !item.draftPreviewUrl) {
         issues.push(`${slotLabel} 没有填写资源链接`);
         continue;
       }
@@ -2912,10 +2934,16 @@ function App() {
   const useGalleryWorldHome = false;
   const assetCapabilities = adminCapabilities?.capabilities?.assets || {};
   const deploymentCapabilities = adminCapabilities?.capabilities?.deployment || {};
+  const streamCapabilities = adminCapabilities?.capabilities?.stream || {};
+  const uploadLimits = adminCapabilities?.limits || {};
   const canListAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.list === true;
   const canWriteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.upload === true && assetCapabilities.replace === true;
   const canDeleteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.delete === true;
+  const canUseStreamUploads = IS_PORTFOLIO_ADMIN_MODE && streamCapabilities.directUpload === true && streamCapabilities.status === true;
   const assetCapabilityReason = assetCapabilities.reason || adminCapabilityStatus || "Asset tools are not ready yet.";
+  const streamCapabilityReason = streamCapabilities.reason || "Cloudflare Stream upload is not configured.";
+  const staticAssetUploadLimitBytes = Number(uploadLimits.staticAssetBytes || uploadLimits.videoUploadBytes || DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES);
+  const streamDirectUploadLimitBytes = Number(uploadLimits.streamDirectUploadBytes || streamCapabilities.maxUploadBytes || DEFAULT_STREAM_DIRECT_UPLOAD_LIMIT_BYTES);
   const homepageDesignerState = normalizeHomepageDesignerConfig(normalizeSiteMeta(portfolioData?.meta).homepageDesigner);
   const isHomepageSectionHidden = (sectionId) => sectionId !== "home" && homepageDesignerState.sections?.[sectionId]?.hidden === true;
   const isHomepageBlockHidden = (blockId) => homepageDesignerState.blocks?.[blockId]?.hidden === true;
@@ -3051,7 +3079,12 @@ function App() {
         ready: false,
         capabilities: {
           assets: { list: false, upload: false, delete: false, replace: false, reason: message },
-          deployment: { status: false, reason: message }
+          deployment: { status: false, reason: message },
+          stream: { directUpload: false, status: false, reason: message }
+        },
+        limits: {
+          staticAssetBytes: DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES,
+          streamDirectUploadBytes: DEFAULT_STREAM_DIRECT_UPLOAD_LIMIT_BYTES
         }
       });
       return null;
@@ -4094,6 +4127,92 @@ function App() {
     }
   };
 
+  const getMediaReplacementUploadMode = (file, kind) => {
+    const size = Number(file?.size || 0);
+    if (kind === "video" && size > staticAssetUploadLimitBytes) return "stream";
+    return "github";
+  };
+
+  const validateMediaReplacementFile = (file, target, kind, uploadMode) => {
+    const path = buildPublishedAssetPath(file);
+    if (!path || !/^(images|videos)\//.test(path)) {
+      return "Only image and video files can be uploaded here.";
+    }
+    if (target.accept === "image" && kind !== "image") {
+      return "This target only accepts image files.";
+    }
+    if (target.accept === "video" && kind !== "video") {
+      return "This target only accepts video files.";
+    }
+    if (kind === "image" && Number(file.size || 0) > staticAssetUploadLimitBytes) {
+      return `Image is larger than ${formatBytes(staticAssetUploadLimitBytes)}. Compress it before uploading.`;
+    }
+    if (uploadMode === "stream") {
+      if (Number(file.size || 0) > streamDirectUploadLimitBytes) {
+        return `Video is larger than ${formatBytes(streamDirectUploadLimitBytes)}.`;
+      }
+      if (!canUseStreamUploads) {
+        return streamCapabilityReason;
+      }
+    }
+    return "";
+  };
+
+  const waitForStreamUploadReady = async (uid) => {
+    for (let attempt = 0; attempt < STREAM_UPLOAD_MAX_POLLS; attempt += 1) {
+      const response = await fetch(`/api/portfolio-admin/stream-status?uid=${encodeURIComponent(uid)}`, { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || `Cloudflare Stream status failed: ${response.status}`);
+      if (data.status === "error") {
+        throw new Error(data.errorReasonText || "Cloudflare Stream processing failed.");
+      }
+      if (data.ready && data.delivery?.hlsUrl) return data;
+      setStatusMessage(`Cloudflare Stream is processing video... ${attempt + 1}/${STREAM_UPLOAD_MAX_POLLS}`);
+      await new Promise((resolve) => window.setTimeout(resolve, STREAM_UPLOAD_POLL_INTERVAL_MS));
+    }
+    throw new Error("Cloudflare Stream processing did not finish in time. The upload may still be processing; retry replacement after it is ready.");
+  };
+
+  const uploadPortfolioVideoToStream = async (file) => {
+    const setupResponse = await fetch("/api/portfolio-admin/stream-upload-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: file.name || "portfolio-video",
+        mime: file.type || "video/mp4",
+        size: file.size || 0
+      })
+    });
+    const setup = await setupResponse.json().catch(() => ({}));
+    if (!setupResponse.ok || !setup.ok || !setup.uploadURL) {
+      throw new Error(setup.error || `Cloudflare Stream upload setup failed: ${setupResponse.status}`);
+    }
+    if (!setup.uid) {
+      throw new Error("Cloudflare Stream upload setup did not return a video uid.");
+    }
+
+    const form = new FormData();
+    form.append("file", file);
+    const uploadResponse = await fetch(setup.uploadURL, {
+      method: "POST",
+      body: form
+    });
+    if (!uploadResponse.ok) {
+      throw new Error(`Cloudflare Stream upload failed: ${uploadResponse.status}`);
+    }
+
+    const status = await waitForStreamUploadReady(setup.uid);
+    return {
+      kind: "video",
+      title: file.name || "Cloudflare Stream video",
+      name: file.name || "Cloudflare Stream video",
+      fileName: file.name || "stream-video",
+      size: file.size || 0,
+      poster: status.delivery?.thumbnailUrl || "",
+      delivery: status.delivery
+    };
+  };
+
   const requestMediaReplacement = (file, target) => {
     if (!file) return;
     if (!IS_PORTFOLIO_ADMIN_MODE) {
@@ -4108,6 +4227,13 @@ function App() {
       return;
     }
     const kind = getFileMediaKind(file);
+    const uploadMode = getMediaReplacementUploadMode(file, kind);
+    const validationMessage = validateMediaReplacementFile(file, target, kind, uploadMode);
+    if (validationMessage) {
+      window.alert(validationMessage);
+      setStatusMessage(validationMessage);
+      return;
+    }
     if (target.accept === "image" && kind !== "image") {
       window.alert("这个位置只能替换为图片。视频请拖到视频作品媒体位。");
       return;
@@ -4118,6 +4244,7 @@ function App() {
       target,
       previewUrl,
       kind,
+      uploadMode,
       summary: getReplacementFileSummary(file)
     });
   };
@@ -4135,12 +4262,14 @@ function App() {
     try {
       const measured = await measureImageFile(pending.file, pending.previewUrl);
       setStatusMessage(`正在上传并替换：${pending.target.label || pending.file.name}...`);
-      const upload = await uploadPortfolioFile(pending.file, {
-        category: pending.target.type === "case-cover" ? "portfolio-case-cover" : "portfolio-media",
-        title: pending.file.name,
-        width: measured.width,
-        height: measured.height
-      });
+      const upload = pending.uploadMode === "stream"
+        ? await uploadPortfolioVideoToStream(pending.file)
+        : await uploadPortfolioFile(pending.file, {
+          category: pending.target.type === "case-cover" ? "portfolio-case-cover" : "portfolio-media",
+          title: pending.file.name,
+          width: measured.width,
+          height: measured.height
+        });
       await replacePortfolioMediaOnServer(pending.target, upload, {
         message: `Upload and replace portfolio media ${pending.target.label || pending.file.name}`
       });
@@ -4831,7 +4960,7 @@ function App() {
     const bindingInfo = getMediaBindingInfo(item);
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
-    const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster));
+    const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster || item.delivery?.hlsUrl || item.delivery?.iframeUrl));
     const [isMuted, setIsMuted] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
@@ -5004,6 +5133,7 @@ function App() {
           type: "free-layout-media",
           slideId: slidesData[slideIndex]?.id,
           elementId: element.id,
+          accept: getMediaAcceptFromKind(item?.kind),
           label: element.media?.label || `自由布局媒体 ${element.id}`
         });
         setIsDragTarget(false);
@@ -5263,7 +5393,7 @@ function App() {
         <div>拖入媒体，或点击右上角上传/填写链接</div>
         <div className="text-[11px] text-white/25">拖入本地文件后，会尝试绑定到 images/ 或 videos/ 同名路径</div>
       </div>}
-      <input id={fileInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      <input id={fileInputId} type="file" accept={getUploadAcceptAttr(getMediaAcceptFromKind(item?.kind))} className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) applyLocalFile(file);
         event.target.value = "";
@@ -5471,6 +5601,7 @@ function App() {
           type: "slide-media",
           slideId: slide.id,
           slotIndex,
+          accept: getMediaAcceptFromKind(item?.kind),
           label: slide.title || label || `媒体 ${slotIndex + 1}`
         });
         setIsDragTarget(false);
@@ -5749,7 +5880,7 @@ function App() {
           <button onClick={openEmptyEditor} className="px-3 py-1.5 rounded-full bg-cyan-500/15 text-xs text-cyan-100 hover:bg-cyan-500/25">填写链接</button>
         </div>}
       </div>}
-      {IS_EDITOR_MODE && <input id={fileInputId} type="file" accept="image/*,video/*" className="hidden" onChange={handleUpload} />}
+      {IS_EDITOR_MODE && <input id={fileInputId} type="file" accept={getUploadAcceptAttr(getMediaAcceptFromKind(item?.kind))} className="hidden" onChange={handleUpload} />}
       </div>
     </div>;
   };
@@ -6638,12 +6769,13 @@ function App() {
       type: "homepage-work",
       workId: designerWorkId,
       label,
-      accept: options.accept || ""
+      accept: options.accept || getMediaAcceptFromKind(normalizedMedia?.kind)
     } : {
       type: "slide-media",
       slideId: entry.slide.id,
       slotIndex,
-      label
+      label,
+      accept: options.accept || getMediaAcceptFromKind(normalizedMedia?.kind)
     };
     const replaceTargetKey = getCuratedDropTargetKey(replaceTarget);
     const uploadInputId = `curated-upload-${entry.slide.id}-${slotIndex}`;
@@ -6689,7 +6821,7 @@ function App() {
         <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(uploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换</button>
         <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(replaceTarget, normalizedMedia); }}><Icon name="Link2" size={14} /> 外链</button>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      {IS_PORTFOLIO_ADMIN_MODE && canEditMedia && <input id={uploadInputId} type="file" accept={getUploadAcceptAttr(replaceTarget.accept)} className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) requestMediaReplacement(file, replaceTarget);
         event.target.value = "";
@@ -7378,7 +7510,8 @@ function App() {
       type: "slide-media",
       slideId: selectedWorkItem.entry.slide.id,
       slotIndex: selectedWorkItem.mediaEntry.slotIndex,
-      label: selectedWorkItem.title
+      label: selectedWorkItem.title,
+      accept: getMediaAcceptFromKind(selectedWorkItem.mediaEntry.media?.kind)
     } : selectedWorkItem.caseItem ? {
       type: "case-cover",
       caseId: selectedWorkItem.caseItem.id,
@@ -7403,7 +7536,7 @@ function App() {
             <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换当前媒体" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(detailUploadInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换当前媒体</button>
             {detailTarget.type !== "case-cover" && <button type="button" onClick={(event) => { event.stopPropagation(); requestExternalVideoReplacement(detailTarget, selectedWorkItem.mediaEntry?.media); }}><Icon name="Link2" size={14} /> 外链视频</button>}
           </div>}
-          {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <input id={detailUploadInputId} type="file" accept={detailTarget.type === "case-cover" ? "image/*" : "image/*,video/*"} className="hidden" onChange={(event) => {
+          {IS_PORTFOLIO_ADMIN_MODE && detailTarget && <input id={detailUploadInputId} type="file" accept={getUploadAcceptAttr(detailTarget.accept)} className="hidden" onChange={(event) => {
             const file = event.target.files && event.target.files[0];
             if (file) requestMediaReplacement(file, detailTarget);
             event.target.value = "";
@@ -7438,8 +7571,13 @@ function App() {
 
   const renderMediaReplacementDialog = () => {
     if (!pendingMediaReplacement) return null;
-    const { file, previewUrl, kind, target, summary } = pendingMediaReplacement;
-    const targetPath = kind === "video" ? "videos/uploads/YYYY/MM/" : "images/uploads/YYYY/MM/";
+    const { file, previewUrl, kind, target, summary, uploadMode } = pendingMediaReplacement;
+    const targetPath = uploadMode === "stream"
+      ? "Cloudflare Stream"
+      : kind === "video" ? "videos/uploads/YYYY/MM/" : "images/uploads/YYYY/MM/";
+    const replacementFields = uploadMode === "stream"
+      ? "delivery / poster / label"
+      : kind === "video" ? "url / poster" : "url / fullUrl / width / height / alt";
     return <div className="curated-upload-confirm-layer" onClick={cancelPendingMediaReplacement}>
       <aside className="curated-upload-confirm" onClick={(event) => event.stopPropagation()}>
         <div className="curated-upload-preview">
@@ -7448,18 +7586,18 @@ function App() {
             : <img src={previewUrl} alt="" />}
         </div>
         <div className="curated-upload-copy">
-          <span>确认替换到草稿</span>
+          <span>确认后保存并触发生产部署</span>
           <h2>{target.label || "当前作品媒体"}</h2>
-          <p>确认后会先上传文件，再原位替换当前草稿预览；不会自动上线。确认页面无误后，再点击保存到代码仓库发布。</p>
+          <p>确认后会上传文件、写入作品集 JSON 到 GitHub，并等待生产部署 workflow 处理。请确认目标位置和媒体类型无误。</p>
           <div className="curated-upload-rows">
             <div><span>文件</span><strong>{file.name}</strong></div>
             <div><span>类型 / 大小</span><strong>{summary}</strong></div>
-            <div><span>写入目录</span><strong>{targetPath}</strong></div>
-            <div><span>替换字段</span><strong>{kind === "video" ? "url / poster" : "url / fullUrl / width / height / alt"}</strong></div>
+            <div><span>存储方式</span><strong>{targetPath}</strong></div>
+            <div><span>替换字段</span><strong>{replacementFields}</strong></div>
           </div>
           <div className="curated-upload-actions">
             <button type="button" onClick={cancelPendingMediaReplacement} disabled={isReplacingMedia}>取消</button>
-            <button type="button" onClick={confirmPendingMediaReplacement} disabled={isReplacingMedia}>{isReplacingMedia ? "正在上传..." : "确认替换到草稿"}</button>
+            <button type="button" onClick={confirmPendingMediaReplacement} disabled={isReplacingMedia}>{isReplacingMedia ? "正在保存..." : "确认保存并部署"}</button>
           </div>
         </div>
       </aside>
@@ -7485,7 +7623,8 @@ function App() {
           type: "slide-media",
           slideId: item.entry.slide.id,
           slotIndex: item.mediaEntry.slotIndex,
-          label: detail.title
+          label: detail.title,
+          accept: getMediaAcceptFromKind(media.kind)
         }
       };
     };
@@ -7531,7 +7670,7 @@ function App() {
                   <div className="curated-card-manager-actions">
                     <button type="button" onClick={() => updateCuratedCardHidden(item.source, !item.hidden)}>{item.hidden ? "恢复" : "隐藏"}</button>
                     <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换图片" : assetCapabilityReason} onClick={() => document.getElementById(inputId)?.click()}>替换图片</button>
-                    <input id={inputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+                    <input id={inputId} type="file" accept={getUploadAcceptAttr(item.target.accept)} className="hidden" onChange={(event) => {
                       const file = event.target.files && event.target.files[0];
                       if (file) requestMediaReplacement(file, item.target);
                       event.target.value = "";
@@ -7560,7 +7699,7 @@ function App() {
     const stylePreset = selectedWork?.stylePreset || selectedSection?.stylePreset || "default";
     const selectedTitle = selectedWork?.title || selectedSection?.title || selectedSection?.label || "未选择元素";
     const uploadInputId = selectedWork ? `designer-inspector-upload-${selectedWork.id}`.replace(/[^a-zA-Z0-9_-]/g, "-") : "";
-    const mediaTarget = selectedWork ? { type: "homepage-work", workId: selectedWork.id, label: selectedWork.title || selectedWork.label || selectedWork.id } : null;
+    const mediaTarget = selectedWork ? { type: "homepage-work", workId: selectedWork.id, label: selectedWork.title || selectedWork.label || selectedWork.id, accept: getMediaAcceptFromKind(selectedWorkMedia?.kind) } : null;
 
     const renderPresetGroup = (label, presets, value, field, options = {}) => <div className="curated-inspector-group">
       <span>{label}</span>
@@ -7731,7 +7870,7 @@ function App() {
           <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换" : assetCapabilityReason} onClick={() => document.getElementById(uploadInputId)?.click()}><Icon name="UploadCloud" size={14} /> 上传替换</button>
           <button type="button" onClick={() => requestExternalVideoReplacement(mediaTarget, selectedWorkMedia)}><Icon name="Link2" size={14} /> 外链视频</button>
         </div>
-        <input id={uploadInputId} type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+        <input id={uploadInputId} type="file" accept={getUploadAcceptAttr(mediaTarget?.accept)} className="hidden" onChange={(event) => {
           const file = event.target.files && event.target.files[0];
           if (file) requestMediaReplacement(file, mediaTarget);
           event.target.value = "";
@@ -7784,6 +7923,7 @@ function App() {
       type: "slide-media",
       slideId: heroItem.entry.slide.id,
       slotIndex: heroItem.mediaEntry.slotIndex,
+      accept: getMediaAcceptFromKind(heroItem.mediaEntry.media?.kind),
       label: "首页动态舞台"
     } : null;
     const targetKey = target ? getCuratedDropTargetKey(target) : "";
@@ -7824,7 +7964,7 @@ function App() {
       {IS_PORTFOLIO_ADMIN_MODE && target && <div className="curated-admin-media-tools">
         <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换舞台作品" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById("curated-hero-upload").click(); }}><Icon name="UploadCloud" size={14} /> 替换舞台作品</button>
       </div>}
-      {IS_PORTFOLIO_ADMIN_MODE && target && <input id="curated-hero-upload" type="file" accept="image/*,video/*" className="hidden" onChange={(event) => {
+      {IS_PORTFOLIO_ADMIN_MODE && target && <input id="curated-hero-upload" type="file" accept={getUploadAcceptAttr(target.accept)} className="hidden" onChange={(event) => {
         const file = event.target.files && event.target.files[0];
         if (file) requestMediaReplacement(file, target);
         event.target.value = "";

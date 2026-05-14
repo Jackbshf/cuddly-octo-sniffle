@@ -35,11 +35,15 @@ const VIEW_COOKIE_NAME = "prompt_library_auth";
 const PROMPT_ADMIN_COOKIE_NAME = "prompt_library_admin_auth";
 const PORTFOLIO_ADMIN_COOKIE_NAME = "portfolio_admin_auth";
 const COOKIE_TTL_SECONDS = 60 * 60 * 24 * 7;
-const MAX_IMAGE_ASSET_BYTES = 32 * 1024 * 1024;
-const MAX_VIDEO_ASSET_BYTES = 95 * 1024 * 1024;
+const MAX_STATIC_ASSET_BYTES = 25 * 1024 * 1024;
+const MAX_IMAGE_ASSET_BYTES = MAX_STATIC_ASSET_BYTES;
+const MAX_VIDEO_ASSET_BYTES = MAX_STATIC_ASSET_BYTES;
+const MAX_STREAM_DIRECT_UPLOAD_BYTES = 200 * 1024 * 1024;
+const DEFAULT_STREAM_MAX_DURATION_SECONDS = 60 * 30;
 
 const PROMPTS_TOKEN_ENV = "PROMPTS_GITHUB_TOKEN";
 const PORTFOLIO_TOKEN_ENV = "PORTFOLIO_GITHUB_TOKEN";
+const CLOUDFLARE_STREAM_TOKEN_ENV = "CLOUDFLARE_STREAM_API_TOKEN";
 const DEFAULT_GITHUB_OWNER = "Jackbshf";
 const DEFAULT_GITHUB_REPO = "cuddly-octo-sniffle";
 const DEFAULT_GITHUB_BRANCH = "main";
@@ -239,6 +243,14 @@ async function handlePortfolioAdminApi(request, env, url) {
 
   if (url.pathname === `${PORTFOLIO_API_PREFIX}/deployment-status` && request.method === "GET") {
     return readPortfolioDeploymentStatus(url, env);
+  }
+
+  if (url.pathname === `${PORTFOLIO_API_PREFIX}/stream-upload-url` && request.method === "POST") {
+    return createPortfolioStreamUploadUrl(request, env);
+  }
+
+  if (url.pathname === `${PORTFOLIO_API_PREFIX}/stream-status` && request.method === "GET") {
+    return readPortfolioStreamStatus(url, env);
   }
 
   if (url.pathname === `${PORTFOLIO_API_PREFIX}/portfolio-json` && request.method === "POST") {
@@ -461,7 +473,8 @@ async function buildPortfolioAdminCapabilityReport(env, options = {}) {
     },
     secrets: {
       portfolioAdminPassword: Boolean(env.PORTFOLIO_ADMIN_PASSWORD),
-      portfolioGitHubToken: Boolean(env.PORTFOLIO_GITHUB_TOKEN)
+      portfolioGitHubToken: Boolean(env.PORTFOLIO_GITHUB_TOKEN),
+      cloudflareStreamToken: Boolean(env.CLOUDFLARE_STREAM_API_TOKEN)
     },
     capabilities: {
       assets: {
@@ -474,12 +487,44 @@ async function buildPortfolioAdminCapabilityReport(env, options = {}) {
       deployment: {
         status: false,
         reason: ""
+      },
+      stream: {
+        directUpload: false,
+        status: false,
+        reason: "",
+        maxUploadBytes: MAX_STREAM_DIRECT_UPLOAD_BYTES,
+        maxDurationSeconds: DEFAULT_STREAM_MAX_DURATION_SECONDS
       }
+    },
+    limits: {
+      staticAssetBytes: MAX_STATIC_ASSET_BYTES,
+      imageUploadBytes: MAX_IMAGE_ASSET_BYTES,
+      videoUploadBytes: MAX_VIDEO_ASSET_BYTES,
+      streamDirectUploadBytes: MAX_STREAM_DIRECT_UPLOAD_BYTES
     },
     diagnostics: [],
     assets: null,
     deployment: null
   };
+
+  const streamConfig = getCloudflareStreamConfig(env);
+  if (streamConfig.ready) {
+    report.capabilities.stream.directUpload = true;
+    report.capabilities.stream.status = true;
+    report.capabilities.stream.reason = "";
+    report.diagnostics.push({
+      level: "info",
+      code: "stream-ready",
+      message: "Cloudflare Stream direct upload is configured."
+    });
+  } else {
+    report.capabilities.stream.reason = streamConfig.reason;
+    report.diagnostics.push({
+      level: "warn",
+      code: "stream-not-configured",
+      message: streamConfig.reason
+    });
+  }
 
   if (!env.PORTFOLIO_GITHUB_TOKEN) {
     report.capabilities.assets.reason = `${PORTFOLIO_TOKEN_ENV} is not configured.`;
@@ -557,6 +602,97 @@ async function readPortfolioDeploymentStatus(url, env) {
     return jsonResponse({ ok: true, deployment });
   } catch (error) {
     return jsonResponse({ ok: false, error: error.message || "Deployment status is unavailable." }, 502);
+  }
+}
+
+async function createPortfolioStreamUploadUrl(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse({ ok: false, error: "Invalid JSON payload." }, 400);
+  }
+
+  const config = getCloudflareStreamConfig(env);
+  if (!config.ready) {
+    return jsonResponse({ ok: false, error: config.reason }, 503);
+  }
+
+  const fileName = cleanText(payload?.fileName || payload?.name);
+  const mime = cleanText(payload?.mime || payload?.type).toLowerCase();
+  const size = Number(payload?.size || 0);
+  const extension = getVideoExtension(fileName, mime);
+  if (!extension) {
+    return jsonResponse({ ok: false, error: "Cloudflare Stream uploads only support video files here." }, 415);
+  }
+  if (!Number.isFinite(size) || size <= MAX_VIDEO_ASSET_BYTES) {
+    return jsonResponse({ ok: false, error: "Use the normal portfolio asset upload path for small videos." }, 400);
+  }
+  if (size > MAX_STREAM_DIRECT_UPLOAD_BYTES) {
+    return jsonResponse({ ok: false, error: `Video is too large for direct browser upload. Maximum is ${MAX_STREAM_DIRECT_UPLOAD_BYTES} bytes.` }, 413);
+  }
+
+  const maxDurationSeconds = Math.max(
+    1,
+    Math.min(DEFAULT_STREAM_MAX_DURATION_SECONDS, Number(payload?.maxDurationSeconds) || DEFAULT_STREAM_MAX_DURATION_SECONDS)
+  );
+  const body = {
+    maxDurationSeconds,
+    meta: {
+      name: fileName || "portfolio-upload"
+    }
+  };
+
+  try {
+    const result = await requestCloudflareStreamJson(config, "/stream/direct_upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const uid = cleanText(result?.uid);
+    return jsonResponse({
+      ok: true,
+      uid,
+      uploadURL: cleanText(result?.uploadURL),
+      uploadUrl: cleanText(result?.uploadURL),
+      maxDurationSeconds,
+      delivery: cleanStreamDelivery({
+        provider: "cloudflare-stream",
+        uid
+      })
+    });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Cloudflare Stream upload URL creation failed." }, 502);
+  }
+}
+
+async function readPortfolioStreamStatus(url, env) {
+  const config = getCloudflareStreamConfig(env);
+  if (!config.ready) {
+    return jsonResponse({ ok: false, error: config.reason }, 503);
+  }
+
+  const uid = cleanCloudflareStreamUid(url.searchParams.get("uid"));
+  if (!uid) {
+    return jsonResponse({ ok: false, error: "Cloudflare Stream uid is required." }, 400);
+  }
+
+  try {
+    const result = await requestCloudflareStreamJson(config, `/stream/${encodeURIComponent(uid)}`);
+    const status = parseCloudflareStreamStatus(result);
+    const delivery = buildCloudflareStreamDelivery(result, env);
+    return jsonResponse({
+      ok: true,
+      uid,
+      status,
+      ready: Boolean(result?.readyToStream && delivery?.hlsUrl),
+      readyToStream: Boolean(result?.readyToStream),
+      errorReasonText: cleanText(result?.errorReasonText),
+      duration: Number.isFinite(Number(result?.duration)) ? Number(result.duration) : null,
+      delivery
+    });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Cloudflare Stream status read failed." }, 502);
   }
 }
 
@@ -1046,7 +1182,8 @@ async function uploadPortfolioAsset(request, env) {
 
   const maxBytes = assetType.kind === "video" ? MAX_VIDEO_ASSET_BYTES : MAX_IMAGE_ASSET_BYTES;
   if (!file.size || file.size > maxBytes) {
-    return jsonResponse({ ok: false, error: `${assetType.kind === "video" ? "Video" : "Image"} must be between 1 byte and ${maxBytes} bytes.` }, 413);
+    const largeVideoHint = assetType.kind === "video" ? " Use /api/portfolio-admin/stream-upload-url for larger videos." : "";
+    return jsonResponse({ ok: false, error: `${assetType.kind === "video" ? "Video" : "Image"} must be between 1 byte and ${maxBytes} bytes.${largeVideoHint}` }, 413);
   }
 
   const buffer = await file.arrayBuffer();
@@ -1301,6 +1438,26 @@ function cleanPortfolioReplacementTarget(target = {}) {
 }
 
 function buildPortfolioReplacementMedia(asset = {}, target = {}) {
+  const delivery = cleanStreamDelivery(asset.delivery);
+  if (delivery?.provider === "cloudflare-stream") {
+    if (cleanText(target.accept) === "image") {
+      throw new Error("This target only accepts image assets.");
+    }
+    const name = cleanText(asset.name || asset.title || asset.fileName) || delivery.uid || "Cloudflare Stream video";
+    return {
+      kind: "video",
+      url: "",
+      fullUrl: "",
+      poster: cleanPortfolioMediaPath(asset.poster || delivery.thumbnailUrl),
+      delivery,
+      externalProvider: "cloudflare-stream",
+      alt: cleanText(asset.alt) || name,
+      label: name,
+      width: cleanNumber(asset.width),
+      height: cleanNumber(asset.height)
+    };
+  }
+
   const rawPath = asset.path || asset.relativePath || asset.src || asset.url || "";
   const path = normalizePortfolioReferencePath(rawPath);
   if (!path) throw new Error("Replacement asset must be under images/ or videos/.");
@@ -1545,6 +1702,22 @@ function cleanPortfolioMediaPath(value) {
   return normalized;
 }
 
+function cleanStreamDelivery(value) {
+  if (!value || typeof value !== "object") return null;
+  const uid = cleanCloudflareStreamUid(value.uid);
+  const hlsUrl = cleanText(value.hlsUrl);
+  const iframeUrl = cleanText(value.iframeUrl);
+  const thumbnailUrl = cleanText(value.thumbnailUrl);
+  if (!uid && !hlsUrl && !iframeUrl) return null;
+  return {
+    provider: "cloudflare-stream",
+    uid,
+    hlsUrl,
+    iframeUrl,
+    thumbnailUrl
+  };
+}
+
 function cleanCommitMessage(value, fallback = "Update content") {
   return cleanText(value).replace(/[\r\n]+/g, " ").slice(0, 120) || fallback;
 }
@@ -1742,6 +1915,92 @@ async function getGitHubFileSha(config, encodedPath) {
 
   const data = await response.json();
   return typeof data.sha === "string" ? data.sha : null;
+}
+
+function getCloudflareStreamConfig(env) {
+  const accountId = cleanText(env.CLOUDFLARE_STREAM_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID);
+  const token = cleanText(env[CLOUDFLARE_STREAM_TOKEN_ENV]);
+  if (!accountId) {
+    return { ready: false, reason: "CLOUDFLARE_STREAM_ACCOUNT_ID is not configured.", accountId: "", token: "" };
+  }
+  if (!token) {
+    return { ready: false, reason: `${CLOUDFLARE_STREAM_TOKEN_ENV} is not configured.`, accountId, token: "" };
+  }
+  return { ready: true, reason: "", accountId, token };
+}
+
+async function requestCloudflareStreamJson(config, endpoint, options = {}) {
+  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(config.accountId)}${endpoint}`, {
+    method: options.method || "GET",
+    headers: {
+      Authorization: `Bearer ${config.token}`,
+      ...(options.headers || {})
+    },
+    body: options.body
+  });
+
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || !payload?.success) {
+    const message = payload?.errors?.map((entry) => entry?.message).filter(Boolean).join("; ")
+      || payload?.messages?.map((entry) => entry?.message).filter(Boolean).join("; ")
+      || `${response.status} ${response.statusText}`;
+    throw new Error(`Cloudflare Stream API request failed (${endpoint}): ${message}`);
+  }
+
+  return payload.result;
+}
+
+function parseCloudflareStreamStatus(streamResult) {
+  const rawStatus = streamResult?.status;
+  if (typeof rawStatus === "string" && rawStatus) return rawStatus;
+  if (rawStatus && typeof rawStatus === "object") {
+    if (typeof rawStatus.state === "string" && rawStatus.state) return rawStatus.state;
+    if (typeof rawStatus.status === "string" && rawStatus.status) return rawStatus.status;
+  }
+  return streamResult?.readyToStream ? "ready" : "processing";
+}
+
+function cleanCloudflareStreamUid(value) {
+  return cleanText(value).replace(/[^A-Za-z0-9_-]/g, "");
+}
+
+function getStreamCustomerCodeFromUrl(value = "") {
+  const match = cleanText(value).match(/^https?:\/\/customer-([a-z0-9]+)\.cloudflarestream\.com\//i);
+  return match?.[1] ? match[1].toLowerCase() : "";
+}
+
+function getStreamDeliveryUrls(uid, customerCode) {
+  const normalizedUid = cleanCloudflareStreamUid(uid);
+  const normalizedCustomerCode = cleanText(customerCode);
+  if (!normalizedUid || !normalizedCustomerCode) {
+    return { iframeUrl: "", hlsUrl: "", thumbnailUrl: "" };
+  }
+  const base = `https://customer-${normalizedCustomerCode}.cloudflarestream.com/${normalizedUid}`;
+  return {
+    iframeUrl: `${base}/iframe`,
+    hlsUrl: `${base}/manifest/video.m3u8`,
+    thumbnailUrl: `${base}/thumbnails/thumbnail.jpg`
+  };
+}
+
+function buildCloudflareStreamDelivery(streamResult, env) {
+  const uid = cleanCloudflareStreamUid(streamResult?.uid);
+  const playback = streamResult?.playback && typeof streamResult.playback === "object" ? streamResult.playback : {};
+  const previewUrl = cleanText(streamResult?.preview);
+  const thumbnailUrl = cleanText(streamResult?.thumbnail);
+  const hlsUrl = cleanText(playback?.hls);
+  const customerCode = getStreamCustomerCodeFromUrl(hlsUrl)
+    || getStreamCustomerCodeFromUrl(previewUrl)
+    || getStreamCustomerCodeFromUrl(thumbnailUrl)
+    || cleanText(env.CLOUDFLARE_STREAM_CUSTOMER_CODE);
+  const fallback = getStreamDeliveryUrls(uid, customerCode);
+  return cleanStreamDelivery({
+    provider: "cloudflare-stream",
+    uid,
+    iframeUrl: previewUrl ? previewUrl.replace(/\/watch(?:[?#].*)?$/i, "/iframe") : fallback.iframeUrl,
+    hlsUrl: hlsUrl || fallback.hlsUrl,
+    thumbnailUrl: thumbnailUrl || fallback.thumbnailUrl
+  });
 }
 
 function getGitHubConfig(env, tokenEnvName) {

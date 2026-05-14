@@ -96,6 +96,7 @@ jobs:
           PROMPTS_GITHUB_TOKEN: ${{ secrets.PROMPTS_GITHUB_TOKEN }}
           PORTFOLIO_ADMIN_PASSWORD: ${{ secrets.PORTFOLIO_ADMIN_PASSWORD }}
           PORTFOLIO_GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
+          CLOUDFLARE_STREAM_API_TOKEN: ${{ secrets.CLOUDFLARE_STREAM_API_TOKEN }}
         run: |
           if [ -z "$PROMPT_LIBRARY_PASSWORD" ]; then
             echo "::error title=Missing prompt library password::Set the PROMPT_LIBRARY_PASSWORD repository secret before deploying."
@@ -122,6 +123,11 @@ jobs:
           printf '%s' "$PROMPTS_GITHUB_TOKEN" | npx wrangler secret put PROMPTS_GITHUB_TOKEN --config wrangler.jsonc
           printf '%s' "$PORTFOLIO_ADMIN_PASSWORD" | npx wrangler secret put PORTFOLIO_ADMIN_PASSWORD --config wrangler.jsonc
           printf '%s' "$PORTFOLIO_GITHUB_TOKEN" | npx wrangler secret put PORTFOLIO_GITHUB_TOKEN --config wrangler.jsonc
+          if [ -n "$CLOUDFLARE_STREAM_API_TOKEN" ]; then
+            printf '%s' "$CLOUDFLARE_STREAM_API_TOKEN" | npx wrangler secret put CLOUDFLARE_STREAM_API_TOKEN --config wrangler.jsonc
+          else
+            echo "::notice title=Cloudflare Stream disabled::CLOUDFLARE_STREAM_API_TOKEN is not set; small media uploads remain available."
+          fi
 
       - name: Deploy Worker
         env:
