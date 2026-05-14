@@ -6659,7 +6659,7 @@ function App() {
             className={isActive ? "is-active" : ""}
             onClick={() => selectItem(index)}
           >
-            <img src={item.image} alt="" loading={index < 4 ? "eager" : "lazy"} decoding="async" />
+            <img src={item.image} alt="" loading="eager" decoding="async" />
             <span>{item.label}</span>
             <strong>{item.shortTitle}</strong>
             <em>{item.category}</em>
@@ -6691,7 +6691,7 @@ function App() {
               onClick={() => selectItem(index)}
               title={item.title}
             >
-              <img src={item.image} alt="" loading="lazy" decoding="async" />
+              <img src={item.image} alt="" loading="eager" decoding="async" />
             </button>)}
           </div>
         </div>
