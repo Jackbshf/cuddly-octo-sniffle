@@ -7052,9 +7052,10 @@ html {
 .curated-page .curated-contact h2 {
   max-width: 720px;
   margin: 0;
+  padding-bottom: 0.06em;
   color: var(--portfolio-text);
   font-size: clamp(30px, 4vw, 56px);
-  line-height: 1;
+  line-height: 1.12;
   font-weight: 760;
   letter-spacing: 0;
   text-wrap: balance;
@@ -7536,7 +7537,7 @@ html {
   .curated-page .curated-contact h2 {
     max-width: 100%;
     font-size: clamp(26px, 8vw, 34px);
-    line-height: 1.08;
+    line-height: 1.16;
     word-break: normal;
     overflow-wrap: break-word;
   }
@@ -8474,13 +8475,27 @@ html {
 }
 
 .curated-page .curated-hero-copy h2 {
-  max-width: 18ch;
+  display: grid;
+  max-width: min(720px, 100%);
+  gap: 8px;
   margin-top: 18px;
   color: var(--portfolio-accent);
   font-size: clamp(22px, 3vw, 42px);
   line-height: 1.12;
   font-weight: 760;
   letter-spacing: 0;
+}
+
+.curated-page .curated-hero-copy h2 span {
+  display: block;
+}
+
+.curated-page .curated-hero-copy h2 span + span {
+  max-width: 52ch;
+  color: rgba(230, 244, 255, 0.88);
+  font-size: clamp(13px, 1.22vw, 18px);
+  line-height: 1.45;
+  font-weight: 740;
 }
 
 .curated-page .curated-hero-copy p {
@@ -9043,21 +9058,67 @@ html {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.curated-page .curated-capability-matrix-figure {
-  margin: 0;
-  overflow: hidden;
+.curated-page .curated-capability-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
   border: 1px solid var(--portfolio-border);
-  border-radius: 12px;
-  background: var(--portfolio-surface);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(9, 22, 32, 0.92), rgba(4, 10, 15, 0.96));
+  padding: clamp(14px, 2vw, 22px);
   box-shadow: 0 22px 58px rgba(0, 0, 0, 0.34);
 }
 
-.curated-page .curated-capability-matrix-figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1677 / 938;
-  object-fit: contain;
+.curated-page .curated-capability-matrix article {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 142px;
+  border: 1px solid rgba(120, 210, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 16px;
+}
+
+.curated-page .curated-capability-matrix article span,
+.curated-page .curated-capability-flow span {
+  color: var(--portfolio-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.curated-page .curated-capability-matrix article h3 {
+  margin: 0;
+  color: rgba(245, 250, 255, 0.96);
+  font-size: clamp(17px, 1.35vw, 21px);
+  line-height: 1.28;
+}
+
+.curated-page .curated-capability-matrix article p {
+  margin: 0;
+  color: rgba(214, 232, 244, 0.76);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.curated-page .curated-capability-flow {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(227, 201, 121, 0.18);
+  border-radius: 10px;
+  background: rgba(227, 201, 121, 0.06);
+  padding: 14px 16px;
+}
+
+.curated-page .curated-capability-flow strong {
+  color: rgba(245, 250, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.8;
+  font-weight: 740;
 }
 
 .curated-page .curated-workflow-grid + .curated-workflow-grid {
@@ -9193,15 +9254,15 @@ html {
     margin: 0 16px 18px;
   }
 
-  .curated-page .curated-capability-matrix-figure {
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scrollbar-color: rgba(127, 215, 244, 0.38) rgba(255, 255, 255, 0.05);
+  .curated-page .curated-capability-matrix {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
   }
 
-  .curated-page .curated-capability-matrix-figure img {
-    width: max(760px, 100%);
-    max-width: none;
+  .curated-page .curated-capability-matrix article {
+    min-height: 0;
+    padding: 14px;
   }
 
   .curated-page .curated-feature-grid,
