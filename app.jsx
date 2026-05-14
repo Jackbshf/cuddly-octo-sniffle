@@ -797,81 +797,6 @@ const HOMEPAGE_CURATED_WORKS = {
   },
 };
 
-const ECOMMERCE_DETAIL_SUITES = [
-  {
-    id: "suite-earbuds",
-    label: "套图 01",
-    title: "黑色耳机｜电商详情页套图",
-    shortTitle: "黑色耳机",
-    category: "产品广告详情套图",
-    referenceWorkId: "case-product-ad",
-    description: "基于黑色耳机主视觉延展首图、卖点、细节和交付页，保持同一商品结构与暗调高级感。",
-    tags: ["耳机产品", "电商详情", "材质光影"],
-    pages: [
-      { title: "黑色耳机英雄图", role: "主视觉", image: "images/curated/ecommerce/suite-earbuds-01.webp", description: "暗调岩石场景强化产品结构、金属高光和新品发布气质。" },
-      { title: "清晰主体与高级光影", role: "核心卖点", image: "images/curated/ecommerce/suite-earbuds-02.webp", description: "用低饱和背景承托产品轮廓，适合电商首屏与品牌 KV。" },
-      { title: "耳机曲面与光泽控制", role: "材质细节", image: "images/curated/ecommerce/suite-earbuds-03.webp", description: "从主体图中提取局部细节，强调硬朗材质、边缘反光和科技感。" },
-      { title: "暗场景产品陈列", role: "场景氛围", image: "images/curated/ecommerce/suite-earbuds-04.webp", description: "保留原有黑金光影和岩石质感，形成可延展的产品页氛围。" },
-      { title: "主图 / 详情 / 社媒统一", role: "系列延展", image: "images/curated/ecommerce/suite-earbuds-05.webp", description: "同一商品图可拆分为首图、细节图和社媒封面，减少视觉跳变。" },
-      { title: "可交付电商视觉资产", role: "收尾展示", image: "images/curated/ecommerce/suite-earbuds-06.webp", description: "围绕产品主体输出一组可用于新品发布和详情页的视觉页面。" }
-    ]
-  },
-  {
-    id: "suite-beauty",
-    label: "套图 02",
-    title: "美妆人像｜产品海报套图",
-    shortTitle: "美妆人像",
-    category: "美妆产品海报套图",
-    referenceWorkId: "case-beauty-live",
-    description: "基于美妆直播主图拆解人物、产品、补光和社媒转化场景，保持人物与产品同框逻辑。",
-    tags: ["美妆产品", "人像海报", "直播封面"],
-    pages: [
-      { title: "人像与产品同框", role: "主视觉", image: "images/curated/ecommerce/suite-beauty-01.webp", description: "保留直播补光场景，突出人物肤质、产品露出和干净广告氛围。" },
-      { title: "肤感、光泽与使用场景", role: "核心卖点", image: "images/curated/ecommerce/suite-beauty-02.webp", description: "围绕美妆产品的真实使用语境组织卖点，而不是孤立展示单品。" },
-      { title: "瓶身、妆面和补光层次", role: "材质细节", image: "images/curated/ecommerce/suite-beauty-03.webp", description: "通过局部裁切展示产品质感、肤质细节和画面洁净度。" },
-      { title: "直播与社媒转化画面", role: "场景氛围", image: "images/curated/ecommerce/suite-beauty-04.webp", description: "适合直播封面、种草图和产品海报的多平台视觉延展。" },
-      { title: "人像主图到产品卡片", role: "系列延展", image: "images/curated/ecommerce/suite-beauty-05.webp", description: "同一参考图拆解成主图、细节图和卖点图，保持人物与产品一致。" },
-      { title: "美妆广告视觉交付", role: "收尾展示", image: "images/curated/ecommerce/suite-beauty-06.webp", description: "形成从主视觉到详情说明的完整美妆产品页面节奏。" }
-    ]
-  },
-  {
-    id: "suite-brand-space",
-    label: "套图 03",
-    title: "冰蓝未来城市｜品牌空间视觉套图",
-    shortTitle: "品牌空间",
-    category: "品牌空间视觉套图",
-    referenceWorkId: "case-brand-space",
-    description: "按品牌空间案例处理，不伪装成具体 SKU 商品详情页，重点展示场景视觉的翻页拆解能力。",
-    tags: ["品牌空间", "场景概念", "视觉延展"],
-    pages: [
-      { title: "冰蓝未来城市空间", role: "主视觉", image: "images/curated/ecommerce/suite-brand-space-01.webp", description: "以完整场景建立品牌调性，不伪装成具体 SKU 商品详情页。" },
-      { title: "科技感、空间感与品牌气质", role: "核心卖点", image: "images/curated/ecommerce/suite-brand-space-02.webp", description: "通过冷调建筑、玻璃材质和远景透视表达未来品牌空间。" },
-      { title: "玻璃、冰晶与冷光结构", role: "材质细节", image: "images/curated/ecommerce/suite-brand-space-03.webp", description: "从场景图中拆解空间材质和光影层次，服务品牌视觉延展。" },
-      { title: "沉浸式品牌空间", role: "场景氛围", image: "images/curated/ecommerce/suite-brand-space-04.webp", description: "保留城市远景与建筑入口，适合展览、发布会和空间海报。" },
-      { title: "海报 / 展台 / KV 统一", role: "系列延展", image: "images/curated/ecommerce/suite-brand-space-05.webp", description: "同一场景可以拆成品牌 KV、社媒封面和空间视觉说明页。" },
-      { title: "可复用的场景视觉资产", role: "收尾展示", image: "images/curated/ecommerce/suite-brand-space-06.webp", description: "以统一色彩和空间语言完成品牌世界观视觉整理。" }
-    ]
-  },
-  {
-    id: "suite-fragrance",
-    label: "套图 04",
-    title: "香氛礼盒｜包装陈列详情套图",
-    shortTitle: "香氛礼盒",
-    category: "包装陈列详情套图",
-    referenceWorkId: "case-fragrance-packaging",
-    description: "基于香氛礼盒主图延展包装、瓶身、礼赠氛围和节日营销页面，保持黑金礼盒调性。",
-    tags: ["香氛礼盒", "包装陈列", "礼赠视觉"],
-    pages: [
-      { title: "香氛礼盒包装陈列", role: "主视觉", image: "images/curated/ecommerce/suite-fragrance-01.webp", description: "黑金礼盒、瓶身和道具组合形成高端礼赠主图。" },
-      { title: "礼赠感、层次与品牌调性", role: "核心卖点", image: "images/curated/ecommerce/suite-fragrance-02.webp", description: "用包装结构和环境光影表达节日礼盒的商业价值。" },
-      { title: "瓶身、礼盒与金色反光", role: "材质细节", image: "images/curated/ecommerce/suite-fragrance-03.webp", description: "从主体图中提取包装边缘、瓶身高光和道具层次。" },
-      { title: "高端香氛礼赠场景", role: "场景氛围", image: "images/curated/ecommerce/suite-fragrance-04.webp", description: "暗调背景和暖金灯光强化香氛产品的高级陈列感。" },
-      { title: "主图 / 礼盒页 / 社媒封面", role: "系列延展", image: "images/curated/ecommerce/suite-fragrance-05.webp", description: "同一礼盒视觉可拆分为产品页、节日海报和推广素材。" },
-      { title: "包装视觉交付能力", role: "收尾展示", image: "images/curated/ecommerce/suite-fragrance-06.webp", description: "形成从主视觉到详情说明的一组香氛礼盒视觉页面。" }
-    ]
-  }
-];
-
 const HOMEPAGE_CURATION = {
   hero: {
     featuredId: "hero-main-visual"
@@ -1078,7 +1003,6 @@ const HOMEPAGE_SECTION_VISIBILITY_OPTIONS = [
   { id: "featured", label: "精选入口" },
   { id: "videos", label: "视频精选" },
   { id: "cases", label: "精选案例" },
-  { id: "ecommerce", label: "电商套图" },
   { id: "capabilities", label: "能力矩阵" },
   { id: "process", label: "工作流模块" },
   { id: "contact", label: "联系模块" }
@@ -2861,8 +2785,6 @@ function App() {
   const [visualFilter, setVisualFilter] = useState("all");
   const [visibleVideoCount, setVisibleVideoCount] = useState(6);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
-  const [activeEcommerceSuiteIndex, setActiveEcommerceSuiteIndex] = useState(0);
-  const [activeEcommercePageIndex, setActiveEcommercePageIndex] = useState(0);
   const featuredVideoRef = useRef(null);
   const [featuredVideoPlayback, setFeaturedVideoPlayback] = useState({ id: "", status: "poster", hasPlayed: false });
   const [visibleVisualCount, setVisibleVisualCount] = useState(24);
@@ -2899,7 +2821,6 @@ function App() {
   const [isReplacingMedia, setIsReplacingMedia] = useState(false);
   const lightboxVideoRef = useRef(null);
   const heroCanvasRef = useRef(null);
-  const ecommerceTouchStartX = useRef(null);
   const importInputRef = useRef(null);
   const pageJumpInputRef = useRef(null);
   const touchStartX = useRef(null);
@@ -2953,7 +2874,6 @@ function App() {
     { id: "featured", label: "入口" },
     { id: "videos", label: "视频" },
     { id: "cases", label: "案例" },
-    { id: "ecommerce", label: "套图" },
     { id: "capabilities", label: "能力" },
     { id: "process", label: "流程" },
     { id: "contact", label: "联系" }
@@ -6567,123 +6487,6 @@ function App() {
     </article>;
   };
 
-  const buildEcommerceSuiteDetail = (suite, page, pageIndex) => ({
-    id: `${suite.id}-${String(pageIndex + 1).padStart(2, "0")}`,
-    kind: "case",
-    label: `${suite.label} · 第 ${pageIndex + 1} 页`,
-    title: `${suite.shortTitle}｜${page.title}`,
-    description: page.description || suite.description,
-    tags: ensureStringArray(suite.tags),
-    cover: page.image,
-    detailRows: [
-      { label: "套图类型", value: suite.category },
-      { label: "参考来源", value: HOMEPAGE_CURATED_WORKS[suite.referenceWorkId]?.title || "首页商业案例图" },
-      { label: "页面用途", value: page.role },
-      { label: "一致性控制", value: "基于现有案例图派生，不混入无关商品或工作流截图。" }
-    ]
-  });
-
-  const renderEcommerceSuiteReader = (suites, section) => {
-    const suiteItems = (Array.isArray(suites) ? suites : []).filter((suite) => suite && Array.isArray(suite.pages) && suite.pages.length);
-    if (!suiteItems.length) return null;
-    const normalizedSuiteIndex = ((activeEcommerceSuiteIndex % suiteItems.length) + suiteItems.length) % suiteItems.length;
-    const activeSuite = suiteItems[normalizedSuiteIndex];
-    const pages = Array.isArray(activeSuite.pages) ? activeSuite.pages : [];
-    const normalizedPageIndex = ((activeEcommercePageIndex % pages.length) + pages.length) % pages.length;
-    const activePage = pages[normalizedPageIndex];
-    const activeDetail = buildEcommerceSuiteDetail(activeSuite, activePage, normalizedPageIndex);
-    const selectSuite = (index) => {
-      setActiveEcommerceSuiteIndex(index);
-      setActiveEcommercePageIndex(0);
-    };
-    const selectPage = (index) => {
-      const nextIndex = ((index % pages.length) + pages.length) % pages.length;
-      setActiveEcommercePageIndex(nextIndex);
-    };
-    const movePage = (offset) => selectPage(normalizedPageIndex + offset);
-    const handleTouchStart = (event) => {
-      ecommerceTouchStartX.current = event.touches?.[0]?.clientX ?? null;
-    };
-    const handleTouchEnd = (event) => {
-      const startX = ecommerceTouchStartX.current;
-      ecommerceTouchStartX.current = null;
-      const endX = event.changedTouches?.[0]?.clientX ?? null;
-      if (!Number.isFinite(startX) || !Number.isFinite(endX)) return;
-      const delta = endX - startX;
-      if (Math.abs(delta) < 42) return;
-      movePage(delta < 0 ? 1 : -1);
-    };
-
-    return <div className="curated-ecommerce-layout" data-ecommerce-suite-count={suiteItems.length}>
-      <div className="curated-suite-tabs" role="tablist" aria-label="选择电商详情页套图">
-        {suiteItems.map((suite, index) => {
-          const isActive = index === normalizedSuiteIndex;
-          const reference = HOMEPAGE_CURATED_WORKS[suite.referenceWorkId];
-          return <button
-            key={suite.id}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            className={isActive ? "is-active" : ""}
-            onClick={() => selectSuite(index)}
-            data-ecommerce-suite={suite.id}
-          >
-            <img src={suite.pages[0]?.image || reference?.media?.url} alt={suite.shortTitle} loading={index === 0 ? "eager" : "lazy"} decoding="async" />
-            <span>{suite.label}</span>
-            <strong>{suite.shortTitle}</strong>
-            <em>{suite.category}</em>
-          </button>;
-        })}
-      </div>
-      <article className="curated-suite-reader" data-ecommerce-active-suite={activeSuite.id} data-ecommerce-active-page={normalizedPageIndex + 1}>
-        <div
-          className="curated-suite-media"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <img src={activePage.image} alt={`${activeSuite.shortTitle} ${activePage.role} ${activePage.title}`} loading="eager" decoding="async" />
-        </div>
-        <div className="curated-suite-copy" {...getDesignerSectionProps("ecommerce", "电商套图")}>
-          <span>{activeSuite.category}</span>
-          <h3>{activePage.title}</h3>
-          <p>{activePage.description}</p>
-          <div className="curated-suite-meta">
-            <span>{activePage.role}</span>
-            <span>{String(normalizedPageIndex + 1).padStart(2, "0")} / {String(pages.length).padStart(2, "0")}</span>
-          </div>
-          <div className="curated-suite-actions">
-            <button type="button" onClick={() => movePage(-1)} aria-label="上一页套图"><Icon name="ChevronLeft" size={15} />上一页</button>
-            <button type="button" onClick={() => openWorkDetail(activeDetail)}>查看大图</button>
-            <button type="button" onClick={() => movePage(1)} aria-label="下一页套图">下一页<Icon name="ChevronRight" size={15} /></button>
-          </div>
-          <div className="curated-suite-dots" role="tablist" aria-label="选择套图页面">
-            {pages.map((page, index) => <button
-              key={activeSuite.id + "-" + page.image}
-              type="button"
-              className={index === normalizedPageIndex ? "is-active" : ""}
-              aria-label={`查看第 ${index + 1} 页：${page.role}`}
-              aria-selected={index === normalizedPageIndex}
-              onClick={() => selectPage(index)}
-            >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-            </button>)}
-          </div>
-          <div className="curated-suite-thumbs" aria-label="套图页面缩略图">
-            {pages.map((page, index) => <button
-              key={activeSuite.id + "-thumb-" + page.image}
-              type="button"
-              className={index === normalizedPageIndex ? "is-active" : ""}
-              onClick={() => selectPage(index)}
-              title={page.title}
-            >
-              <img src={page.image} alt="" loading="lazy" decoding="async" />
-            </button>)}
-          </div>
-        </div>
-      </article>
-    </div>;
-  };
-
   const selectDesignerNode = (nodeId, status = "已选中可编辑元素。") => {
     if (!IS_PORTFOLIO_ADMIN_MODE) return false;
     setSelectedDesignerId(nodeId);
@@ -8031,13 +7834,11 @@ function App() {
     const visibleVideoEntries = homepageVideoEntries;
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
-    const visibleEcommerceSuites = ECOMMERCE_DETAIL_SUITES;
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
       featured: { label: "精选入口", eyebrow: "精选入口", title: "核心能力快速入口", description: "从视频、商业视觉、能力矩阵到 ComfyUI 工作流，快速了解我的 AIGC 视觉生产能力。" },
       videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频与商业短片精选", description: "精选 AI 视频案例，覆盖食品广告、产品展示、场景氛围与镜头运动控制。" },
       cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "商业视觉案例", description: siteMeta.caseSectionDesc || "覆盖产品广告、美妆人像、未来场景与包装陈列，展示商业审美、质感控制与视觉一致性。" },
-      ecommerce: { label: "电商套图", eyebrow: "电商套图", title: "电商详情页 / 视觉套图", description: "基于首页商业案例图延展成翻页阅读套图，展示商品一致性、详情页节奏和视觉交付能力。" },
       capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "以商业项目流程为核心，拆解从需求分析、视觉生成、局部优化到视频输出的完整 AIGC 生产能力。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
       process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI 工作流 / 创作流程", description: "通过节点化流程搭建，实现从图像生成、角色一致性、局部重绘到视频输出的可复用生产流程。" },
@@ -8047,7 +7848,6 @@ function App() {
     const featuredSection = getDesignerSection("featured", sectionDefaults.featured);
     const videoSection = getDesignerSection("videos", sectionDefaults.videos);
     const caseSection = getDesignerSection("cases", sectionDefaults.cases);
-    const ecommerceSection = getDesignerSection("ecommerce", sectionDefaults.ecommerce);
     const capabilitySection = getDesignerSection("capabilities", sectionDefaults.capabilities);
     const gallerySection = getDesignerSection("gallery", sectionDefaults.gallery);
     const processSection = getDesignerSection("process", sectionDefaults.process);
@@ -8114,20 +7914,9 @@ function App() {
         </div>
       </section>}
 
-      {!isHomepageSectionHidden("ecommerce") && <section id="ecommerce" className="curated-section curated-section-ecommerce" style={publishedSectionStyle}>
-        <div className="portfolio-container">
-          {renderCuratedEyebrow(4, ecommerceSection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("ecommerce", "电商套图")}>
-            <h2>{ecommerceSection.title}</h2>
-            <p>{ecommerceSection.description}</p>
-          </div>
-          {renderEcommerceSuiteReader(visibleEcommerceSuites, ecommerceSection)}
-        </div>
-      </section>}
-
       {!isHomepageSectionHidden("capabilities") && <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(5, capabilitySection.eyebrow)}
+          {renderCuratedEyebrow(4, capabilitySection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
             <h2>{capabilitySection.title}</h2>
             <p>{capabilitySection.description}</p>
@@ -8148,7 +7937,7 @@ function App() {
 
       {!isHomepageSectionHidden("process") && <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(6, processSection.eyebrow)}
+          {renderCuratedEyebrow(5, processSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
             <h2>{processSection.title}</h2>
             <p>{processSection.description}</p>
