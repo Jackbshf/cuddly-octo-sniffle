@@ -144,7 +144,29 @@
     pre{margin:0;white-space:pre-wrap;word-break:break-word;border:1px solid var(--line);border-radius:var(--r);background:#0b1017;padding:14px;color:#e4ebf5;font:13px/1.7 "Microsoft YaHei",Arial,sans-serif;max-height:52vh;overflow:auto}
     .toast{position:fixed;right:18px;bottom:18px;z-index:80;max-width:min(520px,calc(100vw - 36px));padding:12px 14px;border:1px solid #37455a;border-radius:var(--r);background:#111925;color:#fff;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.16s;pointer-events:none;font-size:13px}
     .toast.show{opacity:1;transform:translateY(0)}
+    .video-workbench{display:grid;gap:18px}
+    .video-hero{border:1px solid rgba(255,255,255,.1);border-radius:var(--r);background:linear-gradient(135deg,rgba(255,138,42,.12),rgba(51,199,165,.08) 42%,rgba(21,28,39,.96));box-shadow:var(--shadow);padding:24px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:end}
+    .video-hero h2{margin:0;font-size:38px;line-height:1.08;letter-spacing:0}
+    .video-hero p{margin:10px 0 0;color:#c8d2df;max-width:760px}
+    .video-status{border:1px solid var(--line);border-radius:var(--r);background:#0d1420;padding:14px;display:grid;gap:8px}
+    .video-status strong{font-size:15px}.video-status span{color:var(--muted);font-size:12px}
+    .video-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:18px;align-items:start}
+    .video-panel{border:1px solid rgba(255,255,255,.09);border-radius:var(--r);background:rgba(21,28,39,.94);box-shadow:var(--shadow);padding:16px;display:grid;gap:12px}
+    .video-panel h3{margin:0;font-size:16px}.video-panel p{margin:0;color:var(--muted);font-size:13px}
+    .video-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .template-grid,.caption-list,.selected-list{display:grid;gap:8px}
+    .template-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+    .template-card,.caption-card,.selected-card{border:1px solid var(--line);border-radius:var(--r);background:#101722;padding:12px;display:grid;gap:7px}
+    .template-card.is-active{border-color:rgba(255,138,42,.72);background:rgba(255,138,42,.1)}
+    .template-card strong,.caption-card strong,.selected-card strong{font-size:14px;line-height:1.35}
+    .template-card span,.caption-card span,.selected-card span{color:var(--muted);font-size:12px}
+    .caption-card{grid-template-columns:74px minmax(0,1fr);align-items:start}
+    .caption-time{border:1px solid rgba(51,199,165,.34);border-radius:var(--r);color:#b9fff0;background:rgba(51,199,165,.09);padding:6px 8px;text-align:center;font-size:12px;font-weight:900}
+    .video-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .video-preview{min-height:220px;max-height:360px}
+    .local-command{font-size:12px;line-height:1.7}
     @media(max-width:1040px){.hero{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.filter-panel{position:static}.search-copy h2{font-size:34px}}
+    @media(max-width:1040px){.video-hero,.video-layout{grid-template-columns:1fr}.video-hero h2{font-size:32px}}
     @media(max-width:640px){
       .top{padding:12px 14px;align-items:flex-start}.top-actions{width:100%;justify-content:flex-start}.brand h1{font-size:18px}
       main{padding:14px 12px 36px}.search-panel{padding:18px;min-height:0}.search-copy h2{font-size:27px}.search-copy p{font-size:14px}
@@ -153,6 +175,7 @@
       .grid{grid-template-columns:1fr}.prompt-card{min-height:0}.card-actions{grid-template-columns:1fr 1fr}
       .form-grid{grid-template-columns:1fr}.df{display:grid;grid-template-columns:1fr 1fr}.df button{width:100%}
       .metric-grid{grid-template-columns:1fr 1fr}
+      .video-hero{padding:18px}.video-hero h2{font-size:27px}.video-two{grid-template-columns:1fr}.video-actions button,.video-actions a{width:100%}.caption-card{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -164,6 +187,8 @@
         <p id="topSummary">输入需求后再展开结果，避免首页堆满提示词。</p>
       </div>
       <div class="top-actions">
+        <a class="buttonlike quiet" href="/prompts/" id="searchModeLink">提示词搜索</a>
+        <a class="buttonlike" href="/prompts/?tool=video" id="videoModeLink">视频生成</a>
         <button class="quiet" id="managePortal" hidden>管理订阅</button>
         <a class="buttonlike" href="/prompts/admin/" id="adminLink">后台</a>
       </div>
@@ -234,6 +259,64 @@
         <div id="content"><div class="empty"><strong>正在加载提示词库</strong>请稍候。</div></div>
       </section>
     </section>
+
+    <section class="video-workbench" id="videoWorkbench" hidden>
+      <div class="video-hero">
+        <div>
+          <h2>从提示词库出发，生成抖音字幕视频任务。</h2>
+          <p>线上负责选题、模板、素材关键词和字幕分镜；本机渲染桥负责联网素材、可选开源 TTS、HyperFrames 合成和 MP4 输出。</p>
+        </div>
+        <div class="video-status">
+          <strong id="localBridgeTitle">本地渲染桥检测中</strong>
+          <span id="localBridgeText">默认端口 127.0.0.1:47892。若浏览器阻止 localhost 请求，可导出任务 JSON 后手动渲染。</span>
+          <button id="checkLocalBridge">重新检测</button>
+        </div>
+      </div>
+
+      <div class="video-layout">
+        <section class="video-panel">
+          <h3>1. 选题与素材方向</h3>
+          <label class="field">视频标题 / 选题<input id="videoTopic" placeholder="例如：AI Agent 开始自己注册公司"></label>
+          <label class="field">原始材料<textarea id="videoSourceText" rows="7" placeholder="粘贴热点材料、新闻摘要或你的观点。系统会拆成 45-50 秒字幕分镜。"></textarea></label>
+          <div class="video-two">
+            <label class="field">素材关键词<textarea id="videoAssetKeywords" rows="4" placeholder="每行一个关键词，例如 AI agent startup"></textarea></label>
+            <label class="field">声音策略<select id="videoAudioMode"><option value="none">默认无声字幕</option><option value="optional-tts">可选开源 TTS</option></select></label>
+          </div>
+          <div class="video-actions">
+            <button class="primary" id="generateVideoCaptions">生成字幕分镜</button>
+            <button id="resetVideoDraft">重置样例</button>
+          </div>
+        </section>
+
+        <aside class="video-panel">
+          <h3>2. 引用提示词库</h3>
+          <p>搜索提示词并加入任务，渲染器会把这些提示词作为风格和分镜参考。</p>
+          <div class="search-row">
+            <input id="videoPromptSearch" type="search" placeholder="搜索：爆款脚本、短视频开头、Runway 分镜">
+            <button id="videoPromptSearchButton">筛选</button>
+          </div>
+          <div class="selected-list" id="videoPromptPool"></div>
+          <div class="selected-list" id="selectedPrompts"></div>
+        </aside>
+
+        <section class="video-panel">
+          <h3>3. 爆款模板组合</h3>
+          <div class="template-grid" id="videoTemplates"></div>
+        </section>
+
+        <section class="video-panel">
+          <h3>4. 字幕分镜与导出</h3>
+          <div class="caption-list" id="videoCaptions"></div>
+          <pre class="video-preview" id="videoJobPreview"></pre>
+          <div class="video-actions">
+            <button class="primary" id="sendLocalRender">发送本机渲染</button>
+            <button id="downloadVideoJob">导出任务 JSON</button>
+            <button id="copyLocalCommand">复制本地启动命令</button>
+          </div>
+          <pre class="local-command" id="localCommand">Set-Location 'E:\AISP\video-generator-studio'; & 'D:\AI-Tools\runtimes\node-v22.22.2-win-x64\npm.cmd' run serve</pre>
+        </section>
+      </div>
+    </section>
   </main>
 
   <dialog id="detailDialog">
@@ -287,14 +370,30 @@ const API_CONFIRM="/api/prompts/checkout/confirm";
 const API_ENTITLEMENT="/api/prompts/entitlement";
 const API_PORTAL="/api/prompts/customer-portal";
 const IS_ADMIN=location.pathname.replace(/\/+$/,"").startsWith("/prompts/admin");
+const LOCAL_RENDERER_ORIGIN="http://127.0.0.1:47892";
 const FAVORITE_KEY="prompt-commerce-favorites-v1";
 const SEARCHES_KEY="prompt-commerce-searches-v1";
+const VIDEO_DRAFT_KEY="prompt-video-generator-draft-v1";
 const qs=new URLSearchParams(location.search);
-const state={query:qs.get("q")||"",tool:qs.get("tool")||"all",modality:qs.get("mod")||"all",access:qs.get("access")||"all",pack:qs.get("pack")||"all",sort:qs.get("sort")||"relevance"};
+const VIEW_MODE=qs.get("tool")==="video"?"video":"search";
+const state={query:qs.get("q")||"",tool:VIEW_MODE==="video"?"all":qs.get("tool")||"all",modality:qs.get("mod")||"all",access:qs.get("access")||"all",pack:qs.get("pack")||"all",sort:qs.get("sort")||"relevance"};
 let store={version:2,prompts:[],assets:[]},indexData={packs:[],prompts:[]},suggestions={suggestions:[]},entitlement={pro:false,packs:[]};
 let dirty=false,activeDetailId="",lastResults=[];
 const $=id=>document.getElementById(id);
-const E={mode:$("modeBadge"),summary:$("topSummary"),search:$("search"),hot:$("hotKeywords"),metrics:$("metrics"),ent:$("entitlementBadges"),tool:$("toolFilter"),mod:$("modalityFilter"),access:$("accessFilter"),pack:$("packFilter"),sort:$("sortFilter"),saved:$("savedChips"),filters:$("activeFilters"),heading:$("resultHeading"),sub:$("resultSub"),content:$("content"),admin:$("adminPanel"),dirty:$("dirtyBadge"),toast:$("toast"),detail:$("detailDialog"),detailTitle:$("detailTitle"),detailBody:$("detailBody"),detailCopy:$("detailCopy"),editor:$("editorDialog"),editorForm:$("editorForm"),editorTitle:$("editorTitle"),suggestions:$("suggestionDialog"),suggestionBody:$("suggestionBody")};
+const E={mode:$("modeBadge"),summary:$("topSummary"),search:$("search"),hot:$("hotKeywords"),metrics:$("metrics"),ent:$("entitlementBadges"),tool:$("toolFilter"),mod:$("modalityFilter"),access:$("accessFilter"),pack:$("packFilter"),sort:$("sortFilter"),saved:$("savedChips"),filters:$("activeFilters"),heading:$("resultHeading"),sub:$("resultSub"),content:$("content"),admin:$("adminPanel"),dirty:$("dirtyBadge"),toast:$("toast"),detail:$("detailDialog"),detailTitle:$("detailTitle"),detailBody:$("detailBody"),detailCopy:$("detailCopy"),editor:$("editorDialog"),editorForm:$("editorForm"),editorTitle:$("editorTitle"),suggestions:$("suggestionDialog"),suggestionBody:$("suggestionBody"),hero:document.querySelector(".hero"),workspace:document.querySelector(".workspace"),video:$("videoWorkbench"),searchMode:$("searchModeLink"),videoMode:$("videoModeLink"),bridgeTitle:$("localBridgeTitle"),bridgeText:$("localBridgeText"),videoTopic:$("videoTopic"),videoSource:$("videoSourceText"),videoAssets:$("videoAssetKeywords"),videoAudio:$("videoAudioMode"),videoPromptSearch:$("videoPromptSearch"),videoPromptPool:$("videoPromptPool"),selectedPrompts:$("selectedPrompts"),videoTemplates:$("videoTemplates"),videoCaptions:$("videoCaptions"),videoJobPreview:$("videoJobPreview"),localCommand:$("localCommand")};
+const VIDEO_TEMPLATES=[
+  {id:"hook-conflict",title:"强冲突钩子",desc:"前 3 秒把反差和风险打满"},
+  {id:"number-slam",title:"数字猛击",desc:"用日期、比例、成本做视觉锚点"},
+  {id:"evidence-stack",title:"证据堆叠",desc:"来源、事件、结果、风险逐个出现"},
+  {id:"timeline-upgrade",title:"时间线升级",desc:"三段式说明变化如何发生"},
+  {id:"policy-market-split",title:"政策/市场双栏",desc:"两股力量同时推进"},
+  {id:"myth-reversal",title:"误区反转",desc:"先破常识，再给真实判断"},
+  {id:"three-point-list",title:"三点清单",desc:"用三条行动点收束信息"},
+  {id:"action-list",title:"行动清单结尾",desc:"行业认知、用户洞察、商业判断"},
+  {id:"screen-record-explainer",title:"屏幕录制讲解",desc:"适合工具教程和流程演示"},
+  {id:"comment-trigger",title:"评论触发结尾",desc:"用判断题激发讨论"}
+];
+let bridgeOnline=false,videoPromptQuery="",videoDraft=loadVideoDraft();
 const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
 const arr=value=>Array.isArray(value)?value:String(value||"").split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
 const now=()=>new Date().toISOString();
@@ -306,6 +405,9 @@ const favorites=()=>new Set(JSON.parse(localStorage.getItem(FAVORITE_KEY)||"[]")
 const saveFavorites=set=>localStorage.setItem(FAVORITE_KEY,JSON.stringify([...set].slice(0,200)));
 const savedSearches=()=>JSON.parse(localStorage.getItem(SEARCHES_KEY)||"[]");
 const saveSearch=query=>{let q=String(query||"").trim();if(!q)return;localStorage.setItem(SEARCHES_KEY,JSON.stringify([q,...savedSearches().filter(x=>x!==q)].slice(0,8)))};
+function defaultVideoDraft(){return{topic:"AI Agent 开始自己注册公司",sourceText:"据 ClawBank 与科技媒体披露，AI Agent Manfred 自主完成美国公司注册，取得 EIN，开通受 FDIC 保险的银行账户，并连接加密钱包。中国三部门也在 2026-05-08 发布《智能体规范应用与创新发展实施意见》，把智能体定义为能感知、记忆、决策、交互、执行的智能系统。普通人要看的不是热闹，而是行业认知、用户洞察和商业判断如何被 AI 放大。",assetKeywords:"AI agent startup\ncompany registration technology\nChina AI policy\nalgorithmic business dashboard",audioMode:"none",promptIds:[],templateIds:["hook-conflict","evidence-stack","timeline-upgrade","policy-market-split","action-list"],captionBlocks:[]}}
+function loadVideoDraft(){try{return{...defaultVideoDraft(),...JSON.parse(localStorage.getItem(VIDEO_DRAFT_KEY)||"{}")}}catch{return defaultVideoDraft()}}
+function saveVideoDraft(){localStorage.setItem(VIDEO_DRAFT_KEY,JSON.stringify(videoDraft))}
 function toast(message){E.toast.textContent=message;E.toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>E.toast.classList.remove("show"),2200)}
 function normalizePrompt(prompt,index=0){return{ id:String(prompt.id||`prompt-${index}`),title:String(prompt.title||"未命名提示词"),category:String(prompt.category||"未分类"),tags:arr(prompt.tags),variables:arr(prompt.variables),status:String(prompt.status||"待验证"),summary:String(prompt.summary||""),body:String(prompt.body||""),source:String(prompt.source||"手动新增"),createdAt:String(prompt.createdAt||now()),updatedAt:String(prompt.updatedAt||now()),archived:Boolean(prompt.archived),access:["free","pro","pack"].includes(String(prompt.access||""))?String(prompt.access):"free",packId:String(prompt.packId||""),stripePriceId:String(prompt.stripePriceId||""),qualityScore:Number(prompt.qualityScore||60),exampleOutput:String(prompt.exampleOutput||""),sourceType:String(prompt.sourceType||"curated"),verifiedAt:String(prompt.verifiedAt||prompt.updatedAt||prompt.createdAt||""),seoKeywords:arr(prompt.seoKeywords)}}
 function normalizeStore(raw){let prompts=Array.isArray(raw?.prompts)?raw.prompts.map(normalizePrompt):[];return{version:Number(raw?.version)||2,migratedAt:raw?.migratedAt||"",updatedAt:raw?.updatedAt||now(),prompts,assets:Array.isArray(raw?.assets)?raw.assets:[]}}
@@ -314,15 +416,15 @@ function tagValue(prompt,label){let prefixes=[`${label}:`,`${label}：`];return(
 function inferTool(prompt){let text=[prompt.title,prompt.category,prompt.summary,prompt.tags.join(" ")].join(" ");for(let tool of["Midjourney","Sora","Runway","Suno","ChatGPT","GPT Image","Cursor"])if(text.includes(tool))return tool;return"通用 AIGC"}
 function inferModality(prompt){let text=[prompt.title,prompt.category,prompt.summary,prompt.tags.join(" ")].join(" ");for(let mod of["视频","图像","音频","多模态","代码","文本"])if(text.includes(mod))return mod;return"AIGC"}
 function syncControls(){E.search.value=state.query;E.tool.value=state.tool;E.mod.value=state.modality;E.access.value=state.access;E.pack.value=state.pack;E.sort.value=state.sort}
-function syncUrl(){let p=new URLSearchParams();if(state.query)p.set("q",state.query);if(state.tool!=="all")p.set("tool",state.tool);if(state.modality!=="all")p.set("mod",state.modality);if(state.access!=="all")p.set("access",state.access);if(state.pack!=="all")p.set("pack",state.pack);if(state.sort!=="relevance")p.set("sort",state.sort);history.replaceState(null,"",location.pathname+(p.toString()?`?${p}`:""))}
-async function loadAll(){E.mode.textContent=IS_ADMIN?"管理员模式":"公开搜索";E.admin.hidden=!IS_ADMIN;try{await maybeConfirmCheckout();let [library,index,suggestion,access]=await Promise.all([fetchJson(API_LIBRARY),fetchJson(API_INDEX).catch(()=>null),fetchJson(API_SUGGESTIONS).catch(()=>({suggestions:[]})),fetchJson(API_ENTITLEMENT).catch(()=>({pro:false,packs:[]}))]);store=normalizeStore(library);indexData=index&&Array.isArray(index.prompts)?index:clientIndexFromStore();suggestions=suggestion||{suggestions:[]};entitlement=normalizeEntitlement(access);hydrateFilters();render()}catch(error){console.error(error);E.content.innerHTML=`<div class="empty"><strong>提示词库加载失败</strong>${esc(error.message||error)}</div>`}}
+function syncUrl(){let p=new URLSearchParams();if(VIEW_MODE==="video")p.set("tool","video");if(state.query)p.set("q",state.query);if(VIEW_MODE!=="video"&&state.tool!=="all")p.set("tool",state.tool);if(state.modality!=="all")p.set("mod",state.modality);if(state.access!=="all")p.set("access",state.access);if(state.pack!=="all")p.set("pack",state.pack);if(state.sort!=="relevance")p.set("sort",state.sort);history.replaceState(null,"",location.pathname+(p.toString()?`?${p}`:""))}
+async function loadAll(){E.mode.textContent=VIEW_MODE==="video"?"视频生成":IS_ADMIN?"管理员模式":"公开搜索";E.admin.hidden=!IS_ADMIN;E.hero.hidden=VIEW_MODE==="video";E.workspace.hidden=VIEW_MODE==="video";E.video.hidden=VIEW_MODE!=="video";E.searchMode.classList.toggle("primary",VIEW_MODE!=="video");E.videoMode.classList.toggle("primary",VIEW_MODE==="video");try{await maybeConfirmCheckout();let [library,index,suggestion,access]=await Promise.all([fetchJson(API_LIBRARY),fetchJson(API_INDEX).catch(()=>null),fetchJson(API_SUGGESTIONS).catch(()=>({suggestions:[]})),fetchJson(API_ENTITLEMENT).catch(()=>({pro:false,packs:[]}))]);store=normalizeStore(library);indexData=index&&Array.isArray(index.prompts)?index:clientIndexFromStore();suggestions=suggestion||{suggestions:[]};entitlement=normalizeEntitlement(access);hydrateFilters();render();if(VIEW_MODE==="video")checkLocalBridge()}catch(error){console.error(error);let html=`<div class="empty"><strong>提示词库加载失败</strong>${esc(error.message||error)}</div>`;if(VIEW_MODE==="video")E.video.innerHTML=html;else E.content.innerHTML=html}}
 async function fetchJson(url,options){let res=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);return data}
 function normalizeEntitlement(value){return{pro:Boolean(value?.pro),packs:Array.isArray(value?.packs)?value.packs:[],customer:value?.customer||"",email:value?.email||""}}
 async function maybeConfirmCheckout(){let sessionId=qs.get("session_id");if(qs.get("checkout")!=="success"||!sessionId)return;try{let data=await fetchJson(`${API_CONFIRM}?session_id=${encodeURIComponent(sessionId)}`);entitlement=normalizeEntitlement(data.entitlement);toast("支付状态已确认");history.replaceState(null,"",location.pathname)}catch(error){toast(`支付确认失败：${error.message||error}`)}}
 function hydrateFilters(){let tools=[...new Set(indexData.prompts.map(x=>x.tool).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));let mods=[...new Set(indexData.prompts.map(x=>x.modality).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));E.tool.innerHTML=`<option value="all">全部工具</option>${tools.map(x=>`<option>${esc(x)}</option>`).join("")}`;E.mod.innerHTML=`<option value="all">全部模态</option>${mods.map(x=>`<option>${esc(x)}</option>`).join("")}`;E.pack.innerHTML=`<option value="all">全部精选包</option>${packs().map(pack=>`<option value="${esc(pack.id)}">${esc(pack.title)}</option>`).join("")}`;syncControls()}
 function isUnlocked(entry){if(IS_ADMIN||entry.access==="free")return true;if(entitlement.pro)return true;if(entry.access==="pack"&&entitlement.packs.includes(entry.packId))return true;return false}
 function searchResults(){let q=state.query.trim().toLowerCase();let tokens=q.split(/\s+/).filter(Boolean);let hasFilter=[state.tool,state.modality,state.access,state.pack].some(value=>value&&value!=="all");if(!q&&!hasFilter)return[];let results=[];for(let entry of indexData.prompts){if(entry.archived)continue;if(state.tool!=="all"&&entry.tool!==state.tool)continue;if(state.modality!=="all"&&entry.modality!==state.modality)continue;if(state.access!=="all"&&entry.access!==state.access)continue;if(state.pack!=="all"&&entry.packId!==state.pack)continue;let searchable=String(entry.searchable||"").toLowerCase();let score=Number(entry.qualityScore||0)/10;if(q){let hit=false;for(let token of tokens){if(String(entry.title||"").toLowerCase().includes(token)){score+=26;hit=true}else if(searchable.includes(token)){score+=10;hit=true}}if(!hit)continue}results.push({...entry,score})}if(state.sort==="quality")results.sort((a,b)=>Number(b.qualityScore||0)-Number(a.qualityScore||0));else if(state.sort==="newest")results.sort((a,b)=>Date.parse(b.verifiedAt||0)-Date.parse(a.verifiedAt||0));else results.sort((a,b)=>b.score-a.score||Number(b.qualityScore||0)-Number(a.qualityScore||0));return results}
-function render(){syncControls();renderSummary();lastResults=searchResults();renderFilters();if(lastResults.length)renderResultGrid(lastResults);else renderLanding()}
+function render(){syncControls();renderSummary();if(VIEW_MODE==="video"){renderVideoWorkbench();return}lastResults=searchResults();renderFilters();if(lastResults.length)renderResultGrid(lastResults);else renderLanding()}
 function renderSummary(){let active=store.prompts.filter(prompt=>!prompt.archived);let counts=active.reduce((out,prompt)=>{out[prompt.access]=(out[prompt.access]||0)+1;return out},{});
 E.summary.textContent=`${active.length} 条提示词 · 免费 ${counts.free||0} · Pro ${counts.pro||0} · 精选包 ${counts.pack||0}`;
 E.metrics.innerHTML=[["总提示词",active.length],["免费",counts.free||0],["Pro",counts.pro||0],["精选包",counts.pack||0]].map(([k,v])=>`<div class="metric"><strong>${v}</strong><span>${k}</span></div>`).join("");
@@ -347,9 +449,33 @@ function publicLibrary(){return{version:store.version||2,migratedAt:store.migrat
 async function publishLibrary(){if(!IS_ADMIN||!dirty)return toast("没有需要发布的草稿");try{let data=await fetchJson(API_LIBRARY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({library:publicLibrary(),message:"Update prompt commerce library"})});dirty=false;render();toast(data.commit?"已提交到 GitHub，等待部署":"已发布")}catch(error){toast(`发布失败：${error.message||error}`)}}
 function renderSuggestionReview(){E.suggestionBody.innerHTML=`<div class="grid">${(suggestions.suggestions||[]).map(suggestionCard).join("")}</div>`;E.suggestions.showModal()}
 function draftFromSuggestion(id){let item=(suggestions.suggestions||[]).find(x=>x.id===id);if(!item)return;openEditor();let f=E.editorForm.elements;f.title.value=`${item.keyword}提示词模板`;f.category.value="AIGC 趋势草稿";f.status.value="待验证";f.source.value="联网建议审核池";f.access.value="pro";f.qualityScore.value=72;f.sourceType.value="web-inspired-draft";f.verifiedAt.value=now().slice(0,10);f.tags.value=arr(item.suggestedFilters).join(", ");f.seoKeywords.value=[item.keyword,...arr(item.suggestedFilters)].join(", ");f.summary.value=item.theme;f.exampleOutput.value=`输出一份围绕「${item.keyword}」的自写 AIGC 提示词结构。`;f.body.value=`目标：围绕「${item.keyword}」生成可复用提示词。\n\n背景：${item.theme}\n\n输入变量：\n- {项目目标}\n- {目标平台}\n- {受众}\n- {风格方向}\n- {交付格式}\n\n复制即用提示词：\n请基于 {项目目标}，为 {目标平台} 的 {受众} 设计一份 AIGC 生成提示词。要求：结构清晰、变量可替换、明确风格方向为 {风格方向}，输出格式为 {交付格式}。避免复制任何外站提示词原文，只使用主题、关键词和结构灵感。\n\n质量标准：\n1. 明确任务目标。\n2. 明确输入变量。\n3. 明确输出格式。\n4. 包含失败修正建议。\n5. 包含边界提醒。\n\n边界提醒：不要使用外站 prompt 原文，不生成侵权、欺诈、仿冒或规避审核内容。`}
+function readVideoControls(){videoDraft.topic=E.videoTopic.value.trim();videoDraft.sourceText=E.videoSource.value.trim();videoDraft.assetKeywords=E.videoAssets.value.trim();videoDraft.audioMode=E.videoAudio.value;saveVideoDraft()}
+function splitSentences(text){return String(text||"").replace(/\s+/g," ").split(/[。！？!?；;]\s*/).map(x=>x.trim()).filter(Boolean).slice(0,10)}
+function selectedPromptObjects(){return(videoDraft.promptIds||[]).map(id=>promptById(id)).filter(Boolean)}
+function createCaptionBlocks(){let topic=videoDraft.topic||"热点正在变化";let sentences=splitSentences(videoDraft.sourceText);let selected=selectedPromptObjects();let anchors=[...sentences,selected.map(p=>p.summary||p.title).join(" ")].filter(Boolean);let mid=anchors[1]||anchors[0]||"信息密度上升，判断成本也在上升";return[
+  {start:0,duration:3,type:"hook",headline:`${topic}，先看结论`,caption:"不是工具升级，是生产关系变化"},
+  {start:3,duration:5,type:"evidence",headline:anchors[0]||"第一组证据",caption:"把来源、动作、结果放到同一屏"},
+  {start:8,duration:5,type:"number",headline:"2-5 秒刷新一次画面",caption:"大字字幕是主视觉，不是辅助说明"},
+  {start:13,duration:6,type:"proof",headline:mid,captions:["来源标签","关键日期","结果变化"]},
+  {start:19,duration:6,type:"timeline",headline:"时间线要短",captions:["过去：人来执行","现在：AI 协作","下一步：系统化试错"]},
+  {start:25,duration:6,type:"split",headline:"市场在降门槛，规则在抬边界",caption:"机会和责任同时出现"},
+  {start:31,duration:6,type:"action",headline:"普通人抓什么？",captions:["行业认知","用户洞察","商业判断"]},
+  {start:37,duration:7,type:"close",headline:"别追热词，验证真实需求",caption:"用最低成本做一次可复盘的试错"}
+]}
+function generateCaptionBlocks(){readVideoControls();videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft();renderVideoWorkbench();toast("已生成 45 秒字幕分镜")}
+function videoAssetQueries(){let base=arr(videoDraft.assetKeywords).length?arr(videoDraft.assetKeywords):[videoDraft.topic,"AI video dashboard","short video subtitles"];return base.slice(0,8).map(query=>({query,providers:["pexels","pixabay","unsplash"],searchLinks:{pexels:`https://www.pexels.com/search/videos/${encodeURIComponent(query)}/`,pixabay:`https://pixabay.com/videos/search/${encodeURIComponent(query)}/`,unsplash:`https://unsplash.com/s/photos/${encodeURIComponent(query)}`}}))}
+function buildVideoJob(){readVideoControls();if(!videoDraft.captionBlocks?.length){videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft()}let prompts=selectedPromptObjects().map(prompt=>({id:prompt.id,title:prompt.title,summary:prompt.summary,tags:prompt.tags,body:prompt.body.slice(0,1600)}));let duration=videoDraft.captionBlocks.reduce((max,block)=>Math.max(max,Number(block.start||0)+Number(block.duration||0)),0);return{videoJobVersion:1,createdAt:now(),topic:videoDraft.topic||"未命名视频",sourceText:videoDraft.sourceText,promptIds:videoDraft.promptIds||[],prompts,templateRecipe:{id:"douyin-retention-stack",templates:videoDraft.templateIds||[]},captionBlocks:videoDraft.captionBlocks,assetQueries:videoAssetQueries(),audio:{mode:videoDraft.audioMode||"none",default:"subtitle-only",optionalProviders:["MeloTTS","CosyVoice"]},render:{target:{width:1080,height:1920,fps:30,durationSeconds:Math.max(45,duration),format:"mp4"},localWorkspace:"E:\\AISP\\video-generator-studio"}}}
+function renderVideoWorkbench(){E.videoTopic.value=videoDraft.topic||"";E.videoSource.value=videoDraft.sourceText||"";E.videoAssets.value=videoDraft.assetKeywords||"";E.videoAudio.value=videoDraft.audioMode||"none";E.videoPromptSearch.value=videoPromptQuery;if(!videoDraft.captionBlocks?.length){videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft()}E.videoTemplates.innerHTML=VIDEO_TEMPLATES.map(t=>`<button class="template-card ${(videoDraft.templateIds||[]).includes(t.id)?"is-active":""}" data-video-template="${esc(t.id)}"><strong>${esc(t.title)}</strong><span>${esc(t.desc)}</span></button>`).join("");renderVideoPromptPool();renderSelectedPrompts();renderVideoCaptions();E.videoJobPreview.textContent=JSON.stringify(buildVideoJob(),null,2)}
+function renderVideoPromptPool(){let q=videoPromptQuery.trim().toLowerCase();let pool=(q?indexData.prompts.filter(entry=>String(entry.searchable||entry.title||"").toLowerCase().includes(q)):indexData.prompts.filter(entry=>String(entry.modality||"").includes("视频")||String(entry.title||"").includes("视频"))).filter(entry=>!entry.archived).slice(0,6);E.videoPromptPool.innerHTML=pool.length?pool.map(entry=>`<article class="selected-card"><strong>${esc(entry.title)}</strong><span>${esc(entry.summary||entry.category||"")}</span><button data-video-add-prompt="${esc(entry.id)}">加入任务</button></article>`).join(""):`<div class="empty"><strong>没有匹配提示词</strong>换一个关键词试试。</div>`}
+function renderSelectedPrompts(){let selected=selectedPromptObjects();E.selectedPrompts.innerHTML=`<div class="meta"><span class="badge">已选提示词 ${selected.length}</span></div>`+(selected.length?selected.map(prompt=>`<article class="selected-card"><strong>${esc(prompt.title)}</strong><span>${esc(prompt.summary||"")}</span><button data-video-remove-prompt="${esc(prompt.id)}">移除</button></article>`).join(""):`<div class="empty"><strong>尚未选择提示词</strong>可以直接生成，也可以把库里的脚本/分镜提示词加入任务。</div>`)}
+function renderVideoCaptions(){let blocks=videoDraft.captionBlocks||[];E.videoCaptions.innerHTML=blocks.length?blocks.map(block=>`<article class="caption-card"><div class="caption-time">${Number(block.start||0)}s<br>${Number(block.duration||0)}s</div><div><strong>${esc(block.headline)}</strong><span>${esc(block.caption||(block.captions||[]).join(" / "))}</span></div></article>`).join(""):`<div class="empty"><strong>还没有字幕分镜</strong>先填写选题和材料，再点击生成字幕分镜。</div>`}
+async function checkLocalBridge(){E.bridgeTitle.textContent="本地渲染桥检测中";E.bridgeText.textContent="正在请求 127.0.0.1:47892/health。";try{let res=await fetch(`${LOCAL_RENDERER_ORIGIN}/health`,{cache:"no-store"});let data=await res.json();bridgeOnline=Boolean(data.ok);E.bridgeTitle.textContent=bridgeOnline?"本地渲染桥已连接":"本地渲染桥不可用";E.bridgeText.textContent=bridgeOnline?`工作目录：${data.workspace||"E:\\AISP\\video-generator-studio"}`:"请先启动本地桥，或导出任务 JSON。"}catch{bridgeOnline=false;E.bridgeTitle.textContent="本地渲染桥未连接";E.bridgeText.textContent="浏览器可能阻止 localhost，或本地服务未启动。可先导出任务 JSON。"}}
+function downloadVideoJob(){let job=buildVideoJob();let blob=new Blob([JSON.stringify(job,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`video-job-${Date.now().toString(36)}.json`;a.click();URL.revokeObjectURL(a.href);toast("已导出视频任务 JSON")}
+async function sendLocalRender(){let job=buildVideoJob();try{let res=await fetch(`${LOCAL_RENDERER_ORIGIN}/render`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(job)});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);toast(data.output?`已提交渲染：${data.output}`:"已提交本机渲染")}catch(error){toast(`本机渲染不可用：${error.message||error}，请导出 JSON`)}}
+async function copyLocalCommand(){let text=E.localCommand.textContent.trim();try{await navigator.clipboard.writeText(text)}catch{let area=document.createElement("textarea");area.value=text;document.body.appendChild(area);area.select();document.execCommand("copy");area.remove()}toast("已复制本地启动命令")}
 async function startCheckout(productType,packId=""){try{let data=await fetchJson(API_CHECKOUT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productType,packId})});if(data.checkoutUrl)location.assign(data.checkoutUrl);else toast("Stripe Checkout 未返回跳转地址")}catch(error){toast(`支付未配置：${error.message||error}`)}}
 async function openPortal(){try{let data=await fetchJson(API_PORTAL,{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});if(data.url)location.assign(data.url)}catch(error){toast(`订阅管理未配置：${error.message||error}`)}}
-document.addEventListener("click",event=>{let target=event.target.closest("button,a,article");if(!target)return;if(target.dataset.query){state.query=target.dataset.query;saveSearch(state.query);syncUrl();render();return}if(target.dataset.packSearch){state.pack=target.dataset.packSearch;state.access="pack";syncUrl();render();return}if(target.dataset.buyPack!==undefined){startCheckout("pack",target.dataset.buyPack);return}if(target.dataset.buyPro!==undefined||target.id==="buyPro"){startCheckout("pro");return}if(target.dataset.open){openDetail(target.dataset.open);return}if(target.dataset.copy){event.stopPropagation();copyPrompt(target.dataset.copy);return}if(target.dataset.edit){openEditor(target.dataset.edit);return}if(target.dataset.draftSuggestion){draftFromSuggestion(target.dataset.draftSuggestion);return}if(target.dataset.close){$(target.dataset.close).close();return}});
+document.addEventListener("click",event=>{let target=event.target.closest("button,a,article");if(!target)return;if(target.dataset.videoTemplate){let set=new Set(videoDraft.templateIds||[]);set.has(target.dataset.videoTemplate)?set.delete(target.dataset.videoTemplate):set.add(target.dataset.videoTemplate);videoDraft.templateIds=[...set];saveVideoDraft();renderVideoWorkbench();return}if(target.dataset.videoAddPrompt){let set=new Set(videoDraft.promptIds||[]);set.add(target.dataset.videoAddPrompt);videoDraft.promptIds=[...set].slice(0,8);saveVideoDraft();renderVideoWorkbench();return}if(target.dataset.videoRemovePrompt){videoDraft.promptIds=(videoDraft.promptIds||[]).filter(id=>id!==target.dataset.videoRemovePrompt);saveVideoDraft();renderVideoWorkbench();return}if(target.dataset.query){state.query=target.dataset.query;saveSearch(state.query);syncUrl();render();return}if(target.dataset.packSearch){state.pack=target.dataset.packSearch;state.access="pack";syncUrl();render();return}if(target.dataset.buyPack!==undefined){startCheckout("pack",target.dataset.buyPack);return}if(target.dataset.buyPro!==undefined||target.id==="buyPro"){startCheckout("pro");return}if(target.dataset.open){openDetail(target.dataset.open);return}if(target.dataset.copy){event.stopPropagation();copyPrompt(target.dataset.copy);return}if(target.dataset.edit){openEditor(target.dataset.edit);return}if(target.dataset.draftSuggestion){draftFromSuggestion(target.dataset.draftSuggestion);return}if(target.dataset.close){$(target.dataset.close).close();return}});
 $("runSearch").onclick=()=>{state.query=E.search.value.trim();saveSearch(state.query);syncUrl();render()};
 $("clearSearch").onclick=()=>{state.query="";E.search.value="";syncUrl();render();E.search.focus()};
 E.search.onkeydown=event=>{if(event.key==="Enter")$("runSearch").click()};
@@ -359,6 +485,15 @@ $("newPrompt").onclick=()=>openEditor();
 $("publishLibrary").onclick=publishLibrary;
 $("openSuggestionReview").onclick=renderSuggestionReview;
 $("managePortal").onclick=openPortal;
+$("checkLocalBridge").onclick=checkLocalBridge;
+$("generateVideoCaptions").onclick=generateCaptionBlocks;
+$("resetVideoDraft").onclick=()=>{videoDraft=defaultVideoDraft();saveVideoDraft();renderVideoWorkbench();toast("已重置视频样例")};
+$("videoPromptSearchButton").onclick=()=>{videoPromptQuery=E.videoPromptSearch.value.trim();renderVideoWorkbench()};
+$("downloadVideoJob").onclick=downloadVideoJob;
+$("sendLocalRender").onclick=sendLocalRender;
+$("copyLocalCommand").onclick=copyLocalCommand;
+[E.videoTopic,E.videoSource,E.videoAssets,E.videoAudio].forEach(control=>control.oninput=()=>{readVideoControls();renderVideoWorkbench()});
+E.videoPromptSearch.onkeydown=event=>{if(event.key==="Enter")$("videoPromptSearchButton").click()};
 E.editorForm.onsubmit=saveEditor;
 E.detailCopy.onclick=()=>copyPrompt(activeDetailId);
 loadAll();
