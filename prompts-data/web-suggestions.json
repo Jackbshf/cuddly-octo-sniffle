@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-15T05:57:32.174Z",
+  "generatedAt": "2026-05-15T11:13:43.863Z",
   "reviewPolicy": "Use these as topic and structure inspiration only. Do not copy external prompt text.",
   "sources": [
     {
@@ -11,7 +11,7 @@
     {
       "name": "PromptBase",
       "url": "https://promptbase.com/",
-      "usage": "Paid prompt card and pack commerce pattern reference"
+      "usage": "Prompt card and pack browsing pattern reference"
     },
     {
       "name": "AIPRM Private Prompts",

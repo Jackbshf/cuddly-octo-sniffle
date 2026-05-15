@@ -16,7 +16,7 @@ const packDefinitions = [
     title: "短视频电商转化精选包",
     description: "围绕商品卖点、口播、分镜、剧情短视频和投放素材的高转化提示词组合。",
     audience: "电商商家 / 短视频团队",
-    stripeEnv: "PROMPTS_STRIPE_PRICE_PACK_VIDEO_COMMERCE",
+    contactIntent: "video-commerce",
     keywords: ["视频", "短视频", "电商", "商品", "口播", "分镜", "剧情", "带货", "投放", "广告"]
   },
   {
@@ -24,7 +24,7 @@ const packDefinitions = [
     title: "商品视觉与海报精选包",
     description: "覆盖产品图、海报、详情页主图、KV、材质表现和品牌视觉方向。",
     audience: "品牌视觉 / 设计师",
-    stripeEnv: "PROMPTS_STRIPE_PRICE_PACK_IMAGE_PRODUCT",
+    contactIntent: "image-product",
     keywords: ["图像", "产品", "商品", "海报", "视觉", "KV", "材质", "品牌", "摄影", "主图"]
   },
   {
@@ -32,7 +32,7 @@ const packDefinitions = [
     title: "多模态创作流程精选包",
     description: "用于图像、视频、音频和文本之间的跨模态创意生产与复用流程。",
     audience: "AIGC 创作工作室",
-    stripeEnv: "PROMPTS_STRIPE_PRICE_PACK_MULTIMODAL",
+    contactIntent: "multimodal-studio",
     keywords: ["多模态", "工作流", "图像", "视频", "音频", "脚本", "批量", "复用", "创作流程"]
   }
 ];
@@ -290,7 +290,7 @@ const suggestions = {
   reviewPolicy: "Use these as topic and structure inspiration only. Do not copy external prompt text.",
   sources: [
     { name: "PromptHero", url: "https://prompthero.com/", usage: "Search/filter interaction pattern reference" },
-    { name: "PromptBase", url: "https://promptbase.com/", usage: "Paid prompt card and pack commerce pattern reference" },
+    { name: "PromptBase", url: "https://promptbase.com/", usage: "Prompt card and pack browsing pattern reference" },
     { name: "AIPRM Private Prompts", url: "https://www.aiprm.com/en-gb/features/private-team-prompts/", usage: "Private reuse and team prompt organization reference" }
   ],
   suggestions: trendSuggestions

@@ -217,7 +217,7 @@ async function handlePromptsApi(request, env, url) {
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/checkout` && request.method === "POST") {
-    return createPromptCheckoutSession(request, env);
+    return promptContactOnlyResponse();
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/checkout/confirm` && request.method === "GET") {
@@ -225,7 +225,7 @@ async function handlePromptsApi(request, env, url) {
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/customer-portal` && request.method === "POST") {
-    return createPromptCustomerPortalSession(request, env, url);
+    return promptContactOnlyResponse();
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/stripe-webhook` && request.method === "POST") {
@@ -453,6 +453,14 @@ async function createPromptCheckoutSession(request, env) {
   } catch (error) {
     return jsonResponse({ ok: false, error: error.message || "Stripe checkout session creation failed." }, 502);
   }
+}
+
+function promptContactOnlyResponse() {
+  return jsonResponse({
+    ok: false,
+    error: "Prompt checkout is disabled. Use the contact flow on /prompts/ to request professional prompt packs.",
+    contactOnly: true
+  }, 410);
 }
 
 async function confirmPromptCheckoutSession(request, env, url) {
@@ -1775,9 +1783,32 @@ function normalizeLibrary(raw) {
     version: 2,
     migratedAt: cleanText(raw?.migratedAt) || now,
     updatedAt: cleanText(raw?.updatedAt) || now,
+    contact: normalizePromptContact(raw?.contact || raw?.contactSettings),
     prompts,
     assets
   };
+}
+
+function normalizePromptContact(value = {}) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    title: cleanText(source.title) || "联系我获取精选包",
+    description: cleanText(source.description) || "留下需求或直接添加联系方式，按项目目标推荐对应提示词包与使用方式。",
+    ctaLabel: cleanText(source.ctaLabel) || "联系获取方案",
+    wechat: cleanText(source.wechat),
+    email: cleanText(source.email) || "2453193338@qq.com",
+    phone: cleanText(source.phone),
+    qrImageUrl: cleanPromptContactUrl(source.qrImageUrl),
+    consultationText: cleanText(source.consultationText) || "请说明你要解决的创作任务、使用工具、交付平台和期望结果。"
+  };
+}
+
+function cleanPromptContactUrl(value) {
+  const text = cleanText(value);
+  if (!text) return "";
+  if (text.startsWith("/images/") || text.startsWith("/prompts-data/assets/")) return text;
+  if (/^https:\/\/[^\s"<>]+$/i.test(text)) return text;
+  return "";
 }
 
 function normalizePortfolioHomepageBlocks(blocks = {}) {
