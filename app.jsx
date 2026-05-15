@@ -78,6 +78,8 @@ const HOMEPAGE_CURATED_WORKS = {
       kind: "image",
       url: "images/generated/celestial-whale-city.webp",
       fullUrl: "images/generated/celestial-whale-city.webp",
+      width: 1122,
+      height: 1402,
       alt: "云鲸未来城市单张世界观主视觉"
     },
     detailRows: [
@@ -6815,6 +6817,8 @@ function App() {
       {displayUrl ? <img
         src={displayUrl}
         alt={label}
+        width={normalizedMedia?.width || undefined}
+        height={normalizedMedia?.height || undefined}
         loading={options.eager || isManualEntry ? "eager" : "lazy"}
         decoding={options.eager || isManualEntry ? "sync" : "async"}
         fetchPriority={options.eager || isManualEntry ? "high" : "auto"}
