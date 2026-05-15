@@ -12,7 +12,9 @@
     "deploy:worker:version": "wrangler versions upload --config wrangler.jsonc --assets=./dist",
     "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
     "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",
-    "validate:prompts": "node scripts/prompts/validate-general-prompts.mjs"
+    "build:prompt-index": "node scripts/prompts/build-search-index.mjs",
+    "enhance:prompts": "node scripts/prompts/build-search-index.mjs --write-library",
+    "validate:prompts": "node scripts/prompts/build-search-index.mjs && node scripts/prompts/validate-general-prompts.mjs"
   },
   "dependencies": {
     "hls.js": "^1.6.16",

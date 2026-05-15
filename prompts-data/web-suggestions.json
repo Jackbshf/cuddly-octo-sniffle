@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-15T05:57:32.174Z",
+  "reviewPolicy": "Use these as topic and structure inspiration only. Do not copy external prompt text.",
+  "sources": [
+    {
+      "name": "PromptHero",
+      "url": "https://prompthero.com/",
+      "usage": "Search/filter interaction pattern reference"
+    },
+    {
+      "name": "PromptBase",
+      "url": "https://promptbase.com/",
+      "usage": "Paid prompt card and pack commerce pattern reference"
+    },
+    {
+      "name": "AIPRM Private Prompts",
+      "url": "https://www.aiprm.com/en-gb/features/private-team-prompts/",
+      "usage": "Private reuse and team prompt organization reference"
+    }
+  ],
+  "suggestions": [
+    {
+      "id": "trend-commerce-video-hooks",
+      "keyword": "电商短视频开头钩子",
+      "theme": "用 3 秒开场、痛点对比和产品场景快速提高完播率。",
+      "intent": "video-commerce",
+      "priority": 95,
+      "suggestedFilters": [
+        "视频",
+        "电商",
+        "口播",
+        "分镜"
+      ],
+      "notes": "生成自写提示词时只借鉴结构：开场冲突、使用场景、卖点验证、行动指令。"
+    },
+    {
+      "id": "trend-product-visual-consistency",
+      "keyword": "商品图多角度一致性",
+      "theme": "统一产品外观、材质、灯光和构图，适合详情页和广告组图。",
+      "intent": "image-product",
+      "priority": 90,
+      "suggestedFilters": [
+        "图像",
+        "产品",
+        "摄影",
+        "一致性"
+      ],
+      "notes": "重点沉淀变量：产品材质、镜头角度、光源、背景、禁用变形。"
+    },
+    {
+      "id": "trend-ai-video-character-continuity",
+      "keyword": "AI 视频角色一致性",
+      "theme": "控制角色脸部、服装、动作和镜头衔接，减少生成视频跳变。",
+      "intent": "video-character",
+      "priority": 88,
+      "suggestedFilters": [
+        "视频",
+        "角色一致性",
+        "分镜",
+        "连续剧情"
+      ],
+      "notes": "建议写成可复用检查清单，不复制外站提示词原文。"
+    },
+    {
+      "id": "trend-audio-brand-voice",
+      "keyword": "品牌声音与口播音色",
+      "theme": "为短视频、电商广告和播客片头建立稳定声音设定。",
+      "intent": "audio-brand",
+      "priority": 76,
+      "suggestedFilters": [
+        "音频",
+        "口播",
+        "品牌",
+        "广告"
+      ],
+      "notes": "关注语速、情绪、停顿、禁用词和交付格式。"
+    }
+  ]
+}

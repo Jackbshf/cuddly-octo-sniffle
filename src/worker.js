@@ -5,6 +5,10 @@ const PROMPT_ADMIN_LOGIN_PATH = "/prompts/admin/login";
 const PROMPTS_API_PREFIX = "/api/prompts";
 const PROMPTS_DATA_PREFIX = "/prompts-data";
 const PROMPT_LIBRARY_PATH = "prompts-data/library.json";
+const PROMPT_ENTITLEMENT_COOKIE_NAME = "prompt_commerce_entitlement";
+const PROMPT_ENTITLEMENT_TTL_SECONDS = 60 * 60 * 24 * 30;
+const STRIPE_API_BASE = "https://api.stripe.com/v1";
+const STRIPE_API_VERSION = "2026-02-25.clover";
 
 const PORTFOLIO_ADMIN_PREFIX = "/admin";
 const PORTFOLIO_ADMIN_LOGIN_PATH = "/admin/login";
@@ -195,10 +199,7 @@ async function handlePortfolioAdminPage(request, env, url) {
 async function handlePromptsApi(request, env, url) {
   if (url.pathname === `${PROMPTS_API_PREFIX}/library`) {
     if (request.method === "GET") {
-      const assetUrl = new URL(url);
-      assetUrl.pathname = `/${PROMPT_LIBRARY_PATH}`;
-      const response = await env.ASSETS.fetch(new Request(assetUrl, request));
-      return withNoStore(response);
+      return readPromptLibrary(request, env);
     }
 
     if (request.method === "POST") {
@@ -209,6 +210,26 @@ async function handlePromptsApi(request, env, url) {
 
       return savePromptLibrary(request, env);
     }
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/entitlement` && request.method === "GET") {
+    return readPromptEntitlement(request, env);
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/checkout` && request.method === "POST") {
+    return createPromptCheckoutSession(request, env);
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/checkout/confirm` && request.method === "GET") {
+    return confirmPromptCheckoutSession(request, env, url);
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/customer-portal` && request.method === "POST") {
+    return createPromptCustomerPortalSession(request, env, url);
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/stripe-webhook` && request.method === "POST") {
+    return handlePromptStripeWebhook(request, env);
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/assets` && request.method === "POST") {
@@ -325,8 +346,179 @@ async function handleProtectedPromptDataAsset(request, env) {
     return textResponse("Method not allowed.", 405, { Allow: "GET, HEAD" });
   }
 
+  const url = new URL(request.url);
+  if (url.pathname.replace(/^\/+/, "") === PROMPT_LIBRARY_PATH) {
+    return readPromptLibrary(request, env);
+  }
+
   const response = await env.ASSETS.fetch(request);
   return withNoStore(response);
+}
+
+async function readPromptLibrary(request, env) {
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = `/${PROMPT_LIBRARY_PATH}`;
+  const response = await env.ASSETS.fetch(new Request(assetUrl, request));
+  if (!response.ok) return withNoStore(response);
+
+  let library;
+  try {
+    library = await response.json();
+  } catch {
+    return jsonResponse({ ok: false, error: "Prompt library JSON is invalid." }, 502);
+  }
+
+  const auth = await getPromptAuthState(request, env);
+  if (auth.admin) return jsonResponse(library);
+
+  const entitlement = await getPromptEntitlementState(request, env);
+  return jsonResponse(redactPromptLibrary(library, entitlement));
+}
+
+function redactPromptLibrary(library, entitlement) {
+  const source = library && typeof library === "object" ? library : {};
+  return {
+    ...source,
+    prompts: asArray(source.prompts).map((prompt) => redactPromptForAccess(prompt, entitlement))
+  };
+}
+
+function redactPromptForAccess(prompt, entitlement) {
+  const source = prompt && typeof prompt === "object" ? prompt : {};
+  if (isPromptUnlocked(source, entitlement)) return source;
+  return {
+    ...source,
+    body: "",
+    bodyRedacted: true,
+    lockedReason: source.access === "pack" ? "pack" : "pro"
+  };
+}
+
+function isPromptUnlocked(prompt, entitlement) {
+  const access = cleanPromptAccess(prompt?.access);
+  if (access === "free") return true;
+  if (entitlement?.pro) return true;
+  return access === "pack" && entitlement?.packs?.includes(cleanText(prompt?.packId));
+}
+
+async function readPromptEntitlement(request, env) {
+  const entitlement = await getPromptEntitlementState(request, env);
+  return jsonResponse({
+    pro: entitlement.pro,
+    packs: entitlement.packs,
+    customer: entitlement.customer || "",
+    email: entitlement.email || "",
+    source: entitlement.source || "none"
+  });
+}
+
+async function createPromptCheckoutSession(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse({ ok: false, error: "Invalid JSON payload." }, 400);
+  }
+
+  const stripeSecret = env.STRIPE_SECRET_KEY;
+  if (!stripeSecret) return promptCommerceConfigError("STRIPE_SECRET_KEY is not configured.");
+
+  const productType = cleanText(payload?.productType || payload?.type).toLowerCase();
+  const packId = cleanText(payload?.packId);
+  const mode = productType === "pro" || productType === "subscription" ? "subscription" : "payment";
+  const priceId = mode === "subscription"
+    ? cleanText(env.PROMPTS_STRIPE_PRICE_PRO_MONTHLY)
+    : getPromptPackStripePriceId(env, packId);
+
+  if (!priceId) {
+    return promptCommerceConfigError(mode === "subscription"
+      ? "PROMPTS_STRIPE_PRICE_PRO_MONTHLY is not configured."
+      : `Stripe price is not configured for pack ${packId || "(missing)"}.`);
+  }
+
+  const origin = new URL(request.url).origin;
+  const form = new URLSearchParams();
+  form.set("mode", mode);
+  form.set("line_items[0][price]", priceId);
+  form.set("line_items[0][quantity]", "1");
+  form.set("success_url", `${origin}${PROMPTS_PREFIX}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
+  form.set("cancel_url", `${origin}${PROMPTS_PREFIX}/?checkout=cancelled`);
+  form.set("allow_promotion_codes", "true");
+  form.set("metadata[product_type]", mode === "subscription" ? "pro" : "pack");
+  if (packId) form.set("metadata[pack_id]", packId);
+
+  try {
+    const session = await stripeRequest(env, "/checkout/sessions", { method: "POST", body: form });
+    return jsonResponse({ ok: true, checkoutUrl: session.url, sessionId: session.id });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Stripe checkout session creation failed." }, 502);
+  }
+}
+
+async function confirmPromptCheckoutSession(request, env, url) {
+  if (!env.STRIPE_SECRET_KEY) return promptCommerceConfigError("STRIPE_SECRET_KEY is not configured.");
+  if (!env.PROMPT_ENTITLEMENT_SECRET) return promptCommerceConfigError("PROMPT_ENTITLEMENT_SECRET is not configured.");
+  if (!env.PROMPT_ENTITLEMENTS) return promptCommerceConfigError("PROMPT_ENTITLEMENTS KV binding is not configured.");
+
+  const sessionId = cleanText(url.searchParams.get("session_id"));
+  if (!sessionId) return jsonResponse({ ok: false, error: "session_id is required." }, 400);
+
+  try {
+    const session = await stripeRequest(env, `/checkout/sessions/${encodeURIComponent(sessionId)}`);
+    const entitlement = entitlementFromCheckoutSession(session);
+    if (!entitlement.customer) {
+      return jsonResponse({ ok: false, error: "Checkout session does not include a customer id." }, 400);
+    }
+    const stored = await mergePromptEntitlement(env, entitlement);
+    const cookie = await createPromptEntitlementCookie(request, stored, env.PROMPT_ENTITLEMENT_SECRET);
+    return jsonResponse({ ok: true, entitlement: stored }, 200, { "Set-Cookie": cookie });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Stripe checkout confirmation failed." }, 502);
+  }
+}
+
+async function createPromptCustomerPortalSession(request, env, url) {
+  if (!env.STRIPE_SECRET_KEY) return promptCommerceConfigError("STRIPE_SECRET_KEY is not configured.");
+  const entitlement = await getPromptEntitlementState(request, env);
+  if (!entitlement.customer) return jsonResponse({ ok: false, error: "No Stripe customer entitlement is active." }, 403);
+
+  const form = new URLSearchParams();
+  form.set("customer", entitlement.customer);
+  form.set("return_url", `${url.origin}${PROMPTS_PREFIX}/`);
+
+  try {
+    const session = await stripeRequest(env, "/billing_portal/sessions", { method: "POST", body: form });
+    return jsonResponse({ ok: true, url: session.url });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Stripe Customer Portal session creation failed." }, 502);
+  }
+}
+
+async function handlePromptStripeWebhook(request, env) {
+  if (!env.STRIPE_WEBHOOK_SECRET) return promptCommerceConfigError("STRIPE_WEBHOOK_SECRET is not configured.");
+  if (!env.PROMPT_ENTITLEMENTS) return promptCommerceConfigError("PROMPT_ENTITLEMENTS KV binding is not configured.");
+
+  const body = await request.text();
+  const signatureHeader = request.headers.get("Stripe-Signature") || "";
+  const verified = await verifyStripeWebhookSignature(body, signatureHeader, env.STRIPE_WEBHOOK_SECRET);
+  if (!verified) return jsonResponse({ ok: false, error: "Invalid Stripe webhook signature." }, 400);
+
+  let event;
+  try {
+    event = JSON.parse(body);
+  } catch {
+    return jsonResponse({ ok: false, error: "Invalid Stripe event JSON." }, 400);
+  }
+
+  try {
+    const entitlement = entitlementFromStripeEvent(event);
+    if (entitlement?.customer) {
+      await mergePromptEntitlement(env, entitlement);
+    }
+    return jsonResponse({ ok: true, received: true });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || "Stripe webhook handling failed." }, 502);
+  }
 }
 
 async function savePromptLibrary(request, env) {
@@ -1307,6 +1499,233 @@ async function signAuthValue(value, secret) {
   return base64Url(signature);
 }
 
+function promptCommerceConfigError(error) {
+  return jsonResponse({
+    ok: false,
+    error,
+    setupRequired: true
+  }, 503);
+}
+
+function cleanPromptAccess(value) {
+  const access = cleanText(value).toLowerCase();
+  return ["free", "pro", "pack"].includes(access) ? access : "free";
+}
+
+function getPromptPackStripePriceId(env, packId) {
+  const id = cleanText(packId);
+  if (!id) return "";
+
+  try {
+    const map = JSON.parse(cleanText(env.PROMPTS_STRIPE_PACK_PRICE_MAP) || "{}");
+    if (map && typeof map === "object" && cleanText(map[id])) return cleanText(map[id]);
+  } catch {
+    // Ignore invalid optional map and fall through to explicit env names.
+  }
+
+  const normalized = id.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  const candidates = [
+    `PROMPTS_STRIPE_PRICE_PACK_${normalized}`,
+    `PROMPTS_STRIPE_PRICE_PACK_${normalized.replace(/_PRO$/, "")}`
+  ];
+  for (const key of candidates) {
+    if (cleanText(env[key])) return cleanText(env[key]);
+  }
+  return "";
+}
+
+async function stripeRequest(env, path, init = {}) {
+  const response = await fetch(`${STRIPE_API_BASE}${path}`, {
+    method: init.method || "GET",
+    headers: {
+      Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+      "Stripe-Version": STRIPE_API_VERSION,
+      ...(init.body ? { "Content-Type": "application/x-www-form-urlencoded" } : {})
+    },
+    body: init.body
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.error?.message || `Stripe request failed with HTTP ${response.status}`);
+  }
+  return data;
+}
+
+function entitlementFromCheckoutSession(session) {
+  const metadata = session?.metadata || {};
+  const productType = cleanText(metadata.product_type).toLowerCase();
+  const packId = cleanText(metadata.pack_id);
+  const isPaid = ["paid", "no_payment_required"].includes(cleanText(session?.payment_status));
+  const isComplete = cleanText(session?.status) === "complete";
+  const isSubscription = cleanText(session?.mode) === "subscription" || productType === "pro";
+
+  if (!isComplete && !isPaid) {
+    throw new Error("Checkout session is not complete.");
+  }
+
+  return normalizePromptEntitlement({
+    pro: isSubscription,
+    packs: !isSubscription && packId ? [packId] : [],
+    customer: cleanText(session?.customer),
+    email: cleanText(session?.customer_details?.email || session?.customer_email),
+    subscriptionId: cleanText(session?.subscription),
+    latestSessionId: cleanText(session?.id),
+    status: isSubscription ? "active" : "paid",
+    source: "stripe-checkout",
+    updatedAt: new Date().toISOString()
+  });
+}
+
+function entitlementFromStripeEvent(event) {
+  const type = cleanText(event?.type);
+  const object = event?.data?.object || {};
+
+  if (type === "checkout.session.completed") {
+    return entitlementFromCheckoutSession(object);
+  }
+
+  if (type.startsWith("customer.subscription.")) {
+    const active = ["active", "trialing"].includes(cleanText(object.status));
+    return normalizePromptEntitlement({
+      pro: active,
+      packs: [],
+      customer: cleanText(object.customer),
+      subscriptionId: cleanText(object.id),
+      status: cleanText(object.status),
+      source: "stripe-subscription",
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  return null;
+}
+
+function normalizePromptEntitlement(value = {}) {
+  const packs = [...new Set(asArray(value.packs).map(cleanText).filter(Boolean))];
+  return {
+    pro: Boolean(value.pro),
+    packs,
+    customer: cleanText(value.customer),
+    email: cleanText(value.email),
+    subscriptionId: cleanText(value.subscriptionId),
+    latestSessionId: cleanText(value.latestSessionId),
+    status: cleanText(value.status),
+    source: cleanText(value.source),
+    updatedAt: cleanText(value.updatedAt) || new Date().toISOString()
+  };
+}
+
+async function mergePromptEntitlement(env, entitlement) {
+  const next = normalizePromptEntitlement(entitlement);
+  const existing = next.customer
+    ? normalizePromptEntitlement(await env.PROMPT_ENTITLEMENTS.get(`entitlement:customer:${next.customer}`, "json").catch(() => null) || {})
+    : normalizePromptEntitlement();
+
+  const merged = normalizePromptEntitlement({
+    ...existing,
+    ...next,
+    pro: next.pro || (next.source !== "stripe-subscription" && existing.pro),
+    packs: [...existing.packs, ...next.packs],
+    email: next.email || existing.email
+  });
+
+  const ttl = PROMPT_ENTITLEMENT_TTL_SECONDS * 13;
+  if (merged.customer) {
+    await env.PROMPT_ENTITLEMENTS.put(`entitlement:customer:${merged.customer}`, JSON.stringify(merged), { expirationTtl: ttl });
+  }
+  if (merged.email) {
+    await env.PROMPT_ENTITLEMENTS.put(`entitlement:email:${merged.email.toLowerCase()}`, JSON.stringify(merged), { expirationTtl: ttl });
+  }
+  if (merged.latestSessionId) {
+    await env.PROMPT_ENTITLEMENTS.put(`order:session:${merged.latestSessionId}`, JSON.stringify(merged), { expirationTtl: ttl });
+  }
+  return merged;
+}
+
+async function getPromptEntitlementState(request, env) {
+  const cookieEntitlement = await readPromptEntitlementCookie(request, env.PROMPT_ENTITLEMENT_SECRET);
+  if (!cookieEntitlement?.customer) return normalizePromptEntitlement();
+  if (!env.PROMPT_ENTITLEMENTS) return { ...cookieEntitlement, source: "signed-cookie" };
+
+  const stored = await env.PROMPT_ENTITLEMENTS
+    .get(`entitlement:customer:${cookieEntitlement.customer}`, "json")
+    .catch(() => null);
+  return normalizePromptEntitlement({
+    ...cookieEntitlement,
+    ...(stored || {}),
+    source: stored ? "kv" : "signed-cookie"
+  });
+}
+
+async function createPromptEntitlementCookie(request, entitlement, secret) {
+  const expiresAt = Math.floor(Date.now() / 1000) + PROMPT_ENTITLEMENT_TTL_SECONDS;
+  const payload = base64Url(encoder.encode(JSON.stringify({
+    customer: entitlement.customer,
+    email: entitlement.email,
+    packs: entitlement.packs,
+    pro: entitlement.pro,
+    expiresAt
+  })));
+  const signature = await signAuthValue(payload, secret);
+  return [
+    `${PROMPT_ENTITLEMENT_COOKIE_NAME}=${payload}.${signature}`,
+    `Max-Age=${PROMPT_ENTITLEMENT_TTL_SECONDS}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    new URL(request.url).protocol === "https:" ? "Secure" : ""
+  ].filter(Boolean).join("; ");
+}
+
+async function readPromptEntitlementCookie(request, secret) {
+  if (!secret) return null;
+  const cookieHeader = request.headers.get("Cookie") || "";
+  const cookie = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${PROMPT_ENTITLEMENT_COOKIE_NAME}=`));
+  if (!cookie) return null;
+
+  const [payload, signature] = cookie.slice(PROMPT_ENTITLEMENT_COOKIE_NAME.length + 1).split(".");
+  if (!payload || !signature) return null;
+  const expected = await signAuthValue(payload, secret);
+  if (!constantTimeEqual(signature, expected)) return null;
+
+  try {
+    const parsed = JSON.parse(utf8FromBase64Url(payload));
+    if (Number(parsed.expiresAt || 0) <= Math.floor(Date.now() / 1000)) return null;
+    return normalizePromptEntitlement(parsed);
+  } catch {
+    return null;
+  }
+}
+
+async function verifyStripeWebhookSignature(body, signatureHeader, secret) {
+  const parts = Object.fromEntries(signatureHeader.split(",").map((part) => {
+    const [key, value] = part.split("=");
+    return [key, value];
+  }));
+  const timestamp = cleanText(parts.t);
+  const signatures = signatureHeader
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.startsWith("v1="))
+    .map((part) => part.slice(3));
+  if (!timestamp || !signatures.length) return false;
+
+  const signedPayload = `${timestamp}.${body}`;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const digest = await crypto.subtle.sign("HMAC", key, encoder.encode(signedPayload));
+  const expected = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return signatures.some((signature) => constantTimeEqual(signature, expected));
+}
+
 function normalizeLibrary(raw) {
   const now = formatLocalTimestamp(new Date());
   const prompts = asArray(raw?.prompts).map((prompt) => ({
@@ -1321,7 +1740,15 @@ function normalizeLibrary(raw) {
     source: cleanText(prompt?.source) || "Manual",
     createdAt: cleanText(prompt?.createdAt) || now,
     updatedAt: cleanText(prompt?.updatedAt) || now,
-    archived: Boolean(prompt?.archived)
+    archived: Boolean(prompt?.archived),
+    access: cleanPromptAccess(prompt?.access),
+    packId: cleanText(prompt?.packId),
+    stripePriceId: cleanText(prompt?.stripePriceId),
+    qualityScore: Math.max(1, Math.min(100, cleanNumber(prompt?.qualityScore) || 60)),
+    exampleOutput: cleanText(prompt?.exampleOutput),
+    sourceType: cleanText(prompt?.sourceType) || "curated",
+    verifiedAt: cleanText(prompt?.verifiedAt || prompt?.updatedAt || prompt?.createdAt) || now,
+    seoKeywords: cleanTextArray(prompt?.seoKeywords)
   }));
   const promptIds = new Set(prompts.map((prompt) => prompt.id));
   const assets = asArray(raw?.assets).map((asset) => ({
@@ -2142,6 +2569,11 @@ function utf8FromBase64(value) {
   return decoder.decode(bytes);
 }
 
+function utf8FromBase64Url(value) {
+  const padded = String(value || "").replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(String(value || "").length / 4) * 4, "=");
+  return utf8FromBase64(padded);
+}
+
 function constantTimeEqual(left, right) {
   const a = encoder.encode(String(left || ""));
   const b = encoder.encode(String(right || ""));
@@ -2297,10 +2729,10 @@ function renderLoginPage({ mode, hasError, status = 200 }) {
   });
 }
 
-function jsonResponse(payload, status = 200) {
+function jsonResponse(payload, status = 200, headers = {}) {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: noStoreHeaders({ "Content-Type": "application/json; charset=utf-8" })
+    headers: noStoreHeaders({ "Content-Type": "application/json; charset=utf-8", ...headers })
   });
 }
 

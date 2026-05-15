@@ -3,499 +3,333 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AI 提示词工作台</title>
+  <title>AI 提示词搜索工作台</title>
   <style>
-    :root{--bg:#f5f6f3;--panel:#fff;--soft:#eef4f1;--soft2:#f8fbfa;--text:#202421;--muted:#657067;--border:#d8dfda;--accent:#0f766e;--accent2:#0b5f59;--warn:#b45309;--danger:#b91c1c;--ok:#15803d;--shadow:0 10px 26px rgba(22,31,27,.08);--r:8px}
+    :root{
+      --bg:#0b1017;--bg2:#101722;--panel:#151c27;--panel2:#101722;--line:#2a3545;
+      --text:#f5f7fb;--muted:#9aa7b8;--soft:#c6d0dd;--accent:#ff8a2a;--accent2:#33c7a5;
+      --pro:#ffd166;--danger:#ff6b7d;--ok:#7bd88f;--shadow:0 24px 80px rgba(0,0,0,.32);--r:8px
+    }
     *{box-sizing:border-box}
-    html,body{overflow-x:hidden}
-    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;line-height:1.55}
-    img{max-width:100%}
+    html,body{margin:0;min-height:100%;overflow-x:hidden}
+    body{
+      color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.55;background:
+        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),
+        linear-gradient(180deg,rgba(255,255,255,.026) 1px,transparent 1px),
+        linear-gradient(180deg,#0f1622 0%,#0b1017 52%,#090d13 100%);
+      background-size:64px 64px,64px 64px,auto
+    }
     [hidden]{display:none!important}
-    header{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--border);background:rgba(245,246,243,.94);backdrop-filter:blur(12px)}
-    .top{max-width:1460px;margin:auto;padding:16px 24px 12px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}
-    h1{margin:0 0 4px;font-size:24px;line-height:1.2}
-    .sub{margin:0;color:var(--muted);font-size:13px}
-    .mode{display:inline-flex;margin-left:8px;vertical-align:middle}
-    .tabs,.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    button,.buttonlike{min-height:38px;border:1px solid var(--border);border-radius:var(--r);background:var(--panel);color:var(--text);padding:7px 11px;font:13px inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-    button:hover,.buttonlike:hover{border-color:var(--accent);color:var(--accent)}
-    button:disabled{cursor:not-allowed;opacity:.55}
-    .primary,.tab.active{border-color:var(--accent);background:var(--accent);color:#fff}
-    .primary:hover,.tab.active:hover{background:var(--accent2);color:#fff}
-    .danger{border-color:rgba(185,28,28,.35);color:var(--danger)}
-    .warn{border-color:rgba(180,83,9,.35);color:var(--warn)}
-    main{max-width:1460px;margin:auto;padding:20px 24px 44px;display:grid;grid-template-columns:290px 1fr;gap:20px;align-items:start}
-    aside,.card,.panel,.asset-toolbar,.batchbar,.importer{border:1px solid var(--border);border-radius:var(--r);background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
-    aside{position:sticky;top:88px}
-    .ah{padding:13px 14px 10px;border-bottom:1px solid var(--border);background:var(--soft);font-weight:700;display:flex;justify-content:space-between;gap:10px}
-    .filters{padding:10px;display:grid;gap:10px}
-    input,textarea,select{width:100%;border:1px solid var(--border);border-radius:var(--r);background:#fff;color:var(--text);padding:9px 10px;font:14px inherit;outline:none}
-    textarea{min-height:120px;resize:vertical;line-height:1.6}
-    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,118,110,.14)}
-    .cat{width:100%;display:flex;justify-content:space-between;gap:8px;text-align:left;border-color:transparent;background:transparent}
-    .cat.active{background:rgba(15,118,110,.1);color:var(--accent);border-color:rgba(15,118,110,.28)}
-    .pill{min-width:26px;height:22px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#eef0ee;color:var(--muted);font-size:12px}
-    .notice{margin:0 10px 12px;padding:10px;border:1px solid rgba(15,118,110,.2);border-radius:var(--r);color:#25534e;background:var(--soft2);font-size:12px}
-    .notice.warn{border-color:rgba(180,83,9,.25);color:#7c2d12;background:#fff7ed}
-    .head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
-    .head h2{margin:0;font-size:18px}
-    .grid{display:grid;gap:12px}
-    .card-main{padding:16px}
-    .card-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-    .title{margin:0 0 8px;font-size:18px;line-height:1.35}
-    .meta,.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .meta{margin:0 0 10px;color:var(--muted);font-size:12px}
-    .badge{display:inline-flex;align-items:center;min-height:24px;border:1px solid var(--border);border-radius:999px;padding:2px 8px;background:#f7f8f6;color:var(--muted);font-size:12px;max-width:100%}
-    .badge.catb{border-color:rgba(15,118,110,.24);color:var(--accent);background:rgba(15,118,110,.08)}
-    .badge.st{border-color:rgba(180,83,9,.25);color:#7c4a03;background:#fffbeb}
-    .badge.dirty{border-color:rgba(180,83,9,.32);color:#7c2d12;background:#fff7ed}
-    .health-ok{border-color:rgba(21,128,61,.3);color:var(--ok);background:#f0fdf4}
-    .health-pending{border-color:rgba(180,83,9,.28);color:var(--warn);background:#fffbeb}
-    .health-broken{border-color:rgba(185,28,28,.28);color:var(--danger);background:#fef2f2}
-    .health-local{border-color:rgba(15,118,110,.26);color:var(--accent);background:#ecfeff}
-    .summary{margin:0 0 12px;color:#353936;font-size:14px}
-    .label{margin:12px 0 6px;color:var(--muted);font-size:12px;font-weight:700}
-    details.prompt-body{border-top:1px solid var(--border);background:#fbfcfb}
-    details.prompt-body summary{padding:12px 16px;cursor:pointer;color:var(--accent);font-weight:700;font-size:13px}
-    pre{margin:0;padding:0 16px 16px;max-height:68vh;overflow:auto;white-space:pre-wrap;word-break:break-word;font:13px/1.72 "Microsoft YaHei",Arial,sans-serif}
-    code,.path-text{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
-    .empty{padding:30px;border:1px dashed var(--border);border-radius:var(--r);background:#fff;color:var(--muted);text-align:center}
-    .prompt-workbench{margin-bottom:12px;border:1px solid var(--border);border-radius:var(--r);background:#fff;box-shadow:var(--shadow);padding:12px;display:grid;gap:12px}
-    .prompt-workbench-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .prompt-workbench-title{font-size:12px;font-weight:800;color:var(--muted)}
-    .prompt-workbench .active{border-color:var(--accent);background:rgba(15,118,110,.1);color:var(--accent)}
-    .tool-shortcuts{display:flex;gap:8px;flex-wrap:wrap}
-    .tool-shortcuts button{min-height:34px}
-    .prompt-use-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .prompt-run-vars{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .prompt-run-preview{min-height:240px;font-family:"Microsoft YaHei",Arial,sans-serif}
-    .load-more{margin-top:12px;padding:14px;border:1px solid var(--border);border-radius:var(--r);background:#fff;display:flex;justify-content:space-between;gap:12px;align-items:center;box-shadow:var(--shadow)}
-    .load-more span{color:var(--muted);font-size:13px}
-    .load-more button{min-width:128px}
-    .importer{border-style:dashed;border-color:rgba(15,118,110,.45);background:var(--soft2);padding:16px;margin-bottom:12px;display:grid;gap:10px}
-    .importer.drag{background:#e8f4f2;border-color:var(--accent)}
-    .import-title{font-weight:800}
-    .import-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .import-note,.import-result{color:var(--muted);font-size:13px}
-    .import-result strong{color:#25534e}
-    .asset-filter-panel,.prompt-filter-panel{border-top:1px solid var(--border);padding-top:10px;display:grid;gap:10px}
-    .filter-title{font-size:12px;font-weight:800;color:var(--muted)}
-    .asset-toolbar{padding:12px;margin-bottom:12px;display:grid;gap:12px}
-    .asset-overview{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:8px}
-    .mini-stat{border:1px solid var(--border);border-radius:var(--r);background:#fbfcfb;padding:10px;min-width:0}
-    .mini-stat strong{display:block;font-size:18px;line-height:1.2}
-    .mini-stat span{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .batchbar{padding:12px;margin-bottom:12px;display:grid;gap:10px;background:#fff}
-    .batch-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .batch-row .batch-input{max-width:220px}
-    .asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(286px,1fr));gap:12px}
-    .asset-card{display:grid;grid-template-rows:190px auto}
-    .asset-card.selected{outline:2px solid rgba(15,118,110,.38);outline-offset:2px}
-    .asset-thumb{position:relative;background:#eef0ee;border-bottom:1px solid var(--border);overflow:hidden;color:var(--muted)}
-    .thumb-button{width:100%;height:100%;min-height:0;border:0;border-radius:0;background:transparent;padding:0;display:block}
-    .thumb-button:hover{background:#e8ece8}
-    .thumb-button img{width:100%;height:100%;object-fit:cover;display:block}
-    .preview-missing,.preview-error{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:var(--muted);font-size:13px}
-    .asset-check{position:absolute;left:8px;top:8px;z-index:2;display:inline-flex;gap:6px;align-items:center;border:1px solid rgba(255,255,255,.7);border-radius:999px;background:rgba(255,255,255,.9);padding:5px 8px;font-size:12px;color:var(--text)}
-    .asset-check input{width:16px;height:16px;min-height:0;padding:0}
-    .asset-health{position:absolute;right:8px;top:8px;z-index:2;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-    .asset-title-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .asset-title-row .title{font-size:16px}
-    .asset-path{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .asset-card-actions{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:start;margin-top:12px}
-    .asset-more{position:relative}
-    .asset-more summary{list-style:none}
-    .asset-more summary::-webkit-details-marker{display:none}
-    .menu-summary{min-height:38px;border:1px solid var(--border);border-radius:var(--r);background:#fff;padding:7px 11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px}
-    .asset-more[open] .menu-summary{border-color:var(--accent);color:var(--accent)}
-    .menu-panel{position:absolute;right:0;top:44px;z-index:12;width:210px;border:1px solid var(--border);border-radius:var(--r);background:#fff;box-shadow:0 16px 44px rgba(22,31,27,.16);padding:8px;display:grid;gap:6px}
-    .menu-panel button{width:100%;justify-content:flex-start}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .full{grid-column:1/-1}
-    label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:700}
-    dialog{width:min(900px,calc(100vw - 28px));max-height:calc(100vh - 28px);border:1px solid var(--border);border-radius:var(--r);padding:0;box-shadow:0 24px 80px rgba(22,31,27,.24)}
-    dialog::backdrop{background:rgba(20,25,22,.42)}
-    .dh,.df{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--soft)}
+    button,input,textarea,select{font:inherit}
+    button,.buttonlike{
+      min-height:40px;border:1px solid var(--line);border-radius:var(--r);background:#111925;color:var(--text);
+      padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;cursor:pointer;
+      transition:background .16s ease,border-color .16s ease,transform .16s ease,color .16s ease
+    }
+    button:hover,.buttonlike:hover{border-color:rgba(255,138,42,.72);background:#172130;transform:translateY(-1px)}
+    button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .primary{border-color:transparent;background:linear-gradient(135deg,var(--accent),#ff5d3f);color:#fff;font-weight:800}
+    .quiet{background:transparent}
+    .danger{border-color:rgba(255,107,125,.34);color:#ff9baa}
+    input,textarea,select{
+      width:100%;border:1px solid var(--line);border-radius:var(--r);background:#0d1420;color:var(--text);
+      min-height:42px;padding:10px 12px;outline:none
+    }
+    textarea{resize:vertical;min-height:110px}
+    input:focus,textarea:focus,select:focus{border-color:rgba(255,138,42,.78);box-shadow:0 0 0 3px rgba(255,138,42,.14)}
+    header{position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(11,16,23,.88);backdrop-filter:blur(14px)}
+    .top{max-width:1440px;margin:auto;padding:14px 22px;display:flex;justify-content:space-between;gap:16px;align-items:center}
+    .brand{min-width:0}
+    .brand h1{margin:0;font-size:20px;line-height:1.2;letter-spacing:0}
+    .brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    main{max-width:1440px;margin:auto;padding:24px 22px 56px}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:stretch;margin-bottom:18px}
+    .search-panel,.side-panel,.filter-panel,.result-panel,.pack-card,.prompt-card,.suggestion-card,.admin-panel,dialog{
+      border:1px solid rgba(255,255,255,.09);border-radius:var(--r);background:rgba(21,28,39,.94);box-shadow:var(--shadow)
+    }
+    .search-panel{padding:26px;min-height:300px;display:grid;align-content:center;gap:18px}
+    .search-copy{max-width:820px}
+    .search-copy h2{margin:0;font-size:42px;line-height:1.06;letter-spacing:0;color:#fff}
+    .search-copy p{margin:12px 0 0;color:#c8d2df;font-size:16px;max-width:760px}
+    .search-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
+    .search-row input{min-height:58px;border-radius:var(--r);font-size:17px;background:#090f17}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .chip,.badge{
+      display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:26px;border:1px solid var(--line);
+      border-radius:999px;background:#101722;color:#cbd5e1;padding:4px 9px;font-size:12px;max-width:100%
+    }
+    .chip{cursor:pointer}
+    .chip:hover,.chip.active{border-color:rgba(51,199,165,.55);color:#d7fff5;background:rgba(51,199,165,.1)}
+    .badge.pro{border-color:rgba(255,209,102,.42);background:rgba(255,209,102,.12);color:#ffe5a3}
+    .badge.free{border-color:rgba(123,216,143,.38);background:rgba(123,216,143,.1);color:#c7f8cf}
+    .badge.pack{border-color:rgba(255,138,42,.44);background:rgba(255,138,42,.12);color:#ffd1ad}
+    .side-panel{padding:18px;display:grid;gap:14px}
+    .side-panel h3,.filter-panel h3,.result-title h3,.admin-panel h3{margin:0;font-size:15px}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .metric{border:1px solid var(--line);border-radius:var(--r);padding:12px;background:#101722}
+    .metric strong{display:block;font-size:22px;line-height:1.1}
+    .metric span{color:var(--muted);font-size:12px}
+    .workspace{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
+    .filter-panel{position:sticky;top:86px;padding:16px;display:grid;gap:12px}
+    .field{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:800}
+    .result-panel{padding:18px;min-height:420px}
+    .result-title{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}
+    .result-title p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:14px}
+    .prompt-card{position:relative;padding:16px;display:grid;gap:12px;min-height:270px;box-shadow:none;cursor:pointer}
+    .prompt-card:hover{border-color:#40506a;background:#192231}
+    .prompt-top{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;align-items:start}
+    .prompt-icon{width:42px;height:42px;border-radius:var(--r);border:1px solid rgba(255,138,42,.38);background:rgba(255,138,42,.12);display:grid;place-items:center;color:#ffbd7d;font-weight:900}
+    .prompt-card h3{margin:0;font-size:17px;line-height:1.34}
+    .summary{margin:0;color:#b7c3d3;font-size:13px;line-height:1.65}
+    .meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+    .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+    .landing{display:grid;gap:18px}
+    .landing-section{display:grid;gap:12px}
+    .landing-head{display:flex;justify-content:space-between;gap:12px;align-items:end}
+    .landing-head h3{margin:0;font-size:18px}
+    .landing-head p{margin:0;color:var(--muted);font-size:13px}
+    .pack-card{padding:16px;display:grid;gap:12px;box-shadow:none}
+    .pack-card h4{margin:0;font-size:17px}
+    .pack-card p{margin:0;color:#b7c3d3;font-size:13px}
+    .suggestion-card{padding:14px;display:grid;gap:10px;box-shadow:none}
+    .suggestion-card h4{margin:0;font-size:15px}
+    .suggestion-card p{margin:0;color:#b7c3d3;font-size:13px}
+    .empty{border:1px dashed var(--line);border-radius:var(--r);padding:34px;text-align:center;color:var(--muted);background:#0f1622}
+    .empty strong{display:block;color:#fff;font-size:18px;margin-bottom:6px}
+    .admin-panel{padding:14px;margin-bottom:14px;display:grid;gap:12px;box-shadow:none;border-color:rgba(51,199,165,.26)}
+    .admin-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    dialog{width:min(980px,calc(100vw - 28px));max-height:calc(100vh - 28px);padding:0;color:var(--text)}
+    dialog::backdrop{background:rgba(3,7,12,.72);backdrop-filter:blur(4px)}
+    .dh,.df{padding:14px 16px;border-bottom:1px solid var(--line);background:#101722;display:flex;justify-content:space-between;gap:10px;align-items:center}
     .dh h3{margin:0;font-size:18px}
     .db{padding:16px;max-height:calc(100vh - 160px);overflow:auto}
-    .df{justify-content:flex-end;border-top:1px solid var(--border);border-bottom:0;background:#fff}
-    .viewer{width:min(1100px,calc(100vw - 28px))}
-    .viewer .db{padding:0;background:#111;text-align:center}
-    .viewer img{max-width:100%;max-height:calc(100vh - 140px);display:block;margin:auto}
-    .detail-layout{display:grid;grid-template-columns:minmax(260px,45%) 1fr;gap:16px}
-    .detail-preview{border:1px solid var(--border);border-radius:var(--r);background:#f0f2ef;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center}
-    .detail-preview img{width:100%;height:100%;max-height:520px;object-fit:contain;background:#111}
-    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .detail-item{border:1px solid var(--border);border-radius:var(--r);background:#fbfcfb;padding:10px;min-width:0}
-    .detail-item span{display:block;color:var(--muted);font-size:12px}
-    .detail-item strong{display:block;margin-top:2px;word-break:break-word}
-    .detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}
-    .stat{border:1px solid var(--border);border-radius:var(--r);background:#fbfcfb;padding:12px}
-    .stat strong{display:block;font-size:22px;line-height:1.2}
-    .stat span{color:var(--muted);font-size:12px}
-    .panel{padding:16px;display:grid;gap:14px}
-    .toast{position:fixed;right:20px;bottom:20px;z-index:50;max-width:min(520px,calc(100vw - 40px));padding:12px 14px;border-radius:var(--r);background:#202421;color:#fff;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.18s;font-size:13px}
+    .df{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .full{grid-column:1/-1}
+    pre{margin:0;white-space:pre-wrap;word-break:break-word;border:1px solid var(--line);border-radius:var(--r);background:#0b1017;padding:14px;color:#e4ebf5;font:13px/1.7 "Microsoft YaHei",Arial,sans-serif;max-height:52vh;overflow:auto}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:80;max-width:min(520px,calc(100vw - 36px));padding:12px 14px;border:1px solid #37455a;border-radius:var(--r);background:#111925;color:#fff;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.16s;pointer-events:none;font-size:13px}
     .toast.show{opacity:1;transform:translateY(0)}
-    @media(max-width:1080px){.asset-overview{grid-template-columns:repeat(3,minmax(110px,1fr))}.detail-layout{grid-template-columns:1fr}}
-    @media(max-width:980px){.top{grid-template-columns:1fr;padding:16px}.tabs{justify-content:flex-start}main{grid-template-columns:1fr;padding:16px}aside{position:static}.head,.card-top{align-items:flex-start;flex-direction:column}.actions,.card-top button{width:100%}.actions button{flex:1}.form-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(120px,1fr))}}
-    @media(max-width:620px){body{min-height:100dvh}header{position:sticky;top:0}.top{gap:10px;padding:max(12px,env(safe-area-inset-top)) 12px 10px}h1{font-size:20px}.sub{font-size:12px}.tabs{display:flex;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto;min-height:44px;padding:8px 12px}main{gap:12px;padding:12px 12px calc(20px + env(safe-area-inset-bottom))}.filters{gap:8px}.filters input,.filters button,input,textarea,select,button,.buttonlike{min-height:44px}.cat{min-height:44px}.head{gap:10px;margin-bottom:10px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;justify-content:stretch}.actions button{width:100%;min-width:0}.card-main{padding:12px}.title{font-size:16px}.card-top .actions{grid-template-columns:1fr}.prompt-workbench{padding:10px}.prompt-workbench-row,.tool-shortcuts{display:grid;grid-template-columns:1fr 1fr}.prompt-workbench-title{grid-column:1/-1}.prompt-run-vars{grid-template-columns:1fr}.load-more{display:grid;grid-template-columns:1fr}.load-more button{width:100%}.asset-overview{grid-template-columns:1fr 1fr}.asset-grid{grid-template-columns:1fr}.asset-card{grid-template-rows:210px auto}.asset-card-actions{grid-template-columns:1fr 1fr}.asset-card-actions .primary{grid-column:1/-1}.menu-panel{position:static;width:100%;margin-top:6px;box-shadow:none}.batch-row{display:grid;grid-template-columns:1fr 1fr;width:100%}.batch-row .batch-input{max-width:none}.stats{grid-template-columns:1fr 1fr}.panel{padding:12px}.panel .actions[style]{grid-template-columns:1fr}.panel input[type=file]{max-width:100%!important}.toast{right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px)}dialog.detail-drawer{width:100vw;max-width:100vw;max-height:92dvh;margin:auto auto 0;border-radius:12px 12px 0 0}.db{max-height:calc(100dvh - 150px);padding:12px}.dh,.df{padding:12px}.df{display:grid;grid-template-columns:1fr 1fr}.viewer img{max-height:calc(100dvh - 130px)}pre{max-height:60dvh}.detail-grid{grid-template-columns:1fr}.detail-actions{display:grid;grid-template-columns:1fr 1fr}.detail-actions button{width:100%}}
-    :root{--bg:#0f1420;--panel:#171c27;--soft:#1d2431;--soft2:#121824;--text:#f5f7fb;--muted:#9aa4b2;--border:#2a3343;--accent:#ff7a1a;--accent2:#ff4d45;--warn:#ffc46b;--danger:#ff6b7d;--ok:#7bd88f;--shadow:0 18px 54px rgba(0,0,0,.24);--r:8px}
-    body{background:#0f1420;color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
-    body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,rgba(255,122,26,.08) 1px,transparent 1px),linear-gradient(180deg,rgba(255,122,26,.06) 1px,transparent 1px),radial-gradient(circle at 9% 8%,rgba(255,122,26,.14),transparent 13rem),radial-gradient(circle at 92% 82%,rgba(255,77,69,.1),transparent 14rem),linear-gradient(180deg,#111827 0%,#0d1320 46%,#090f1a 100%);background-size:360px 360px,360px 360px,auto,auto,auto}
-    header{background:rgba(15,20,32,.88);border-bottom:1px solid #273142;box-shadow:none;backdrop-filter:blur(14px)}
-    .top{max-width:1420px;padding:18px 28px}
-    h1{font-size:24px;font-weight:900;letter-spacing:0}
-    h1,.head h2,.title{text-shadow:none;color:#fff}
-    .sub{color:#aab3c2}
-    .mode{border-color:#344158;background:#111827;color:#e7edf7}
-    main{max-width:1420px;grid-template-columns:288px minmax(0,1fr);gap:24px;padding:32px 28px 58px}
-    aside,.card,.panel,.asset-toolbar,.batchbar,.importer,.prompt-workbench,.load-more,.mini-stat,.stat,.detail-item,dialog{border:1px solid var(--border);background:#171c27;box-shadow:none;backdrop-filter:none}
-    aside{top:96px;border-radius:26px;background:rgba(23,28,39,.92);overflow:hidden}
-    .ah{padding:18px 18px 12px;border-bottom:0;background:transparent;font-size:18px}
-    .filters{padding:12px 16px 18px}
-    input,textarea,select{border-color:#30394a;background:#111722;color:#f7f9fc;border-radius:14px}
-    input:focus,textarea:focus,select:focus{border-color:rgba(255,122,26,.75);box-shadow:0 0 0 3px rgba(255,122,26,.12)}
-    input::placeholder,textarea::placeholder{color:#727d8f}
-    button,.buttonlike{border-color:#30394a;background:#111722;color:#eef2f7;border-radius:14px;font-weight:800;transition:transform .16s ease,border-color .16s ease,background .16s ease,color .16s ease,box-shadow .16s ease}
-    button:hover,.buttonlike:hover{transform:translateY(-1px);border-color:rgba(255,122,26,.65);color:#fff;background:#161d2a;box-shadow:0 12px 30px rgba(0,0,0,.18)}
-    .primary,.tab.active{border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 14px 32px rgba(255,94,31,.22)}
-    .primary:hover,.tab.active:hover{background:linear-gradient(135deg,#ff8c2a,#ff4d45);color:#fff}
-    .tab.active{box-shadow:none}
-    .cat{min-height:42px;border-color:transparent;background:transparent;color:#aeb7c7;border-radius:14px;font-weight:800}
-    .cat:hover{background:#1d2431;box-shadow:none}
-    .cat.active{border-color:#3a2b23;background:rgba(255,122,26,.14);color:#ffc18c}
-    .pill{background:#202938;color:#d6deea;border:1px solid #30394a}
-    .notice{border-color:#30394a;background:#121824;color:#9fa9ba}
-    .hero-panel{position:relative;overflow:hidden;border:1px solid #2d3748;border-radius:28px;background:linear-gradient(135deg,#171f2e,#121824);box-shadow:none;padding:28px 30px;grid-template-columns:minmax(0,1fr) minmax(390px,.68fr);align-items:center}
-    .hero-panel::after{content:"";position:absolute;right:-90px;top:-110px;width:270px;height:270px;border:1px solid rgba(255,122,26,.2);border-radius:50%;pointer-events:none}
-    .hero-panel h2{font-size:42px;color:#ffbd91;text-shadow:none;letter-spacing:0}
-    .hero-panel p{max-width:680px;color:#d8dee8;font-size:16px}
-    .hero-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-    .hero-stat{border-color:#2d3748;background:#121824;border-radius:18px;padding:14px}
-    .hero-stat strong,.hero-stat:last-child strong{font-size:20px;color:#fff}
-    .hero-stat span{color:#a6afbf}
-    .browsebar{border:1px solid #2d3748;border-radius:28px;background:#171c27;box-shadow:none;padding:20px}
-    .searchbox{grid-template-columns:minmax(260px,1fr) auto auto}
-    .source-chip{border-radius:999px;min-height:40px;padding:8px 16px}
-    .source-chip.active{border-color:#7a3f1a;background:rgba(255,122,26,.17);color:#ffd2ad}
-    .head{margin:18px 0 14px}
-    .head h2{font-size:20px}
-    .grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
-    .prompt-card{position:relative;border-radius:24px;background:#171c27;min-height:292px;overflow:hidden;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}
-    .prompt-card:hover{transform:translateY(-4px);border-color:#39465a;box-shadow:0 22px 48px rgba(0,0,0,.28);background:#1a202d}
-    .prompt-card .card-main{padding:20px;gap:14px;min-height:100%;display:grid;grid-template-rows:auto auto 1fr auto}
-    .prompt-card .card-top{grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:start}
-    .prompt-icon{width:44px;height:44px;border:1px solid rgba(255,122,26,.34);border-radius:16px;background:rgba(255,122,26,.12);color:#ffb36e;display:grid;place-items:center;font:900 17px/1 ui-monospace,SFMono-Regular,Consolas,monospace}
-    .prompt-title-area{min-width:0}
-    .prompt-card .title{font-size:18px;margin:0 0 8px;line-height:1.35}
-    .summary{color:#aab3c2;font-size:14px;line-height:1.72}
-    .badge{border-color:#30394a;background:#111722;color:#c4cbd8}
-    .badge.catb{border-color:#244b73;background:rgba(45,129,204,.17);color:#9ed0ff}
-    .badge.st{border-color:#704116;background:rgba(255,122,26,.16);color:#ffd1a8}
-    .prompt-path{font-size:12px;color:#8b95a6}
-    .prompt-card .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:2px}
-    .prompt-card .actions button:first-child{padding-left:12px;padding-right:12px}
-    .prompt-use-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:0}
-    .prompt-use-meta button{min-height:34px;padding:6px 10px;border-radius:12px}
-    details.prompt-body{display:none}
-    .prompt-workbench{border-radius:22px;background:#171c27;padding:14px;margin-bottom:22px}
-    .prompt-workbench-row,.tool-shortcuts{gap:10px}
-    .prompt-workbench-title{color:#9aa4b2}
-    .prompt-workbench .active{border-color:#7a3f1a;background:rgba(255,122,26,.16);color:#ffd2ad}
-    .load-more{border-radius:18px;background:#171c27}
-    dialog{border-radius:24px;background:#171c27;color:#f5f7fb}
-    .dh,.df{border-color:#2d3748;background:#121824}
-    .df{background:#171c27}
-    dialog::backdrop{background:rgba(3,7,15,.7);backdrop-filter:blur(4px)}
-    .prompt-detail-pre{border-color:#2d3748;background:#0f1420;border-radius:18px;padding:16px;color:#dde5f0}
-    .toast{background:#121824;border:1px solid #3a465a;border-radius:16px;color:#fff}
-    @media(max-width:980px){main{grid-template-columns:1fr}main>section{order:1}main>aside{order:2}.hero-panel{grid-template-columns:1fr}.hero-stats{grid-template-columns:repeat(2,minmax(0,1fr))}aside{position:static}.prompt-card .card-top{grid-template-columns:44px minmax(0,1fr)}}
-    @media(max-width:620px){body{background:#0f1420}.top{padding:14px 14px 12px}main{padding:14px}.hero-panel,.prompt-workbench{display:none}.browsebar{border-radius:20px;padding:14px;margin-bottom:12px}.searchbox{grid-template-columns:1fr}.source-chips{display:grid;grid-template-columns:1fr 1fr}.source-chip{width:100%}.head{margin:14px 0 12px}.grid{grid-template-columns:1fr;gap:14px}.prompt-card{border-radius:18px;min-height:0}.prompt-card .card-main{padding:16px}.prompt-card .actions{grid-template-columns:1fr 1fr}}
+    @media(max-width:1040px){.hero{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.filter-panel{position:static}.search-copy h2{font-size:34px}}
+    @media(max-width:640px){
+      .top{padding:12px 14px;align-items:flex-start}.top-actions{width:100%;justify-content:flex-start}.brand h1{font-size:18px}
+      main{padding:14px 12px 36px}.search-panel{padding:18px;min-height:0}.search-copy h2{font-size:27px}.search-copy p{font-size:14px}
+      .search-row{grid-template-columns:1fr}.search-row input{min-height:52px}.side-panel{display:none}
+      .filter-panel{padding:12px}.result-panel{padding:12px}.result-title{align-items:flex-start;flex-direction:column}
+      .grid{grid-template-columns:1fr}.prompt-card{min-height:0}.card-actions{grid-template-columns:1fr 1fr}
+      .form-grid{grid-template-columns:1fr}.df{display:grid;grid-template-columns:1fr 1fr}.df button{width:100%}
+      .metric-grid{grid-template-columns:1fr 1fr}
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="top">
-      <div>
-        <h1>AI 提示词工作台 <span class="mode badge" id="modeBadge"></span></h1>
-        <p class="sub" id="sub">搜索、筛选、查看详情并直接复制可用提示词。</p>
+      <div class="brand">
+        <h1>AI 提示词搜索工作台 <span class="badge" id="modeBadge"></span></h1>
+        <p id="topSummary">输入需求后再展开结果，避免首页堆满提示词。</p>
       </div>
-      <nav class="tabs" aria-label="主导航">
-        <button class="tab active" data-view="prompts">提示词</button>
-        <button class="tab" data-view="assets">图片素材</button>
-        <button class="tab" data-view="archive">归档</button>
-        <button class="tab" data-view="backup">个人备份</button>
-      </nav>
+      <div class="top-actions">
+        <button class="quiet" id="managePortal" hidden>管理订阅</button>
+        <a class="buttonlike" href="/prompts/admin/" id="adminLink">后台</a>
+      </div>
     </div>
   </header>
+
   <main>
-    <aside>
-      <div class="ah"><span id="asideTitle">筛选</span><span class="pill" id="visibleCount">0</span></div>
-      <div class="filters">
-        <input id="categorySearch" type="search" placeholder="搜索分类...">
-        <div id="categoryList"></div>
-      </div>
-      <div class="notice" id="notice">查看端已公开，可直接搜索、筛选、查看详情和复制。</div>
-    </aside>
-    <section>
-      <div class="hero-panel">
-        <div>
-          <h2>提示词浏览</h2>
-          <p>按分类、来源、工具和模态快速定位，打开详情即可复制使用。</p>
+    <section class="hero">
+      <div class="search-panel">
+        <div class="search-copy">
+          <h2>搜索一个具体创作任务，再拿到可复制的提示词。</h2>
+          <p>面向图像、视频、音频、多模态、电商和短视频的 AIGC 提示词库。先输入关键词，再按工具、模态、免费/Pro 和精选包过滤。</p>
         </div>
-        <div class="hero-stats" id="heroStats"></div>
-      </div>
-      <div class="browsebar">
-        <div class="searchbox">
-          <input id="search" type="search" placeholder="搜索提示词、系统提示词、工具定义、说明文档...">
+        <div class="search-row">
+          <input id="search" type="search" autocomplete="off" placeholder="例如：电商短视频开头、商品图一致性、Runway 分镜、Suno 品牌口播">
+          <button class="primary" id="runSearch">搜索</button>
           <button id="clearSearch">清空</button>
-          <button id="toggleSidebar" type="button">隐藏分类</button>
         </div>
-        <div class="source-chips" id="sourceChips"></div>
+        <div class="chips" id="hotKeywords"></div>
       </div>
-      <div class="head">
-        <h2 id="resultTitle">全部提示词</h2>
-        <div class="actions" id="contentActions"></div>
-      </div>
-      <div id="content"><div class="empty">正在加载共享库...</div></div>
+      <aside class="side-panel">
+        <h3>库状态</h3>
+        <div class="metric-grid" id="metrics"></div>
+        <div class="chips" id="entitlementBadges"></div>
+        <button class="primary" id="buyPro">开通 Pro 会员</button>
+      </aside>
+    </section>
+
+    <section class="workspace">
+      <aside class="filter-panel">
+        <h3>筛选</h3>
+        <label class="field">工具<select id="toolFilter"></select></label>
+        <label class="field">模态<select id="modalityFilter"></select></label>
+        <label class="field">访问<select id="accessFilter">
+          <option value="all">全部</option>
+          <option value="free">免费</option>
+          <option value="pro">Pro</option>
+          <option value="pack">精选包</option>
+        </select></label>
+        <label class="field">精选包<select id="packFilter"></select></label>
+        <label class="field">排序<select id="sortFilter">
+          <option value="relevance">相关性</option>
+          <option value="quality">质量评分</option>
+          <option value="newest">最近验证</option>
+        </select></label>
+        <div class="chips" id="savedChips"></div>
+      </aside>
+
+      <section class="result-panel">
+        <div class="admin-panel" id="adminPanel" hidden>
+          <div class="admin-row">
+            <h3>管理员草稿</h3>
+            <span class="badge" id="dirtyBadge">无本地草稿</span>
+          </div>
+          <div class="admin-row">
+            <button class="primary" id="newPrompt">新增提示词</button>
+            <button id="publishLibrary">发布到 GitHub</button>
+            <button id="openSuggestionReview">联网建议审核池</button>
+          </div>
+        </div>
+        <div class="result-title">
+          <div>
+            <h3 id="resultHeading">先搜索，再浏览结果</h3>
+            <p id="resultSub">首页只保留搜索入口、热门关键词、精选包和联网趋势建议。</p>
+          </div>
+          <div class="chips" id="activeFilters"></div>
+        </div>
+        <div id="content"><div class="empty"><strong>正在加载提示词库</strong>请稍候。</div></div>
+      </section>
     </section>
   </main>
 
-  <dialog id="promptDialog">
-    <form method="dialog" id="promptForm">
-      <div class="dh"><h3 id="promptDialogTitle">新增提示词</h3><button type="button" data-close="promptDialog">关闭</button></div>
+  <dialog id="detailDialog">
+    <div class="dh"><h3 id="detailTitle">提示词详情</h3><button type="button" data-close="detailDialog">关闭</button></div>
+    <div class="db" id="detailBody"></div>
+    <div class="df"><button type="button" data-close="detailDialog">关闭</button><button class="primary" id="detailCopy">复制提示词</button></div>
+  </dialog>
+
+  <dialog id="editorDialog">
+    <form method="dialog" id="editorForm">
+      <div class="dh"><h3 id="editorTitle">编辑提示词</h3><button type="button" data-close="editorDialog">关闭</button></div>
       <div class="db">
         <input type="hidden" name="id">
         <div class="form-grid">
-          <label>标题<input name="title" required></label>
-          <label>分类<input name="category" required></label>
-          <label>状态<input name="status" placeholder="推荐 / 待优化 / 待验证"></label>
-          <label>来源<input name="source" placeholder="手动新增"></label>
-          <label class="full">标签（逗号分隔）<input name="tags"></label>
-          <label class="full">变量（逗号分隔）<input name="variables"></label>
-          <label class="full">摘要<textarea name="summary" rows="3"></textarea></label>
-          <label class="full">提示词正文<textarea name="body" required rows="14"></textarea></label>
+          <label class="field">标题<input name="title" required></label>
+          <label class="field">分类<input name="category" required></label>
+          <label class="field">状态<input name="status" placeholder="推荐 / 待验证"></label>
+          <label class="field">来源<input name="source" placeholder="手动新增"></label>
+          <label class="field">访问<select name="access"><option value="free">free</option><option value="pro">pro</option><option value="pack">pack</option></select></label>
+          <label class="field">精选包 ID<input name="packId" placeholder="video-commerce-pro"></label>
+          <label class="field">Stripe Price ID<input name="stripePriceId" placeholder="可留空，生产用 Worker env 映射"></label>
+          <label class="field">质量评分<input name="qualityScore" type="number" min="1" max="100"></label>
+          <label class="field">来源类型<input name="sourceType" placeholder="curated / generated-library"></label>
+          <label class="field">验证时间<input name="verifiedAt" placeholder="2026-05-15"></label>
+          <label class="field full">标签，逗号分隔<input name="tags"></label>
+          <label class="field full">变量，逗号分隔<input name="variables"></label>
+          <label class="field full">SEO 关键词，逗号分隔<input name="seoKeywords"></label>
+          <label class="field full">示例输出<textarea name="exampleOutput" rows="3"></textarea></label>
+          <label class="field full">摘要<textarea name="summary" rows="3"></textarea></label>
+          <label class="field full">提示词正文<textarea name="body" required rows="14"></textarea></label>
         </div>
       </div>
-      <div class="df"><button type="button" data-close="promptDialog">取消</button><button class="primary" type="submit">保存到草稿</button></div>
+      <div class="df"><button type="button" data-close="editorDialog">取消</button><button class="primary" type="submit">保存到草稿</button></div>
     </form>
   </dialog>
 
-  <dialog id="assetDialog">
-    <form method="dialog" id="assetForm">
-      <div class="dh"><h3 id="assetDialogTitle">编辑图片素材</h3><button type="button" data-close="assetDialog">关闭</button></div>
-      <div class="db">
-        <input type="hidden" name="id">
-        <div class="form-grid">
-          <label>标题<input name="title" required></label>
-          <label>分类<input name="category" required></label>
-          <label class="full">标签（逗号分隔）<input name="tags"></label>
-          <label class="full">用途说明<textarea name="notes" rows="5"></textarea></label>
-          <label class="full">关联提示词<select name="relatedPromptIds" multiple size="7" id="relatedPromptSelect"></select></label>
-        </div>
-      </div>
-      <div class="df"><button type="button" data-close="assetDialog">取消</button><button class="primary" type="submit">保存到草稿</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="assetDetailDialog" class="detail-drawer">
-    <div class="dh"><h3 id="assetDetailTitle">素材详情</h3><button type="button" data-close="assetDetailDialog">关闭</button></div>
-    <div class="db" id="assetDetailBody"></div>
-  </dialog>
-
-  <dialog id="promptRunDialog" class="detail-drawer">
-    <div class="dh"><h3 id="promptRunTitle">填写变量</h3><button type="button" data-close="promptRunDialog">关闭</button></div>
-    <div class="db" id="promptRunBody"></div>
-    <div class="df"><button type="button" data-close="promptRunDialog">关闭</button><button class="primary" type="button" id="copyFilledPrompt">复制填写版</button></div>
-  </dialog>
-  <dialog id="promptDetailDialog" class="detail-drawer prompt-detail">
-    <div class="dh"><h3 id="promptDetailTitle">提示词详情</h3><button type="button" data-close="promptDetailDialog">关闭</button></div>
-    <div class="db" id="promptDetailBody"></div>
-    <div class="df"><button type="button" data-close="promptDetailDialog">关闭</button><button class="primary" type="button" id="copyDetailPrompt">复制提示词</button></div>
-  </dialog>
-
-  <dialog id="viewerDialog" class="viewer">
-    <div class="dh"><h3 id="viewerTitle">查看原图</h3><button type="button" data-close="viewerDialog">关闭</button></div>
-    <div class="db"><img id="viewerImage" alt=""></div>
+  <dialog id="suggestionDialog">
+    <div class="dh"><h3>联网建议审核池</h3><button type="button" data-close="suggestionDialog">关闭</button></div>
+    <div class="db" id="suggestionBody"></div>
+    <div class="df"><button type="button" data-close="suggestionDialog">关闭</button></div>
   </dialog>
 
   <div class="toast" id="toast"></div>
 
   <script>
-const API_LIBRARY='/api/prompts/library',API_ASSETS='/api/prompts/assets';
-const TYPES=['image/jpeg','image/png','image/webp','image/gif','image/svg+xml'],EXT=/\.(jpe?g|png|webp|gif|svg)$/i;
-const IS_ADMIN=location.pathname.replace(/\/+$/,'').startsWith('/prompts/admin');
-const SECRET_WORDS=['sk-'+'proj-','github'+'_pat_','gh'+'p_'];
-const VIEWS=new Set(['prompts','assets','archive','backup']);
-const DEFAULT_PROMPT_FILTERS={tool:'all',modality:'all'};
-const DEFAULT_ASSET_FILTERS={format:'all',ratio:'all',dimension:'all',link:'all',health:'all',sort:'updated-desc'};
-const WORKBENCH_KEY='prompt-workbench-v1',WORK_FILTERS=new Set(['all','favorites','recent']);
-const TOOL_SHORTCUTS=['ChatGPT','ChatGPT / GPT Image','Sora','Midjourney','Runway Gen-4','Suno','GitHub Copilot','Cursor','Lovable'];
-const SOURCE_FILTER_LIMIT=8;
-const PROMPT_PAGE_SIZE=80;
-const localPreviewUrls=new Map(),assetHealthOverrides=new Map();
-let selectedAssets=new Set(),baselineAssets=new Map(),uploadSummary=null;
-let workbench=loadWorkbench(),activeRunPromptId='',activeDetailPromptId='';
-let store=norm({prompts:[],assets:[]}),loading=true,draftDirty=false,publishing=false,healthRenderTimer=null,promptVisibleLimit=PROMPT_PAGE_SIZE,expandPromptsAfterRender=false;
-let state=initialState();
-const $=id=>document.getElementById(id),E={mode:$('modeBadge'),notice:$('notice'),sub:$('sub'),tabs:document.querySelectorAll('.tab'),aside:$('asideTitle'),vc:$('visibleCount'),search:$('search'),categorySearch:$('categorySearch'),cat:$('categoryList'),title:$('resultTitle'),actions:$('contentActions'),content:$('content'),heroStats:$('heroStats'),sourceChips:$('sourceChips'),toggleSidebar:$('toggleSidebar'),toast:$('toast'),pd:$('promptDialog'),pf:$('promptForm'),pt:$('promptDialogTitle'),rd:$('promptRunDialog'),rb:$('promptRunBody'),rt:$('promptRunTitle'),rc:$('copyFilledPrompt'),pdd:$('promptDetailDialog'),pdb:$('promptDetailBody'),pdt:$('promptDetailTitle'),pdc:$('copyDetailPrompt'),ad:$('assetDialog'),af:$('assetForm'),at:$('assetDialogTitle'),rs:$('relatedPromptSelect'),dd:$('assetDetailDialog'),db:$('assetDetailBody'),dt:$('assetDetailTitle'),vd:$('viewerDialog'),vi:$('viewerImage'),vt:$('viewerTitle')};
-function resetPromptPaging(){promptVisibleLimit=PROMPT_PAGE_SIZE;expandPromptsAfterRender=false}
-E.search.value=state.query;
-E.categorySearch.value=state.categoryQuery||'';
-function initialState(){let q=new URLSearchParams(location.search),view=q.get('view')||'prompts',work=q.get('work')||'all';return{view:VIEWS.has(view)?view:'prompts',category:q.get('cat')||'全部',categoryQuery:'',query:q.get('q')||'',work:WORK_FILTERS.has(work)?work:'all',source:q.get('src')||'all',multiSelect:false,prompt:{tool:q.get('tool')||DEFAULT_PROMPT_FILTERS.tool,modality:q.get('mod')||DEFAULT_PROMPT_FILTERS.modality},asset:{format:q.get('fmt')||DEFAULT_ASSET_FILTERS.format,ratio:q.get('ratio')||DEFAULT_ASSET_FILTERS.ratio,dimension:q.get('dim')||DEFAULT_ASSET_FILTERS.dimension,link:q.get('link')||DEFAULT_ASSET_FILTERS.link,health:q.get('health')||DEFAULT_ASSET_FILTERS.health,sort:q.get('sort')||DEFAULT_ASSET_FILTERS.sort}}}
-function syncUrl(){let p=new URLSearchParams(location.search);['view','q','cat','tool','mod','work','src','fmt','ratio','dim','link','health','sort'].forEach(k=>p.delete(k));if(state.view!=='prompts')p.set('view',state.view);if(state.query)p.set('q',state.query);if(state.category&&state.category!=='全部')p.set('cat',state.category);if(state.view==='prompts'||state.view==='archive'){let f=state.prompt;if(f.tool!=='all')p.set('tool',f.tool);if(f.modality!=='all')p.set('mod',f.modality);if(state.work&&state.work!=='all')p.set('work',state.work);if(state.source&&state.source!=='all')p.set('src',state.source)}if(state.view==='assets'){let a=state.asset;if(a.format!=='all')p.set('fmt',a.format);if(a.ratio!=='all')p.set('ratio',a.ratio);if(a.dimension!=='all')p.set('dim',a.dimension);if(a.link!=='all')p.set('link',a.link);if(a.health!=='all')p.set('health',a.health);if(a.sort!=='updated-desc')p.set('sort',a.sort)}let qs=p.toString();history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash)}
-function now(){let d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
-function uid(p){return `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`}
-function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function arr(v){return Array.isArray(v)?v.map(x=>String(x).trim()).filter(Boolean):String(v||'').split(/[,，\n]/).map(x=>x.trim()).filter(Boolean)}
-function list(v){return Array.isArray(v)?v:[]}
-function safeSrc(v){let s=String(v||'').trim();if(s.startsWith('/prompts-data/assets/'))return s;if(s.startsWith('prompts-data/assets/'))return '/'+s;return''}
-function cleanPath(v){return String(v||'').trim().replace(/^\/+/,'')}
-function norm(raw){let n=now(),prompts=list(raw?.prompts).map(p=>({id:String(p.id||uid('prompt')),title:String(p.title||'未命名提示词'),category:String(p.category||'未分类'),tags:arr(p.tags),variables:arr(p.variables),status:String(p.status||'待验证'),summary:String(p.summary||''),body:String(p.body||''),source:String(p.source||'手动新增'),createdAt:String(p.createdAt||n),updatedAt:String(p.updatedAt||n),archived:!!p.archived}));let ids=new Set(prompts.map(p=>p.id));return{version:2,migratedAt:raw?.migratedAt||n,updatedAt:raw?.updatedAt||n,prompts,assets:list(raw?.assets).map(a=>{let rel=cleanPath(a.relativePath||a.src||'');return{id:String(a.id||uid('asset')),title:String(a.title||'未命名素材'),category:String(a.category||'未分类'),tags:arr(a.tags),src:safeSrc(a.src||rel),notes:String(a.notes||''),relatedPromptIds:arr(a.relatedPromptIds).filter(id=>ids.has(id)),createdAt:String(a.createdAt||n),updatedAt:String(a.updatedAt||n),blobId:String(a.blobId||''),thumbBlobId:String(a.thumbBlobId||''),hash:String(a.hash||''),relativePath:rel,fileName:String(a.fileName||a.title||''),size:Number(a.size||0),mime:String(a.mime||''),width:Number(a.width||0),height:Number(a.height||0),importedAt:String(a.importedAt||a.createdAt||n)}})}}
-function publicLibrary(){let x=norm(store);x.assets=x.assets.map(({blobId,thumbBlobId,...a})=>a);return x}
-function active(){return store.prompts.filter(p=>!p.archived)}
-function arch(){return store.prompts.filter(p=>p.archived)}
-function base(){return state.view==='assets'?store.assets:state.view==='archive'?arch():active()}
-function prompt(id){return store.prompts.find(p=>p.id===id)}
-function asset(id){return store.assets.find(a=>a.id===id)}
-function rel(a){return(a.relatedPromptIds||[]).map(id=>store.prompts.find(p=>p.id===id)?.title).filter(Boolean)}
-function text(x){return state.view==='assets'?[x.title,x.category,x.src,x.notes,x.tags.join(' '),x.relativePath,x.fileName,rel(x).join(' ')].join(' ').toLowerCase():[x.title,x.category,x.source,x.status,x.summary,x.tags.join(' '),x.variables.join(' '),x.body].join(' ').toLowerCase()}
-function matchesQuery(x){let q=state.query.trim().toLowerCase();return!q||text(x).includes(q)}
-function countBy(values){let m=new Map();values.forEach(v=>m.set(v,(m.get(v)||0)+1));return m}
-function loadWorkbench(){try{let raw=JSON.parse(localStorage.getItem(WORKBENCH_KEY)||'{}');return{favorites:arr(raw.favorites),recent:arr(raw.recent).slice(0,30),usage:raw.usage&&typeof raw.usage==='object'?raw.usage:{}}}catch(e){return{favorites:[],recent:[],usage:{}}}}
-function saveWorkbench(){try{localStorage.setItem(WORKBENCH_KEY,JSON.stringify(workbench))}catch(e){console.warn(e)}}
-function isFavorite(id){return workbench.favorites.includes(id)}
-function usageCount(id){return Number(workbench.usage?.[id]?.count||0)}
-function recentSet(){return new Set(workbench.recent.filter(id=>prompt(id)))}
-function recordPromptUse(id){if(!id)return;let item=workbench.usage[id]||{count:0,lastUsed:''};item.count=Number(item.count||0)+1;item.lastUsed=now();workbench.usage[id]=item;workbench.recent=[id,...workbench.recent.filter(x=>x!==id)].slice(0,30);saveWorkbench()}
-function toggleFavorite(id){if(!id)return;workbench.favorites=isFavorite(id)?workbench.favorites.filter(x=>x!==id):[id,...workbench.favorites].slice(0,200);saveWorkbench();render()}
-function promptTagValue(p,prefix){return(p.tags||[]).find(x=>String(x).startsWith(prefix))?.slice(prefix.length)||''}
-function promptMatchesFilters(p,includeCategory=true){let f=state.prompt||DEFAULT_PROMPT_FILTERS;if(includeCategory&&state.category!=='全部'&&p.category!==state.category)return false;if(!matchesQuery(p))return false;if(f.tool!=='all'&&promptTagValue(p,'工具:')!==f.tool)return false;if(f.modality!=='all'&&promptTagValue(p,'模态:')!==f.modality)return false;if(state.source&&state.source!=='all'&&p.source!==state.source)return false;if(state.work==='favorites'&&!isFavorite(p.id))return false;if(state.work==='recent'&&!recentSet().has(p.id))return false;return true}
-function promptMatchesWithoutSource(p,includeCategory=true){let source=state.source;state.source='all';let ok=promptMatchesFilters(p,includeCategory);state.source=source;return ok}
-function assetPath(a){return cleanPath(a.relativePath)||cleanPath(a.src)||cleanPath(a.fileName)}
-function assetPublicPath(a){let p=assetPath(a);if(p&&p.startsWith('prompts-data/assets/'))return'/'+p;return safeSrc(p)||safeSrc(a.src)||p}
-function assetUrl(a){return localPreviewUrls.get(a.id)||safeSrc(a.src)||safeSrc(assetPath(a))}
-function assetFormat(a){let m=String(a.mime||'').toLowerCase();let f=m.includes('/')?m.split('/').pop():'';if(!f){let name=assetPath(a);f=(name.match(/\.([^.?#]+)(?:[?#].*)?$/)||[])[1]||''}f=f.toLowerCase();if(f==='jpeg')return'jpg';if(f==='svg+xml')return'svg';return f}
-function ratioKey(a){let w=Number(a.width||0),h=Number(a.height||0);if(!w||!h)return'unknown';let r=w/h;if(Math.abs(r-1)<=.08)return'square';return r>1?'landscape':'portrait'}
-function ratioLabel(a){let key=ratioKey(a),label={landscape:'横图',portrait:'竖图',square:'方图',unknown:'比例未知'}[key];if(key==='unknown')return label;return `${label} · ${simpleRatio(a.width,a.height)}`}
-function simpleRatio(w,h){let g=gcd(Number(w||0),Number(h||0));return g?`${Math.round(w/g)}:${Math.round(h/g)}`:'未知'}
-function gcd(a,b){while(b){let t=b;b=a%b;a=t}return a||0}
-function dimensionKey(a){let w=Number(a.width||0),h=Number(a.height||0),m=Math.max(w,h);if(!m)return'unknown';if(m<1200)return'small';if(m<=3000)return'medium';return'large'}
-function assetHealthKey(a){if(localPreviewUrls.has(a.id))return'local';return assetHealthOverrides.get(a.id)||(assetUrl(a)?'pending':'broken')}
-function healthMeta(key){return{ok:['可访问','health-ok'],pending:['等待部署','health-pending'],broken:['不可访问','health-broken'],local:['本地预览','health-local']}[key]||['未知','health-pending']}
-function assetHealth(a){let key=assetHealthKey(a),m=healthMeta(key);return{key,label:m[0],className:m[1]}}
-function assetMatchesFilters(a,includeCategory=true){let f=state.asset;if(includeCategory&&state.category!=='全部'&&a.category!==state.category)return false;if(!matchesQuery(a))return false;if(f.format!=='all'&&assetFormat(a)!==f.format)return false;if(f.ratio!=='all'&&ratioKey(a)!==f.ratio)return false;if(f.dimension!=='all'&&dimensionKey(a)!==f.dimension)return false;if(f.link==='linked'&&!a.relatedPromptIds?.length)return false;if(f.link==='unlinked'&&a.relatedPromptIds?.length)return false;if(f.health!=='all'&&assetHealthKey(a)!==f.health)return false;return true}
-function sortAssets(xs){let out=[...xs],s=state.asset.sort;let time=a=>Date.parse(a.updatedAt||a.createdAt||0)||0;out.sort((a,b)=>{if(s==='updated-asc')return time(a)-time(b);if(s==='title')return a.title.localeCompare(b.title,'zh-Hans-CN');if(s==='category')return(a.category+a.title).localeCompare(b.category+b.title,'zh-Hans-CN');if(s==='size-desc')return(b.size||0)-(a.size||0);if(s==='size-asc')return(a.size||0)-(b.size||0);return time(b)-time(a)});return out}
-function filt(){if(state.view==='assets')return sortAssets(store.assets.filter(a=>assetMatchesFilters(a,true)));return base().filter(x=>promptMatchesFilters(x,true))}
-function cats(){let xs=state.view==='assets'?store.assets.filter(a=>assetMatchesFilters(a,false)):base().filter(x=>promptMatchesFilters(x,false)),c={'全部':xs.length},q=String(state.categoryQuery||'').trim().toLowerCase();xs.forEach(x=>c[x.category]=(c[x.category]||0)+1);return['全部',...Object.keys(c).filter(x=>x!=='全部').sort((a,b)=>a.localeCompare(b,'zh-Hans-CN'))].filter(k=>k==='全部'||!q||k.toLowerCase().includes(q)).map(k=>[k,c[k]])}
-function snapshotAssets(){baselineAssets=new Map(store.assets.map(a=>[a.id,assetComparable(a)]))}
-function assetComparable(a){return JSON.stringify({title:a.title,category:a.category,tags:a.tags,src:a.src,notes:a.notes,relatedPromptIds:a.relatedPromptIds,relativePath:a.relativePath,fileName:a.fileName,size:a.size,mime:a.mime,width:a.width,height:a.height})}
-function draftAssetChanges(){let current=new Map(store.assets.map(a=>[a.id,assetComparable(a)])),added=0,changed=0,removed=0;current.forEach((v,id)=>{if(!baselineAssets.has(id))added++;else if(baselineAssets.get(id)!==v)changed++});baselineAssets.forEach((_,id)=>{if(!current.has(id))removed++});return{added,changed,removed}}
-async function loadLibrary(){loading=true;render();try{let res=await fetch(API_LIBRARY,{headers:{Accept:'application/json'},cache:'no-store'});if(!res.ok)throw new Error(`HTTP ${res.status}`);store=norm(await res.json());snapshotAssets();resetPromptPaging();draftDirty=false;loading=false;render();toast('共享库已加载')}catch(e){loading=false;E.content.innerHTML=`<div class="empty">共享库加载失败：${esc(e.message||e)}</div>`;E.sub.textContent='共享库加载失败';toast('共享库加载失败')}}
-function markDirty(msg){draftDirty=true;store.updatedAt=now();render();if(msg)toast(msg)}
-function render(){E.mode.textContent=IS_ADMIN?(draftDirty?'管理员草稿未发布':'管理员模式'):'公开查看';E.mode.classList.toggle('dirty',IS_ADMIN&&draftDirty);E.notice.classList.toggle('warn',IS_ADMIN&&draftDirty);E.notice.textContent=IS_ADMIN?'管理员改动只保存在当前草稿里，点击“发布到 GitHub”后才会成为公共内容。':'查看端已公开，可直接搜索、筛选、查看详情和复制。';E.tabs.forEach(t=>t.classList.toggle('active',t.dataset.view===state.view));E.sub.textContent=loading?'正在读取共享提示词库...':`提示词 ${active().length} 条 · 归档 ${arch().length} 条 · 图片素材 ${store.assets.length} 条 · 共享库更新 ${store.updatedAt}`;renderHeroStats();renderSourceChips();renderCats();renderActions();if(loading){E.content.innerHTML='<div class="empty">正在加载共享库...</div>';return}state.view==='assets'?renderAssets():state.view==='backup'?renderBackup():renderPrompts()}
-function renderHeroStats(){if(!E.heroStats)return;let categoryCount=new Set(active().map(p=>p.category)).size,toolCount=new Set(active().map(p=>promptTagValue(p,'工具:')).filter(Boolean)).size,updatedAt=store.updatedAt?String(store.updatedAt).slice(0,10):'同步中';E.heroStats.innerHTML=`<div class="hero-stat"><strong>${active().length}</strong><span>可用提示词</span></div><div class="hero-stat"><strong>${categoryCount}</strong><span>分类</span></div><div class="hero-stat"><strong>${toolCount}</strong><span>覆盖工具</span></div><div class="hero-stat"><strong>${esc(updatedAt)}</strong><span>最近更新</span></div>`}
-function sourceCounts(){let xs=base().filter(p=>(state.category==='全部'||p.category===state.category)&&matchesQuery(p)),m=countBy(xs.map(p=>p.source||'未标注'));return[...m.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'zh-Hans-CN')).slice(0,SOURCE_FILTER_LIMIT)}
-function renderSourceChips(){if(!E.sourceChips)return;if(state.view==='assets'||state.view==='backup'){E.sourceChips.innerHTML='';return}let items=sourceCounts(),allCount=base().filter(x=>promptMatchesWithoutSource(x,true)).length;E.sourceChips.innerHTML=`<button class="source-chip ${state.source==='all'?'active':''}" data-source-filter="all">全部来源 ${allCount}</button>${items.map(([s,n])=>`<button class="source-chip ${state.source===s?'active':''}" data-source-filter="${esc(s)}">${esc(shortSource(s))} ${n}</button>`).join('')}`;E.sourceChips.querySelectorAll('[data-source-filter]').forEach(b=>b.onclick=()=>{state.source=b.dataset.sourceFilter;resetPromptPaging();syncUrl();render()})}
-function shortSource(v){let s=String(v||'未标注');return s.length>18?s.slice(0,18)+'...':s}
-function renderCats(){E.aside.textContent=state.view==='assets'?'素材分类':state.view==='archive'?'归档分类':state.view==='backup'?'数据状态':'提示词分类';if(state.view==='backup'){E.cat.innerHTML=`<div class="stat"><strong>${active().length}</strong><span>当前提示词</span></div><div class="stat"><strong>${arch().length}</strong><span>归档提示词</span></div><div class="stat"><strong>${store.assets.length}</strong><span>图片素材</span></div>`;E.vc.textContent=store.prompts.length+store.assets.length;return}let cs=cats();if(!cs.some(x=>x[0]===state.category))state.category='全部';let html=cs.map(([k,n])=>`<button class="cat ${k===state.category?'active':''}" data-cat="${esc(k)}"><span>${esc(k)}</span><span class="pill">${n}</span></button>`).join('');if(state.view==='assets')html+=renderAssetFilters();else html+=renderPromptFilters();E.cat.innerHTML=html;E.cat.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{state.category=b.dataset.cat;resetPromptPaging();syncUrl();render()});bindPromptFilters();bindAssetFilters();E.vc.textContent=filt().length}
-function promptFilterValues(prefix){let xs=base().filter(x=>(state.category==='全部'||x.category===state.category)&&matchesQuery(x)),vals=[...new Set(xs.map(p=>promptTagValue(p,prefix)).filter(Boolean))];return vals.sort((a,b)=>a.localeCompare(b,'zh-Hans-CN'))}
-function promptFilterOptions(prefix,value,label){return opts([['all',label],...promptFilterValues(prefix).map(v=>[v,v])],value)}
-function renderPromptFilters(){if(state.view!=='prompts'&&state.view!=='archive')return'';let f=state.prompt||DEFAULT_PROMPT_FILTERS;return`<div class="prompt-filter-panel"><div class="filter-title">工具与模态</div><label>模态<select data-prompt-filter="modality">${promptFilterOptions('模态:',f.modality,'全部模态')}</select></label><label>工具<select data-prompt-filter="tool">${promptFilterOptions('工具:',f.tool,'全部工具')}</select></label></div>`}
-function bindPromptFilters(){if(state.view!=='prompts'&&state.view!=='archive')return;E.cat.querySelectorAll('[data-prompt-filter]').forEach(el=>el.onchange=()=>{state.prompt[el.dataset.promptFilter]=el.value;resetPromptPaging();syncUrl();render()})}
-function renderAssetFilters(){return`<div class="asset-filter-panel"><div class="filter-title">素材筛选</div><label>格式<select data-asset-filter="format">${opts([['all','全部格式'],['jpg','JPG'],['png','PNG'],['webp','WEBP'],['gif','GIF'],['svg','SVG']],state.asset.format)}</select></label><label>比例<select data-asset-filter="ratio">${opts([['all','全部比例'],['landscape','横图'],['portrait','竖图'],['square','方图'],['unknown','未知']],state.asset.ratio)}</select></label><label>尺寸范围<select data-asset-filter="dimension">${opts([['all','全部尺寸'],['small','小图 < 1200px'],['medium','中图 1200-3000px'],['large','大图 > 3000px'],['unknown','未知']],state.asset.dimension)}</select></label><label>关联提示词<select data-asset-filter="link">${opts([['all','全部'],['linked','有关联'],['unlinked','未关联']],state.asset.link)}</select></label><label>健康状态<select data-asset-filter="health">${opts([['all','全部状态'],['ok','可访问'],['pending','等待部署'],['broken','不可访问'],['local','本地预览']],state.asset.health)}</select></label><label>排序<select data-asset-filter="sort">${opts([['updated-desc','最近更新'],['updated-asc','最早更新'],['title','标题 A-Z'],['category','分类'],['size-desc','文件最大'],['size-asc','文件最小']],state.asset.sort)}</select></label></div>`}
-function opts(items,value){return items.map(([v,t])=>`<option value="${esc(v)}" ${v===value?'selected':''}>${esc(t)}</option>`).join('')}
-function bindAssetFilters(){if(state.view!=='assets')return;E.cat.querySelectorAll('[data-asset-filter]').forEach(el=>el.onchange=()=>{state.asset[el.dataset.assetFilter]=el.value;syncUrl();render()})}
-function renderActions(){let a=[];if(IS_ADMIN){a.push(`<button id="reloadLibrary">重新加载共享库</button>`,`<button class="primary" id="publishLibrary" ${publishing||!draftDirty?'disabled':''}>${publishing?'发布中...':'发布到 GitHub'}</button>`)}if(state.view==='prompts'){E.title.textContent=`当前结果 · ${filt().length} 条`;if(IS_ADMIN)a.unshift('<button class="primary" id="addP">新增提示词</button>')}else if(state.view==='assets'){E.title.textContent=`图片素材 · ${filt().length} 条`;a.unshift(`<button id="toggleMulti" class="${state.multiSelect?'primary':''}">${state.multiSelect?'退出多选':'多选管理'}</button>`);if(IS_ADMIN)a.unshift('<button class="primary" id="pickFiles">选择图片</button>','<button id="pickFolder">选择文件夹</button>','<input hidden id="fileInput" type="file" accept="image/*" multiple>','<input hidden id="folderInput" type="file" webkitdirectory multiple>')}else E.title.textContent=state.view==='archive'?`归档 · ${filt().length} 条`:'个人备份';E.actions.innerHTML=a.join('');if(IS_ADMIN){let r=$('reloadLibrary'),p=$('publishLibrary');if(r)r.onclick=()=>{if(!draftDirty||confirm('重新加载会放弃当前未发布草稿。确认继续？'))loadLibrary()};if(p)p.onclick=publishLibrary;let add=$('addP');if(add)add.onclick=()=>openPrompt();let fi=$('fileInput'),fo=$('folderInput'),pf=$('pickFiles'),pd=$('pickFolder');if(pf&&fi)pf.onclick=()=>fi.click();if(pd&&fo)pd.onclick=()=>fo.click();if(fi)fi.onchange=e=>{importFileList([...e.target.files].map(f=>({file:f,path:f.name})));fi.value=''};if(fo)fo.onchange=e=>{importFileList([...e.target.files].map(f=>({file:f,path:f.webkitRelativePath||f.name})));fo.value=''}}let tm=$('toggleMulti');if(tm)tm.onclick=()=>{state.multiSelect=!state.multiSelect;if(!state.multiSelect)selectedAssets.clear();render()}}
-function renderPrompts(){let xs=filt(),workHtml=promptWorkbenchHtml();if(!xs.length){E.content.innerHTML=workHtml+'<div class="empty">没有匹配的提示词。</div>';bindPromptWorkbench();return}if(promptVisibleLimit<1)promptVisibleLimit=PROMPT_PAGE_SIZE;let visible=xs.slice(0,promptVisibleLimit),hasMore=visible.length<xs.length,more=hasMore?`<div class="load-more"><span>已显示 ${visible.length} / ${xs.length} 条。搜索和分类仍会覆盖全部提示词。</span><button class="primary" data-load-prompts>加载更多内容</button></div>`:'';E.content.innerHTML=workHtml+'<div class="grid">'+visible.map(pcard).join('')+'</div>'+more;bindPromptWorkbench();E.content.querySelectorAll('[data-card-detail]').forEach(card=>{card.onclick=e=>{if(e.target.closest('button,a,details,summary,input,select,textarea'))return;showPromptDetail(card.dataset.cardDetail)};card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showPromptDetail(card.dataset.cardDetail)}}});E.content.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>showPromptDetail(b.dataset.detail));E.content.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copyPrompt(b.dataset.copy));E.content.querySelectorAll('[data-fill]').forEach(b=>b.onclick=()=>openRunPrompt(b.dataset.fill));E.content.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>toggleFavorite(b.dataset.fav));let load=E.content.querySelector('[data-load-prompts]');if(load)load.onclick=()=>{promptVisibleLimit=Math.min(xs.length,promptVisibleLimit+PROMPT_PAGE_SIZE);renderPrompts()};if(expandPromptsAfterRender){document.querySelectorAll('details.prompt-body').forEach(d=>d.open=1);expandPromptsAfterRender=false}if(IS_ADMIN){E.content.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openPrompt(b.dataset.edit));E.content.querySelectorAll('[data-archive]').forEach(b=>b.onclick=()=>archivePrompt(b.dataset.archive));E.content.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>restorePrompt(b.dataset.restore));E.content.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deletePrompt(b.dataset.del))}}
-function pcard(p){let ctl='',fav=isFavorite(p.id),count=usageCount(p.id),fill=p.variables.length?`<button data-fill="${esc(p.id)}">填写变量</button>`:'';if(IS_ADMIN)ctl=p.archived?`<button data-restore="${esc(p.id)}">恢复</button><button class="danger" data-del="${esc(p.id)}">永久删除</button>`:`<button data-edit="${esc(p.id)}">编辑</button><button class="warn" data-archive="${esc(p.id)}">归档</button>`;return`<article class="card prompt-card" data-card-detail="${esc(p.id)}" tabindex="0" aria-label="查看 ${esc(p.title)} 详情"><div class="card-main"><div class="card-top"><div class="prompt-icon" aria-hidden="true">&gt;_</div><div class="prompt-title-area"><h3 class="title">${esc(p.title)}</h3><div class="meta"><span class="badge catb">${esc(p.category)}</span><span class="badge st">${esc(p.status)}</span><span>${esc(shortSource(p.source))}</span></div><div class="prompt-path">${esc(p.source||'Prompt Library')} / ${esc(p.category)} / ${esc(p.title)}</div></div></div><p class="summary">${esc(p.summary||p.body.slice(0,120))}</p><div class="chips">${p.tags.slice(0,5).map(x=>`<span class="badge">${esc(x)}</span>`).join('')||'<span class="badge">无标签</span>'}</div><div class="actions"><button data-detail="${esc(p.id)}">查看详情</button><button class="primary" data-copy="${esc(p.id)}">复制</button></div><div class="prompt-use-meta"><button data-fav="${esc(p.id)}" class="${fav?'primary':''}">${fav?'已收藏':'收藏'}</button>${fill}${ctl}<span class="badge">${count?`已用 ${count} 次`:'未使用'}</span>${fav?'<span class="badge catb">已收藏</span>':''}</div></div><details class="prompt-body"><summary>展开完整提示词正文</summary><pre>${esc(p.body)}</pre></details></article>`}
-function showPromptDetail(id){let p=prompt(id);if(!p)return;activeDetailPromptId=id;E.pdt.textContent=p.title;E.pdb.innerHTML=promptDetailHtml(p);E.pdb.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copyPrompt(b.dataset.copy));E.pdb.querySelectorAll('[data-detail-fill]').forEach(b=>b.onclick=()=>{E.pdd.close();openRunPrompt(b.dataset.detailFill)});E.pdb.querySelectorAll('[data-detail-fav]').forEach(b=>b.onclick=()=>{toggleFavorite(b.dataset.detailFav);showPromptDetail(id)});if(!E.pdd.open)E.pdd.showModal()}
-function promptDetailHtml(p){let count=usageCount(p.id),fav=isFavorite(p.id),fill=p.variables.length?`<button data-detail-fill="${esc(p.id)}">填写变量</button>`:'';return`<div class="prompt-detail-head"><div class="meta"><span class="badge catb">${esc(p.category)}</span><span class="badge st">${esc(p.status)}</span><span class="badge">${esc(shortSource(p.source))}</span><span class="badge">${count?`已用 ${count} 次`:'未使用'}</span></div><p class="summary">${esc(p.summary||'无摘要')}</p><div class="prompt-path">${esc(p.source||'Prompt Library')} / ${esc(p.category)} / ${esc(p.title)}</div><div class="detail-actions"><button data-detail-fav="${esc(p.id)}" class="${fav?'primary':''}">${fav?'已收藏':'收藏'}</button>${fill}<button class="primary" data-copy="${esc(p.id)}">复制</button></div></div><div class="label">标签</div><div class="chips">${p.tags.map(x=>`<span class="badge">${esc(x)}</span>`).join('')||'<span class="badge">无标签</span>'}</div><div class="label">变量</div><div class="chips">${p.variables.map(x=>`<span class="badge">${esc(x)}</span>`).join('')||'<span class="badge">无变量</span>'}</div><div class="label">完整提示词</div><pre class="prompt-detail-pre">${esc(p.body)}</pre>`}
-function promptWorkbenchHtml(){if(state.view!=='prompts'&&state.view!=='archive')return'';let favCount=workbench.favorites.filter(id=>prompt(id)).length,recentCount=workbench.recent.filter(id=>prompt(id)).length,used=Object.values(workbench.usage||{}).reduce((sum,item)=>sum+Number(item.count||0),0),tools=toolShortcutHtml();return`<div class="prompt-workbench"><div class="prompt-workbench-row"><span class="prompt-workbench-title">工作台</span><button data-work-filter="all" class="${state.work==='all'?'active':''}">全部</button><button data-work-filter="favorites" class="${state.work==='favorites'?'active':''}">收藏 ${favCount}</button><button data-work-filter="recent" class="${state.work==='recent'?'active':''}">最近 ${recentCount}</button><span class="badge">累计复制 ${used} 次</span></div>${tools}<div class="prompt-workbench-row"><span class="prompt-workbench-title">当前筛选</span><span class="badge">工具：${esc(state.prompt.tool==='all'?'全部':state.prompt.tool)}</span><span class="badge">模态：${esc(state.prompt.modality==='all'?'全部':state.prompt.modality)}</span><span class="badge">分类：${esc(state.category)}</span></div></div>`}
-function toolShortcutHtml(){let counts=countBy(base().filter(matchesQuery).map(p=>promptTagValue(p,'工具:')).filter(Boolean)),items=TOOL_SHORTCUTS.filter(tool=>counts.get(tool));return`<div class="tool-shortcuts"><span class="prompt-workbench-title">常用工具</span><button data-tool-shortcut="all" class="${state.prompt.tool==='all'?'active':''}">全部工具</button>${items.map(tool=>`<button data-tool-shortcut="${esc(tool)}" class="${state.prompt.tool===tool?'active':''}">${esc(tool)} ${counts.get(tool)}</button>`).join('')}</div>`}
-function bindPromptWorkbench(){E.content.querySelectorAll('[data-work-filter]').forEach(b=>b.onclick=()=>{state.work=b.dataset.workFilter;resetPromptPaging();syncUrl();render()});E.content.querySelectorAll('[data-tool-shortcut]').forEach(b=>b.onclick=()=>{state.prompt.tool=b.dataset.toolShortcut;state.work='all';state.category='全部';resetPromptPaging();syncUrl();render()})}
-function renderAssets(){let xs=filt();selectedAssets=new Set([...selectedAssets].filter(id=>store.assets.some(a=>a.id===id)));let html=(IS_ADMIN?importer():'')+assetOverview(xs)+(state.multiSelect?batchBar(xs):'')+(!xs.length?`<div class="empty">${IS_ADMIN?'没有匹配的图片素材。可以把图片或文件夹拖到上方上传。':'没有匹配的图片素材。'}</div>`:`<div class="asset-grid">${xs.map(acard).join('')}</div>`);E.content.innerHTML=html;if(IS_ADMIN)bindImporter();bindBatchControls(xs);bindHealthImages(E.content);E.content.querySelectorAll('[data-select-asset]').forEach(c=>c.onchange=()=>{c.checked?selectedAssets.add(c.value):selectedAssets.delete(c.value);render()})}
-function assetOverview(xs){let all=store.assets,linked=xs.filter(a=>a.relatedPromptIds?.length).length,ok=xs.filter(a=>assetHealthKey(a)==='ok').length,pending=xs.filter(a=>assetHealthKey(a)==='pending').length,changes=draftAssetChanges();return`<div class="asset-toolbar"><div class="asset-overview"><div class="mini-stat"><strong>${xs.length}</strong><span>当前筛选</span></div><div class="mini-stat"><strong>${all.length}</strong><span>素材总数</span></div><div class="mini-stat"><strong>${linked}</strong><span>已关联提示词</span></div><div class="mini-stat"><strong>${ok}</strong><span>可访问图片</span></div><div class="mini-stat"><strong>${pending}</strong><span>等待部署</span></div></div>${IS_ADMIN&&draftDirty?`<div class="notice warn" style="margin:0">待发布变更：新增 ${changes.added}，修改 ${changes.changed}，删除索引 ${changes.removed}。发布到 GitHub 后才会成为公共内容。</div>`:''}</div>`}
-function batchBar(xs){let count=selectedAssets.size,disabled=count?'':'disabled',admin=IS_ADMIN?`<div class="batch-row"><input class="batch-input" id="batchCategory" placeholder="批量分类"><button id="batchSetCategory" ${disabled}>应用分类</button><input class="batch-input" id="batchTags" placeholder="追加标签，逗号分隔"><button id="batchAddTags" ${disabled}>追加标签</button><button class="danger" id="batchDelete" ${disabled}>批量删除索引</button></div>`:'';return`<div class="batchbar"><div class="batch-row"><span class="badge ${count?'catb':''}">已选择 ${count} 个素材</span><button id="batchSelectAll">全选当前筛选</button><button id="batchClear" ${disabled}>清空选择</button><button id="batchCopyPaths" ${disabled}>批量复制路径</button><button id="batchCopyPackages" ${disabled}>批量复制调用包</button><button id="batchManifest" ${disabled}>批量下载清单</button></div>${admin}</div>`}
-function bindBatchControls(xs){let ids=xs.map(a=>a.id),sel=id=>$(id);if(sel('batchSelectAll'))sel('batchSelectAll').onclick=()=>{ids.forEach(id=>selectedAssets.add(id));render()};if(sel('batchClear'))sel('batchClear').onclick=()=>{selectedAssets.clear();render()};if(sel('batchCopyPaths'))sel('batchCopyPaths').onclick=()=>copyText(selectedAssetObjects().map(assetPublicPath).join('\n'),`已复制 ${selectedAssets.size} 个素材路径`);if(sel('batchCopyPackages'))sel('batchCopyPackages').onclick=()=>copyText(selectedAssetObjects().map(assetCallPackage).join('\n\n---\n\n'),`已复制 ${selectedAssets.size} 个调用包`);if(sel('batchManifest'))sel('batchManifest').onclick=downloadSelectedManifest;if(sel('batchSetCategory'))sel('batchSetCategory').onclick=batchSetCategory;if(sel('batchAddTags'))sel('batchAddTags').onclick=batchAddTags;if(sel('batchDelete'))sel('batchDelete').onclick=batchDeleteAssets}
-function selectedAssetObjects(){let ids=new Set(selectedAssets);return store.assets.filter(a=>ids.has(a.id))}
-function acard(a){let url=assetUrl(a),dim=a.width&&a.height?`${a.width} × ${a.height}`:'尺寸未知',size=a.size?fmt(a.size):'大小未知',fmtText=assetFormat(a)||'格式未知',health=assetHealth(a),selected=selectedAssets.has(a.id),admin=IS_ADMIN?`<button data-asset-act="edit" data-asset-id="${esc(a.id)}">编辑</button><button class="danger" data-asset-act="delete" data-asset-id="${esc(a.id)}">删除索引</button>`:'';return`<article class="card asset-card ${selected?'selected':''}"><div class="asset-thumb">${state.multiSelect?`<label class="asset-check"><input type="checkbox" data-select-asset value="${esc(a.id)}" ${selected?'checked':''}><span>选择</span></label>`:''}<span class="badge asset-health ${health.className}" data-health-badge="${esc(a.id)}">${esc(health.label)}</span><button class="thumb-button" data-asset-act="detail" data-asset-id="${esc(a.id)}" aria-label="查看 ${esc(a.title)}">${url?`<img data-health-img="${esc(a.id)}" src="${esc(url)}" alt="${esc(a.title)}" loading="lazy"><span class="preview-error" hidden>图片等待部署或不可访问</span>`:'<span class="preview-missing">图片未找到</span>'}</button></div><div class="card-main"><div class="asset-title-row"><div><h3 class="title">${esc(a.title)}</h3><div class="meta"><span class="badge catb">${esc(a.category)}</span><span>${esc(fmtText.toUpperCase())}</span><span>${esc(dim)}</span><span>${esc(size)}</span></div></div></div><p class="summary">${esc(a.notes||'无说明')}</p><div class="label">路径</div><div class="chips"><span class="badge path-text asset-path">${esc(assetPath(a)||'无路径')}</span></div><div class="label">标签</div><div class="chips">${a.tags.map(x=>`<span class="badge">${esc(x)}</span>`).join('')||'<span class="badge">无标签</span>'}</div><div class="label">关联提示词</div><div class="chips">${rel(a).map(x=>`<span class="badge">${esc(x)}</span>`).join('')||'<span class="badge">未关联</span>'}</div><div class="asset-card-actions"><button class="primary" data-asset-act="copy-image" data-asset-id="${esc(a.id)}">复制图片</button><button data-asset-act="detail" data-asset-id="${esc(a.id)}">详情</button><details class="asset-more"><summary class="menu-summary">更多</summary><div class="menu-panel"><button data-asset-act="copy-path" data-asset-id="${esc(a.id)}">复制路径</button><button data-asset-act="copy-markdown" data-asset-id="${esc(a.id)}">复制 Markdown</button><button data-asset-act="copy-package" data-asset-id="${esc(a.id)}">复制调用包</button><button data-asset-act="download" data-asset-id="${esc(a.id)}">下载原图</button><button data-asset-act="open" data-asset-id="${esc(a.id)}">打开原图</button>${admin}</div></details></div></div></article>`}
-function importer(){let ch=draftAssetChanges(),up=uploadSummary?`<div class="import-result"><strong>最近上传：</strong>成功 ${uploadSummary.ok}，重复 ${uploadSummary.dup}，跳过 ${uploadSummary.skip}，失败 ${uploadSummary.fail}</div>`:'';return`<div class="importer" id="dropZone"><div class="import-title">上传图片到 GitHub 仓库</div><div class="import-note">支持 jpg / png / webp / gif / svg。图片文件会先写入 GitHub；索引改动仍需点击“发布到 GitHub”后才对所有人可见。</div><div class="import-row"><button class="primary" id="zonePickFolder">选择文件夹</button><button id="zonePickFiles">选择图片</button><span class="badge">上传后请发布索引</span><span class="badge dirty">待发布：新增 ${ch.added} / 修改 ${ch.changed} / 删除 ${ch.removed}</span></div><div class="import-result" id="importResult"></div>${up}</div>`}
-function bindImporter(){let z=$('dropZone');if(!z)return;$('zonePickFiles').onclick=()=>$('fileInput')?.click();$('zonePickFolder').onclick=()=>$('folderInput')?.click();['dragenter','dragover'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.add('drag')}));['dragleave','drop'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.remove('drag')}));z.addEventListener('drop',async e=>{let items=await getDropItems(e.dataTransfer);importFileList(items)})}
-async function getDropItems(dt){let out=[];if(dt.items&&dt.items.length){for(let item of dt.items){let entry=item.webkitGetAsEntry?.();if(entry)await walkEntry(entry,'',out);else{let f=item.getAsFile?.();if(f)out.push({file:f,path:f.name})}}}else out=[...dt.files].map(f=>({file:f,path:f.webkitRelativePath||f.name}));return out}
-function walkEntry(entry,path,out){return new Promise(resolve=>{if(entry.isFile){entry.file(f=>{out.push({file:f,path:path+f.name});resolve()})}else if(entry.isDirectory){let reader=entry.createReader(),dir=path+entry.name+'/';let read=()=>reader.readEntries(async entries=>{if(!entries.length){resolve();return}for(let e of entries)await walkEntry(e,dir,out);read()});read()}else resolve()})}
-async function importFileList(items){if(!IS_ADMIN)return;let stat={ok:0,dup:0,skip:0,fail:0};setImportResult('正在上传图片到 GitHub...');for(let it of items){try{let f=it.file,path=it.path||f.webkitRelativePath||f.name;if(!isImage(f,path)){stat.skip++;continue}let hash=await hashFile(f);if(store.assets.some(a=>a.hash===hash)){stat.dup++;continue}let meta=await imageMeta(f),uploaded=await uploadAssetBlob(f,{title:titleFrom(path),category:catFrom(path),width:meta.width,height:meta.height});store.assets.unshift(uploaded);setLocalPreview(uploaded.id,URL.createObjectURL(f));stat.ok++}catch(e){console.error(e);stat.fail++}}uploadSummary=stat;markDirty(`图片上传完成：成功 ${stat.ok}，重复 ${stat.dup}，失败 ${stat.fail}`);setImportResult(`上传完成：成功 ${stat.ok}，跳过重复 ${stat.dup}，跳过非图片 ${stat.skip}，失败 ${stat.fail}`)}
-async function uploadAssetBlob(blob,meta={}){let form=new FormData(),name=meta.fileName||blob.name||'asset';form.append('file',blob,name);form.append('title',meta.title||titleFrom(name));form.append('category',meta.category||'待分类');form.append('notes',meta.notes||'');form.append('width',String(meta.width||0));form.append('height',String(meta.height||0));let res=await fetch(API_ASSETS,{method:'POST',body:form});let data=await res.json().catch(()=>({}));if(!res.ok||!data.asset)throw new Error(data.error||`上传失败 HTTP ${res.status}`);return norm({prompts:store.prompts,assets:[data.asset]}).assets[0]}
-function setImportResult(t){let el=$('importResult');if(el)el.textContent=t}
-function setLocalPreview(id,url){let old=localPreviewUrls.get(id);if(old&&old!==url)URL.revokeObjectURL(old);if(url)localPreviewUrls.set(id,url)}
-function isImage(f,p){return TYPES.includes(f.type)||EXT.test(p)}
-async function hashFile(f){let buf=await f.arrayBuffer(),dig=await crypto.subtle.digest('SHA-256',buf);return[...new Uint8Array(dig)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-function catFrom(p){let parts=p.replace(/\\/g,'/').split('/').filter(Boolean);parts.pop();return parts.length?parts.join(' / '):'待分类'}
-function titleFrom(p){let n=p.replace(/\\/g,'/').split('/').pop()||'未命名图片';return n.replace(/\.[^.]+$/,'')}
-function fmt(n){if(!n)return'大小未知';if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';return(n/1048576).toFixed(1)+' MB'}
-function imageMeta(file){return new Promise(res=>{let u=URL.createObjectURL(file),img=new Image();img.onload=()=>{let w=img.naturalWidth,h=img.naturalHeight;URL.revokeObjectURL(u);res({width:w,height:h})};img.onerror=()=>{URL.revokeObjectURL(u);res({width:0,height:0})};img.src=u})}
-function bindHealthImages(root){root.querySelectorAll('[data-health-img]').forEach(img=>{let id=img.dataset.healthImg,markBroken=()=>{setAssetHealth(id,'broken');img.hidden=true;let msg=img.parentElement?.querySelector('.preview-error');if(msg)msg.hidden=false};img.onload=()=>setAssetHealth(id,'ok');img.onerror=markBroken;if(img.complete){img.naturalWidth?setAssetHealth(id,'ok'):markBroken()}})}
-function setAssetHealth(id,key){let old=assetHealthOverrides.get(id);if(old===key)return;assetHealthOverrides.set(id,key);document.querySelectorAll('[data-health-badge]').forEach(el=>{if(el.dataset.healthBadge!==id)return;let m=healthMeta(key);el.className=`badge asset-health ${m[1]}`;el.textContent=m[0]});if(state.view==='assets'&&state.asset.health!=='all'){clearTimeout(healthRenderTimer);healthRenderTimer=setTimeout(render,120)}}
-async function viewImage(id){let a=asset(id);if(!a)return;let src=assetUrl(a);if(!src){toast('原图未找到');return}E.vi.src=src;E.vi.alt=a.title;E.vt.textContent=a.title;E.vd.showModal()}
-function showAssetDetail(id){let a=asset(id);if(!a)return;E.dt.textContent=a.title;E.db.innerHTML=assetDetailHtml(a);bindHealthImages(E.db);if(!E.dd.open)E.dd.showModal()}
-function assetDetailHtml(a){let src=assetUrl(a),health=assetHealth(a),prompts=(a.relatedPromptIds||[]).map(id=>prompt(id)).filter(Boolean),path=assetPublicPath(a)||assetPath(a)||'无路径';return`<div class="detail-layout"><div class="detail-preview">${src?`<img data-health-img="${esc(a.id)}" src="${esc(src)}" alt="${esc(a.title)}"><span class="preview-error" hidden>图片等待部署或不可访问</span>`:'<span class="preview-missing">图片未找到</span>'}</div><div><div class="detail-grid"><div class="detail-item"><span>分类</span><strong>${esc(a.category)}</strong></div><div class="detail-item"><span>健康状态</span><strong><span class="badge ${health.className}" data-health-badge="${esc(a.id)}">${esc(health.label)}</span></strong></div><div class="detail-item"><span>尺寸</span><strong>${esc(a.width&&a.height?`${a.width} × ${a.height}`:'尺寸未知')}</strong></div><div class="detail-item"><span>比例</span><strong>${esc(ratioLabel(a))}</strong></div><div class="detail-item"><span>格式</span><strong>${esc((assetFormat(a)||'未知').toUpperCase())}</strong></div><div class="detail-item"><span>大小</span><strong>${esc(fmt(a.size))}</strong></div><div class="detail-item"><span>创建时间</span><strong>${esc(a.createdAt||'未知')}</strong></div><div class="detail-item"><span>更新时间</span><strong>${esc(a.updatedAt||'未知')}</strong></div></div><div class="label">路径</div><div class="chips"><span class="badge path-text asset-path">${esc(path)}</span></div><div class="label">标签</div><div class="chips">${a.tags.map(x=>`<span class="badge">${esc(x)}</span>`).join('')||'<span class="badge">无标签</span>'}</div><div class="label">素材说明</div><p class="summary">${esc(a.notes||'无说明')}</p><div class="label">关联提示词</div><div class="chips">${prompts.map(p=>`<span class="badge">${esc(p.title)}</span>`).join('')||'<span class="badge">未关联</span>'}</div><div class="detail-actions"><button class="primary" data-asset-act="copy-image" data-asset-id="${esc(a.id)}">复制图片</button><button data-asset-act="copy-package" data-asset-id="${esc(a.id)}">复制调用包</button><button data-asset-act="copy-path" data-asset-id="${esc(a.id)}">复制路径</button><button data-asset-act="download" data-asset-id="${esc(a.id)}">下载原图</button><button data-asset-act="open" data-asset-id="${esc(a.id)}">打开原图</button>${IS_ADMIN?`<button data-asset-act="edit" data-asset-id="${esc(a.id)}">编辑</button><button class="danger" data-asset-act="delete" data-asset-id="${esc(a.id)}">删除索引</button>`:''}</div></div></div>`}
-function renderBackup(){let title=IS_ADMIN?'导入为管理员草稿':'导入个人备份到本机',btn=IS_ADMIN?'导入并生成草稿':'导入到本机查看',badge=IS_ADMIN?'导入后仍需发布':'不改写公共库',note=IS_ADMIN?'导入会替换当前管理员草稿，但不会立即改写公共库。':'普通访问者导入只会替换当前浏览器里的临时视图，刷新页面可重新读取线上共享库。',legacyGuide=`<div class="notice" style="margin:0"><strong>旧离线仓库导入说明</strong><br>正式入口已统一为 /prompts/ 和 /prompts/admin，旧桌面 HTML 仅作归档，不再作为日常入口维护。普通用户导入备份只影响当前浏览器临时视图；管理员如需迁移旧 JSON，请进入 /prompts/admin 导入为草稿，检查后点击“发布到 GitHub”。</div>`,importBlock=`<div><div class="label">${title}</div><div class="actions" style="justify-content:flex-start"><input id="importJson" type="file" accept="application/json,.json" style="max-width:360px"><button id="importSelected">${btn}</button><span class="badge">${badge}</span></div><div class="notice" style="margin:8px 0 0">${note}</div></div>`;E.content.innerHTML=`<div class="panel"><div class="stats"><div class="stat"><strong>${active().length}</strong><span>当前提示词</span></div><div class="stat"><strong>${arch().length}</strong><span>归档提示词</span></div><div class="stat"><strong>${store.prompts.length}</strong><span>提示词总数</span></div><div class="stat"><strong>${store.assets.length}</strong><span>图片素材</span></div></div>${legacyGuide}<div><div class="label">导出个人备份</div><div class="actions" style="justify-content:flex-start"><button class="primary" id="exportLite">导出轻量备份</button><button id="exportFull">导出完整备份（含图片）</button><span class="badge">不是公共内容源</span></div></div>${importBlock}</div>`;$('exportLite').onclick=()=>exportJson(false);$('exportFull').onclick=()=>exportJson(true);$('importSelected').onclick=importJson}
-function openPrompt(id){if(!IS_ADMIN)return;let p=id?prompt(id):null,f=E.pf.elements;E.pt.textContent=p?'编辑提示词':'新增提示词';E.pf.reset();f.id.value=p?.id||'';f.title.value=p?.title||'';f.category.value=p?.category||(state.category!=='全部'?state.category:'');f.status.value=p?.status||'待验证';f.source.value=p?.source||'手动新增';f.tags.value=(p?.tags||[]).join(', ');f.variables.value=(p?.variables||[]).join(', ');f.summary.value=p?.summary||'';f.body.value=p?.body||'';E.pd.showModal()}
-function savePrompt(e){e.preventDefault();if(!IS_ADMIN)return;let f=E.pf.elements,id=f.id.value,n=now(),old=prompt(id),p={id:id||uid('prompt'),title:f.title.value.trim(),category:f.category.value.trim()||'未分类',tags:arr(f.tags.value),variables:arr(f.variables.value),status:f.status.value.trim()||'待验证',summary:f.summary.value.trim(),body:f.body.value.trim(),source:f.source.value.trim()||'手动新增',createdAt:old?.createdAt||n,updatedAt:n,archived:old?.archived||false};let i=store.prompts.findIndex(x=>x.id===id);i>=0?store.prompts[i]=p:store.prompts.unshift(p);E.pd.close();markDirty(id?'提示词已写入草稿':'提示词已新增到草稿')}
-function archivePrompt(id){let p=prompt(id);if(p&&confirm(`归档“${p.title}”？归档后发布才会对外生效。`)){p.archived=true;p.updatedAt=now();markDirty('已归档到草稿')}}
-function restorePrompt(id){let p=prompt(id);if(p){p.archived=false;p.updatedAt=now();markDirty('已恢复到草稿')}}
-function deletePrompt(id){let p=prompt(id);if(p&&confirm(`永久删除“${p.title}”的索引？发布后对外生效，已上传图片文件不会删除。`)){store.prompts=store.prompts.filter(x=>x.id!==id);store.assets.forEach(a=>a.relatedPromptIds=a.relatedPromptIds.filter(x=>x!==id));markDirty('已从草稿删除')}}
-function openAsset(id){if(!IS_ADMIN)return;let a=asset(id);if(!a)return;let f=E.af.elements;E.at.textContent='编辑图片素材';E.af.reset();E.rs.innerHTML=active().map(p=>`<option value="${esc(p.id)}">${esc(p.title)}</option>`).join('');f.id.value=a.id;f.title.value=a.title;f.category.value=a.category;f.tags.value=(a.tags||[]).join(', ');f.notes.value=a.notes||'';[...E.rs.options].forEach(o=>o.selected=!!a.relatedPromptIds?.includes(o.value));E.ad.showModal()}
-function saveAsset(e){e.preventDefault();if(!IS_ADMIN)return;let f=E.af.elements,id=f.id.value,a=asset(id);if(!a)return;a.title=f.title.value.trim();a.category=f.category.value.trim()||'未分类';a.tags=arr(f.tags.value);a.notes=f.notes.value.trim();a.relatedPromptIds=[...f.relatedPromptIds.selectedOptions].map(o=>o.value);a.updatedAt=now();E.ad.close();if(E.dd.open)showAssetDetail(id);markDirty('图片素材索引已写入草稿')}
-function deleteAsset(id){let a=asset(id);if(a&&confirm(`删除图片素材“${a.title}”的索引？GitHub 中已上传的图片文件会保留。`)){store.assets=store.assets.filter(x=>x.id!==id);selectedAssets.delete(id);if(E.dd.open)E.dd.close();markDirty('图片索引已从草稿删除')}}
-function batchSetCategory(){let v=$('batchCategory')?.value.trim();if(!IS_ADMIN||!v)return toast('请先填写批量分类');selectedAssetObjects().forEach(a=>{a.category=v;a.updatedAt=now()});markDirty(`已批量更新 ${selectedAssets.size} 个素材分类`)}
-function batchAddTags(){let tags=arr($('batchTags')?.value);if(!IS_ADMIN||!tags.length)return toast('请先填写要追加的标签');selectedAssetObjects().forEach(a=>{a.tags=[...new Set([...a.tags,...tags])];a.updatedAt=now()});markDirty(`已批量追加 ${selectedAssets.size} 个素材标签`)}
-function batchDeleteAssets(){let n=selectedAssets.size;if(!IS_ADMIN||!n)return;if(confirm(`删除已选 ${n} 个图片素材索引？GitHub 中已上传的图片文件会保留。`)){let ids=new Set(selectedAssets);store.assets=store.assets.filter(a=>!ids.has(a.id));selectedAssets.clear();markDirty(`已批量删除 ${n} 个素材索引`)}}
-function cleanVarName(v){return String(v||'').trim().replace(/^[{[（【<\s]+|[}\]）】>\s]+$/g,'').trim()}
-function promptRunVars(p){return[...new Set((p.variables||[]).map(cleanVarName).filter(Boolean))]}
-function openRunPrompt(id){let p=prompt(id);if(!p)return;activeRunPromptId=id;E.rt.textContent=`填写变量：${p.title}`;E.rb.innerHTML=promptRunHtml(p);E.rb.querySelectorAll('[data-run-var]').forEach(el=>el.oninput=updateRunPreview);updateRunPreview();E.rd.showModal()}
-function promptRunHtml(p){let vars=promptRunVars(p),fields=vars.length?vars.map(v=>`<label>${esc(v)}<textarea rows="2" data-run-var="${esc(v)}" placeholder="填写 ${esc(v)}，留空则保留原模板"></textarea></label>`).join(''):'<div class="empty">这个提示词没有变量，可以直接复制原文。</div>';return`<div class="notice" style="margin:0">把项目、产品、场景、风格等变量填好后复制，页面会自动记录到“最近使用”和使用次数。</div><div class="label">变量</div><div class="prompt-run-vars">${fields}</div><div class="label">复制预览</div><pre id="runPreview" class="prompt-run-preview"></pre>`}
-function runValues(){let out={};E.rb.querySelectorAll('[data-run-var]').forEach(el=>out[el.dataset.runVar]=el.value.trim());return out}
-function filledPromptText(p,values){let out=p.body,filled=Object.entries(values).filter(([,v])=>v);filled.forEach(([name,value])=>{[`{${name}}`,`[${name}]`,`【${name}】`,`<${name}>`].forEach(token=>{out=out.split(token).join(value)})});if(!filled.length)return out;let head=filled.map(([name,value])=>`- ${name}: ${value}`).join('\n');return`已填写变量：\n${head}\n\n${out}`}
-function updateRunPreview(){let p=prompt(activeRunPromptId),pre=$('runPreview');if(p&&pre)pre.textContent=filledPromptText(p,runValues())}
-function copyFilledPrompt(){let p=prompt(activeRunPromptId);if(!p)return;recordPromptUse(p.id);copyText(filledPromptText(p,runValues()),`已复制填写版：${p.title}`);render()}
-function copyPrompt(id){let p=prompt(id);if(p){recordPromptUse(id);copyText(p.body,`已复制：${p.title}`);render()}}
-function copyDetailPrompt(){let p=prompt(activeDetailPromptId);if(p)copyPrompt(p.id)}
-async function copyAssetImage(id){let a=asset(id);if(!a)return;let src=assetUrl(a),path=assetPublicPath(a)||assetPath(a)||'';if(!src){copyText(path,'原图未找到，已复制图片路径');return}try{if(!navigator.clipboard?.write||typeof ClipboardItem==='undefined')throw new Error('Clipboard image write is not supported');toast('正在复制图片...');let res=await fetch(src,{cache:'no-store'});if(!res.ok)throw new Error(`图片读取失败 HTTP ${res.status}`);let blob=await res.blob(),copyBlob=blob.type==='image/png'?blob:await imageBlobToPng(blob);await navigator.clipboard.write([new ClipboardItem({'image/png':copyBlob})]);toast(`已复制图片：${a.title||'素材'}`)}catch(e){console.warn(e);if(path)copyText(path,'浏览器未允许复制图片，已复制图片路径');else toast('复制图片失败')}}
-function imageBlobToPng(blob){return new Promise((resolve,reject)=>{let url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{try{let c=document.createElement('canvas');c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;let ctx=c.getContext('2d');ctx.drawImage(img,0,0);c.toBlob(b=>{URL.revokeObjectURL(url);b?resolve(b):reject(new Error('图片转换失败'))},'image/png')}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('图片解码失败'))};img.src=url})}
-function assetMarkdown(a){let path=assetPublicPath(a)||assetPath(a);return`![${a.title}](${path})`}
-function assetCallPackage(a){let related=rel(a);return[`图片素材调用包`,`标题：${a.title}`,`分类：${a.category}`,`标签：${a.tags.join('，')||'无'}`,`路径：${assetPublicPath(a)||assetPath(a)||'无路径'}`,`Markdown：${assetMarkdown(a)}`,`尺寸：${a.width&&a.height?`${a.width} × ${a.height}`:'尺寸未知'}`,`格式：${(assetFormat(a)||'未知').toUpperCase()}`,`健康状态：${assetHealth(a).label}`,`关联提示词：${related.join('，')||'未关联'}`,`素材说明：${a.notes||'无说明'}`].join('\n')}
-function downloadAsset(a){let url=assetUrl(a);if(!url)return toast('原图未找到，无法下载');downloadUrl(url,a.fileName||`${safeName(a.title)}.${assetFormat(a)||'png'}`)}
-function openOriginal(a){let url=assetUrl(a);if(!url)return toast('原图未找到');window.open(url,'_blank','noopener')}
-function downloadSelectedManifest(){let items=selectedAssetObjects().map(a=>({id:a.id,title:a.title,category:a.category,tags:a.tags,path:assetPublicPath(a)||assetPath(a),width:a.width,height:a.height,size:a.size,mime:a.mime,notes:a.notes,relatedPromptIds:a.relatedPromptIds,updatedAt:a.updatedAt}));downloadBlob(JSON.stringify({exportedAt:now(),count:items.length,assets:items},null,2),`图片素材清单-${new Date().toISOString().slice(0,10)}.json`,'application/json;charset=utf-8');toast(`已下载 ${items.length} 个素材清单`)}
-function downloadUrl(url,name){let a=document.createElement('a');a.href=url;a.download=name||'';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()}
-function downloadBlob(data,name,type){let blob=new Blob([data],{type}),u=URL.createObjectURL(blob);downloadUrl(u,name);setTimeout(()=>URL.revokeObjectURL(u),1000)}
-function safeName(v){return String(v||'asset').replace(/[\\/:*?"<>|]+/g,'-').slice(0,80)}
-async function copyText(t,msg){try{navigator.clipboard?.writeText?await navigator.clipboard.writeText(t):fallback(t)}catch(e){fallback(t)}toast(msg||'已复制')}
-function fallback(t){let x=document.createElement('textarea');x.value=t;x.style.position='fixed';x.style.left='-9999px';document.body.appendChild(x);x.select();document.execCommand('copy');x.remove()}
-function runAssetAction(act,id){let a=asset(id);if(!a)return;if(act==='detail')showAssetDetail(id);else if(act==='copy-image')copyAssetImage(id);else if(act==='copy-path')copyText(assetPublicPath(a)||assetPath(a),`已复制路径：${a.title}`);else if(act==='copy-markdown')copyText(assetMarkdown(a),`已复制 Markdown：${a.title}`);else if(act==='copy-package')copyText(assetCallPackage(a),`已复制调用包：${a.title}`);else if(act==='download')downloadAsset(a);else if(act==='open')openOriginal(a);else if(act==='edit')openAsset(id);else if(act==='delete')deleteAsset(id)}
-function hasPossibleSecret(){let t=JSON.stringify(publicLibrary());return SECRET_WORDS.some(w=>t.includes(w))||/\bsk-[A-Za-z0-9_-]{20,}\b/i.test(t)}
-async function publishLibrary(){if(!IS_ADMIN||publishing||!draftDirty)return;if(hasPossibleSecret()){toast('草稿中疑似包含密钥，已阻止发布');return}publishing=true;render();try{let res=await fetch(API_LIBRARY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({library:publicLibrary(),message:'Update prompt library'})}),data=await res.json().catch(()=>({}));if(!res.ok||!data.ok)throw new Error(data.error||`HTTP ${res.status}`);draftDirty=false;uploadSummary=null;snapshotAssets();toast('已提交到 GitHub，等待自动部署完成后公开生效')}catch(e){toast(`发布失败：${e.message||e}`)}finally{publishing=false;render()}}
-function blobToDataUrl(blob){return new Promise((res,rej)=>{let r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
-function dataUrlToBlob(url){let [h,b]=url.split(','),mime=(h.match(/data:(.*?);base64/)||[])[1]||'application/octet-stream',bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime})}
-async function exportJson(full){let payload={version:2,backupType:full?'full':'lite',backupScope:'personal',exportedAt:now(),store:publicLibrary(),images:[]};if(full){for(let a of store.assets){try{let src=assetUrl(a);if(!src)continue;let b=await fetch(src,{cache:'no-store'}).then(r=>r.ok?r.blob():null);if(b)payload.images.push({id:a.id,type:b.type,size:b.size,dataUrl:await blobToDataUrl(b)})}catch(e){console.warn(e)}}}downloadBlob(JSON.stringify(payload,null,2),`提示词网页仓库个人${full?'完整':'轻量'}备份-${new Date().toISOString().slice(0,10)}.json`,'application/json;charset=utf-8');toast(full?'个人完整备份已导出':'个人轻量备份已导出')}
-async function importJson(){let file=$('importJson')?.files?.[0];if(!file){toast('请先选择 JSON 文件');return}let msg=IS_ADMIN?'导入会替换当前管理员草稿，不会立即改写公共库。确认继续？':'导入会把当前页面切换为这个备份的本机视图，不会写入公共库。确认继续？';if(!confirm(msg))return;try{let raw=JSON.parse(await file.text());if(!raw||(!raw.store&&!raw.prompts&&!raw.assets))throw new Error('JSON 不包含提示词库数据');let next=norm(raw.store||raw),images=new Map(list(raw.images).map(img=>[img.id,img]));for(let a of next.assets){let img=images.get(a.id)||images.get(a.blobId)||images.get(a.thumbBlobId);if(!img?.dataUrl)continue;if(IS_ADMIN&&!a.src){let uploaded=await uploadAssetBlob(dataUrlToBlob(img.dataUrl),{fileName:a.fileName||`${a.title}.png`,title:a.title,category:a.category,notes:a.notes,width:a.width,height:a.height});Object.assign(a,uploaded,{id:a.id,title:a.title,category:a.category,tags:a.tags,notes:a.notes,relatedPromptIds:a.relatedPromptIds})}else if(!IS_ADMIN){setLocalPreview(a.id,URL.createObjectURL(dataUrlToBlob(img.dataUrl)))}}store=next;state.view='prompts';state.category='全部';state.query='';E.search.value='';draftDirty=IS_ADMIN;if(!IS_ADMIN)snapshotAssets();syncUrl();render();toast(IS_ADMIN?'已导入为管理员草稿，请检查后发布':'已导入个人备份到当前浏览器，不会改写公共库')}catch(e){console.error(e);toast(`导入失败：${e.message||'JSON 格式不正确或图片数据损坏'}`)}}
-let tt;function toast(m){E.toast.textContent=m;E.toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>E.toast.classList.remove('show'),2600)}
-E.tabs.forEach(t=>t.onclick=()=>{state.view=t.dataset.view;state.category='全部';state.source='all';selectedAssets.clear();resetPromptPaging();if(state.view!=='assets')state.multiSelect=false;syncUrl();render()});
-E.search.oninput=()=>{state.query=E.search.value;resetPromptPaging();syncUrl();render()};
-E.categorySearch.oninput=()=>{state.categoryQuery=E.categorySearch.value;renderCats()};
-$('clearSearch').onclick=()=>{E.search.value='';state.query='';resetPromptPaging();syncUrl();render();E.search.focus()};
-E.toggleSidebar.onclick=()=>{document.body.classList.toggle('sidebar-hidden');E.toggleSidebar.textContent=document.body.classList.contains('sidebar-hidden')?'显示分类':'隐藏分类'};
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
-E.rc.onclick=copyFilledPrompt;
-E.pdc.onclick=copyDetailPrompt;
-document.addEventListener('click',e=>{let b=e.target.closest('[data-asset-act]');if(!b)return;e.preventDefault();runAssetAction(b.dataset.assetAct,b.dataset.assetId);b.closest('details.asset-more')?.removeAttribute('open')});
-E.vd.addEventListener('close',()=>{E.vi.removeAttribute('src')});
-E.pf.onsubmit=savePrompt;
-E.af.onsubmit=saveAsset;
-window.addEventListener('beforeunload',()=>localPreviewUrls.forEach(u=>URL.revokeObjectURL(u)));
-loadLibrary();
+const API_LIBRARY="/api/prompts/library";
+const API_INDEX="/prompts-data/search-index.json";
+const API_SUGGESTIONS="/prompts-data/web-suggestions.json";
+const API_CHECKOUT="/api/prompts/checkout";
+const API_CONFIRM="/api/prompts/checkout/confirm";
+const API_ENTITLEMENT="/api/prompts/entitlement";
+const API_PORTAL="/api/prompts/customer-portal";
+const IS_ADMIN=location.pathname.replace(/\/+$/,"").startsWith("/prompts/admin");
+const FAVORITE_KEY="prompt-commerce-favorites-v1";
+const SEARCHES_KEY="prompt-commerce-searches-v1";
+const qs=new URLSearchParams(location.search);
+const state={query:qs.get("q")||"",tool:qs.get("tool")||"all",modality:qs.get("mod")||"all",access:qs.get("access")||"all",pack:qs.get("pack")||"all",sort:qs.get("sort")||"relevance"};
+let store={version:2,prompts:[],assets:[]},indexData={packs:[],prompts:[]},suggestions={suggestions:[]},entitlement={pro:false,packs:[]};
+let dirty=false,activeDetailId="",lastResults=[];
+const $=id=>document.getElementById(id);
+const E={mode:$("modeBadge"),summary:$("topSummary"),search:$("search"),hot:$("hotKeywords"),metrics:$("metrics"),ent:$("entitlementBadges"),tool:$("toolFilter"),mod:$("modalityFilter"),access:$("accessFilter"),pack:$("packFilter"),sort:$("sortFilter"),saved:$("savedChips"),filters:$("activeFilters"),heading:$("resultHeading"),sub:$("resultSub"),content:$("content"),admin:$("adminPanel"),dirty:$("dirtyBadge"),toast:$("toast"),detail:$("detailDialog"),detailTitle:$("detailTitle"),detailBody:$("detailBody"),detailCopy:$("detailCopy"),editor:$("editorDialog"),editorForm:$("editorForm"),editorTitle:$("editorTitle"),suggestions:$("suggestionDialog"),suggestionBody:$("suggestionBody")};
+const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+const arr=value=>Array.isArray(value)?value:String(value||"").split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
+const now=()=>new Date().toISOString();
+const promptById=id=>store.prompts.find(prompt=>prompt.id===id);
+const indexById=id=>indexData.prompts.find(prompt=>prompt.id===id);
+const packs=()=>Array.isArray(indexData.packs)?indexData.packs:[];
+const packById=id=>packs().find(pack=>pack.id===id);
+const favorites=()=>new Set(JSON.parse(localStorage.getItem(FAVORITE_KEY)||"[]"));
+const saveFavorites=set=>localStorage.setItem(FAVORITE_KEY,JSON.stringify([...set].slice(0,200)));
+const savedSearches=()=>JSON.parse(localStorage.getItem(SEARCHES_KEY)||"[]");
+const saveSearch=query=>{let q=String(query||"").trim();if(!q)return;localStorage.setItem(SEARCHES_KEY,JSON.stringify([q,...savedSearches().filter(x=>x!==q)].slice(0,8)))};
+function toast(message){E.toast.textContent=message;E.toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>E.toast.classList.remove("show"),2200)}
+function normalizePrompt(prompt,index=0){return{ id:String(prompt.id||`prompt-${index}`),title:String(prompt.title||"未命名提示词"),category:String(prompt.category||"未分类"),tags:arr(prompt.tags),variables:arr(prompt.variables),status:String(prompt.status||"待验证"),summary:String(prompt.summary||""),body:String(prompt.body||""),source:String(prompt.source||"手动新增"),createdAt:String(prompt.createdAt||now()),updatedAt:String(prompt.updatedAt||now()),archived:Boolean(prompt.archived),access:["free","pro","pack"].includes(String(prompt.access||""))?String(prompt.access):"free",packId:String(prompt.packId||""),stripePriceId:String(prompt.stripePriceId||""),qualityScore:Number(prompt.qualityScore||60),exampleOutput:String(prompt.exampleOutput||""),sourceType:String(prompt.sourceType||"curated"),verifiedAt:String(prompt.verifiedAt||prompt.updatedAt||prompt.createdAt||""),seoKeywords:arr(prompt.seoKeywords)}}
+function normalizeStore(raw){let prompts=Array.isArray(raw?.prompts)?raw.prompts.map(normalizePrompt):[];return{version:Number(raw?.version)||2,migratedAt:raw?.migratedAt||"",updatedAt:raw?.updatedAt||now(),prompts,assets:Array.isArray(raw?.assets)?raw.assets:[]}}
+function clientIndexFromStore(){return{packs:indexData.packs||[],prompts:store.prompts.map(prompt=>({id:prompt.id,title:prompt.title,category:prompt.category,summary:prompt.summary,tags:prompt.tags,variablesCount:prompt.variables.length,access:prompt.access,packId:prompt.packId,qualityScore:prompt.qualityScore,sourceType:prompt.sourceType,verifiedAt:prompt.verifiedAt,seoKeywords:prompt.seoKeywords,tool:tagValue(prompt,"工具")||inferTool(prompt),modality:tagValue(prompt,"模态")||inferModality(prompt),use:tagValue(prompt,"用途")||prompt.category,difficulty:tagValue(prompt,"难度")||(prompt.variables.length>6?"进阶":"基础"),archived:prompt.archived,searchable:[prompt.title,prompt.category,prompt.summary,prompt.source,prompt.tags.join(" "),prompt.variables.join(" "),prompt.seoKeywords.join(" ")].join(" ").toLowerCase()}))}}
+function tagValue(prompt,label){let prefixes=[`${label}:`,`${label}：`];return(prompt.tags||[]).find(tag=>prefixes.some(prefix=>String(tag).startsWith(prefix)))?.replace(new RegExp(`^${label}[:：]`),"").trim()||""}
+function inferTool(prompt){let text=[prompt.title,prompt.category,prompt.summary,prompt.tags.join(" ")].join(" ");for(let tool of["Midjourney","Sora","Runway","Suno","ChatGPT","GPT Image","Cursor"])if(text.includes(tool))return tool;return"通用 AIGC"}
+function inferModality(prompt){let text=[prompt.title,prompt.category,prompt.summary,prompt.tags.join(" ")].join(" ");for(let mod of["视频","图像","音频","多模态","代码","文本"])if(text.includes(mod))return mod;return"AIGC"}
+function syncControls(){E.search.value=state.query;E.tool.value=state.tool;E.mod.value=state.modality;E.access.value=state.access;E.pack.value=state.pack;E.sort.value=state.sort}
+function syncUrl(){let p=new URLSearchParams();if(state.query)p.set("q",state.query);if(state.tool!=="all")p.set("tool",state.tool);if(state.modality!=="all")p.set("mod",state.modality);if(state.access!=="all")p.set("access",state.access);if(state.pack!=="all")p.set("pack",state.pack);if(state.sort!=="relevance")p.set("sort",state.sort);history.replaceState(null,"",location.pathname+(p.toString()?`?${p}`:""))}
+async function loadAll(){E.mode.textContent=IS_ADMIN?"管理员模式":"公开搜索";E.admin.hidden=!IS_ADMIN;try{await maybeConfirmCheckout();let [library,index,suggestion,access]=await Promise.all([fetchJson(API_LIBRARY),fetchJson(API_INDEX).catch(()=>null),fetchJson(API_SUGGESTIONS).catch(()=>({suggestions:[]})),fetchJson(API_ENTITLEMENT).catch(()=>({pro:false,packs:[]}))]);store=normalizeStore(library);indexData=index&&Array.isArray(index.prompts)?index:clientIndexFromStore();suggestions=suggestion||{suggestions:[]};entitlement=normalizeEntitlement(access);hydrateFilters();render()}catch(error){console.error(error);E.content.innerHTML=`<div class="empty"><strong>提示词库加载失败</strong>${esc(error.message||error)}</div>`}}
+async function fetchJson(url,options){let res=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);return data}
+function normalizeEntitlement(value){return{pro:Boolean(value?.pro),packs:Array.isArray(value?.packs)?value.packs:[],customer:value?.customer||"",email:value?.email||""}}
+async function maybeConfirmCheckout(){let sessionId=qs.get("session_id");if(qs.get("checkout")!=="success"||!sessionId)return;try{let data=await fetchJson(`${API_CONFIRM}?session_id=${encodeURIComponent(sessionId)}`);entitlement=normalizeEntitlement(data.entitlement);toast("支付状态已确认");history.replaceState(null,"",location.pathname)}catch(error){toast(`支付确认失败：${error.message||error}`)}}
+function hydrateFilters(){let tools=[...new Set(indexData.prompts.map(x=>x.tool).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));let mods=[...new Set(indexData.prompts.map(x=>x.modality).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));E.tool.innerHTML=`<option value="all">全部工具</option>${tools.map(x=>`<option>${esc(x)}</option>`).join("")}`;E.mod.innerHTML=`<option value="all">全部模态</option>${mods.map(x=>`<option>${esc(x)}</option>`).join("")}`;E.pack.innerHTML=`<option value="all">全部精选包</option>${packs().map(pack=>`<option value="${esc(pack.id)}">${esc(pack.title)}</option>`).join("")}`;syncControls()}
+function isUnlocked(entry){if(IS_ADMIN||entry.access==="free")return true;if(entitlement.pro)return true;if(entry.access==="pack"&&entitlement.packs.includes(entry.packId))return true;return false}
+function searchResults(){let q=state.query.trim().toLowerCase();let tokens=q.split(/\s+/).filter(Boolean);let hasFilter=[state.tool,state.modality,state.access,state.pack].some(value=>value&&value!=="all");if(!q&&!hasFilter)return[];let results=[];for(let entry of indexData.prompts){if(entry.archived)continue;if(state.tool!=="all"&&entry.tool!==state.tool)continue;if(state.modality!=="all"&&entry.modality!==state.modality)continue;if(state.access!=="all"&&entry.access!==state.access)continue;if(state.pack!=="all"&&entry.packId!==state.pack)continue;let searchable=String(entry.searchable||"").toLowerCase();let score=Number(entry.qualityScore||0)/10;if(q){let hit=false;for(let token of tokens){if(String(entry.title||"").toLowerCase().includes(token)){score+=26;hit=true}else if(searchable.includes(token)){score+=10;hit=true}}if(!hit)continue}results.push({...entry,score})}if(state.sort==="quality")results.sort((a,b)=>Number(b.qualityScore||0)-Number(a.qualityScore||0));else if(state.sort==="newest")results.sort((a,b)=>Date.parse(b.verifiedAt||0)-Date.parse(a.verifiedAt||0));else results.sort((a,b)=>b.score-a.score||Number(b.qualityScore||0)-Number(a.qualityScore||0));return results}
+function render(){syncControls();renderSummary();lastResults=searchResults();renderFilters();if(lastResults.length)renderResultGrid(lastResults);else renderLanding()}
+function renderSummary(){let active=store.prompts.filter(prompt=>!prompt.archived);let counts=active.reduce((out,prompt)=>{out[prompt.access]=(out[prompt.access]||0)+1;return out},{});
+E.summary.textContent=`${active.length} 条提示词 · 免费 ${counts.free||0} · Pro ${counts.pro||0} · 精选包 ${counts.pack||0}`;
+E.metrics.innerHTML=[["总提示词",active.length],["免费",counts.free||0],["Pro",counts.pro||0],["精选包",counts.pack||0]].map(([k,v])=>`<div class="metric"><strong>${v}</strong><span>${k}</span></div>`).join("");
+E.ent.innerHTML=`<span class="badge ${entitlement.pro?"pro":"free"}">${entitlement.pro?"Pro 已解锁":"未登录 Pro"}</span>${entitlement.packs.map(id=>`<span class="badge pack">${esc(packById(id)?.title||id)}</span>`).join("")}`;
+E.dirty.textContent=dirty?"有未发布草稿":"无本地草稿";E.dirty.className=`badge ${dirty?"pack":"free"}`;
+let keywords=["电商短视频开头","商品图一致性","Runway 分镜","Suno 品牌口播","多模态工作流","AI 视频角色一致性"];
+E.hot.innerHTML=keywords.map(x=>`<button class="chip" data-query="${esc(x)}">${esc(x)}</button>`).join("");
+E.saved.innerHTML=savedSearches().length?`<span class="badge">最近搜索</span>${savedSearches().map(x=>`<button class="chip" data-query="${esc(x)}">${esc(x)}</button>`).join("")}`:"";
+}
+function renderFilters(){let active=[];if(state.query)active.push(`关键词：${state.query}`);if(state.tool!=="all")active.push(`工具：${state.tool}`);if(state.modality!=="all")active.push(`模态：${state.modality}`);if(state.access!=="all")active.push(`访问：${state.access}`);if(state.pack!=="all")active.push(`包：${packById(state.pack)?.title||state.pack}`);E.filters.innerHTML=active.map(x=>`<span class="badge">${esc(x)}</span>`).join("")}
+function renderLanding(){E.heading.textContent="先搜索，再浏览结果";E.sub.textContent=state.query?"没有匹配结果，试试热门关键词或放宽筛选。":"首页不铺满 1810 条内容，搜索后才展开可复制结果。";E.content.innerHTML=`<div class="landing"><section class="landing-section"><div class="landing-head"><div><h3>精选包入口</h3><p>用于商业化售卖的主题包，第一阶段通过 Stripe Checkout 解锁。</p></div></div><div class="grid">${packs().map(packCard).join("")}</div></section><section class="landing-section"><div class="landing-head"><div><h3>联网趋势建议</h3><p>只沉淀主题、关键词和结构灵感，不复制外站提示词原文。</p></div></div><div class="grid">${(suggestions.suggestions||[]).map(suggestionCard).join("")}</div></section></div>`}
+function packCard(pack){return`<article class="pack-card"><div class="meta"><span class="badge pack">精选包</span><span class="badge">${Number(pack.promptCount||0)} 条</span></div><h4>${esc(pack.title)}</h4><p>${esc(pack.description)}</p><div class="meta"><span class="badge">${esc(pack.audience||"AIGC 创作者")}</span><span class="badge">${esc(pack.stripeEnv||"Stripe env 待配置")}</span></div><div class="card-actions"><button data-pack-search="${esc(pack.id)}">查看内容</button><button class="primary" data-buy-pack="${esc(pack.id)}">购买包</button></div></article>`}
+function suggestionCard(item){return`<article class="suggestion-card"><div class="meta"><span class="badge">趋势</span><span class="badge">优先级 ${Number(item.priority||0)}</span></div><h4>${esc(item.keyword)}</h4><p>${esc(item.theme)}</p><div class="chips">${(item.suggestedFilters||[]).map(x=>`<span class="badge">${esc(x)}</span>`).join("")}</div>${IS_ADMIN?`<button data-draft-suggestion="${esc(item.id)}">生成草稿</button>`:""}</article>`}
+function renderResultGrid(results){E.heading.textContent=`找到 ${results.length} 条匹配提示词`;E.sub.textContent="结果按相关性、质量评分和访问状态排序。锁定内容需要 Pro 或对应精选包。";E.content.innerHTML=`<div class="grid">${results.slice(0,72).map(promptCard).join("")}</div>${results.length>72?`<div class="empty"><strong>还有 ${results.length-72} 条结果</strong>请继续缩小关键词或筛选条件。</div>`:""}`}
+function promptCard(entry){let prompt=promptById(entry.id)||entry,locked=!isUnlocked(entry),accessClass=entry.access==="free"?"free":entry.access==="pro"?"pro":"pack";return`<article class="prompt-card" data-open="${esc(entry.id)}"><div class="prompt-top"><div class="prompt-icon">${esc(String(entry.modality||"AI").slice(0,2))}</div><div><div class="meta"><span class="badge ${accessClass}">${esc(entry.access)}</span>${locked?'<span class="badge pro">锁定</span>':""}<span class="badge">评分 ${Number(entry.qualityScore||0)}</span></div><h3>${esc(entry.title)}</h3></div></div><p class="summary">${esc(entry.summary||prompt.summary||"暂无摘要")}</p><div class="meta"><span class="badge">${esc(entry.tool||"通用")}</span><span class="badge">${esc(entry.modality||"AIGC")}</span><span class="badge">${esc(entry.use||"创作")}</span><span class="badge">${esc(entry.difficulty||"基础")}</span><span class="badge">变量 ${Number(entry.variablesCount||prompt.variables?.length||0)}</span></div><div class="card-actions"><button data-copy="${esc(entry.id)}" ${locked?"disabled":""}>复制</button><button class="primary" data-open="${esc(entry.id)}">${locked?"解锁/详情":"查看详情"}</button></div></article>`}
+function openDetail(id){let entry=indexById(id)||promptById(id),prompt=promptById(id)||entry;if(!entry||!prompt)return;activeDetailId=id;let locked=!isUnlocked(entry);E.detailTitle.textContent=prompt.title;let pack=packById(entry.packId);E.detailBody.innerHTML=`<div class="meta"><span class="badge ${entry.access==="free"?"free":entry.access==="pro"?"pro":"pack"}">${esc(entry.access)}</span><span class="badge">质量 ${Number(entry.qualityScore||prompt.qualityScore||0)}</span><span class="badge">${esc(entry.tool||"通用")}</span><span class="badge">${esc(entry.modality||"AIGC")}</span>${pack?`<span class="badge pack">${esc(pack.title)}</span>`:""}</div><p class="summary">${esc(prompt.summary||"")}</p><div class="chips">${(prompt.seoKeywords||entry.seoKeywords||[]).map(x=>`<span class="badge">${esc(x)}</span>`).join("")}</div><div class="field full">示例输出</div><p class="summary">${esc(prompt.exampleOutput||"暂无示例输出")}</p>${locked?lockedHtml(entry):`<div class="field full">提示词正文</div><pre>${esc(prompt.body||"")}</pre>`}${IS_ADMIN?`<div class="admin-row" style="margin-top:12px"><button data-edit="${esc(id)}">编辑</button></div>`:""}`;E.detailCopy.disabled=locked;E.detail.showModal()}
+function lockedHtml(entry){let pack=packById(entry.packId);return`<div class="empty"><strong>${entry.access==="pro"?"Pro 会员内容":"精选包内容"}</strong>${pack?`属于「${esc(pack.title)}」。`:"开通后可复制完整正文。"}<div class="admin-row" style="justify-content:center;margin-top:12px"><button class="primary" data-buy-${entry.access==="pack"?"pack":"pro"}="${esc(entry.packId||"")}">${entry.access==="pack"?"购买精选包":"开通 Pro"}</button></div></div>`}
+async function copyPrompt(id){let entry=indexById(id)||promptById(id),prompt=promptById(id);if(!entry||!prompt)return;if(!isUnlocked(entry))return openDetail(id);if(!prompt.body)return toast("当前提示词正文未解锁或不可用");try{await navigator.clipboard.writeText(prompt.body)}catch{let area=document.createElement("textarea");area.value=prompt.body;area.style.position="fixed";area.style.left="-9999px";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove()}toast(`已复制：${prompt.title}`);let fav=favorites();fav.add(id);saveFavorites(fav)}
+function openEditor(id){if(!IS_ADMIN)return;let p=id?promptById(id):null;let f=E.editorForm.elements;E.editorTitle.textContent=p?"编辑提示词":"新增提示词";E.editorForm.reset();f.id.value=p?.id||"";f.title.value=p?.title||"";f.category.value=p?.category||"";f.status.value=p?.status||"待验证";f.source.value=p?.source||"手动新增";f.access.value=p?.access||"free";f.packId.value=p?.packId||"";f.stripePriceId.value=p?.stripePriceId||"";f.qualityScore.value=p?.qualityScore||70;f.sourceType.value=p?.sourceType||"curated";f.verifiedAt.value=p?.verifiedAt||now().slice(0,10);f.tags.value=(p?.tags||[]).join(", ");f.variables.value=(p?.variables||[]).join(", ");f.seoKeywords.value=(p?.seoKeywords||[]).join(", ");f.exampleOutput.value=p?.exampleOutput||"";f.summary.value=p?.summary||"";f.body.value=p?.body||"";E.editor.showModal()}
+function saveEditor(event){event.preventDefault();if(!IS_ADMIN)return;let f=E.editorForm.elements,id=f.id.value.trim(),time=now(),old=promptById(id);let prompt=normalizePrompt({id:id||`prompt-${Date.now().toString(36)}`,title:f.title.value.trim(),category:f.category.value.trim(),status:f.status.value.trim(),source:f.source.value.trim(),access:f.access.value,packId:f.packId.value.trim(),stripePriceId:f.stripePriceId.value.trim(),qualityScore:Number(f.qualityScore.value||70),sourceType:f.sourceType.value.trim(),verifiedAt:f.verifiedAt.value.trim(),tags:arr(f.tags.value),variables:arr(f.variables.value),seoKeywords:arr(f.seoKeywords.value),exampleOutput:f.exampleOutput.value.trim(),summary:f.summary.value.trim(),body:f.body.value.trim(),createdAt:old?.createdAt||time,updatedAt:time,archived:old?.archived||false});let index=store.prompts.findIndex(x=>x.id===prompt.id);if(index>=0)store.prompts[index]=prompt;else store.prompts.unshift(prompt);indexData=clientIndexFromStore();dirty=true;E.editor.close();render();toast("已保存到管理员草稿")}
+function publicLibrary(){return{version:store.version||2,migratedAt:store.migratedAt||"",updatedAt:now(),prompts:store.prompts,assets:store.assets||[]}}
+async function publishLibrary(){if(!IS_ADMIN||!dirty)return toast("没有需要发布的草稿");try{let data=await fetchJson(API_LIBRARY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({library:publicLibrary(),message:"Update prompt commerce library"})});dirty=false;render();toast(data.commit?"已提交到 GitHub，等待部署":"已发布")}catch(error){toast(`发布失败：${error.message||error}`)}}
+function renderSuggestionReview(){E.suggestionBody.innerHTML=`<div class="grid">${(suggestions.suggestions||[]).map(suggestionCard).join("")}</div>`;E.suggestions.showModal()}
+function draftFromSuggestion(id){let item=(suggestions.suggestions||[]).find(x=>x.id===id);if(!item)return;openEditor();let f=E.editorForm.elements;f.title.value=`${item.keyword}提示词模板`;f.category.value="AIGC 趋势草稿";f.status.value="待验证";f.source.value="联网建议审核池";f.access.value="pro";f.qualityScore.value=72;f.sourceType.value="web-inspired-draft";f.verifiedAt.value=now().slice(0,10);f.tags.value=arr(item.suggestedFilters).join(", ");f.seoKeywords.value=[item.keyword,...arr(item.suggestedFilters)].join(", ");f.summary.value=item.theme;f.exampleOutput.value=`输出一份围绕「${item.keyword}」的自写 AIGC 提示词结构。`;f.body.value=`目标：围绕「${item.keyword}」生成可复用提示词。\n\n背景：${item.theme}\n\n输入变量：\n- {项目目标}\n- {目标平台}\n- {受众}\n- {风格方向}\n- {交付格式}\n\n复制即用提示词：\n请基于 {项目目标}，为 {目标平台} 的 {受众} 设计一份 AIGC 生成提示词。要求：结构清晰、变量可替换、明确风格方向为 {风格方向}，输出格式为 {交付格式}。避免复制任何外站提示词原文，只使用主题、关键词和结构灵感。\n\n质量标准：\n1. 明确任务目标。\n2. 明确输入变量。\n3. 明确输出格式。\n4. 包含失败修正建议。\n5. 包含边界提醒。\n\n边界提醒：不要使用外站 prompt 原文，不生成侵权、欺诈、仿冒或规避审核内容。`}
+async function startCheckout(productType,packId=""){try{let data=await fetchJson(API_CHECKOUT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productType,packId})});if(data.checkoutUrl)location.assign(data.checkoutUrl);else toast("Stripe Checkout 未返回跳转地址")}catch(error){toast(`支付未配置：${error.message||error}`)}}
+async function openPortal(){try{let data=await fetchJson(API_PORTAL,{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});if(data.url)location.assign(data.url)}catch(error){toast(`订阅管理未配置：${error.message||error}`)}}
+document.addEventListener("click",event=>{let target=event.target.closest("button,a,article");if(!target)return;if(target.dataset.query){state.query=target.dataset.query;saveSearch(state.query);syncUrl();render();return}if(target.dataset.packSearch){state.pack=target.dataset.packSearch;state.access="pack";syncUrl();render();return}if(target.dataset.buyPack!==undefined){startCheckout("pack",target.dataset.buyPack);return}if(target.dataset.buyPro!==undefined||target.id==="buyPro"){startCheckout("pro");return}if(target.dataset.open){openDetail(target.dataset.open);return}if(target.dataset.copy){event.stopPropagation();copyPrompt(target.dataset.copy);return}if(target.dataset.edit){openEditor(target.dataset.edit);return}if(target.dataset.draftSuggestion){draftFromSuggestion(target.dataset.draftSuggestion);return}if(target.dataset.close){$(target.dataset.close).close();return}});
+$("runSearch").onclick=()=>{state.query=E.search.value.trim();saveSearch(state.query);syncUrl();render()};
+$("clearSearch").onclick=()=>{state.query="";E.search.value="";syncUrl();render();E.search.focus()};
+E.search.onkeydown=event=>{if(event.key==="Enter")$("runSearch").click()};
+E.search.oninput=()=>{state.query=E.search.value.trim();syncUrl();render()};
+[E.tool,E.mod,E.access,E.pack,E.sort].forEach(control=>control.onchange=()=>{state.tool=E.tool.value;state.modality=E.mod.value;state.access=E.access.value;state.pack=E.pack.value;state.sort=E.sort.value;syncUrl();render()});
+$("newPrompt").onclick=()=>openEditor();
+$("publishLibrary").onclick=publishLibrary;
+$("openSuggestionReview").onclick=renderSuggestionReview;
+$("managePortal").onclick=openPortal;
+E.editorForm.onsubmit=saveEditor;
+E.detailCopy.onclick=()=>copyPrompt(activeDetailId);
+loadAll();
   </script>
 </body>
 </html>

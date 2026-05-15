@@ -6,6 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "../..");
 const libraryPath = path.join(repoRoot, "prompts-data", "library.json");
+const searchIndexPath = path.join(repoRoot, "prompts-data", "search-index.json");
+const suggestionsPath = path.join(repoRoot, "prompts-data", "web-suggestions.json");
 
 const OLD_PREFIX = "general-template-";
 const V2_PREFIX = "v2-";
@@ -86,6 +88,8 @@ function jaccard(a, b) {
 }
 
 const library = JSON.parse(await readFile(libraryPath, "utf8"));
+const searchIndex = JSON.parse(await readFile(searchIndexPath, "utf8"));
+const webSuggestions = JSON.parse(await readFile(suggestionsPath, "utf8"));
 const prompts = Array.isArray(library.prompts) ? library.prompts : fail("prompts must be an array");
 const v2 = prompts.filter((item) => String(item?.id || "").startsWith(V2_PREFIX));
 const old = prompts.filter((item) => String(item?.id || "").startsWith(OLD_PREFIX));
@@ -107,6 +111,20 @@ if (duplicateTitles.length) fail(`Duplicate prompt titles: ${duplicateTitles.sli
 for (const prompt of prompts) {
   if (!prompt.id || !prompt.title || !prompt.category || !prompt.body) {
     fail(`Prompt has required empty field: ${prompt.id || prompt.title || "(unknown)"}`);
+  }
+  if (!["free", "pro", "pack"].includes(String(prompt.access || ""))) {
+    fail(`${prompt.id} has invalid access: ${prompt.access}`);
+  }
+  if (!Number.isFinite(Number(prompt.qualityScore)) || Number(prompt.qualityScore) < 1 || Number(prompt.qualityScore) > 100) {
+    fail(`${prompt.id} has invalid qualityScore: ${prompt.qualityScore}`);
+  }
+  if (!prompt.sourceType) fail(`${prompt.id} missing sourceType`);
+  if (!prompt.verifiedAt) fail(`${prompt.id} missing verifiedAt`);
+  if (!Array.isArray(prompt.seoKeywords) || !prompt.seoKeywords.length) {
+    fail(`${prompt.id} missing seoKeywords`);
+  }
+  if (prompt.access === "pack" && !prompt.packId) {
+    fail(`${prompt.id} is pack-gated but missing packId`);
   }
 }
 
@@ -146,6 +164,41 @@ for (const [category, items] of countGrouped(v2, (prompt) => prompt.category)) {
   }
 }
 
+if (!searchIndex || searchIndex.version !== 1) fail("search-index.json must have version 1");
+if (!Array.isArray(searchIndex.prompts) || searchIndex.prompts.length !== prompts.length) {
+  fail(`search-index.json prompt count mismatch: ${searchIndex.prompts?.length || 0}`);
+}
+if (!Array.isArray(searchIndex.packs) || searchIndex.packs.length < 3) {
+  fail("search-index.json must define commerce packs");
+}
+const indexIds = new Set(searchIndex.prompts.map((prompt) => prompt.id));
+for (const prompt of prompts) {
+  if (!indexIds.has(prompt.id)) fail(`search-index.json missing prompt ${prompt.id}`);
+}
+const accessCounts = countBy(prompts.map((prompt) => prompt.access));
+for (const access of ["free", "pro", "pack"]) {
+  if (!accessCounts.get(access)) fail(`Expected at least one ${access} prompt`);
+}
+for (const entry of searchIndex.prompts) {
+  if (Object.prototype.hasOwnProperty.call(entry, "body")) {
+    fail(`search-index.json must not include prompt body: ${entry.id}`);
+  }
+  if (!entry.searchable || String(entry.searchable).length < 20) {
+    fail(`search-index.json entry has weak searchable text: ${entry.id}`);
+  }
+}
+
+if (!webSuggestions || webSuggestions.version !== 1) fail("web-suggestions.json must have version 1");
+if (!Array.isArray(webSuggestions.suggestions) || webSuggestions.suggestions.length < 3) {
+  fail("web-suggestions.json must contain reviewable suggestions");
+}
+for (const suggestion of webSuggestions.suggestions) {
+  const serialized = JSON.stringify(suggestion);
+  if (/"(body|promptBody|originalPrompt)"\s*:/.test(serialized)) {
+    fail(`web suggestion must not store external prompt text: ${suggestion.id || suggestion.keyword}`);
+  }
+}
+
 function countGrouped(values, keyFn) {
   const out = new Map();
   for (const value of values) {
@@ -162,3 +215,6 @@ console.log(`V2 prompts: ${v2.length}`);
 console.log(`Preserved prompts: ${preserved.length}`);
 console.log(`Old general-template prompts: ${old.length}`);
 console.log(`Modalities: ${[...modalityCounts].map(([key, value]) => `${key}:${value}`).join(", ")}`);
+console.log(`Access: ${[...accessCounts].map(([key, value]) => `${key}:${value}`).join(", ")}`);
+console.log(`Search index prompts: ${searchIndex.prompts.length}`);
+console.log(`Web suggestions: ${webSuggestions.suggestions.length}`);

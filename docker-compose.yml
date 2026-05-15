@@ -1,0 +1,16 @@
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.15
+    container_name: zhangwei-prompts-meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_ENV: development
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - prompts-meili-data:/meili_data
+    profiles:
+      - search
+
+volumes:
+  prompts-meili-data:
