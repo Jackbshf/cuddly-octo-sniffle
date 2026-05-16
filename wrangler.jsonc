@@ -16,6 +16,8 @@
     "run_worker_first": [
       "/admin",
       "/admin/*",
+      "/console",
+      "/console/*",
       "/api/portfolio-admin/*",
       "/api/prompts/*",
       "/prompts",

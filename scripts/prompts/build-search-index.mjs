@@ -12,28 +12,60 @@ const shouldWriteLibrary = process.argv.includes("--write-library");
 
 const packDefinitions = [
   {
-    id: "video-commerce-pro",
-    title: "短视频电商转化精选包",
-    description: "围绕商品卖点、口播、分镜、剧情短视频和投放素材的高转化提示词组合。",
-    audience: "电商商家 / 短视频团队",
-    contactIntent: "video-commerce",
-    keywords: ["视频", "短视频", "电商", "商品", "口播", "分镜", "剧情", "带货", "投放", "广告"]
-  },
-  {
-    id: "image-product-pro",
-    title: "商品视觉与海报精选包",
-    description: "覆盖产品图、海报、详情页主图、KV、材质表现和品牌视觉方向。",
-    audience: "品牌视觉 / 设计师",
+    id: "image-product-pack",
+    title: "图像产品广告主题包",
+    description: "商品主图、海报、生活方式场景、包装系列和广告视觉的可复制提示词集合。",
+    audience: "品牌视觉 / 电商设计",
     contactIntent: "image-product",
-    keywords: ["图像", "产品", "商品", "海报", "视觉", "KV", "材质", "品牌", "摄影", "主图"]
+    keywords: ["图像", "产品", "广告", "海报", "主视觉", "商品", "包装", "视觉"]
   },
   {
-    id: "multi-modal-studio-pro",
-    title: "多模态创作流程精选包",
-    description: "用于图像、视频、音频和文本之间的跨模态创意生产与复用流程。",
-    audience: "AIGC 创作工作室",
-    contactIntent: "multimodal-studio",
-    keywords: ["多模态", "工作流", "图像", "视频", "音频", "脚本", "批量", "复用", "创作流程"]
+    id: "video-story-pack",
+    title: "视频短片分镜主题包",
+    description: "短视频、产品演示、分镜、首尾帧、B-roll 和信息流素材的可复制提示词集合。",
+    audience: "短视频团队 / AIGC 视频剪辑师",
+    contactIntent: "video-story",
+    keywords: ["视频", "短视频", "分镜", "Runway", "Sora", "Kling", "口播", "镜头"]
+  },
+  {
+    id: "commerce-growth-pack",
+    title: "电商营销文案主题包",
+    description: "详情页、直播口播、私域回复、广告标题和社媒种草的可复制提示词集合。",
+    audience: "电商运营 / 内容增长团队",
+    contactIntent: "commerce-growth",
+    keywords: ["电商", "营销", "文案", "详情页", "直播", "广告", "小红书", "转化"]
+  },
+  {
+    id: "audio-voice-pack",
+    title: "音频音乐口播主题包",
+    description: "品牌声音、配乐、口播导演、拟音和音频修复说明的可复制提示词集合。",
+    audience: "声音设计 / 短视频制作",
+    contactIntent: "audio-voice",
+    keywords: ["音频", "音乐", "口播", "Suno", "Udio", "配音", "声音", "拟音"]
+  },
+  {
+    id: "workflow-pack",
+    title: "多模态工作流主题包",
+    description: "素材整理、视觉质检、分镜拆解、参考图改写和多模态报告的可复制提示词集合。",
+    audience: "AIGC 工作室 / 设计团队",
+    contactIntent: "workflow",
+    keywords: ["多模态", "工作流", "素材", "质检", "分镜", "审查", "图片", "视频"]
+  },
+  {
+    id: "business-automation-pack",
+    title: "商业 SEO 自动化主题包",
+    description: "SEO 简报、经营复盘、竞品分析、销售跟进和自动化 SOP 的可复制提示词集合。",
+    audience: "创业团队 / 运营团队",
+    contactIntent: "business-automation",
+    keywords: ["商业", "SEO", "自动化", "复盘", "竞品", "销售", "SOP", "CRM"]
+  },
+  {
+    id: "agent-toolflow-pack",
+    title: "代码 Agent 工具流主题包",
+    description: "功能实现、调试、代码审查、测试、CI 和 Agent 任务拆解的可复制提示词集合。",
+    audience: "工程团队 / 独立开发者",
+    contactIntent: "agent-toolflow",
+    keywords: ["代码", "Agent", "Cursor", "Copilot", "Codex", "测试", "CI", "Worker"]
   }
 ];
 
@@ -209,7 +241,12 @@ function enhancedPrompt(prompt, index) {
     exampleOutput: exampleOutputFor(prompt, modality, use),
     sourceType: text(prompt.sourceType) || (String(prompt.id || "").startsWith("v2-") ? "generated-library" : "curated"),
     verifiedAt: text(prompt.verifiedAt) || text(prompt.updatedAt) || text(prompt.createdAt),
-    seoKeywords: seoKeywords(prompt, tool, modality, use)
+    seoKeywords: seoKeywords(prompt, tool, modality, use),
+    copyReady: prompt.copyReady !== false,
+    modelTargets: unique([...(Array.isArray(prompt.modelTargets) ? prompt.modelTargets : []), tool, "通用"]).slice(0, 8),
+    useCase: text(prompt.useCase) || use,
+    promptKind: text(prompt.promptKind) || "ready",
+    sourcePolicy: text(prompt.sourcePolicy) || "original"
   };
 }
 
@@ -249,6 +286,11 @@ function indexEntry(prompt) {
     modality,
     use,
     difficulty,
+    copyReady: prompt.copyReady !== false,
+    modelTargets: list(prompt.modelTargets),
+    useCase: prompt.useCase || use,
+    promptKind: prompt.promptKind || "ready",
+    sourcePolicy: prompt.sourcePolicy || "original",
     archived: Boolean(prompt.archived),
     searchable
   };

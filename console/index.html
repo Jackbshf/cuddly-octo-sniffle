@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>提示词控制台｜张玮 AIGC 视觉作品集</title>
+  <meta name="robots" content="noindex,nofollow">
+  <style>
+    :root{--bg:#f6f8fb;--panel:#fff;--line:#d9e2ef;--text:#111827;--muted:#667085;--blue:#2563eb;--green:#10b981;--red:#dc2626;--shadow:0 16px 44px rgba(15,23,42,.08);--r:8px}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;line-height:1.55}
+    button,input,textarea,select{font:inherit}
+    button,a.buttonlike{min-height:38px;border:1px solid var(--line);border-radius:var(--r);background:#fff;color:#172033;padding:8px 12px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-weight:750;transition:.16s}
+    button:hover,a.buttonlike:hover{border-color:#b8c9e3;background:#f8fbff;color:#174ea6;transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,99,235,.08)}
+    button:active{transform:translateY(0) scale(.99)}
+    button:focus-visible,a.buttonlike:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(37,99,235,.22);outline-offset:2px}
+    .primary{border-color:transparent;background:#2563eb;color:#fff}.primary:hover{background:#1d4ed8;color:#fff}
+    .danger{color:#b91c1c;border-color:#fecaca;background:#fff5f5}.danger:hover{background:#fee2e2;color:#991b1b}
+    input,textarea,select{width:100%;border:1px solid var(--line);border-radius:var(--r);background:#fff;color:var(--text);padding:9px 11px;min-height:40px}
+    textarea{resize:vertical;min-height:110px}
+    header{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);background:rgba(255,255,255,.88);backdrop-filter:blur(12px)}
+    .top{max-width:1440px;margin:auto;padding:14px 22px;display:flex;justify-content:space-between;gap:16px;align-items:center}
+    h1{margin:0;font-size:22px}p{margin:0;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    main{max-width:1440px;margin:auto;padding:22px}
+    .metrics{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:12px;margin-bottom:16px}
+    .metric,.panel,.prompt-row{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);box-shadow:var(--shadow)}
+    .metric{padding:14px}.metric strong{display:block;font-size:26px;line-height:1.1}.metric span{color:var(--muted);font-size:12px}
+    .layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;align-items:start}
+    .panel{padding:16px;display:grid;gap:12px}.panel h2{font-size:16px;margin:0}.panel h3{font-size:14px;margin:0}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button[aria-pressed="true"]{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+    .field{display:grid;gap:6px;color:#526071;font-size:12px;font-weight:800}
+    .hint{border:1px solid #dbeafe;background:#eff6ff;color:#174ea6;border-radius:var(--r);padding:10px;font-size:12px}
+    .list{display:grid;gap:8px;max-height:520px;overflow:auto;padding-right:2px}
+    .prompt-row{box-shadow:none;padding:12px;display:grid;gap:6px;text-align:left}
+    .prompt-row.is-active{border-color:#2563eb;background:#eff6ff}
+    .prompt-row strong{font-size:14px}.prompt-row span{color:var(--muted);font-size:12px}
+    .badges{display:flex;gap:6px;flex-wrap:wrap}.badge{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:#f3f7fb;color:#526071;padding:3px 8px;font-size:12px}
+    .bar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    pre{margin:0;border:1px solid var(--line);border-radius:var(--r);background:#f8fbff;padding:12px;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:50;max-width:min(520px,calc(100vw - 36px));background:#111827;color:#fff;border-radius:var(--r);box-shadow:0 18px 44px rgba(15,23,42,.22);padding:12px 14px;opacity:0;transform:translateY(10px);transition:.16s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    [hidden]{display:none!important}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.top{display:grid}.actions{justify-content:flex-start}}
+    @media(max-width:620px){main{padding:14px}.top{padding:12px 14px}.metrics{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.actions a,.actions button{flex:1}.bar{align-items:stretch}.bar button{width:100%}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}button:hover,a.buttonlike:hover{transform:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <div>
+        <h1>提示词控制台</h1>
+        <p id="statusText">加载提示词库中。</p>
+      </div>
+      <div class="actions">
+        <a class="buttonlike" href="/prompts/">打开提示词主页</a>
+        <a class="buttonlike" href="/prompts/?tool=video">视频工作台</a>
+        <button class="primary" id="publish">发布配置</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="metrics" id="metrics"></section>
+    <section class="layout">
+      <aside class="panel">
+        <div class="tabs">
+          <button data-tab="home" aria-pressed="true">主页配置</button>
+          <button data-tab="contact" aria-pressed="false">联系/套餐</button>
+          <button data-tab="prompts" aria-pressed="false">提示词管理</button>
+        </div>
+        <label class="field">搜索提示词<input id="promptSearch" type="search" placeholder="搜索标题、分类、用途、工具"></label>
+        <div class="bar">
+          <button id="newPrompt">新增提示词</button>
+          <button id="showArchived">显示归档</button>
+        </div>
+        <div class="list" id="promptList"></div>
+      </aside>
+
+      <section class="panel" id="homePanel">
+        <h2>主页配置</h2>
+        <div class="hint">这里配置 `/prompts/` 首屏标题、说明和热门关键词。公开库全部可复制，付款不再控制复制权限。</div>
+        <form id="homeForm" class="grid2">
+          <label class="field full">首屏标题<input name="heroTitle"></label>
+          <label class="field full">首屏说明<textarea name="heroDescription"></textarea></label>
+          <label class="field">套餐区标题<input name="planSectionTitle"></label>
+          <label class="field">套餐区说明<input name="planSectionDesc"></label>
+          <label class="field full">热门关键词，每行一个<textarea name="hotKeywords"></textarea></label>
+          <div class="full"><button class="primary">保存主页配置到草稿</button></div>
+        </form>
+      </section>
+
+      <section class="panel" id="contactPanel" hidden>
+        <h2>联系与套餐展示</h2>
+        <form id="contactForm" class="grid2">
+          <label class="field">标题<input name="title"></label>
+          <label class="field">按钮文案<input name="ctaLabel"></label>
+          <label class="field full">说明<textarea name="description"></textarea></label>
+          <label class="field">微信<input name="wechat"></label>
+          <label class="field">邮箱<input name="email"></label>
+          <label class="field">电话<input name="phone"></label>
+          <label class="field">二维码 URL<input name="qrImageUrl"></label>
+          <label class="field full">咨询说明<textarea name="consultationText"></textarea></label>
+          <label class="field full">上传二维码图片<input id="qrFile" type="file" accept="image/*"></label>
+          <div class="full bar"><button class="primary">保存联系方式到草稿</button><button type="button" id="uploadQr">上传二维码并填入 URL</button></div>
+        </form>
+        <h3>套餐 JSON</h3>
+        <textarea id="plansJson" rows="12"></textarea>
+        <button id="savePlans">保存套餐到草稿</button>
+      </section>
+
+      <section class="panel" id="promptsPanel" hidden>
+        <div class="bar">
+          <h2>提示词编辑</h2>
+          <div class="badges"><span class="badge" id="selectedBadge">未选择</span><span class="badge" id="dirtyBadge">无草稿</span></div>
+        </div>
+        <form id="promptForm" class="grid2">
+          <input type="hidden" name="id">
+          <label class="field">标题<input name="title"></label>
+          <label class="field">分类<input name="category"></label>
+          <label class="field">语义标签<select name="access"><option value="free">公开主题</option><option value="pro">专业主题</option><option value="pack">套餐主题</option></select></label>
+          <label class="field">套餐 ID<input name="packId"></label>
+          <label class="field">模型目标<input name="modelTargets" placeholder="ChatGPT, 通用 AIGC"></label>
+          <label class="field">用途分组<input name="useCase"></label>
+          <label class="field full">摘要<textarea name="summary"></textarea></label>
+          <label class="field full">正文<textarea name="body" rows="16"></textarea></label>
+          <label class="field">SEO 关键词<input name="seoKeywords"></label>
+          <label class="field">质量评分<input name="qualityScore" type="number" min="1" max="100"></label>
+          <div class="full bar"><button class="primary">保存提示词到草稿</button><button type="button" class="danger" id="archivePrompt">归档/恢复</button></div>
+        </form>
+      </section>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+
+  <script>
+const API_LIBRARY="/api/prompts/library";
+const API_ASSETS="/api/prompts/assets";
+const DEFAULT_SITE={heroTitle:"5000 条可直接复制的 AIGC 提示词库",heroDescription:"图像、视频、短视频、电商、音频、多模态、商业和代码 Agent 全部公开可复制。",planSectionTitle:"需要团队落地时再联系我",planSectionDesc:"公共提示词不再支付锁定，套餐只用于咨询、定制和培训。",hotKeywords:["商品主视觉","短视频分镜","电商详情页","Suno 口播","多模态质检","Agent 工作流"]};
+const DEFAULT_CONTACT={title:"联系我获取定制方案",description:"公开库可直接复制。如果需要团队训练、行业定制包或工作流搭建，可以联系沟通。",ctaLabel:"联系定制方案",wechat:"",email:"2453193338@qq.com",phone:"",qrImageUrl:"",consultationText:"请说明行业、使用工具、目标渠道、团队人数和期望交付。"};
+let store={version:3,siteSettings:{...DEFAULT_SITE},plans:[],contact:{...DEFAULT_CONTACT},prompts:[],assets:[]};
+let activeTab="home",selectedId="",showArchived=false,dirty=false;
+const $=id=>document.getElementById(id);
+const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+const arr=value=>Array.isArray(value)?value:String(value||"").split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
+function toast(message){$("toast").textContent=message;$("toast").classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").classList.remove("show"),2200)}
+function markDirty(){dirty=true;$("dirtyBadge").textContent="有草稿";$("statusText").textContent="有未发布草稿。"}
+function normalizeStore(raw){return{version:Number(raw?.version)||3,migratedAt:raw?.migratedAt||"",updatedAt:raw?.updatedAt||new Date().toISOString(),siteSettings:{...DEFAULT_SITE,...(raw?.siteSettings||{})},plans:Array.isArray(raw?.plans)?raw.plans:[],contact:{...DEFAULT_CONTACT,...(raw?.contact||raw?.contactSettings||{})},prompts:Array.isArray(raw?.prompts)?raw.prompts:[],assets:Array.isArray(raw?.assets)?raw.assets:[]}}
+async function load(){let res=await fetch(API_LIBRARY,{cache:"no-store"});let data=await res.json();if(!res.ok)throw new Error(data.error||`HTTP ${res.status}`);store=normalizeStore(data);selectedId=store.prompts.find(p=>!p.archived)?.id||store.prompts[0]?.id||"";fillForms();render();$("statusText").textContent="控制台已加载。"}
+function render(){renderTabs();renderMetrics();renderList();renderPromptForm();$("dirtyBadge").textContent=dirty?"有草稿":"无草稿"}
+function renderTabs(){["home","contact","prompts"].forEach(tab=>{$(`${tab}Panel`).hidden=activeTab!==tab;document.querySelector(`[data-tab="${tab}"]`).setAttribute("aria-pressed",String(activeTab===tab))})}
+function renderMetrics(){let active=store.prompts.filter(p=>!p.archived);let counts=active.reduce((out,p)=>{out[p.useCase||p.category||"未分类"]=(out[p.useCase||p.category||"未分类"]||0)+1;return out},{});$("metrics").innerHTML=[["总提示词",store.prompts.length],["可复制",active.filter(p=>p.copyReady!==false).length],["归档",store.prompts.length-active.length],["套餐",store.plans.length],["分组",Object.keys(counts).length]].map(([k,v])=>`<div class="metric"><strong>${v}</strong><span>${k}</span></div>`).join("")}
+function filteredPrompts(){let q=$("promptSearch").value.trim().toLowerCase();return store.prompts.filter(p=>(showArchived||!p.archived)&&(!q||[p.title,p.category,p.summary,p.useCase,(p.tags||[]).join(" "),(p.seoKeywords||[]).join(" ")].join(" ").toLowerCase().includes(q))).slice(0,120)}
+function renderList(){let list=filteredPrompts();$("promptList").innerHTML=list.length?list.map(p=>`<button class="prompt-row ${p.id===selectedId?"is-active":""}" data-select="${esc(p.id)}"><strong>${esc(p.title)}</strong><span>${esc(p.category||p.useCase||"未分类")}</span><span>${p.archived?"已归档":"可用"} · ${p.copyReady===false?"待完善":"可复制"}</span></button>`).join(""):`<div class="hint">没有匹配提示词。</div>`}
+function fillForms(){let site={...DEFAULT_SITE,...store.siteSettings};let hf=$("homeForm").elements;hf.heroTitle.value=site.heroTitle;hf.heroDescription.value=site.heroDescription;hf.planSectionTitle.value=site.planSectionTitle;hf.planSectionDesc.value=site.planSectionDesc;hf.hotKeywords.value=arr(site.hotKeywords).join("\n");let cf=$("contactForm").elements;let contact={...DEFAULT_CONTACT,...store.contact};for(let key of Object.keys(DEFAULT_CONTACT))cf[key].value=contact[key]||"";$("plansJson").value=JSON.stringify(store.plans||[],null,2)}
+function selectedPrompt(){return store.prompts.find(p=>p.id===selectedId)}
+function renderPromptForm(){let p=selectedPrompt(),f=$("promptForm").elements;$("selectedBadge").textContent=p?p.id:"未选择";if(!p){$("promptForm").reset();return}f.id.value=p.id;f.title.value=p.title||"";f.category.value=p.category||"";f.access.value=p.access||"free";f.packId.value=p.packId||"";f.modelTargets.value=arr(p.modelTargets).join(", ");f.useCase.value=p.useCase||p.category||"";f.summary.value=p.summary||"";f.body.value=p.body||"";f.seoKeywords.value=arr(p.seoKeywords).join(", ");f.qualityScore.value=Number(p.qualityScore||80);$("archivePrompt").textContent=p.archived?"恢复提示词":"归档提示词"}
+function saveHome(event){event.preventDefault();let f=event.currentTarget.elements;store.siteSettings={heroTitle:f.heroTitle.value.trim(),heroDescription:f.heroDescription.value.trim(),planSectionTitle:f.planSectionTitle.value.trim(),planSectionDesc:f.planSectionDesc.value.trim(),hotKeywords:arr(f.hotKeywords.value)};markDirty();toast("主页配置已保存到草稿")}
+function saveContact(event){event.preventDefault();let f=event.currentTarget.elements;store.contact={title:f.title.value.trim(),description:f.description.value.trim(),ctaLabel:f.ctaLabel.value.trim(),wechat:f.wechat.value.trim(),email:f.email.value.trim(),phone:f.phone.value.trim(),qrImageUrl:f.qrImageUrl.value.trim(),consultationText:f.consultationText.value.trim()};markDirty();toast("联系方式已保存到草稿")}
+function savePlans(){try{let plans=JSON.parse($("plansJson").value);if(!Array.isArray(plans))throw new Error("套餐 JSON 必须是数组");store.plans=plans;markDirty();renderMetrics();toast("套餐已保存到草稿")}catch(error){toast(`套餐 JSON 无效：${error.message||error}`)}}
+function savePrompt(event){event.preventDefault();let f=event.currentTarget.elements;let p=selectedPrompt();if(!p)return;Object.assign(p,{title:f.title.value.trim(),category:f.category.value.trim(),access:f.access.value,packId:f.packId.value.trim(),modelTargets:arr(f.modelTargets.value),useCase:f.useCase.value.trim(),summary:f.summary.value.trim(),body:f.body.value.trim(),seoKeywords:arr(f.seoKeywords.value),qualityScore:Number(f.qualityScore.value||80),copyReady:true,promptKind:"ready",sourcePolicy:"original",updatedAt:new Date().toISOString()});markDirty();render();toast("提示词已保存到草稿")}
+function newPrompt(){let id=`manual-ready-${Date.now().toString(36)}`;store.prompts.unshift({id,title:"新提示词",category:"人工新增",tags:["库分类:人工新增","工具:ChatGPT","模态:文本","用途:人工新增"],variables:["主题对象","目标受众","发布渠道","输出格式"],status:"草稿",summary:"在控制台新增的可复制提示词。",body:"角色定位：\n你是中文 AIGC 助手，直接完成一个具体内容任务。\n\n任务背景：\n项目对象是一个真实业务需求，目标受众是需要快速落地的团队，发布渠道是内部文档。\n\n直接复制使用：\n请输出一份结构清晰、可执行、可复核的结果，不要要求我补充资料。\n\n输出要求：\n1. 给出成品内容。\n2. 给出执行步骤。\n3. 给出质量自检。\n\n质量标准：\n具体、克制、可操作。\n\n失败修正：\n如果空泛，补充场景和验收标准。\n\n边界提醒：\n不生成违法、侵权、凭证或冒用内容。",source:"console",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),archived:false,access:"free",packId:"",qualityScore:80,exampleOutput:"输出一份可直接复制使用的提示词。",sourceType:"manual-console",verifiedAt:new Date().toISOString(),seoKeywords:["AI提示词","人工新增"],copyReady:true,modelTargets:["ChatGPT","通用 AIGC"],useCase:"人工新增",promptKind:"ready",sourcePolicy:"original"});selectedId=id;markDirty();render();activeTab="prompts";renderTabs();toast("已新增提示词草稿")}
+function archivePrompt(){let p=selectedPrompt();if(!p)return;p.archived=!p.archived;p.updatedAt=new Date().toISOString();markDirty();render();toast(p.archived?"已归档":"已恢复")}
+async function uploadQr(){let file=$("qrFile").files[0];if(!file)return toast("先选择二维码图片");let form=new FormData();form.set("file",file);form.set("title","提示词联系二维码");form.set("category","prompt-contact");let res=await fetch(API_ASSETS,{method:"POST",body:form});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);let src=data.asset?.src||"";$("contactForm").elements.qrImageUrl.value=src.startsWith("/")?src:`/${src}`;toast("二维码已上传，记得保存联系方式")}
+async function publish(){let payload={...store,updatedAt:new Date().toISOString()};let res=await fetch(API_LIBRARY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({library:payload,message:"Update prompt console library"})});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);dirty=false;render();$("statusText").textContent=data.commit?`已发布到 GitHub：${data.commit.slice(0,7)}`:"已发布";toast("发布成功")}
+document.addEventListener("click",event=>{let target=event.target.closest("button");if(!target)return;if(target.dataset.tab){activeTab=target.dataset.tab;renderTabs()}if(target.dataset.select){selectedId=target.dataset.select;activeTab="prompts";render()}});
+$("homeForm").onsubmit=saveHome;$("contactForm").onsubmit=saveContact;$("savePlans").onclick=savePlans;$("promptForm").onsubmit=savePrompt;$("newPrompt").onclick=newPrompt;$("archivePrompt").onclick=archivePrompt;$("promptSearch").oninput=renderList;$("showArchived").onclick=()=>{showArchived=!showArchived;$("showArchived").textContent=showArchived?"隐藏归档":"显示归档";renderList()};$("uploadQr").onclick=()=>uploadQr().catch(error=>toast(`上传失败：${error.message||error}`));$("publish").onclick=()=>publish().catch(error=>toast(`发布失败：${error.message||error}`));
+load().catch(error=>{$("statusText").textContent=`加载失败：${error.message||error}`;toast(`加载失败：${error.message||error}`)});
+  </script>
+</body>
+</html>

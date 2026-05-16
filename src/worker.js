@@ -2,6 +2,8 @@ const PROMPTS_PREFIX = "/prompts";
 const PROMPT_ADMIN_PREFIX = "/prompts/admin";
 const VIEW_LOGIN_PATH = "/prompts/login";
 const PROMPT_ADMIN_LOGIN_PATH = "/prompts/admin/login";
+const CONSOLE_PREFIX = "/console";
+const CONSOLE_LOGIN_PATH = "/console/login";
 const PROMPTS_API_PREFIX = "/api/prompts";
 const PROMPTS_DATA_PREFIX = "/prompts-data";
 const PROMPT_LIBRARY_PATH = "prompts-data/library.json";
@@ -91,8 +93,17 @@ export default {
       return handleLogin(request, {
         password: env.PROMPT_LIBRARY_ADMIN_PASSWORD,
         cookieName: PROMPT_ADMIN_COOKIE_NAME,
-        redirectPath: PROMPT_ADMIN_PREFIX,
+        redirectPath: CONSOLE_PREFIX,
         mode: "prompt-admin"
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === CONSOLE_LOGIN_PATH) {
+      return handleLogin(request, {
+        password: env.PROMPT_LIBRARY_ADMIN_PASSWORD,
+        cookieName: PROMPT_ADMIN_COOKIE_NAME,
+        redirectPath: CONSOLE_PREFIX,
+        mode: "console-admin"
       });
     }
 
@@ -107,6 +118,10 @@ export default {
 
     if (isPortfolioAdminPath(url.pathname)) {
       return handlePortfolioAdminPage(request, env, url);
+    }
+
+    if (isConsolePath(url.pathname)) {
+      return handleConsolePage(request, env, url);
     }
 
     if (!isPromptsPath(url.pathname)) {
@@ -129,22 +144,13 @@ function isPortfolioAdminPath(pathname) {
   return pathname === PORTFOLIO_ADMIN_PREFIX || pathname === PORTFOLIO_ADMIN_LOGIN_PATH || pathname.startsWith(`${PORTFOLIO_ADMIN_PREFIX}/`);
 }
 
+function isConsolePath(pathname) {
+  return pathname === CONSOLE_PREFIX || pathname === CONSOLE_LOGIN_PATH || pathname.startsWith(`${CONSOLE_PREFIX}/`);
+}
+
 async function handlePromptPage(request, env, url) {
   if (isPromptAdminPath(url.pathname)) {
-    if (url.pathname === PROMPT_ADMIN_PREFIX || url.pathname === PROMPT_ADMIN_LOGIN_PATH) {
-      return Response.redirect(new URL(`${PROMPT_ADMIN_PREFIX}/`, url), 302);
-    }
-
-    if (!env.PROMPT_LIBRARY_ADMIN_PASSWORD) {
-      return textResponse("Prompt library admin password is not configured.", 503);
-    }
-
-    const auth = await getPromptAuthState(request, env);
-    if (!auth.admin) {
-      return renderLoginPage({ mode: "prompt-admin", hasError: false });
-    }
-
-    return servePromptApp(request, env, url, true);
+    return Response.redirect(new URL(`${CONSOLE_PREFIX}/prompts`, url), 302);
   }
 
   if (url.pathname === VIEW_LOGIN_PATH) {
@@ -156,6 +162,31 @@ async function handlePromptPage(request, env, url) {
   }
 
   return servePromptApp(request, env, url, false);
+}
+
+async function handleConsolePage(request, env, url) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return textResponse("Method not allowed.", 405, { Allow: "GET, HEAD" });
+  }
+
+  if (url.pathname === CONSOLE_PREFIX || url.pathname === CONSOLE_LOGIN_PATH) {
+    return Response.redirect(new URL(`${CONSOLE_PREFIX}/`, url), 302);
+  }
+
+  if (!env.PROMPT_LIBRARY_ADMIN_PASSWORD) {
+    return textResponse("Prompt console admin password is not configured.", 503);
+  }
+
+  const auth = await getPromptAuthState(request, env);
+  if (!auth.admin) {
+    return renderLoginPage({ mode: "console-admin", hasError: false });
+  }
+
+  const assetUrl = new URL(url);
+  assetUrl.pathname = `${CONSOLE_PREFIX}/`;
+  assetUrl.search = "";
+  const response = await env.ASSETS.fetch(new Request(assetUrl, request));
+  return withNoStore(response);
 }
 
 async function servePromptApp(request, env, url, isAdmin) {
@@ -221,7 +252,7 @@ async function handlePromptsApi(request, env, url) {
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/checkout/confirm` && request.method === "GET") {
-    return confirmPromptCheckoutSession(request, env, url);
+    return promptContactOnlyResponse();
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/customer-portal` && request.method === "POST") {
@@ -368,47 +399,47 @@ async function readPromptLibrary(request, env) {
     return jsonResponse({ ok: false, error: "Prompt library JSON is invalid." }, 502);
   }
 
-  const auth = await getPromptAuthState(request, env);
-  if (auth.admin) return jsonResponse(library);
-
-  const entitlement = await getPromptEntitlementState(request, env);
-  return jsonResponse(redactPromptLibrary(library, entitlement));
+  return jsonResponse(makePromptLibraryCopyReady(library));
 }
 
-function redactPromptLibrary(library, entitlement) {
+function makePromptLibraryCopyReady(library) {
   const source = library && typeof library === "object" ? library : {};
   return {
     ...source,
-    prompts: asArray(source.prompts).map((prompt) => redactPromptForAccess(prompt, entitlement))
+    prompts: asArray(source.prompts).map((prompt) => ({
+      ...(prompt && typeof prompt === "object" ? prompt : {}),
+      copyReady: true,
+      bodyRedacted: false,
+      lockedReason: ""
+    }))
   };
+}
+
+function redactPromptLibrary(library, entitlement) {
+  return makePromptLibraryCopyReady(library);
 }
 
 function redactPromptForAccess(prompt, entitlement) {
   const source = prompt && typeof prompt === "object" ? prompt : {};
-  if (isPromptUnlocked(source, entitlement)) return source;
   return {
     ...source,
-    body: "",
-    bodyRedacted: true,
-    lockedReason: source.access === "pack" ? "pack" : "pro"
+    copyReady: true,
+    bodyRedacted: false,
+    lockedReason: ""
   };
 }
 
 function isPromptUnlocked(prompt, entitlement) {
-  const access = cleanPromptAccess(prompt?.access);
-  if (access === "free") return true;
-  if (entitlement?.pro) return true;
-  return access === "pack" && entitlement?.packs?.includes(cleanText(prompt?.packId));
+  return true;
 }
 
 async function readPromptEntitlement(request, env) {
-  const entitlement = await getPromptEntitlementState(request, env);
   return jsonResponse({
-    pro: entitlement.pro,
-    packs: entitlement.packs,
-    customer: entitlement.customer || "",
-    email: entitlement.email || "",
-    source: entitlement.source || "none"
+    pro: true,
+    packs: ["all"],
+    customer: "",
+    email: "",
+    source: "public-copy-ready"
   });
 }
 
@@ -1756,7 +1787,12 @@ function normalizeLibrary(raw) {
     exampleOutput: cleanText(prompt?.exampleOutput),
     sourceType: cleanText(prompt?.sourceType) || "curated",
     verifiedAt: cleanText(prompt?.verifiedAt || prompt?.updatedAt || prompt?.createdAt) || now,
-    seoKeywords: cleanTextArray(prompt?.seoKeywords)
+    seoKeywords: cleanTextArray(prompt?.seoKeywords),
+    copyReady: prompt?.copyReady !== false,
+    modelTargets: cleanTextArray(prompt?.modelTargets),
+    useCase: cleanText(prompt?.useCase),
+    promptKind: cleanText(prompt?.promptKind) || "ready",
+    sourcePolicy: cleanText(prompt?.sourcePolicy) || "original"
   }));
   const promptIds = new Set(prompts.map((prompt) => prompt.id));
   const assets = asArray(raw?.assets).map((asset) => ({
@@ -1783,10 +1819,54 @@ function normalizeLibrary(raw) {
     version: 2,
     migratedAt: cleanText(raw?.migratedAt) || now,
     updatedAt: cleanText(raw?.updatedAt) || now,
+    siteSettings: normalizePromptSiteSettings(raw?.siteSettings),
+    plans: normalizePromptPlans(raw?.plans),
     contact: normalizePromptContact(raw?.contact || raw?.contactSettings),
     prompts,
     assets
   };
+}
+
+function normalizePromptSiteSettings(value = {}) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    heroTitle: cleanText(source.heroTitle) || "5000 条可直接复制的 AIGC 提示词库",
+    heroDescription: cleanText(source.heroDescription) || "面向图像、视频、短视频、电商、音频、多模态、商业和代码 Agent 的原创提示词，每条都可以直接复制使用。",
+    planSectionTitle: cleanText(source.planSectionTitle) || "联系获取定制方案",
+    planSectionDesc: cleanText(source.planSectionDesc) || "复制权限全部公开，套餐只用于咨询、定制、培训和团队落地服务。",
+    hotKeywords: cleanTextArray(source.hotKeywords).length
+      ? cleanTextArray(source.hotKeywords).slice(0, 12)
+      : ["商品主视觉", "短视频分镜", "电商详情页", "Suno 口播", "多模态审查", "Agent 工作流"]
+  };
+}
+
+function normalizePromptPlans(value = []) {
+  const fallback = [
+    {
+      id: "team-training",
+      title: "团队提示词训练",
+      price: "联系报价",
+      description: "为内容、电商和设计团队整理专属提示词库、演示流程和复盘标准。",
+      ctaLabel: "联系训练方案",
+      highlights: ["提示词库梳理", "团队培训", "案例复盘"]
+    },
+    {
+      id: "custom-pack",
+      title: "行业定制提示词包",
+      price: "按需求评估",
+      description: "围绕你的行业、工具和素材流程生成可直接复制的专属提示词包。",
+      ctaLabel: "咨询定制包",
+      highlights: ["行业场景", "工具适配", "交付清单"]
+    }
+  ];
+  return (asArray(value).length ? asArray(value) : fallback).map((plan, index) => ({
+    id: cleanId(plan?.id, `plan-${index + 1}`),
+    title: cleanText(plan?.title) || "定制服务",
+    price: cleanText(plan?.price) || "联系报价",
+    description: cleanText(plan?.description) || "按项目目标提供提示词整理、培训和落地建议。",
+    ctaLabel: cleanText(plan?.ctaLabel) || "联系咨询",
+    highlights: cleanTextArray(plan?.highlights).slice(0, 6)
+  }));
 }
 
 function normalizePromptContact(value = {}) {
@@ -2637,6 +2717,18 @@ function loginCopy(mode) {
       label: "管理员密码",
       action: PROMPT_ADMIN_LOGIN_PATH,
       button: "进入管理后台",
+      error: "管理员密码不正确，请重试。"
+    };
+  }
+
+  if (mode === "console-admin") {
+    return {
+      title: "提示词控制台",
+      heading: "提示词控制台",
+      intro: "输入提示词管理员密码后，可以管理主页、联系购买、套餐展示和提示词库。",
+      label: "管理员密码",
+      action: CONSOLE_LOGIN_PATH,
+      button: "进入控制台",
       error: "管理员密码不正确，请重试。"
     };
   }

@@ -11,7 +11,7 @@
     "deploy:preview": "wrangler deploy --config wrangler.jsonc --assets=./dist --name floral-leaf-4e44-preview",
     "deploy:worker:version": "wrangler versions upload --config wrangler.jsonc --assets=./dist",
     "audit:stream": "node scripts/media/audit-stream-delivery.mjs",
-    "generate:prompts": "node scripts/prompts/generate-general-prompts.mjs",
+    "generate:prompts": "node scripts/prompts/generate-copy-ready-prompts.mjs",
     "build:prompt-index": "node scripts/prompts/build-search-index.mjs",
     "enhance:prompts": "node scripts/prompts/build-search-index.mjs --write-library",
     "validate:prompts": "node scripts/prompts/build-search-index.mjs && node scripts/prompts/validate-general-prompts.mjs"
