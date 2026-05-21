@@ -21,9 +21,14 @@ const sourceJsonPath = path.join(root, "data", "portfolio.json");
 const distJsonPath = path.join(distDir, "data", "portfolio.json");
 const distPromptLibraryPath = path.join(distDir, "prompts-data", "library.json");
 const distPromptLibraryManifestPath = path.join(distDir, "prompts-data", "library-manifest.json");
+const distPromptSearchIndexPath = path.join(distDir, "prompts-data", "search-index.json");
+const distPromptSearchIndexManifestPath = path.join(distDir, "prompts-data", "search-index-manifest.json");
 const optimizedImagesDir = path.join(distDir, "images", "_optimized");
 const generatedPostersDir = path.join(distDir, "images", "_posters");
 const PROMPT_LIBRARY_CHUNK_MAX_BYTES = 20 * 1024 * 1024;
+const PROMPT_SEARCH_INDEX_CHUNK_MAX_BYTES = 12 * 1024 * 1024;
+const WORKER_ASSET_MAX_BYTES = 25 * 1024 * 1024;
+const WORKER_ASSET_SOFT_MAX_BYTES = 23 * 1024 * 1024;
 const LARGE_IMAGE_BYTES = 500 * 1024;
 const MAX_IMAGE_WIDTH = 1600;
 const IMAGE_QUALITY = 82;
@@ -399,44 +404,89 @@ const splitPromptLibraryForWorkerAssets = async () => {
 
   const library = JSON.parse(await readFile(distPromptLibraryPath, "utf8"));
   const prompts = Array.isArray(library.prompts) ? library.prompts : [];
-  const promptJson = prompts.map((prompt) => JSON.stringify(prompt));
-  const chunks = [];
-  let current = [];
-  let currentBytes = Buffer.byteLength('{"prompts":[]}', "utf8");
-
-  for (const serializedPrompt of promptJson) {
-    const nextBytes = currentBytes + Buffer.byteLength(serializedPrompt, "utf8") + (current.length ? 1 : 0);
-    if (current.length && nextBytes > PROMPT_LIBRARY_CHUNK_MAX_BYTES) {
-      chunks.push(current);
-      current = [];
-      currentBytes = Buffer.byteLength('{"prompts":[]}', "utf8");
-    }
-    current.push(serializedPrompt);
-    currentBytes += Buffer.byteLength(serializedPrompt, "utf8") + (current.length > 1 ? 1 : 0);
-  }
-  if (current.length) chunks.push(current);
-
   const manifest = {
     version: library.version,
     migratedAt: library.migratedAt || "",
     updatedAt: library.updatedAt || "",
-    assets: Array.isArray(library.assets) ? library.assets : [],
+    assets: [],
     promptCount: prompts.length,
-    chunks: chunks.map((items, index) => ({
-      path: `/prompts-data/library-prompts-${String(index).padStart(3, "0")}.json`,
-      count: items.length
-    }))
+    chunks: [],
+    source: "d1",
+    staticLibraryDisabled: true
   };
 
   await mkdir(path.dirname(distPromptLibraryManifestPath), { recursive: true });
-  for (const [index, items] of chunks.entries()) {
-    const chunkPath = path.join(distDir, "prompts-data", `library-prompts-${String(index).padStart(3, "0")}.json`);
-    await writeFile(chunkPath, `{"prompts":[${items.join(",")}]}`, "utf8");
-  }
   await writeFile(distPromptLibraryManifestPath, `${JSON.stringify(manifest)}\n`, "utf8");
   await rm(distPromptLibraryPath, { force: true });
 
-  console.log(`[prepare-static] Split prompt library into ${chunks.length} Worker asset chunks.`);
+  console.log("[prepare-static] Removed full prompt library from dist; Worker serves D1-backed public data.");
+};
+
+const splitPromptSearchIndexForWorkerAssets = async () => {
+  if (!existsSync(distPromptSearchIndexPath)) return;
+
+  const searchIndex = JSON.parse(await readFile(distPromptSearchIndexPath, "utf8"));
+  const prompts = Array.isArray(searchIndex.prompts) ? searchIndex.prompts : [];
+  const manifest = {
+    version: searchIndex.version || 1,
+    generatedAt: searchIndex.generatedAt || new Date().toISOString(),
+    promptCount: prompts.length,
+    prompts: [],
+    packs: [],
+    chunked: false,
+    facets: { tools: [], modalities: [] },
+    chunks: [],
+    source: "d1",
+    staticSearchIndexDisabled: true
+  };
+
+  await mkdir(path.dirname(distPromptSearchIndexManifestPath), { recursive: true });
+  const compactManifest = `${JSON.stringify(manifest)}\n`;
+  await writeFile(distPromptSearchIndexManifestPath, compactManifest, "utf8");
+  await writeFile(distPromptSearchIndexPath, compactManifest, "utf8");
+
+  console.log("[prepare-static] Removed full prompt search index from dist; Worker serves D1-backed public search.");
+};
+
+const walkFiles = async (directory) => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const absolutePath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await walkFiles(absolutePath));
+    } else if (entry.isFile()) {
+      files.push(absolutePath);
+    }
+  }
+  return files;
+};
+
+const assertWorkerAssetSizes = async () => {
+  const files = await walkFiles(distDir);
+  const oversized = [];
+  const nearLimit = [];
+
+  for (const filePath of files) {
+    const fileStats = await stat(filePath);
+    const relativePath = toPosixPath(path.relative(distDir, filePath));
+    if (fileStats.size > WORKER_ASSET_MAX_BYTES) {
+      oversized.push({ relativePath, size: fileStats.size });
+    } else if (fileStats.size > WORKER_ASSET_SOFT_MAX_BYTES) {
+      nearLimit.push({ relativePath, size: fileStats.size });
+    }
+  }
+
+  for (const item of nearLimit) {
+    console.warn(`[prepare-static] Worker asset near 25 MiB limit: ${item.relativePath} (${(item.size / 1024 / 1024).toFixed(2)} MiB).`);
+  }
+
+  if (oversized.length) {
+    const details = oversized
+      .map((item) => `${item.relativePath} (${(item.size / 1024 / 1024).toFixed(2)} MiB)`)
+      .join(", ");
+    throw new Error(`Worker asset size limit exceeded. Cloudflare Workers Assets allows files up to 25 MiB: ${details}`);
+  }
 };
 
 async function main() {
@@ -463,6 +513,7 @@ async function main() {
     await cp(source, destination, { recursive: true });
   }
   await splitPromptLibraryForWorkerAssets();
+  await splitPromptSearchIndexForWorkerAssets();
 
   await mkdir(optimizedImagesDir, { recursive: true });
   await mkdir(generatedPostersDir, { recursive: true });
@@ -485,6 +536,7 @@ async function main() {
 
   await rewriteDistIndexHtml(versionedAssets);
   await writeDistHeaders();
+  await assertWorkerAssetSizes();
 
   console.log(`Prepared static bundle in ${distDir}`);
   console.log(`Optimized referenced images: ${optimizedImageCount}`);

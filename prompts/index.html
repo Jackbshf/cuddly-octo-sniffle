@@ -2,279 +2,140 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AI 提示词搜索工作台｜张玮 AIGC 视觉作品集</title>
-  <meta name="description" content="面向 AIGC 商业视觉、AI 视频、图像生成和创作工作流的中文提示词工作台，支持检索、变量填充、复制复用和素材管理。">
-  <meta name="keywords" content="AI提示词,AIGC提示词,图像生成提示词,AI视频提示词,ComfyUI,商业视觉,提示词工作台">
-  <meta name="theme-color" content="#f5f6f3">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>互联网岗位 AI 提示词工作台｜张玮 AIGC 视觉作品集</title>
+  <meta name="description" content="按互联网岗位职责和真实工作任务整理的免费 AI 提示词工作台，复制即可用于日常工作。">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="AI 提示词搜索工作台｜张玮 AIGC 视觉作品集">
-  <meta property="og:description" content="可检索、可变量填充、可复用的中文 AIGC 提示词工作台。">
+  <meta property="og:title" content="互联网岗位 AI 提示词工作台">
+  <meta property="og:description" content="按新媒体、影视视觉、电商、品牌市场、产品、增长、销售客服、技术研发、HR 行政等真实岗位职责整理，复制即可用于日常工作。">
   <meta property="og:url" content="https://www.zhangweivisual.cn/prompts/">
   <meta property="og:image" content="https://www.zhangweivisual.cn/images/generated/celestial-whale-city.webp">
   <meta property="og:site_name" content="张玮 AIGC 视觉作品集">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AI 提示词搜索工作台｜张玮 AIGC 视觉作品集">
-  <meta name="twitter:description" content="面向 AIGC 商业视觉、AI 视频和图像生成的中文提示词工作台。">
-  <meta name="twitter:image" content="https://www.zhangweivisual.cn/images/generated/celestial-whale-city.webp">
   <link rel="canonical" href="https://www.zhangweivisual.cn/prompts/">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "@id": "https://www.zhangweivisual.cn/prompts/#webpage",
-    "url": "https://www.zhangweivisual.cn/prompts/",
-    "name": "AI 提示词工作台",
-    "description": "面向 AIGC 商业视觉、AI 视频、图像生成和创作工作流的中文提示词工作台，支持检索、变量填充、复制复用和素材管理。",
-    "inLanguage": "zh-CN",
-    "isPartOf": {
-      "@type": "WebSite",
-      "@id": "https://www.zhangweivisual.cn/#website",
-      "url": "https://www.zhangweivisual.cn/",
-      "name": "张玮 AIGC 视觉作品集"
-    },
-    "about": ["AI 提示词", "AIGC 商业视觉", "AI 视频", "图像生成", "ComfyUI 工作流"]
-  }
-  </script>
   <style>
     :root{
-      --bg:#0b1017;--bg2:#101722;--panel:#151c27;--panel2:#101722;--line:#2a3545;
-      --text:#f5f7fb;--muted:#9aa7b8;--soft:#c6d0dd;--accent:#ff8a2a;--accent2:#33c7a5;
-      --pro:#ffd166;--danger:#ff6b7d;--ok:#7bd88f;--shadow:0 24px 80px rgba(0,0,0,.32);--r:8px
+      color-scheme:dark;--bg:#080c12;--panel:#111821;--panel2:#0d131b;--line:rgba(255,255,255,.1);
+      --text:#f5f8fb;--muted:#aab6c5;--soft:#748195;--accent:#69d7ff;--accent2:#9ce7bd;--warn:#ffd166;
+      --danger:#ff6b7d;--r:8px;--shadow:0 24px 80px rgba(0,0,0,.28)
     }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;overflow-x:hidden}
-    body{
-      color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
-      line-height:1.55;background:
-        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),
-        linear-gradient(180deg,rgba(255,255,255,.026) 1px,transparent 1px),
-        linear-gradient(180deg,#0f1622 0%,#0b1017 52%,#090d13 100%);
-      background-size:64px 64px,64px 64px,auto
-    }
+    *{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;min-height:100vh;background:
+      radial-gradient(circle at 8% 0%,rgba(105,215,255,.14),transparent 32%),
+      radial-gradient(circle at 80% 10%,rgba(156,231,189,.08),transparent 28%),
+      linear-gradient(180deg,#0d141d 0%,#080c12 46%,#070a0f 100%);
+      color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
+    a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{border:1px solid var(--line);border-radius:var(--r);background:#141d28;color:var(--text);min-height:40px;padding:0 13px;cursor:pointer}
+    button:hover{border-color:rgba(105,215,255,.35);background:#182536}button:disabled{opacity:.45;cursor:not-allowed}.primary{border-color:rgba(105,215,255,.5);background:linear-gradient(135deg,rgba(105,215,255,.24),rgba(156,231,189,.14));color:#e9fbff;font-weight:700}
+    .danger{border-color:rgba(255,107,125,.38);color:#ffd7dc;background:rgba(255,107,125,.08)}.quiet{background:transparent}.active{border-color:rgba(105,215,255,.55);background:rgba(105,215,255,.13);color:#e9fbff}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:var(--r);background:#0b1118;color:var(--text);padding:11px 12px;outline:none}
+    textarea{resize:vertical;line-height:1.6}input:focus,select:focus,textarea:focus{border-color:rgba(105,215,255,.55);box-shadow:0 0 0 3px rgba(105,215,255,.11)}
+    header{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);background:rgba(8,12,18,.88);backdrop-filter:blur(14px)}
+    .nav{max-width:1420px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:10px;min-width:0}.mark{width:34px;height:34px;border:1px solid rgba(105,215,255,.32);border-radius:var(--r);display:grid;place-items:center;background:rgba(105,215,255,.1);font-weight:900;color:#bdf2ff}.brand strong{font-size:15px}.brand span{display:block;color:var(--soft);font-size:12px;margin-top:2px}.nav-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    main{max-width:1420px;margin:0 auto;padding:26px 22px 56px}.hero{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:stretch;margin-bottom:18px}.hero-copy,.status-panel,.panel,.prompt-card,.department-card,.task-card,dialog{border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015)),var(--panel);box-shadow:var(--shadow)}
+    .hero-copy{padding:28px;display:grid;gap:17px}.hero-copy h1{margin:0;max-width:820px;font-size:42px;line-height:1.08;letter-spacing:0}.hero-copy p{margin:0;max-width:860px;color:var(--muted);line-height:1.75}.search-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px}.search-row input{min-height:54px;font-size:16px}.status-panel{padding:18px;display:grid;align-content:start;gap:13px}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{border:1px solid var(--line);border-radius:var(--r);padding:11px;background:#0d141e}.metric strong{display:block;font-size:22px}.metric span{color:var(--soft);font-size:12px}
+    .view{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px}.panel{padding:16px}.panel h2,.panel h3{margin:0 0 10px}.panel p{margin:0;color:var(--muted);line-height:1.65}.department-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.department-card{padding:16px;box-shadow:none;display:grid;gap:10px;text-align:left}.department-card strong{font-size:16px}.department-card p{min-height:44px;font-size:13px}.card-meta,.chips,.crumbs{display:flex;flex-wrap:wrap;gap:7px;align-items:center}.badge{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;color:#cbd6e4;font-size:12px;background:rgba(255,255,255,.035)}.badge.free{border-color:rgba(156,231,189,.4);color:#c9f5d9;background:rgba(156,231,189,.09)}.badge.warn{border-color:rgba(255,209,102,.42);color:#ffe4a6;background:rgba(255,209,102,.09)}.badge.pro{border-color:rgba(255,209,102,.42);color:#ffe4a6;background:rgba(255,209,102,.09)}.badge.pack{border-color:rgba(255,145,77,.45);color:#ffd0ae;background:rgba(255,145,77,.1)}
+    .task-list{display:grid;gap:8px}.task-card{width:100%;box-shadow:none;padding:11px;text-align:left;background:#0d141d}.task-card span{display:block;color:var(--soft);font-size:12px;margin-top:4px}.result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}.result-head h2{margin:0}.result-head p{margin:5px 0 0;color:var(--muted)}.filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.prompt-card{padding:15px;box-shadow:none;min-height:260px;display:grid;gap:11px}.prompt-card h3{margin:0;font-size:17px;line-height:1.35}.prompt-card p{margin:0;color:var(--muted);line-height:1.62}.prompt-preview{border:1px solid var(--line);border-radius:var(--r);background:#0b1118;padding:10px;color:#dce6f2;font-size:13px;line-height:1.6;max-height:96px;overflow:hidden}.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-self:end}.empty{border:1px dashed rgba(255,255,255,.16);border-radius:var(--r);padding:24px;text-align:center;color:var(--muted);background:rgba(255,255,255,.025)}
+    .admin-panel{margin-bottom:18px;border-color:rgba(156,231,189,.28)}.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px;color:var(--muted);font-size:13px}.field.full{grid-column:1/-1}.admin-list{display:grid;gap:8px;max-height:520px;overflow:auto}.admin-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:10px;background:#0d141d}.admin-row strong{display:block}.admin-row span{display:block;color:var(--soft);font-size:12px;margin-top:4px}.admin-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    dialog{width:min(900px,calc(100vw - 28px));max-height:88vh;padding:0;color:var(--text);overflow:hidden}dialog::backdrop{background:rgba(0,0,0,.68);backdrop-filter:blur(4px)}.dh,.df{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center;background:#0d141d}.df{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end}.dh h3{margin:0}.db{padding:16px;overflow:auto;max-height:70vh}.detail-grid{display:grid;gap:14px}.detail-section{border:1px solid var(--line);border-radius:var(--r);background:#0b1118;padding:13px}.detail-section h4{margin:0 0 8px}.detail-section p,.detail-section li{color:#cbd6e4;line-height:1.7}.detail-section pre{white-space:pre-wrap;word-break:break-word;margin:0;color:#f5f8fb;line-height:1.7}
+    .video-workbench{display:grid;gap:14px}.video-hero,.video-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px}.video-panel{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:16px}.video-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.selected-list{display:grid;gap:8px;margin-top:10px}.selected-card{border:1px solid var(--line);border-radius:var(--r);padding:10px;background:#0b1118;display:grid;gap:6px}.selected-card span{color:var(--soft);font-size:12px}.template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.template-card{text-align:left;height:auto;padding:10px}.template-card span{display:block;color:var(--soft);font-size:12px;margin-top:4px}.job-preview{white-space:pre-wrap;max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:#05080d;padding:12px;color:#b8c7d8;font-size:12px}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:80;max-width:min(420px,calc(100vw - 28px));border:1px solid rgba(105,215,255,.34);border-radius:var(--r);background:#0d141d;color:#e9fbff;padding:12px 14px;box-shadow:var(--shadow);display:none}.toast.show{display:block}
     [hidden]{display:none!important}
-    button,input,textarea,select{font:inherit}
-    button,.buttonlike{
-      min-height:40px;border:1px solid var(--line);border-radius:var(--r);background:#111925;color:var(--text);
-      padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;cursor:pointer;
-      transition:background .16s ease,border-color .16s ease,transform .16s ease,color .16s ease
-    }
-    button:hover,.buttonlike:hover{border-color:rgba(255,138,42,.72);background:#172130;transform:translateY(-1px)}
-    button:disabled{opacity:.55;cursor:not-allowed;transform:none}
-    .primary{border-color:transparent;background:linear-gradient(135deg,var(--accent),#ff5d3f);color:#fff;font-weight:800}
-    .quiet{background:transparent}
-    .danger{border-color:rgba(255,107,125,.34);color:#ff9baa}
-    input,textarea,select{
-      width:100%;border:1px solid var(--line);border-radius:var(--r);background:#0d1420;color:var(--text);
-      min-height:42px;padding:10px 12px;outline:none
-    }
-    textarea{resize:vertical;min-height:110px}
-    input:focus,textarea:focus,select:focus{border-color:rgba(255,138,42,.78);box-shadow:0 0 0 3px rgba(255,138,42,.14)}
-    header{position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(11,16,23,.88);backdrop-filter:blur(14px)}
-    .top{max-width:1440px;margin:auto;padding:14px 22px;display:flex;justify-content:space-between;gap:16px;align-items:center}
-    .brand{min-width:0}
-    .brand h1{margin:0;font-size:20px;line-height:1.2;letter-spacing:0}
-    .brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
-    .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    main{max-width:1440px;margin:auto;padding:24px 22px 56px}
-    .hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:stretch;margin-bottom:18px}
-    .search-panel,.side-panel,.filter-panel,.result-panel,.pack-card,.prompt-card,.suggestion-card,.admin-panel,dialog{
-      border:1px solid rgba(255,255,255,.09);border-radius:var(--r);background:rgba(21,28,39,.94);box-shadow:var(--shadow)
-    }
-    .search-panel{padding:26px;min-height:300px;display:grid;align-content:center;gap:18px}
-    .search-copy{max-width:820px}
-    .search-copy h2{margin:0;font-size:42px;line-height:1.06;letter-spacing:0;color:#fff}
-    .search-copy p{margin:12px 0 0;color:#c8d2df;font-size:16px;max-width:760px}
-    .search-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
-    .search-row input{min-height:58px;border-radius:var(--r);font-size:17px;background:#090f17}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .chip,.badge{
-      display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:26px;border:1px solid var(--line);
-      border-radius:999px;background:#101722;color:#cbd5e1;padding:4px 9px;font-size:12px;max-width:100%
-    }
-    .chip{cursor:pointer}
-    .chip:hover,.chip.active{border-color:rgba(51,199,165,.55);color:#d7fff5;background:rgba(51,199,165,.1)}
-    .badge.pro{border-color:rgba(255,209,102,.42);background:rgba(255,209,102,.12);color:#ffe5a3}
-    .badge.free{border-color:rgba(123,216,143,.38);background:rgba(123,216,143,.1);color:#c7f8cf}
-    .badge.pack{border-color:rgba(255,138,42,.44);background:rgba(255,138,42,.12);color:#ffd1ad}
-    .side-panel{padding:18px;display:grid;gap:14px}
-    .side-panel h3,.filter-panel h3,.result-title h3,.admin-panel h3{margin:0;font-size:15px}
-    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .metric{border:1px solid var(--line);border-radius:var(--r);padding:12px;background:#101722}
-    .metric strong{display:block;font-size:22px;line-height:1.1}
-    .metric span{color:var(--muted);font-size:12px}
-    .workspace{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
-    .filter-panel{position:sticky;top:86px;padding:16px;display:grid;gap:12px}
-    .field{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:800}
-    .result-panel{padding:18px;min-height:420px}
-    .result-title{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}
-    .result-title p{margin:4px 0 0;color:var(--muted);font-size:13px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:14px}
-    .prompt-card{position:relative;padding:16px;display:grid;gap:12px;min-height:270px;box-shadow:none;cursor:pointer}
-    .prompt-card:hover{border-color:#40506a;background:#192231}
-    .prompt-top{display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;align-items:start}
-    .prompt-icon{width:42px;height:42px;border-radius:var(--r);border:1px solid rgba(255,138,42,.38);background:rgba(255,138,42,.12);display:grid;place-items:center;color:#ffbd7d;font-weight:900}
-    .prompt-card h3{margin:0;font-size:17px;line-height:1.34}
-    .summary{margin:0;color:#b7c3d3;font-size:13px;line-height:1.65}
-    .meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-    .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
-    .landing{display:grid;gap:18px}
-    .landing-section{display:grid;gap:12px}
-    .landing-head{display:flex;justify-content:space-between;gap:12px;align-items:end}
-    .landing-head h3{margin:0;font-size:18px}
-    .landing-head p{margin:0;color:var(--muted);font-size:13px}
-    .pack-card{padding:16px;display:grid;gap:12px;box-shadow:none}
-    .pack-card h4{margin:0;font-size:17px}
-    .pack-card p{margin:0;color:#b7c3d3;font-size:13px}
-    .suggestion-card{padding:14px;display:grid;gap:10px;box-shadow:none}
-    .suggestion-card h4{margin:0;font-size:15px}
-    .suggestion-card p{margin:0;color:#b7c3d3;font-size:13px}
-    .audit-box{margin:12px 0;border:1px solid rgba(255,255,255,.1);border-radius:var(--r);background:#0d1420;padding:12px;display:grid;gap:8px}
-    .audit-box p{margin:0;color:#b7c3d3;font-size:13px}
-    .empty{border:1px dashed var(--line);border-radius:var(--r);padding:34px;text-align:center;color:var(--muted);background:#0f1622}
-    .empty strong{display:block;color:#fff;font-size:18px;margin-bottom:6px}
-    .admin-panel{padding:14px;margin-bottom:14px;display:grid;gap:12px;box-shadow:none;border-color:rgba(51,199,165,.26)}
-    .admin-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    dialog{width:min(980px,calc(100vw - 28px));max-height:calc(100vh - 28px);padding:0;color:var(--text)}
-    dialog::backdrop{background:rgba(3,7,12,.72);backdrop-filter:blur(4px)}
-    .dh,.df{padding:14px 16px;border-bottom:1px solid var(--line);background:#101722;display:flex;justify-content:space-between;gap:10px;align-items:center}
-    .dh h3{margin:0;font-size:18px}
-    .db{padding:16px;max-height:calc(100vh - 160px);overflow:auto}
-    .df{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .full{grid-column:1/-1}
-    pre{margin:0;white-space:pre-wrap;word-break:break-word;border:1px solid var(--line);border-radius:var(--r);background:#0b1017;padding:14px;color:#e4ebf5;font:13px/1.7 "Microsoft YaHei",Arial,sans-serif;max-height:52vh;overflow:auto}
-    .toast{position:fixed;right:18px;bottom:18px;z-index:80;max-width:min(520px,calc(100vw - 36px));padding:12px 14px;border:1px solid #37455a;border-radius:var(--r);background:#111925;color:#fff;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.16s;pointer-events:none;font-size:13px}
-    .toast.show{opacity:1;transform:translateY(0)}
-    .video-workbench{display:grid;gap:18px}
-    .video-hero{border:1px solid rgba(255,255,255,.1);border-radius:var(--r);background:linear-gradient(135deg,rgba(255,138,42,.12),rgba(51,199,165,.08) 42%,rgba(21,28,39,.96));box-shadow:var(--shadow);padding:24px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:end}
-    .video-hero h2{margin:0;font-size:38px;line-height:1.08;letter-spacing:0}
-    .video-hero p{margin:10px 0 0;color:#c8d2df;max-width:760px}
-    .video-status{border:1px solid var(--line);border-radius:var(--r);background:#0d1420;padding:14px;display:grid;gap:8px}
-    .video-status strong{font-size:15px}.video-status span{color:var(--muted);font-size:12px}
-    .video-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:18px;align-items:start}
-    .video-panel{border:1px solid rgba(255,255,255,.09);border-radius:var(--r);background:rgba(21,28,39,.94);box-shadow:var(--shadow);padding:16px;display:grid;gap:12px}
-    .video-panel h3{margin:0;font-size:16px}.video-panel p{margin:0;color:var(--muted);font-size:13px}
-    .video-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .template-grid,.caption-list,.selected-list{display:grid;gap:8px}
-    .template-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
-    .template-card,.caption-card,.selected-card{border:1px solid var(--line);border-radius:var(--r);background:#101722;padding:12px;display:grid;gap:7px}
-    .template-card.is-active{border-color:rgba(255,138,42,.72);background:rgba(255,138,42,.1)}
-    .template-card strong,.caption-card strong,.selected-card strong{font-size:14px;line-height:1.35}
-    .template-card span,.caption-card span,.selected-card span{color:var(--muted);font-size:12px}
-    .caption-card{grid-template-columns:74px minmax(0,1fr);align-items:start}
-    .caption-time{border:1px solid rgba(51,199,165,.34);border-radius:var(--r);color:#b9fff0;background:rgba(51,199,165,.09);padding:6px 8px;text-align:center;font-size:12px;font-weight:900}
-    .video-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .video-preview{min-height:220px;max-height:360px}
-    .local-command{font-size:12px;line-height:1.7}
-    @media(max-width:1040px){.hero{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.filter-panel{position:static}.search-copy h2{font-size:34px}}
-    @media(max-width:1040px){.video-hero,.video-layout{grid-template-columns:1fr}.video-hero h2{font-size:32px}}
-    @media(max-width:640px){
-      .top{padding:12px 14px;align-items:flex-start}.top-actions{width:100%;justify-content:flex-start}.brand h1{font-size:18px}
-      main{padding:14px 12px 36px}.search-panel{padding:18px;min-height:0}.search-copy h2{font-size:27px}.search-copy p{font-size:14px}
-      .search-row{grid-template-columns:1fr}.search-row input{min-height:52px}.side-panel{display:none}
-      .filter-panel{padding:12px}.result-panel{padding:12px}.result-title{align-items:flex-start;flex-direction:column}
-      .grid{grid-template-columns:1fr}.prompt-card{min-height:0}.card-actions{grid-template-columns:1fr 1fr}
-      .form-grid{grid-template-columns:1fr}.df{display:grid;grid-template-columns:1fr 1fr}.df button{width:100%}
-      .metric-grid{grid-template-columns:1fr 1fr}
-      .video-hero{padding:18px}.video-hero h2{font-size:27px}.video-two{grid-template-columns:1fr}.video-actions button,.video-actions a{width:100%}.caption-card{grid-template-columns:1fr}
-    }
+    @media(max-width:1100px){.hero,.view,.video-hero,.video-layout{grid-template-columns:1fr}.department-grid,.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.status-panel{order:-1}.filters{grid-template-columns:1fr 1fr}}
+    @media(max-width:680px){.nav{padding:11px 12px}.brand span{display:none}.nav-actions{gap:6px}.nav-actions a{padding:0 9px}main{padding:14px 12px 36px}.hero-copy{padding:18px}.hero-copy h1{font-size:30px}.search-row,.department-grid,.grid,.filters,.admin-grid,.form-grid,.video-two,.template-grid{grid-template-columns:1fr}.result-head{display:grid}.card-actions{grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
   <header>
-    <div class="top">
-      <div class="brand">
-        <h1>AI 提示词搜索工作台 <span class="badge" id="modeBadge"></span></h1>
-        <p id="topSummary">输入需求后再展开结果，避免首页堆满提示词。</p>
-      </div>
-      <div class="top-actions">
-        <a class="buttonlike quiet" href="/prompts/" id="searchModeLink">提示词搜索</a>
-        <a class="buttonlike" href="/prompts/?tool=video" id="videoModeLink">视频生成</a>
-        <button class="quiet" id="managePortal" hidden>管理订阅</button>
-        <a class="buttonlike" href="/prompts/admin/" id="adminLink">后台</a>
-      </div>
+    <div class="nav">
+      <a class="brand" href="/prompts/">
+        <span class="mark">AI</span>
+        <span><strong>互联网岗位 AI 提示词工作台</strong><span>岗位部门 → 工作场景 → 具体任务 → 可复制提示词</span></span>
+      </a>
+      <nav class="nav-actions">
+        <a class="buttonlike quiet" href="/prompts/" id="searchModeLink"><button type="button">岗位工作台</button></a>
+        <a class="buttonlike" href="/prompts/?tool=video" id="videoModeLink"><button type="button">视频生成</button></a>
+        <a class="buttonlike" href="/prompts/admin/" id="adminLink"><button type="button">后台</button></a>
+      </nav>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="search-panel">
-        <div class="search-copy">
-          <h2>搜索一个具体创作任务，再拿到可复制的提示词。</h2>
-          <p>面向图像、视频、电商、商业视觉和影视分镜的 5000 条可复制 AIGC 提示词库。先输入关键词，再按工具、模态、免费/Pro 和精选包过滤。</p>
+    <section class="hero" id="hero">
+      <div class="hero-copy">
+        <div>
+          <h1>互联网岗位 AI 提示词工作台</h1>
+          <p>按新媒体、影视视觉、电商、品牌市场、产品、增长、销售客服、技术研发、HR 行政等真实岗位职责整理，复制即可用于日常工作。</p>
         </div>
         <div class="search-row">
-          <input id="search" type="search" autocomplete="off" placeholder="例如：电商短视频开头、商品图一致性、Runway 分镜、Suno 品牌口播">
+          <input id="search" type="search" autocomplete="off" placeholder="搜索岗位、任务或你想完成的工作，例如：小红书标题、短剧分镜、PRD、直播话术">
           <button class="primary" id="runSearch">搜索</button>
           <button id="clearSearch">清空</button>
         </div>
-        <div class="chips" id="hotKeywords"></div>
+        <div class="chips" id="hotTasks"></div>
       </div>
-      <aside class="side-panel">
-        <h3>库状态</h3>
+      <aside class="status-panel">
+        <h3>免费版内容状态</h3>
         <div class="metric-grid" id="metrics"></div>
-        <div class="chips" id="entitlementBadges"></div>
-        <button class="primary" id="buyPro">开通 Pro 会员</button>
+        <div class="chips" id="settingBadges"></div>
+        <p id="paidLead" hidden>专业版和精选包入口当前由管理员控制显示。</p>
       </aside>
     </section>
 
-    <section class="workspace">
-      <aside class="filter-panel">
-        <h3>筛选</h3>
-        <label class="field">工具<select id="toolFilter"></select></label>
-        <label class="field">模态<select id="modalityFilter"></select></label>
-        <label class="field">访问<select id="accessFilter">
-          <option value="all">全部</option>
-          <option value="free">免费</option>
-          <option value="pro">Pro</option>
-          <option value="pack">精选包</option>
-        </select></label>
-        <label class="field">精选包<select id="packFilter"></select></label>
-        <label class="field">排序<select id="sortFilter">
-          <option value="relevance">相关性</option>
-          <option value="quality">质量评分</option>
-          <option value="newest">最近验证</option>
-        </select></label>
-        <div class="chips" id="savedChips"></div>
-      </aside>
-
-      <section class="result-panel">
-        <div class="admin-panel" id="adminPanel" hidden>
-          <div class="admin-row">
-            <h3>管理员草稿</h3>
-            <span class="badge" id="dirtyBadge">无本地草稿</span>
-          </div>
-          <div class="admin-row">
-            <button class="primary" id="newPrompt">新增提示词</button>
-            <button id="publishLibrary">发布到 GitHub</button>
-            <button id="openSuggestionReview">联网建议审核池</button>
-          </div>
+    <section class="panel admin-panel" id="adminPanel" hidden>
+      <div class="result-head">
+        <div>
+          <h2>提示词后台</h2>
+          <p>分类、提示词、权限和站点设置通过 Worker API 写入 D1/KV。</p>
         </div>
-        <div class="result-title">
+        <button class="primary" id="refreshAdmin">刷新后台数据</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="active" data-admin-tab="settings">站点设置</button>
+        <button data-admin-tab="prompts">提示词管理</button>
+        <button data-admin-tab="categories">分类管理</button>
+        <button data-admin-tab="logs">操作日志</button>
+      </div>
+      <div id="adminBody"></div>
+    </section>
+
+    <section id="workbenchView" class="view">
+      <aside class="panel">
+        <h2>选择你的岗位</h2>
+        <p>先按职责进入，再选择工作场景和具体任务。</p>
+        <div class="task-list" id="sideNav"></div>
+      </aside>
+      <section class="panel">
+        <div class="result-head">
           <div>
-            <h3 id="resultHeading">先搜索，再浏览结果</h3>
-            <p id="resultSub">首页只保留搜索入口、热门关键词、精选包和联网趋势建议。</p>
+            <div class="crumbs" id="crumbs"></div>
+            <h2 id="resultHeading">选择你的岗位，直接复制可用提示词</h2>
+            <p id="resultSub">前台只展示免费、已发布、copyReady 的精选提示词；后台完整库继续沉淀。</p>
           </div>
           <div class="chips" id="activeFilters"></div>
         </div>
-        <div id="content"><div class="empty"><strong>正在加载提示词库</strong>请稍候。</div></div>
+        <div class="department-grid" id="departmentGrid"></div>
+        <div class="filters" id="filters" hidden>
+          <label class="field">适用工具<select id="toolFilter"></select></label>
+          <label class="field">适用输出<select id="modalityFilter"></select></label>
+          <label class="field">排序<select id="sortFilter"><option value="relevance">相关性</option><option value="quality">质量评分</option><option value="newest">最近验证</option></select></label>
+        </div>
+        <div class="grid" id="promptGrid"></div>
+        <div class="empty" id="emptyState" hidden></div>
+        <div class="card-actions" style="margin-top:12px" id="pagination"></div>
       </section>
     </section>
 
     <section class="video-workbench" id="videoWorkbench" hidden>
       <div class="video-hero">
-        <div>
-          <h2>从提示词库出发，生成抖音字幕视频任务。</h2>
+        <div class="video-panel">
+          <h2>从提示词库出发，生成抖音字幕视频任务</h2>
           <p>线上负责选题、模板、素材关键词和字幕分镜；本机渲染桥负责联网素材、可选开源 TTS、HyperFrames 合成和 MP4 输出。</p>
         </div>
-        <div class="video-status">
+        <div class="video-panel">
           <strong id="localBridgeTitle">本地渲染桥检测中</strong>
-          <span id="localBridgeText">默认端口 127.0.0.1:47892。若浏览器阻止 localhost 请求，可导出任务 JSON 后手动渲染。</span>
+          <p id="localBridgeText">默认端口 127.0.0.1:47892。若浏览器阻止 localhost 请求，可导出任务 JSON 后手动渲染。</p>
           <button id="checkLocalBridge">重新检测</button>
         </div>
       </div>
-
       <div class="video-layout">
         <section class="video-panel">
           <h3>1. 选题与素材方向</h3>
@@ -284,39 +145,40 @@
             <label class="field">素材关键词<textarea id="videoAssetKeywords" rows="4" placeholder="每行一个关键词，例如 AI agent startup"></textarea></label>
             <label class="field">声音策略<select id="videoAudioMode"><option value="none">默认无声字幕</option><option value="optional-tts">可选开源 TTS</option></select></label>
           </div>
-          <div class="video-actions">
+          <div class="card-actions" style="margin-top:10px">
             <button class="primary" id="generateVideoCaptions">生成字幕分镜</button>
             <button id="resetVideoDraft">重置样例</button>
           </div>
         </section>
-
         <aside class="video-panel">
           <h3>2. 引用提示词库</h3>
           <p>搜索提示词并加入任务，渲染器会把这些提示词作为风格和分镜参考。</p>
-          <div class="search-row">
+          <div class="search-row" style="grid-template-columns:minmax(0,1fr) auto">
             <input id="videoPromptSearch" type="search" placeholder="搜索：爆款脚本、短视频开头、Runway 分镜">
             <button id="videoPromptSearchButton">筛选</button>
           </div>
           <div class="selected-list" id="videoPromptPool"></div>
+          <h3 style="margin-top:14px">已选提示词</h3>
           <div class="selected-list" id="selectedPrompts"></div>
         </aside>
-
+      </div>
+      <div class="video-layout">
         <section class="video-panel">
-          <h3>3. 爆款模板组合</h3>
+          <h3>3. 字幕模板</h3>
           <div class="template-grid" id="videoTemplates"></div>
+          <div class="selected-list" id="videoCaptions" style="margin-top:12px"></div>
         </section>
-
-        <section class="video-panel">
-          <h3>4. 字幕分镜与导出</h3>
-          <div class="caption-list" id="videoCaptions"></div>
-          <pre class="video-preview" id="videoJobPreview"></pre>
-          <div class="video-actions">
+        <aside class="video-panel">
+          <h3>4. 导出任务</h3>
+          <div class="card-actions">
             <button class="primary" id="sendLocalRender">发送本机渲染</button>
-            <button id="downloadVideoJob">导出任务 JSON</button>
-            <button id="copyLocalCommand">复制本地启动命令</button>
+            <button id="downloadVideoJob">导出 JSON</button>
           </div>
-          <pre class="local-command" id="localCommand">Set-Location 'E:\AISP\video-generator-studio'; & 'D:\AI-Tools\runtimes\node-v22.22.2-win-x64\npm.cmd' run serve</pre>
-        </section>
+          <button id="copyLocalCommand" style="width:100%;margin-top:8px">复制本地命令</button>
+          <pre class="job-preview" id="localCommand">cd /d E:\AISP\video-generator-studio
+node scripts\render-job.mjs --job video-job.json</pre>
+          <pre class="job-preview" id="videoJobPreview"></pre>
+        </aside>
       </div>
     </section>
   </main>
@@ -334,177 +196,392 @@
         <input type="hidden" name="id">
         <div class="form-grid">
           <label class="field">标题<input name="title" required></label>
-          <label class="field">分类<input name="category" required></label>
-          <label class="field">状态<input name="status" placeholder="推荐 / 待验证"></label>
-          <label class="field">来源<input name="source" placeholder="手动新增"></label>
-          <label class="field">访问<select name="access"><option value="free">free</option><option value="pro">pro</option><option value="pack">pack</option></select></label>
-          <label class="field">精选包 ID<input name="packId" placeholder="video-commerce-pro"></label>
-          <label class="field">Stripe Price ID<input name="stripePriceId" placeholder="可留空，生产用 Worker env 映射"></label>
+          <label class="field">状态<select name="status"><option value="draft">draft</option><option value="published">published</option><option value="hidden">hidden</option><option value="archived">archived</option><option value="needs_classification">needs_classification</option></select></label>
+          <label class="field">一级岗位<select name="departmentId"></select></label>
+          <label class="field">二级场景<select name="scenarioId"></select></label>
+          <label class="field">三级任务<select name="taskId"></select></label>
+          <label class="field">访问<select name="access"><option value="free">free</option><option value="pro">pro</option><option value="pack">pack</option><option value="paid">paid</option></select></label>
+          <label class="field">适用工具<input name="tool"></label>
+          <label class="field">适用输出<input name="modality"></label>
           <label class="field">质量评分<input name="qualityScore" type="number" min="1" max="100"></label>
-          <label class="field">来源类型<input name="sourceType" placeholder="curated / generated-library"></label>
-          <label class="field">验证时间<input name="verifiedAt" placeholder="2026-05-15"></label>
-          <label class="field full">标签，逗号分隔<input name="tags"></label>
+          <label class="field">质量等级<select name="qualityLevel"><option value="basic">basic</option><option value="usable">usable</option><option value="professional">professional</option></select></label>
+          <label class="field">复制就绪<select name="copyReady"><option value="true">true</option><option value="false">false</option></select></label>
+          <label class="field">精选<select name="featured"><option value="false">false</option><option value="true">true</option></select></label>
+          <label class="field full">摘要<textarea name="summary" rows="3"></textarea></label>
+          <label class="field full">完整中文提示词<textarea name="promptZh" rows="12" required></textarea></label>
+          <label class="field full">英文提示词<textarea name="promptEn" rows="5"></textarea></label>
+          <label class="field full">负面提示词<textarea name="negativePrompt" rows="4"></textarea></label>
           <label class="field full">变量，逗号分隔<input name="variables"></label>
           <label class="field full">SEO 关键词，逗号分隔<input name="seoKeywords"></label>
-          <label class="field full">示例输出<textarea name="exampleOutput" rows="3"></textarea></label>
-          <label class="field full">摘要<textarea name="summary" rows="3"></textarea></label>
-          <label class="field full">提示词正文<textarea name="body" required rows="14"></textarea></label>
+          <label class="field full">使用建议<textarea name="usageTips" rows="3"></textarea></label>
+          <label class="field full">示例结果<textarea name="expectedResult" rows="3"></textarea></label>
         </div>
       </div>
-      <div class="df"><button type="button" data-close="editorDialog">取消</button><button class="primary" type="submit">保存到草稿</button></div>
+      <div class="df"><button type="button" data-close="editorDialog">取消</button><button class="primary" id="savePrompt" type="submit">保存到后端</button></div>
     </form>
-  </dialog>
-
-  <dialog id="suggestionDialog">
-    <div class="dh"><h3>联网建议审核池</h3><button type="button" data-close="suggestionDialog">关闭</button></div>
-    <div class="db" id="suggestionBody"></div>
-    <div class="df"><button type="button" data-close="suggestionDialog">关闭</button></div>
   </dialog>
 
   <div class="toast" id="toast"></div>
 
-  <script>
-const API_LIBRARY="/api/prompts/library";
-const API_INDEX="/prompts-data/search-index.json";
-const API_SUGGESTIONS="/prompts-data/web-suggestions.json";
-const API_CHECKOUT="/api/prompts/checkout";
-const API_CONFIRM="/api/prompts/checkout/confirm";
-const API_ENTITLEMENT="/api/prompts/entitlement";
-const API_PORTAL="/api/prompts/customer-portal";
-const IS_ADMIN=location.pathname.replace(/\/+$/,"").startsWith("/prompts/admin");
+<script>
+const PUBLIC="/api/public";
+const ADMIN="/api/admin";
 const LOCAL_RENDERER_ORIGIN="http://127.0.0.1:47892";
-const FAVORITE_KEY="prompt-commerce-favorites-v1";
-const SEARCHES_KEY="prompt-commerce-searches-v1";
-const VIDEO_DRAFT_KEY="prompt-video-generator-draft-v1";
+const IS_ADMIN=location.pathname.replace(/\/+$/,"").startsWith("/prompts/admin");
 const qs=new URLSearchParams(location.search);
-const VIEW_MODE=qs.get("tool")==="video"?"video":"search";
-const state={query:qs.get("q")||"",tool:VIEW_MODE==="video"?"all":qs.get("tool")||"all",modality:qs.get("mod")||"all",access:qs.get("access")||"all",pack:qs.get("pack")||"all",sort:qs.get("sort")||"relevance"};
-let store={version:2,prompts:[],assets:[]},indexData={packs:[],prompts:[]},suggestions={suggestions:[]},entitlement={pro:false,packs:[]};
-let dirty=false,activeDetailId="",lastResults=[];
+const VIEW_MODE=qs.get("tool")==="video"?"video":"workbench";
 const $=id=>document.getElementById(id);
-const E={mode:$("modeBadge"),summary:$("topSummary"),search:$("search"),hot:$("hotKeywords"),metrics:$("metrics"),ent:$("entitlementBadges"),tool:$("toolFilter"),mod:$("modalityFilter"),access:$("accessFilter"),pack:$("packFilter"),sort:$("sortFilter"),saved:$("savedChips"),filters:$("activeFilters"),heading:$("resultHeading"),sub:$("resultSub"),content:$("content"),admin:$("adminPanel"),dirty:$("dirtyBadge"),toast:$("toast"),detail:$("detailDialog"),detailTitle:$("detailTitle"),detailBody:$("detailBody"),detailCopy:$("detailCopy"),editor:$("editorDialog"),editorForm:$("editorForm"),editorTitle:$("editorTitle"),suggestions:$("suggestionDialog"),suggestionBody:$("suggestionBody"),hero:document.querySelector(".hero"),workspace:document.querySelector(".workspace"),video:$("videoWorkbench"),searchMode:$("searchModeLink"),videoMode:$("videoModeLink"),bridgeTitle:$("localBridgeTitle"),bridgeText:$("localBridgeText"),videoTopic:$("videoTopic"),videoSource:$("videoSourceText"),videoAssets:$("videoAssetKeywords"),videoAudio:$("videoAudioMode"),videoPromptSearch:$("videoPromptSearch"),videoPromptPool:$("videoPromptPool"),selectedPrompts:$("selectedPrompts"),videoTemplates:$("videoTemplates"),videoCaptions:$("videoCaptions"),videoJobPreview:$("videoJobPreview"),localCommand:$("localCommand")};
-const VIDEO_TEMPLATES=[
-  {id:"hook-conflict",title:"强冲突钩子",desc:"前 3 秒把反差和风险打满"},
-  {id:"number-slam",title:"数字猛击",desc:"用日期、比例、成本做视觉锚点"},
-  {id:"evidence-stack",title:"证据堆叠",desc:"来源、事件、结果、风险逐个出现"},
-  {id:"timeline-upgrade",title:"时间线升级",desc:"三段式说明变化如何发生"},
-  {id:"policy-market-split",title:"政策/市场双栏",desc:"两股力量同时推进"},
-  {id:"myth-reversal",title:"误区反转",desc:"先破常识，再给真实判断"},
-  {id:"three-point-list",title:"三点清单",desc:"用三条行动点收束信息"},
-  {id:"action-list",title:"行动清单结尾",desc:"行业认知、用户洞察、商业判断"},
-  {id:"screen-record-explainer",title:"屏幕录制讲解",desc:"适合工具教程和流程演示"},
-  {id:"comment-trigger",title:"评论触发结尾",desc:"用判断题激发讨论"}
-];
-let bridgeOnline=false,videoPromptQuery="",videoDraft=loadVideoDraft();
 const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
 const arr=value=>Array.isArray(value)?value:String(value||"").split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
 const now=()=>new Date().toISOString();
-const promptById=id=>store.prompts.find(prompt=>prompt.id===id);
-const indexById=id=>indexData.prompts.find(prompt=>prompt.id===id);
-const packs=()=>Array.isArray(indexData.packs)?indexData.packs:[];
-const packById=id=>packs().find(pack=>pack.id===id);
-const favorites=()=>new Set(JSON.parse(localStorage.getItem(FAVORITE_KEY)||"[]"));
-const saveFavorites=set=>localStorage.setItem(FAVORITE_KEY,JSON.stringify([...set].slice(0,200)));
-const savedSearches=()=>JSON.parse(localStorage.getItem(SEARCHES_KEY)||"[]");
-const saveSearch=query=>{let q=String(query||"").trim();if(!q)return;localStorage.setItem(SEARCHES_KEY,JSON.stringify([q,...savedSearches().filter(x=>x!==q)].slice(0,8)))};
-function defaultVideoDraft(){return{topic:"AI Agent 开始自己注册公司",sourceText:"据 ClawBank 与科技媒体披露，AI Agent Manfred 自主完成美国公司注册，取得 EIN，开通受 FDIC 保险的银行账户，并连接加密钱包。中国三部门也在 2026-05-08 发布《智能体规范应用与创新发展实施意见》，把智能体定义为能感知、记忆、决策、交互、执行的智能系统。普通人要看的不是热闹，而是行业认知、用户洞察和商业判断如何被 AI 放大。",assetKeywords:"AI agent startup\ncompany registration technology\nChina AI policy\nalgorithmic business dashboard",audioMode:"none",promptIds:[],templateIds:["hook-conflict","evidence-stack","timeline-upgrade","policy-market-split","action-list"],captionBlocks:[]}}
+let settings={},categories=[],flatCategories=[],currentPrompts=[],currentPagination={page:1,pages:1,total:0,limit:20},adminPrompts=[],auditLogs=[];
+let selected={department:"",scenario:"",task:"",tool:"all",modality:"all",sort:"relevance",page:1,query:qs.get("q")||""};
+let activeDetail=null,adminTab="settings",adminPromptPage=1,videoPromptQuery="",bridgeOnline=false;
+
+const E={
+  hero:$("hero"),admin:$("adminPanel"),adminBody:$("adminBody"),workbench:$("workbenchView"),video:$("videoWorkbench"),
+  search:$("search"),metrics:$("metrics"),badges:$("settingBadges"),paidLead:$("paidLead"),hot:$("hotTasks"),
+  side:$("sideNav"),deptGrid:$("departmentGrid"),departmentGrid:$("departmentGrid"),crumbs:$("crumbs"),heading:$("resultHeading"),sub:$("resultSub"),
+  filters:$("filters"),tool:$("toolFilter"),modality:$("modalityFilter"),sort:$("sortFilter"),activeFilters:$("activeFilters"),
+  grid:$("promptGrid"),empty:$("emptyState"),pagination:$("pagination"),toast:$("toast"),
+  detail:$("detailDialog"),detailTitle:$("detailTitle"),detailBody:$("detailBody"),detailCopy:$("detailCopy"),
+  editor:$("editorDialog"),editorForm:$("editorForm"),editorTitle:$("editorTitle"),
+  bridgeTitle:$("localBridgeTitle"),bridgeText:$("localBridgeText"),videoTopic:$("videoTopic"),videoSource:$("videoSourceText"),
+  videoAssets:$("videoAssetKeywords"),videoAudio:$("videoAudioMode"),videoPromptSearch:$("videoPromptSearch"),
+  videoPromptPool:$("videoPromptPool"),selectedPrompts:$("selectedPrompts"),videoTemplates:$("videoTemplates"),
+  videoCaptions:$("videoCaptions"),videoJobPreview:$("videoJobPreview"),localCommand:$("localCommand")
+};
+
+function toast(message){E.toast.textContent=message;E.toast.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>E.toast.classList.remove("show"),3200)}
+async function fetchJson(url,options={}){let res=await fetch(url,{cache:"no-store",...options});let data=await res.json().catch(()=>null);if(!res.ok||data?.ok===false)throw new Error(data?.error||`HTTP ${res.status}`);return data}
+function flattenTree(nodes,out=[]){for(let node of nodes||[]){out.push(node);flattenTree(node.children||[],out)}return out}
+function findCat(id){return flatCategories.find(x=>x.id===id)}
+function childrenOf(id){return flatCategories.filter(x=>x.parentId===id)}
+function departments(){return categories||[]}
+function scenarioOptions(departmentId){return childrenOf(departmentId)}
+function taskOptions(scenarioId){return childrenOf(scenarioId)}
+function categoryPath(){return [findCat(selected.department),findCat(selected.scenario),findCat(selected.task)].filter(Boolean)}
+
+async function loadAll(){
+  E.search.value=selected.query;
+  E.admin.hidden=!IS_ADMIN;
+  E.workbench.hidden=VIEW_MODE==="video";
+  E.video.hidden=VIEW_MODE!=="video";
+  $("searchModeLink").querySelector("button").classList.toggle("active",VIEW_MODE!=="video");
+  $("videoModeLink").querySelector("button").classList.toggle("active",VIEW_MODE==="video");
+  try{
+    let [settingsRes,catsRes]=await Promise.all([fetchJson(`${PUBLIC}/settings`),fetchJson(`${PUBLIC}/categories`)]);
+    settings=settingsRes.settings||{};
+    categories=catsRes.categories||[];
+    flatCategories=flattenTree(categories,[]);
+    renderShell();
+    if(IS_ADMIN) await loadAdmin();
+    if(VIEW_MODE==="video"){await loadVideo();return}
+    await loadPrompts();
+  }catch(error){
+    console.error(error);
+    E.grid.innerHTML="";
+    E.empty.hidden=false;
+    E.empty.innerHTML=`<strong>提示词工作台加载失败</strong><br>${esc(error.message||error)}`;
+  }
+}
+
+function renderShell(){
+  let totalTasks=flatCategories.filter(x=>x.type==="task").length;
+  let visibleDepartments=departments().length;
+  let publicCount=departments().reduce((sum,item)=>sum+Number(item.promptCount||0),0);
+  E.metrics.innerHTML=[["岗位入口",visibleDepartments],["任务骨架",totalTasks],["免费精选",publicCount],["每页数量",settings.categoryPromptLimit||20]].map(([k,v])=>`<div class="metric"><strong>${v}</strong><span>${k}</span></div>`).join("");
+  E.badges.innerHTML=[
+    `<span class="badge free">free-only</span>`,
+    settings.showPaidEntry?`<span class="badge warn">付费入口开启</span>`:`<span class="badge">付费入口关闭</span>`,
+    settings.allowLockedPreview?`<span class="badge warn">锁定预览开启</span>`:`<span class="badge">不返回锁定内容</span>`
+  ].join("");
+  E.paidLead.hidden=!settings.showPaidEntry;
+  E.side.innerHTML=departments().map(dept=>`<button class="task-card ${selected.department===dept.id?"active":""}" data-department="${esc(dept.id)}"><strong>${esc(dept.name)}</strong><span>${Number(dept.promptCount||0)} 条精选提示词 · ${childrenOf(dept.id).length} 个场景</span></button>`).join("");
+  E.hot.innerHTML=flatCategories.filter(x=>x.type==="task"&&x.promptCount>0).slice(0,10).map(task=>`<button class="quiet" data-task-hot="${esc(task.id)}">${esc(task.name)}</button>`).join("");
+  hydrateFilterOptions();
+}
+
+function hydrateFilterOptions(){
+  let tools=[...new Set(currentPrompts.map(x=>x.tool).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));
+  let mods=[...new Set(currentPrompts.map(x=>x.modality).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));
+  E.tool.innerHTML=`<option value="all">全部工具</option>${tools.map(x=>`<option ${selected.tool===x?"selected":""}>${esc(x)}</option>`).join("")}`;
+  E.modality.innerHTML=`<option value="all">全部输出</option>${mods.map(x=>`<option ${selected.modality===x?"selected":""}>${esc(x)}</option>`).join("")}`;
+  E.sort.value=selected.sort;
+}
+
+async function loadPrompts(page=selected.page||1){
+  selected.page=page;
+  if(selected.query){
+    let p=new URLSearchParams({q:selected.query,page:String(page),limit:"20"});
+    if(selected.tool!=="all")p.set("tool",selected.tool);
+    if(selected.modality!=="all")p.set("modality",selected.modality);
+    let data=await fetchJson(`${PUBLIC}/search?${p}`);
+    currentPrompts=data.prompts||[];currentPagination=data.pagination||{};
+  }else{
+    let p=new URLSearchParams({page:String(page),limit:String(selected.task?settings.categoryPromptLimit||20:settings.homepageFeaturedLimit||12)});
+    if(selected.department)p.set("department",selected.department);
+    if(selected.scenario)p.set("scenario",selected.scenario);
+    if(selected.task)p.set("task",selected.task);
+    if(!selected.department&&!selected.scenario&&!selected.task)p.set("featured","1");
+    if(selected.tool!=="all")p.set("tool",selected.tool);
+    if(selected.modality!=="all")p.set("modality",selected.modality);
+    let data=await fetchJson(`${PUBLIC}/prompts?${p}`);
+    currentPrompts=data.prompts||[];currentPagination=data.pagination||{};
+  }
+  renderWorkbench();
+}
+
+function renderWorkbench(){
+  let path=categoryPath();
+  E.crumbs.innerHTML=path.length?path.map((x,i)=>`<button class="quiet" data-crumb="${i}">${esc(x.name)}</button>`).join(""):`<span class="badge">岗位部门 → 工作场景 → 具体任务</span>`;
+  E.departmentGrid.hidden=Boolean(selected.department||selected.query);
+  E.filters.hidden=false;
+  if(!selected.department&&!selected.query){
+    E.heading.textContent="选择你的岗位，直接复制可用提示词";
+    E.sub.textContent="免费版首页只展示精选内容；选择岗位后会进入场景和任务。";
+    E.departmentGrid.innerHTML=departments().map(departmentCard).join("");
+  }else if(selected.query){
+    E.heading.textContent=`搜索：${selected.query}`;
+    E.sub.textContent="搜索结果按任务精确匹配、精选、质量等级和质量评分排序。";
+    E.departmentGrid.innerHTML="";
+  }else{
+    let dept=findCat(selected.department),scenario=findCat(selected.scenario),task=findCat(selected.task);
+    E.heading.textContent=task?.name||scenario?.name||dept?.name||"岗位任务";
+    E.sub.textContent=task?"这些提示词可直接用于该具体任务。":scenario?"选择具体任务后查看对应提示词。":"选择工作场景，再进入具体任务。";
+    E.departmentGrid.innerHTML=renderCategoryDrilldown(dept,scenario);
+    E.departmentGrid.hidden=false;
+  }
+  E.activeFilters.innerHTML=[selected.tool!=="all"&&`工具：${selected.tool}`,selected.modality!=="all"&&`输出：${selected.modality}`].filter(Boolean).map(x=>`<span class="badge">${esc(x)}</span>`).join("");
+  hydrateFilterOptions();
+  let prompts=sortPrompts(currentPrompts);
+  E.grid.innerHTML=prompts.map(promptCard).join("");
+  E.empty.hidden=prompts.length>0;
+  if(!prompts.length)E.empty.innerHTML="<strong>当前任务暂无免费精选提示词</strong><br>该岗位骨架已建立，后台可继续补充和发布。";
+  renderPagination();
+}
+
+function departmentCard(dept){return`<article class="department-card" data-department="${esc(dept.id)}"><div class="badge">${esc(dept.icon||"AI")}</div><strong>${esc(dept.name)}</strong><p>${esc(dept.description||"")}</p><div class="card-meta"><span class="badge free">${Number(dept.promptCount||0)} 条精选</span><span class="badge">${childrenOf(dept.id).length} 个场景</span></div><button class="primary" data-department="${esc(dept.id)}">进入</button></article>`}
+function renderCategoryDrilldown(dept,scenario){
+  if(!dept)return"";
+  if(!scenario){
+    return childrenOf(dept.id).map(item=>`<article class="department-card" data-scenario="${esc(item.id)}"><strong>${esc(item.name)}</strong><p>${esc(item.description||"")}</p><div class="card-meta"><span class="badge free">${Number(item.promptCount||0)} 条精选</span><span class="badge">${childrenOf(item.id).length} 个任务</span></div><button data-scenario="${esc(item.id)}">查看任务</button></article>`).join("");
+  }
+  return childrenOf(scenario.id).map(item=>`<article class="department-card" data-task="${esc(item.id)}"><strong>${esc(item.name)}</strong><p>${esc(item.description||"")||"具体可复制任务"}</p><div class="card-meta"><span class="badge free">${Number(item.promptCount||0)} 条精选</span></div><button data-task="${esc(item.id)}">查看提示词</button></article>`).join("");
+}
+function sortPrompts(prompts){
+  let out=[...prompts];
+  if(selected.sort==="quality")out.sort((a,b)=>Number(b.qualityScore||0)-Number(a.qualityScore||0));
+  else if(selected.sort==="newest")out.sort((a,b)=>Date.parse(b.updatedAt||0)-Date.parse(a.updatedAt||0));
+  return out;
+}
+function promptCard(prompt){return`<article class="prompt-card"><div class="card-meta"><span class="badge free">free</span><span class="badge">${esc(prompt.department||"岗位")}</span><span class="badge">${esc(prompt.task||"任务")}</span></div><h3>${esc(prompt.title)}</h3><p>${esc(prompt.summary||"暂无摘要")}</p><div class="card-meta"><span class="badge">${esc(prompt.tool||"通用")}</span><span class="badge">${esc(prompt.outputType||prompt.modality||"输出")}</span><span class="badge">${esc(prompt.qualityLevel||"basic")}</span><span class="badge">评分 ${Number(prompt.qualityScore||0)}</span></div><div class="prompt-preview">${esc(prompt.promptPreview||"查看详情后复制完整提示词。")}</div><div class="card-actions"><button data-copy="${esc(prompt.id)}">复制</button><button class="primary" data-open="${esc(prompt.id)}">查看详情</button></div></article>`}
+function renderPagination(){
+  let p=currentPagination;
+  E.pagination.innerHTML=p&&p.total>0?`<button ${p.page<=1?"disabled":""} data-page="${p.page-1}">上一页</button><button ${!p.hasMore?"disabled":""} data-page="${p.page+1}">下一页 · ${p.page}/${p.pages}</button>`:"";
+}
+
+async function openDetail(id){
+  let data=await fetchJson(`${PUBLIC}/prompts/${encodeURIComponent(id)}`);
+  activeDetail=data.prompt;
+  let p=activeDetail;
+  E.detailTitle.textContent=p.title;
+  E.detailBody.innerHTML=`<div class="detail-grid">
+    <section class="detail-section"><h4>使用场景</h4><p>${esc(p.useCase||p.summary||"日常工作任务")}</p><div class="card-meta"><span class="badge">${esc(p.department)}</span><span class="badge">${esc(p.scenario)}</span><span class="badge">${esc(p.task)}</span><span class="badge free">free</span></div></section>
+    <section class="detail-section"><h4>输入变量</h4><p>${(p.variables||[]).length?esc((p.variables||[]).join("、")):"补充你的业务背景、素材、目标用户和交付格式。"}</p></section>
+    <section class="detail-section"><h4>完整提示词</h4><pre>${esc(p.promptZh||"")}</pre></section>
+    ${p.promptEn?`<section class="detail-section"><h4>英文提示词</h4><pre>${esc(p.promptEn)}</pre></section>`:""}
+    ${(p.midjourneyPrompt||p.videoPrompt)?`<section class="detail-section"><h4>模型版本</h4>${p.midjourneyPrompt?`<p><strong>Midjourney：</strong>${esc(p.midjourneyPrompt)}</p>`:""}${p.videoPrompt?`<p><strong>视频模型：</strong>${esc(p.videoPrompt)}</p>`:""}</section>`:""}
+    ${p.negativePrompt?`<section class="detail-section"><h4>负面提示词</h4><pre>${esc(p.negativePrompt)}</pre></section>`:""}
+    <section class="detail-section"><h4>输出格式</h4><p>${esc(p.outputFormat||p.outputType||"结构化输出")}</p></section>
+    <section class="detail-section"><h4>使用步骤</h4><ol>${(p.usageSteps||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></section>
+    <section class="detail-section"><h4>示例结果</h4><p>${esc(p.expectedResult||"暂无示例结果，后台可继续补充。")}</p></section>
+    <section class="detail-section"><h4>常见错误</h4><p>${(p.commonErrors||[]).length?esc((p.commonErrors||[]).join("、")):"输入材料过少、输出格式不清、缺少检查标准。"}</p></section>
+    <section class="detail-section"><h4>优化建议</h4><p>${(p.optimizationTips||[]).length?esc((p.optimizationTips||[]).join("、")):esc(p.usageTips||"根据实际输出继续补充场景、约束和验收标准。")}</p></section>
+    <section class="detail-section"><h4>检查清单</h4><div class="chips">${(p.checklist||[]).map(x=>`<span class="badge">${esc(x)}</span>`).join("")}</div></section>
+  </div>`;
+  E.detailCopy.disabled=!p.promptZh;
+  E.detail.showModal();
+}
+async function copyPrompt(id){
+  let p=activeDetail?.id===id?activeDetail:(await fetchJson(`${PUBLIC}/prompts/${encodeURIComponent(id)}`)).prompt;
+  await copyText(p.promptZh||p.promptPreview||"");
+  toast(`已复制：${p.title}`);
+}
+async function copyText(text){try{await navigator.clipboard.writeText(text)}catch{let area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.left="-9999px";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove()}}
+
+async function loadAdmin(){
+  let [settingsRes,catsRes,promptsRes,logsRes]=await Promise.all([
+    fetchJson(`${ADMIN}/settings`),
+    fetchJson(`${ADMIN}/categories`),
+    fetchJson(`${ADMIN}/prompts?page=${adminPromptPage}&limit=40`),
+    fetchJson(`${ADMIN}/audit-logs?limit=30`).catch(()=>({logs:[]}))
+  ]);
+  settings=settingsRes.settings||settings;
+  categories=catsRes.categories||categories;
+  flatCategories=flattenTree(categories,[]);
+  adminPrompts=promptsRes.prompts||[];
+  auditLogs=logsRes.logs||[];
+  renderAdmin();
+}
+function renderAdmin(){
+  document.querySelectorAll("[data-admin-tab]").forEach(btn=>btn.classList.toggle("active",btn.dataset.adminTab===adminTab));
+  if(adminTab==="settings")renderAdminSettings();
+  if(adminTab==="prompts")renderAdminPrompts();
+  if(adminTab==="categories")renderAdminCategories();
+  if(adminTab==="logs")renderAdminLogs();
+}
+function renderAdminSettings(){
+  E.adminBody.innerHTML=`<div class="admin-grid"><form id="settingsForm" class="panel" style="box-shadow:none"><div class="form-grid">
+    ${["showPaidEntry","showProBadges","showPackBadges","showContactLead","allowLockedPreview"].map(key=>`<label class="field">${key}<select name="${key}"><option value="false" ${!settings[key]?"selected":""}>false</option><option value="true" ${settings[key]?"selected":""}>true</option></select></label>`).join("")}
+    <label class="field">homepageFeaturedLimit<input name="homepageFeaturedLimit" type="number" min="1" max="24" value="${Number(settings.homepageFeaturedLimit||12)}"></label>
+    <label class="field">categoryPromptLimit<input name="categoryPromptLimit" type="number" min="1" max="50" value="${Number(settings.categoryPromptLimit||20)}"></label>
+    <label class="field full">publicAccessMode<input name="publicAccessMode" value="${esc(settings.publicAccessMode||"free-only")}"></label>
+  </div><button class="primary" style="margin-top:10px">保存设置</button></form><div class="panel" style="box-shadow:none"><h3>权限策略</h3><p>公开 API 强制只返回 free + published + copyReady。allowLockedPreview=false 时，pro / pack 不进入公开接口。</p></div></div>`;
+  $("settingsForm").onsubmit=saveSettings;
+}
+async function saveSettings(event){
+  event.preventDefault();
+  let f=new FormData(event.currentTarget);
+  let payload={settings:{publicAccessMode:f.get("publicAccessMode"),homepageFeaturedLimit:Number(f.get("homepageFeaturedLimit")),categoryPromptLimit:Number(f.get("categoryPromptLimit"))}};
+  for(let key of["showPaidEntry","showProBadges","showPackBadges","showContactLead","allowLockedPreview"])payload.settings[key]=f.get(key)==="true";
+  let data=await fetchJson(`${ADMIN}/settings`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  settings=data.settings;toast("设置已保存到后端");renderShell();renderAdmin();
+}
+function renderAdminPrompts(){
+  E.adminBody.innerHTML=`<div class="result-head"><div><h3>提示词管理</h3><p>保存、发布、归档和质量审计都写入 D1。</p></div><div class="admin-actions"><button class="primary" id="newPrompt">新增提示词</button><button id="auditSelected">审计当前列表</button></div></div><div class="admin-list">${adminPrompts.map(p=>`<div class="admin-row"><div><strong>${esc(p.title)}</strong><span>${esc(p.department)} / ${esc(p.scenario)} / ${esc(p.task)} · ${esc(p.access)} · ${esc(p.status)} · ${esc(p.qualityLevel)}</span></div><div class="admin-actions"><button data-admin-edit="${esc(p.id)}">编辑</button><button data-admin-publish="${esc(p.id)}">发布</button><button class="danger" data-admin-archive="${esc(p.id)}">归档</button></div></div>`).join("")}</div>`;
+  $("newPrompt").onclick=()=>openEditor();
+  $("auditSelected").onclick=async()=>{await fetchJson(`${ADMIN}/prompts/quality-audit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:adminPrompts.map(p=>p.id)})});toast("质量审计已完成");await loadAdmin()};
+}
+function renderAdminCategories(){
+  E.adminBody.innerHTML=`<div class="admin-grid"><form id="categoryForm" class="panel" style="box-shadow:none"><div class="form-grid">
+    <label class="field">名称<input name="name" required></label>
+    <label class="field">slug<input name="slug" required></label>
+    <label class="field">层级<select name="level"><option value="1">一级岗位</option><option value="2">二级场景</option><option value="3">三级任务</option></select></label>
+    <label class="field">父级<select name="parentId"><option value="">无</option>${flatCategories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)} (${esc(c.type)})</option>`).join("")}</select></label>
+    <label class="field">图标<input name="icon" maxlength="8"></label>
+    <label class="field">排序<input name="sortOrder" type="number" value="0"></label>
+    <label class="field full">说明<textarea name="description" rows="3"></textarea></label>
+  </div><button class="primary" style="margin-top:10px">新增分类</button></form><div class="admin-list">${flatCategories.map(c=>`<div class="admin-row"><div><strong>${esc(c.name)}</strong><span>${esc(c.type)} · ${esc(c.id)} · ${Number(c.promptCount||0)} 条</span></div><div class="admin-actions"><button class="danger" data-category-delete="${esc(c.id)}">停用</button></div></div>`).join("")}</div></div>`;
+  $("categoryForm").onsubmit=saveCategory;
+}
+async function saveCategory(event){
+  event.preventDefault();
+  let f=new FormData(event.currentTarget);
+  let level=Number(f.get("level"));
+  let payload={name:f.get("name"),slug:f.get("slug"),level,type:level===1?"department":level===2?"scenario":"task",parentId:f.get("parentId"),icon:f.get("icon"),sortOrder:Number(f.get("sortOrder")),description:f.get("description"),accessScope:"public",isActive:true};
+  await fetchJson(`${ADMIN}/categories`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  toast("分类已保存");await loadAdmin();renderShell();
+}
+function renderAdminLogs(){
+  E.adminBody.innerHTML=`<div class="admin-list">${auditLogs.map(log=>`<div class="admin-row"><div><strong>${esc(log.action)}</strong><span>${esc(log.entity_type)} · ${esc(log.entity_id)} · ${esc(log.created_at)}</span></div><code>${esc(String(log.detail_json||"").slice(0,140))}</code></div>`).join("")||'<div class="empty">暂无操作日志</div>'}</div>`;
+}
+
+function openEditor(id=""){
+  let p=id?adminPrompts.find(x=>x.id===id):null;
+  let f=E.editorForm.elements;
+  E.editorTitle.textContent=p?"编辑提示词":"新增提示词";
+  E.editorForm.reset();
+  f.id.value=p?.id||"";
+  f.title.value=p?.title||"";
+  f.status.value=p?.status||"draft";
+  f.departmentId.innerHTML=departments().map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+  f.departmentId.value=p?.departmentId||departments()[0]?.id||"";
+  hydrateEditorCategories(p?.scenarioId,p?.taskId);
+  f.scenarioId.value=p?.scenarioId||f.scenarioId.value;
+  hydrateEditorTasks(p?.taskId);
+  f.taskId.value=p?.taskId||f.taskId.value;
+  f.access.value=p?.access||"free";
+  f.tool.value=p?.tool||"";
+  f.modality.value=p?.modality||"";
+  f.qualityScore.value=p?.qualityScore||70;
+  f.qualityLevel.value=p?.qualityLevel||"usable";
+  f.copyReady.value=String(p?.copyReady??true);
+  f.featured.value=String(p?.featured??false);
+  f.summary.value=p?.summary||"";
+  f.promptZh.value=p?.promptZh||"";
+  f.promptEn.value=p?.promptEn||"";
+  f.negativePrompt.value=p?.negativePrompt||"";
+  f.variables.value=(p?.variables||[]).join(", ");
+  f.seoKeywords.value=(p?.seoKeywords||[]).join(", ");
+  f.usageTips.value=p?.usageTips||"";
+  f.expectedResult.value=p?.expectedResult||"";
+  E.editor.showModal();
+}
+function hydrateEditorCategories(selectedScenario=""){let f=E.editorForm.elements;let scenarios=scenarioOptions(f.departmentId.value);f.scenarioId.innerHTML=scenarios.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");if(selectedScenario)f.scenarioId.value=selectedScenario;hydrateEditorTasks()}
+function hydrateEditorTasks(selectedTask=""){let f=E.editorForm.elements;let tasks=taskOptions(f.scenarioId.value);f.taskId.innerHTML=tasks.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");if(selectedTask)f.taskId.value=selectedTask}
+E.editorForm.elements.departmentId?.addEventListener?.("change",()=>hydrateEditorCategories());
+E.editorForm.elements.scenarioId?.addEventListener?.("change",()=>hydrateEditorTasks());
+E.editorForm.onsubmit=savePromptForm;
+async function savePromptForm(event){
+  event.preventDefault();
+  let f=E.editorForm.elements;
+  let payload={id:f.id.value||undefined,title:f.title.value,status:f.status.value,departmentId:f.departmentId.value,scenarioId:f.scenarioId.value,taskId:f.taskId.value,access:f.access.value,tool:f.tool.value,modality:f.modality.value,qualityScore:Number(f.qualityScore.value),qualityAudit:{copyReady:f.copyReady.value==="true",qualityLevel:f.qualityLevel.value,missingFields:[]},featured:f.featured.value==="true",summary:f.summary.value,promptZh:f.promptZh.value,promptEn:f.promptEn.value,negativePrompt:f.negativePrompt.value,variables:arr(f.variables.value),seoKeywords:arr(f.seoKeywords.value),usageTips:f.usageTips.value,expectedResult:f.expectedResult.value,outputType:f.modality.value||"结构化输出",useCase:findCat(f.taskId.value)?.name||""};
+  let method=payload.id?"PUT":"POST";
+  let url=payload.id?`${ADMIN}/prompts/${encodeURIComponent(payload.id)}`:`${ADMIN}/prompts`;
+  await fetchJson(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  E.editor.close();toast("提示词已保存到后端");await loadAdmin();await loadPrompts(1);
+}
+
+const VIDEO_DRAFT_KEY="prompt-video-generator-draft-v2";
+const VIDEO_TEMPLATES=[
+  {id:"hook-conflict",title:"冲突开场",desc:"前 3 秒抛出反常识观点。"},
+  {id:"evidence-stack",title:"证据堆叠",desc:"用来源、日期、事实提高可信度。"},
+  {id:"timeline-upgrade",title:"时间线升级",desc:"按过去、现在、下一步组织。"},
+  {id:"action-list",title:"行动清单",desc:"结尾给用户可执行动作。"}
+];
+let videoDraft=loadVideoDraft(),videoPromptCache=new Map();
+function defaultVideoDraft(){return{topic:"AI Agent 开始自己注册公司",sourceText:"把热点材料粘贴到这里，系统会拆成短视频字幕分镜。",assetKeywords:"AI agent startup\nalgorithmic business dashboard",audioMode:"none",promptIds:[],templateIds:["hook-conflict","evidence-stack"],captionBlocks:[]}}
 function loadVideoDraft(){try{return{...defaultVideoDraft(),...JSON.parse(localStorage.getItem(VIDEO_DRAFT_KEY)||"{}")}}catch{return defaultVideoDraft()}}
 function saveVideoDraft(){localStorage.setItem(VIDEO_DRAFT_KEY,JSON.stringify(videoDraft))}
-function toast(message){E.toast.textContent=message;E.toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>E.toast.classList.remove("show"),2200)}
-function normalizeQualityAudit(value){let source=value&&typeof value==="object"?value:{};let level=["basic","usable","professional"].includes(String(source.qualityLevel||""))?String(source.qualityLevel):"basic";return{copyReady:Boolean(source.copyReady),qualityLevel:level,missingFields:arr(source.missingFields),improvementSuggestion:String(source.improvementSuggestion||"待质量审计。")}}
-function normalizeVarDefaults(value){if(!value||typeof value!=="object"||Array.isArray(value))return{};return Object.fromEntries(Object.entries(value).map(([key,item])=>[String(key||"").trim(),String(item||"").trim()]).filter(([key,item])=>key&&item).slice(0,48))}
-function normalizePrompt(prompt,index=0){return{ id:String(prompt.id||`prompt-${index}`),title:String(prompt.title||"未命名提示词"),category:String(prompt.category||"未分类"),tags:arr(prompt.tags),variables:arr(prompt.variables),status:String(prompt.status||"待验证"),summary:String(prompt.summary||""),body:String(prompt.body||""),source:String(prompt.source||"手动新增"),createdAt:String(prompt.createdAt||now()),updatedAt:String(prompt.updatedAt||now()),archived:Boolean(prompt.archived),access:["free","pro","pack"].includes(String(prompt.access||""))?String(prompt.access):"free",packId:String(prompt.packId||""),stripePriceId:String(prompt.stripePriceId||""),qualityScore:Number(prompt.qualityScore||60),exampleOutput:String(prompt.exampleOutput||""),sourceType:String(prompt.sourceType||"curated"),verifiedAt:String(prompt.verifiedAt||prompt.updatedAt||prompt.createdAt||""),seoKeywords:arr(prompt.seoKeywords),contentType:String(prompt.contentType||""),promptKind:String(prompt.promptKind||""),platform:String(prompt.platform||""),model:String(prompt.model||""),language:String(prompt.language||""),aspectRatio:String(prompt.aspectRatio||""),variableDefaults:normalizeVarDefaults(prompt.variableDefaults),copyPrompt:String(prompt.copyPrompt||""),negativePrompt:String(prompt.negativePrompt||""),usageTips:String(prompt.usageTips||""),parameterTips:String(prompt.parameterTips||""),zhPrompt:String(prompt.zhPrompt||""),enPrompt:String(prompt.enPrompt||""),mjPrompt:String(prompt.mjPrompt||""),videoPrompt:String(prompt.videoPrompt||""),shotSize:arr(prompt.shotSize),cameraAngle:arr(prompt.cameraAngle),cameraMovement:arr(prompt.cameraMovement),lighting:arr(prompt.lighting),colorGrade:arr(prompt.colorGrade),mood:arr(prompt.mood),styleTags:arr(prompt.styleTags),failureReasons:arr(prompt.failureReasons),optimizationTips:arr(prompt.optimizationTips),subjectCount:String(prompt.subjectCount||""),gridType:String(prompt.gridType||""),qualityAudit:normalizeQualityAudit(prompt.qualityAudit)}}
-function normalizeStore(raw){let prompts=Array.isArray(raw?.prompts)?raw.prompts.map(normalizePrompt):[];return{version:Number(raw?.version)||2,migratedAt:raw?.migratedAt||"",updatedAt:raw?.updatedAt||now(),prompts,assets:Array.isArray(raw?.assets)?raw.assets:[]}}
-function clientIndexFromStore(){return{packs:indexData.packs||[],prompts:store.prompts.map(prompt=>({id:prompt.id,title:prompt.title,category:prompt.category,summary:prompt.summary,tags:prompt.tags,variablesCount:prompt.variables.length,access:prompt.access,packId:prompt.packId,qualityScore:prompt.qualityScore,copyReady:Boolean(prompt.qualityAudit?.copyReady),qualityLevel:prompt.qualityAudit?.qualityLevel||"basic",missingFields:arr(prompt.qualityAudit?.missingFields),improvementSuggestion:String(prompt.qualityAudit?.improvementSuggestion||""),sourceType:prompt.sourceType,verifiedAt:prompt.verifiedAt,seoKeywords:prompt.seoKeywords,contentType:prompt.contentType,promptKind:prompt.promptKind,platform:prompt.platform,model:prompt.model,language:prompt.language,aspectRatio:prompt.aspectRatio,parameterTips:prompt.parameterTips,tool:tagValue(prompt,"工具")||prompt.platform||inferTool(prompt),modality:tagValue(prompt,"模态")||inferModality(prompt),use:tagValue(prompt,"用途")||prompt.category,difficulty:tagValue(prompt,"难度")||(prompt.variables.length>6?"进阶":"基础"),archived:prompt.archived,searchable:[prompt.title,prompt.category,prompt.summary,prompt.source,prompt.platform,prompt.promptKind,prompt.model,prompt.copyPrompt,prompt.negativePrompt,prompt.usageTips,prompt.parameterTips,Object.values(prompt.variableDefaults||{}).join(" "),prompt.tags.join(" "),prompt.variables.join(" "),prompt.seoKeywords.join(" "),prompt.qualityAudit?.qualityLevel||"",arr(prompt.qualityAudit?.missingFields).join(" ")].join(" ").toLowerCase()}))}}
-function tagValue(prompt,label){let prefixes=[`${label}:`,`${label}：`];return(prompt.tags||[]).find(tag=>prefixes.some(prefix=>String(tag).startsWith(prefix)))?.replace(new RegExp(`^${label}[:：]`),"").trim()||""}
-function inferTool(prompt){let text=[prompt.title,prompt.category,prompt.summary,prompt.tags.join(" ")].join(" ");for(let tool of["Midjourney","Sora","Runway","Suno","ChatGPT","GPT Image","Cursor"])if(text.includes(tool))return tool;return"通用 AIGC"}
-function inferModality(prompt){let text=[prompt.title,prompt.category,prompt.summary,prompt.tags.join(" ")].join(" ");for(let mod of["音频","音乐","歌曲","视频","图像","多模态","代码","文本"])if(text.includes(mod))return mod==="音乐"||mod==="歌曲"?"音频":mod;return"AIGC"}
-function auditOf(entry,prompt=entry){let source=entry.qualityAudit||prompt.qualityAudit||{};return{copyReady:entry.copyReady??Boolean(source.copyReady),qualityLevel:entry.qualityLevel||source.qualityLevel||"basic",missingFields:arr(entry.missingFields||source.missingFields),improvementSuggestion:String(entry.improvementSuggestion||source.improvementSuggestion||"待质量审计。")}}
-function qualityLevelLabel(level){return{professional:"专业级",usable:"可用",basic:"基础"}[level]||"基础"}
-function auditBadges(audit){let tone=audit.copyReady?"free":"pack";let status=audit.copyReady?"复制即用":"需补强";return`<span class="badge ${tone}">${status}</span><span class="badge">${qualityLevelLabel(audit.qualityLevel)}</span>${audit.missingFields.length?`<span class="badge">缺 ${audit.missingFields.length}</span>`:""}`}
-function auditHtml(audit){return`<div class="audit-box"><div class="meta">${auditBadges(audit)}</div>${audit.missingFields.length?`<p>缺失项：${audit.missingFields.map(esc).join("、")}</p>`:"<p>未发现关键结构缺口。</p>"}<p>${esc(audit.improvementSuggestion)}</p></div>`}
-function syncControls(){E.search.value=state.query;E.tool.value=state.tool;E.mod.value=state.modality;E.access.value=state.access;E.pack.value=state.pack;E.sort.value=state.sort}
-function syncUrl(){let p=new URLSearchParams();if(VIEW_MODE==="video")p.set("tool","video");if(state.query)p.set("q",state.query);if(VIEW_MODE!=="video"&&state.tool!=="all")p.set("tool",state.tool);if(state.modality!=="all")p.set("mod",state.modality);if(state.access!=="all")p.set("access",state.access);if(state.pack!=="all")p.set("pack",state.pack);if(state.sort!=="relevance")p.set("sort",state.sort);history.replaceState(null,"",location.pathname+(p.toString()?`?${p}`:""))}
-async function loadAll(){E.mode.textContent=VIEW_MODE==="video"?"视频生成":IS_ADMIN?"管理员模式":"公开搜索";E.admin.hidden=!IS_ADMIN;E.hero.hidden=VIEW_MODE==="video";E.workspace.hidden=VIEW_MODE==="video";E.video.hidden=VIEW_MODE!=="video";E.searchMode.classList.toggle("primary",VIEW_MODE!=="video");E.videoMode.classList.toggle("primary",VIEW_MODE==="video");try{await maybeConfirmCheckout();let [library,index,suggestion,access]=await Promise.all([fetchJson(API_LIBRARY),fetchJson(API_INDEX).catch(()=>null),fetchJson(API_SUGGESTIONS).catch(()=>({suggestions:[]})),fetchJson(API_ENTITLEMENT).catch(()=>({pro:false,packs:[]}))]);store=normalizeStore(library);indexData=index&&Array.isArray(index.prompts)?index:clientIndexFromStore();suggestions=suggestion||{suggestions:[]};entitlement=normalizeEntitlement(access);hydrateFilters();render();if(VIEW_MODE==="video")checkLocalBridge()}catch(error){console.error(error);let html=`<div class="empty"><strong>提示词库加载失败</strong>${esc(error.message||error)}</div>`;if(VIEW_MODE==="video")E.video.innerHTML=html;else E.content.innerHTML=html}}
-async function fetchJson(url,options){let res=await fetch(url,{cache:"no-store",headers:{Accept:"application/json"},...options});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);return data}
-function normalizeEntitlement(value){return{pro:Boolean(value?.pro),packs:Array.isArray(value?.packs)?value.packs:[],customer:value?.customer||"",email:value?.email||""}}
-async function maybeConfirmCheckout(){let sessionId=qs.get("session_id");if(qs.get("checkout")!=="success"||!sessionId)return;try{let data=await fetchJson(`${API_CONFIRM}?session_id=${encodeURIComponent(sessionId)}`);entitlement=normalizeEntitlement(data.entitlement);toast("支付状态已确认");history.replaceState(null,"",location.pathname)}catch(error){toast(`支付确认失败：${error.message||error}`)}}
-function hydrateFilters(){let tools=[...new Set(indexData.prompts.map(x=>x.tool).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));let mods=[...new Set(indexData.prompts.map(x=>x.modality).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));E.tool.innerHTML=`<option value="all">全部工具</option>${tools.map(x=>`<option>${esc(x)}</option>`).join("")}`;E.mod.innerHTML=`<option value="all">全部模态</option>${mods.map(x=>`<option>${esc(x)}</option>`).join("")}`;E.pack.innerHTML=`<option value="all">全部精选包</option>${packs().map(pack=>`<option value="${esc(pack.id)}">${esc(pack.title)}</option>`).join("")}`;syncControls()}
-function isUnlocked(entry){if(IS_ADMIN||entry.access==="free")return true;if(entitlement.pro)return true;if(entry.access==="pack"&&entitlement.packs.includes(entry.packId))return true;return false}
-function searchResults(){let q=state.query.trim().toLowerCase();let tokens=q.split(/\s+/).filter(Boolean);let hasFilter=[state.tool,state.modality,state.access,state.pack].some(value=>value&&value!=="all");if(!q&&!hasFilter)return[];let results=[];for(let entry of indexData.prompts){if(entry.archived)continue;if(state.tool!=="all"&&entry.tool!==state.tool)continue;if(state.modality!=="all"&&entry.modality!==state.modality)continue;if(state.access!=="all"&&entry.access!==state.access)continue;if(state.pack!=="all"&&entry.packId!==state.pack)continue;let searchable=String(entry.searchable||"").toLowerCase();let score=Number(entry.qualityScore||0)/10;if(q){let hit=false;for(let token of tokens){if(String(entry.title||"").toLowerCase().includes(token)){score+=26;hit=true}else if(searchable.includes(token)){score+=10;hit=true}}if(!hit)continue}results.push({...entry,score})}if(state.sort==="quality")results.sort((a,b)=>Number(b.qualityScore||0)-Number(a.qualityScore||0));else if(state.sort==="newest")results.sort((a,b)=>Date.parse(b.verifiedAt||0)-Date.parse(a.verifiedAt||0));else results.sort((a,b)=>b.score-a.score||Number(b.qualityScore||0)-Number(a.qualityScore||0));return results}
-function render(){syncControls();renderSummary();if(VIEW_MODE==="video"){renderVideoWorkbench();return}lastResults=searchResults();renderFilters();if(lastResults.length)renderResultGrid(lastResults);else renderLanding()}
-function renderSummary(){let active=store.prompts.filter(prompt=>!prompt.archived);let counts=active.reduce((out,prompt)=>{out[prompt.access]=(out[prompt.access]||0)+1;if(prompt.qualityAudit?.copyReady)out.copyReady=(out.copyReady||0)+1;return out},{});
-E.summary.textContent=`${active.length} 条提示词 · 复制即用 ${counts.copyReady||0} · 免费 ${counts.free||0} · Pro ${counts.pro||0} · 精选包 ${counts.pack||0}`;
-E.metrics.innerHTML=[["总提示词",active.length],["复制即用",counts.copyReady||0],["Pro",counts.pro||0],["精选包",counts.pack||0]].map(([k,v])=>`<div class="metric"><strong>${v}</strong><span>${k}</span></div>`).join("");
-E.ent.innerHTML=`<span class="badge ${entitlement.pro?"pro":"free"}">${entitlement.pro?"Pro 已解锁":"未登录 Pro"}</span>${entitlement.packs.map(id=>`<span class="badge pack">${esc(packById(id)?.title||id)}</span>`).join("")}`;
-E.dirty.textContent=dirty?"有未发布草稿":"无本地草稿";E.dirty.className=`badge ${dirty?"pack":"free"}`;
-let keywords=["电商短视频开头","商品图一致性","Runway 分镜","Suno 品牌口播","多模态工作流","AI 视频角色一致性"];
-E.hot.innerHTML=keywords.map(x=>`<button class="chip" data-query="${esc(x)}">${esc(x)}</button>`).join("");
-E.saved.innerHTML=savedSearches().length?`<span class="badge">最近搜索</span>${savedSearches().map(x=>`<button class="chip" data-query="${esc(x)}">${esc(x)}</button>`).join("")}`:"";
-}
-function renderFilters(){let active=[];if(state.query)active.push(`关键词：${state.query}`);if(state.tool!=="all")active.push(`工具：${state.tool}`);if(state.modality!=="all")active.push(`模态：${state.modality}`);if(state.access!=="all")active.push(`访问：${state.access}`);if(state.pack!=="all")active.push(`包：${packById(state.pack)?.title||state.pack}`);E.filters.innerHTML=active.map(x=>`<span class="badge">${esc(x)}</span>`).join("")}
-function renderLanding(){E.heading.textContent="先搜索，再浏览结果";E.sub.textContent=state.query?"没有匹配结果，试试热门关键词或放宽筛选。":"首页不铺满 5000 条内容，搜索后才展开可复制结果。";E.content.innerHTML=`<div class="landing"><section class="landing-section"><div class="landing-head"><div><h3>精选包入口</h3><p>用于商业化售卖的主题包，第一阶段通过 Stripe Checkout 解锁。</p></div></div><div class="grid">${packs().map(packCard).join("")}</div></section><section class="landing-section"><div class="landing-head"><div><h3>联网趋势建议</h3><p>只沉淀主题、关键词和结构灵感，不复制外站提示词原文。</p></div></div><div class="grid">${(suggestions.suggestions||[]).map(suggestionCard).join("")}</div></section></div>`}
-function packCard(pack){return`<article class="pack-card"><div class="meta"><span class="badge pack">精选包</span><span class="badge">${Number(pack.promptCount||0)} 条</span></div><h4>${esc(pack.title)}</h4><p>${esc(pack.description)}</p><div class="meta"><span class="badge">${esc(pack.audience||"AIGC 创作者")}</span><span class="badge">${esc(pack.stripeEnv||"Stripe env 待配置")}</span></div><div class="card-actions"><button data-pack-search="${esc(pack.id)}">查看内容</button><button class="primary" data-buy-pack="${esc(pack.id)}">购买包</button></div></article>`}
-function suggestionCard(item){return`<article class="suggestion-card"><div class="meta"><span class="badge">趋势</span><span class="badge">优先级 ${Number(item.priority||0)}</span></div><h4>${esc(item.keyword)}</h4><p>${esc(item.theme)}</p><div class="chips">${(item.suggestedFilters||[]).map(x=>`<span class="badge">${esc(x)}</span>`).join("")}</div>${IS_ADMIN?`<button data-draft-suggestion="${esc(item.id)}">生成草稿</button>`:""}</article>`}
-function renderResultGrid(results){E.heading.textContent=`找到 ${results.length} 条匹配提示词`;E.sub.textContent="结果按相关性、质量评分和访问状态排序。锁定内容需要 Pro 或对应精选包。";E.content.innerHTML=`<div class="grid">${results.slice(0,72).map(promptCard).join("")}</div>${results.length>72?`<div class="empty"><strong>还有 ${results.length-72} 条结果</strong>请继续缩小关键词或筛选条件。</div>`:""}`}
-function promptCard(entry){let prompt=promptById(entry.id)||entry,locked=!isUnlocked(entry),accessClass=entry.access==="free"?"free":entry.access==="pro"?"pro":"pack",audit=auditOf(entry,prompt);return`<article class="prompt-card" data-open="${esc(entry.id)}"><div class="prompt-top"><div class="prompt-icon">${esc(String(entry.modality||"AI").slice(0,2))}</div><div><div class="meta"><span class="badge ${accessClass}">${esc(entry.access)}</span>${locked?'<span class="badge pro">锁定</span>':""}<span class="badge">评分 ${Number(entry.qualityScore||0)}</span>${auditBadges(audit)}</div><h3>${esc(entry.title)}</h3></div></div><p class="summary">${esc(entry.summary||prompt.summary||"暂无摘要")}</p><div class="meta"><span class="badge">${esc(entry.tool||"通用")}</span><span class="badge">${esc(entry.modality||"AIGC")}</span><span class="badge">${esc(entry.use||"创作")}</span><span class="badge">${esc(entry.difficulty||"基础")}</span><span class="badge">变量 ${Number(entry.variablesCount||prompt.variables?.length||0)}</span></div><div class="card-actions"><button data-copy="${esc(entry.id)}" ${locked?"disabled":""}>复制</button><button class="primary" data-open="${esc(entry.id)}">${locked?"解锁/详情":"查看详情"}</button></div></article>`}
-function openDetail(id){let entry=indexById(id)||promptById(id),prompt=promptById(id)||entry;if(!entry||!prompt)return;activeDetailId=id;let locked=!isUnlocked(entry),audit=auditOf(entry,prompt);E.detailTitle.textContent=prompt.title;let pack=packById(entry.packId);E.detailBody.innerHTML=`<div class="meta"><span class="badge ${entry.access==="free"?"free":entry.access==="pro"?"pro":"pack"}">${esc(entry.access)}</span><span class="badge">质量 ${Number(entry.qualityScore||prompt.qualityScore||0)}</span><span class="badge">${esc(entry.tool||"通用")}</span><span class="badge">${esc(entry.modality||"AIGC")}</span>${pack?`<span class="badge pack">${esc(pack.title)}</span>`:""}</div><p class="summary">${esc(prompt.summary||"")}</p>${auditHtml(audit)}<div class="chips">${(prompt.seoKeywords||entry.seoKeywords||[]).map(x=>`<span class="badge">${esc(x)}</span>`).join("")}</div><div class="field full">示例输出</div><p class="summary">${esc(prompt.exampleOutput||"暂无示例输出")}</p>${locked?lockedHtml(entry):`<div class="field full">提示词正文</div><pre>${esc(prompt.body||"")}</pre>`}${IS_ADMIN?`<div class="admin-row" style="margin-top:12px"><button data-edit="${esc(id)}">编辑</button></div>`:""}`;E.detailCopy.disabled=locked;E.detail.showModal()}
-function lockedHtml(entry){let pack=packById(entry.packId);return`<div class="empty"><strong>${entry.access==="pro"?"Pro 会员内容":"精选包内容"}</strong>${pack?`属于「${esc(pack.title)}」。`:"开通后可复制完整正文。"}<div class="admin-row" style="justify-content:center;margin-top:12px"><button class="primary" data-buy-${entry.access==="pack"?"pack":"pro"}="${esc(entry.packId||"")}">${entry.access==="pack"?"购买精选包":"开通 Pro"}</button></div></div>`}
-async function copyPrompt(id){let entry=indexById(id)||promptById(id),prompt=promptById(id);if(!entry||!prompt)return;if(!isUnlocked(entry))return openDetail(id);let text=prompt.copyPrompt||prompt.body;if(!text)return toast("当前提示词正文未解锁或不可用");try{await navigator.clipboard.writeText(text)}catch{let area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.left="-9999px";document.body.appendChild(area);area.select();document.execCommand("copy");area.remove()}toast(`已复制：${prompt.title}`);let fav=favorites();fav.add(id);saveFavorites(fav)}
-function openEditor(id){if(!IS_ADMIN)return;let p=id?promptById(id):null;let f=E.editorForm.elements;E.editorTitle.textContent=p?"编辑提示词":"新增提示词";E.editorForm.reset();f.id.value=p?.id||"";f.title.value=p?.title||"";f.category.value=p?.category||"";f.status.value=p?.status||"待验证";f.source.value=p?.source||"手动新增";f.access.value=p?.access||"free";f.packId.value=p?.packId||"";f.stripePriceId.value=p?.stripePriceId||"";f.qualityScore.value=p?.qualityScore||70;f.sourceType.value=p?.sourceType||"curated";f.verifiedAt.value=p?.verifiedAt||now().slice(0,10);f.tags.value=(p?.tags||[]).join(", ");f.variables.value=(p?.variables||[]).join(", ");f.seoKeywords.value=(p?.seoKeywords||[]).join(", ");f.exampleOutput.value=p?.exampleOutput||"";f.summary.value=p?.summary||"";f.body.value=p?.body||"";E.editor.showModal()}
-function saveEditor(event){event.preventDefault();if(!IS_ADMIN)return;let f=E.editorForm.elements,id=f.id.value.trim(),time=now(),old=promptById(id);let prompt=normalizePrompt({...old,id:id||`prompt-${Date.now().toString(36)}`,title:f.title.value.trim(),category:f.category.value.trim(),status:f.status.value.trim(),source:f.source.value.trim(),access:f.access.value,packId:f.packId.value.trim(),stripePriceId:f.stripePriceId.value.trim(),qualityScore:Number(f.qualityScore.value||70),sourceType:f.sourceType.value.trim(),verifiedAt:f.verifiedAt.value.trim(),tags:arr(f.tags.value),variables:arr(f.variables.value),seoKeywords:arr(f.seoKeywords.value),exampleOutput:f.exampleOutput.value.trim(),summary:f.summary.value.trim(),body:f.body.value.trim(),createdAt:old?.createdAt||time,updatedAt:time,archived:old?.archived||false,qualityAudit:old?.qualityAudit});let index=store.prompts.findIndex(x=>x.id===prompt.id);if(index>=0)store.prompts[index]=prompt;else store.prompts.unshift(prompt);indexData=clientIndexFromStore();dirty=true;E.editor.close();render();toast("已保存到管理员草稿")}
-function publicLibrary(){return{version:store.version||2,migratedAt:store.migratedAt||"",updatedAt:now(),prompts:store.prompts,assets:store.assets||[]}}
-async function publishLibrary(){if(!IS_ADMIN||!dirty)return toast("没有需要发布的草稿");try{let data=await fetchJson(API_LIBRARY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({library:publicLibrary(),message:"Update prompt commerce library"})});dirty=false;render();toast(data.commit?"已提交到 GitHub，等待部署":"已发布")}catch(error){toast(`发布失败：${error.message||error}`)}}
-function renderSuggestionReview(){E.suggestionBody.innerHTML=`<div class="grid">${(suggestions.suggestions||[]).map(suggestionCard).join("")}</div>`;E.suggestions.showModal()}
-function draftFromSuggestion(id){let item=(suggestions.suggestions||[]).find(x=>x.id===id);if(!item)return;openEditor();let f=E.editorForm.elements;f.title.value=`${item.keyword}提示词模板`;f.category.value="AIGC 趋势草稿";f.status.value="待验证";f.source.value="联网建议审核池";f.access.value="pro";f.qualityScore.value=72;f.sourceType.value="web-inspired-draft";f.verifiedAt.value=now().slice(0,10);f.tags.value=arr(item.suggestedFilters).join(", ");f.seoKeywords.value=[item.keyword,...arr(item.suggestedFilters)].join(", ");f.summary.value=item.theme;f.exampleOutput.value=`输出一份围绕「${item.keyword}」的自写 AIGC 提示词结构。`;f.body.value=`目标：围绕「${item.keyword}」生成可复用提示词。\n\n背景：${item.theme}\n\n输入变量：\n- {项目目标}\n- {目标平台}\n- {受众}\n- {风格方向}\n- {交付格式}\n\n复制即用提示词：\n请基于 {项目目标}，为 {目标平台} 的 {受众} 设计一份 AIGC 生成提示词。要求：结构清晰、变量可替换、明确风格方向为 {风格方向}，输出格式为 {交付格式}。避免复制任何外站提示词原文，只使用主题、关键词和结构灵感。\n\n质量标准：\n1. 明确任务目标。\n2. 明确输入变量。\n3. 明确输出格式。\n4. 包含失败修正建议。\n5. 包含边界提醒。\n\n边界提醒：不要使用外站 prompt 原文，不生成侵权、欺诈、仿冒或规避审核内容。`}
-function readVideoControls(){videoDraft.topic=E.videoTopic.value.trim();videoDraft.sourceText=E.videoSource.value.trim();videoDraft.assetKeywords=E.videoAssets.value.trim();videoDraft.audioMode=E.videoAudio.value;saveVideoDraft()}
-function splitSentences(text){return String(text||"").replace(/\s+/g," ").split(/[。！？!?；;]\s*/).map(x=>x.trim()).filter(Boolean).slice(0,10)}
-function selectedPromptObjects(){return(videoDraft.promptIds||[]).map(id=>promptById(id)).filter(Boolean)}
-function createCaptionBlocks(){let topic=videoDraft.topic||"热点正在变化";let sentences=splitSentences(videoDraft.sourceText);let selected=selectedPromptObjects();let anchors=[...sentences,selected.map(p=>p.summary||p.title).join(" ")].filter(Boolean);let mid=anchors[1]||anchors[0]||"信息密度上升，判断成本也在上升";return[
-  {start:0,duration:3,type:"hook",headline:`${topic}，先看结论`,caption:"不是工具升级，是生产关系变化"},
-  {start:3,duration:5,type:"evidence",headline:anchors[0]||"第一组证据",caption:"把来源、动作、结果放到同一屏"},
-  {start:8,duration:5,type:"number",headline:"2-5 秒刷新一次画面",caption:"大字字幕是主视觉，不是辅助说明"},
-  {start:13,duration:6,type:"proof",headline:mid,captions:["来源标签","关键日期","结果变化"]},
-  {start:19,duration:6,type:"timeline",headline:"时间线要短",captions:["过去：人来执行","现在：AI 协作","下一步：系统化试错"]},
-  {start:25,duration:6,type:"split",headline:"市场在降门槛，规则在抬边界",caption:"机会和责任同时出现"},
-  {start:31,duration:6,type:"action",headline:"普通人抓什么？",captions:["行业认知","用户洞察","商业判断"]},
-  {start:37,duration:7,type:"close",headline:"别追热词，验证真实需求",caption:"用最低成本做一次可复盘的试错"}
-]}
-function generateCaptionBlocks(){readVideoControls();videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft();renderVideoWorkbench();toast("已生成 45 秒字幕分镜")}
-function videoAssetQueries(){let base=arr(videoDraft.assetKeywords).length?arr(videoDraft.assetKeywords):[videoDraft.topic,"AI video dashboard","short video subtitles"];return base.slice(0,8).map(query=>({query,providers:["pexels","pixabay","unsplash"],searchLinks:{pexels:`https://www.pexels.com/search/videos/${encodeURIComponent(query)}/`,pixabay:`https://pixabay.com/videos/search/${encodeURIComponent(query)}/`,unsplash:`https://unsplash.com/s/photos/${encodeURIComponent(query)}`}}))}
-function buildVideoJob(){readVideoControls();if(!videoDraft.captionBlocks?.length){videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft()}let prompts=selectedPromptObjects().map(prompt=>({id:prompt.id,title:prompt.title,summary:prompt.summary,tags:prompt.tags,body:prompt.body.slice(0,1600)}));let duration=videoDraft.captionBlocks.reduce((max,block)=>Math.max(max,Number(block.start||0)+Number(block.duration||0)),0);return{videoJobVersion:1,createdAt:now(),topic:videoDraft.topic||"未命名视频",sourceText:videoDraft.sourceText,promptIds:videoDraft.promptIds||[],prompts,templateRecipe:{id:"douyin-retention-stack",templates:videoDraft.templateIds||[]},captionBlocks:videoDraft.captionBlocks,assetQueries:videoAssetQueries(),audio:{mode:videoDraft.audioMode||"none",default:"subtitle-only",optionalProviders:["MeloTTS","CosyVoice"]},render:{target:{width:1080,height:1920,fps:30,durationSeconds:Math.max(45,duration),format:"mp4"},localWorkspace:"E:\\AISP\\video-generator-studio"}}}
-function renderVideoWorkbench(){E.videoTopic.value=videoDraft.topic||"";E.videoSource.value=videoDraft.sourceText||"";E.videoAssets.value=videoDraft.assetKeywords||"";E.videoAudio.value=videoDraft.audioMode||"none";E.videoPromptSearch.value=videoPromptQuery;if(!videoDraft.captionBlocks?.length){videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft()}E.videoTemplates.innerHTML=VIDEO_TEMPLATES.map(t=>`<button class="template-card ${(videoDraft.templateIds||[]).includes(t.id)?"is-active":""}" data-video-template="${esc(t.id)}"><strong>${esc(t.title)}</strong><span>${esc(t.desc)}</span></button>`).join("");renderVideoPromptPool();renderSelectedPrompts();renderVideoCaptions();E.videoJobPreview.textContent=JSON.stringify(buildVideoJob(),null,2)}
-function renderVideoPromptPool(){let q=videoPromptQuery.trim().toLowerCase();let pool=(q?indexData.prompts.filter(entry=>String(entry.searchable||entry.title||"").toLowerCase().includes(q)):indexData.prompts.filter(entry=>String(entry.modality||"").includes("视频")||String(entry.title||"").includes("视频"))).filter(entry=>!entry.archived).slice(0,6);E.videoPromptPool.innerHTML=pool.length?pool.map(entry=>`<article class="selected-card"><strong>${esc(entry.title)}</strong><span>${esc(entry.summary||entry.category||"")}</span><button data-video-add-prompt="${esc(entry.id)}">加入任务</button></article>`).join(""):`<div class="empty"><strong>没有匹配提示词</strong>换一个关键词试试。</div>`}
-function renderSelectedPrompts(){let selected=selectedPromptObjects();E.selectedPrompts.innerHTML=`<div class="meta"><span class="badge">已选提示词 ${selected.length}</span></div>`+(selected.length?selected.map(prompt=>`<article class="selected-card"><strong>${esc(prompt.title)}</strong><span>${esc(prompt.summary||"")}</span><button data-video-remove-prompt="${esc(prompt.id)}">移除</button></article>`).join(""):`<div class="empty"><strong>尚未选择提示词</strong>可以直接生成，也可以把库里的脚本/分镜提示词加入任务。</div>`)}
-function renderVideoCaptions(){let blocks=videoDraft.captionBlocks||[];E.videoCaptions.innerHTML=blocks.length?blocks.map(block=>`<article class="caption-card"><div class="caption-time">${Number(block.start||0)}s<br>${Number(block.duration||0)}s</div><div><strong>${esc(block.headline)}</strong><span>${esc(block.caption||(block.captions||[]).join(" / "))}</span></div></article>`).join(""):`<div class="empty"><strong>还没有字幕分镜</strong>先填写选题和材料，再点击生成字幕分镜。</div>`}
+async function loadVideo(){renderVideoWorkbench();checkLocalBridge();await renderVideoPromptPool()}
+function readVideoControls(){videoDraft.topic=E.videoTopic.value;videoDraft.sourceText=E.videoSource.value;videoDraft.assetKeywords=E.videoAssets.value;videoDraft.audioMode=E.videoAudio.value;saveVideoDraft()}
+function renderVideoWorkbench(){E.videoTopic.value=videoDraft.topic||"";E.videoSource.value=videoDraft.sourceText||"";E.videoAssets.value=videoDraft.assetKeywords||"";E.videoAudio.value=videoDraft.audioMode||"none";E.videoPromptSearch.value=videoPromptQuery;if(!videoDraft.captionBlocks?.length){videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft()}E.videoTemplates.innerHTML=VIDEO_TEMPLATES.map(t=>`<button class="template-card ${(videoDraft.templateIds||[]).includes(t.id)?"active":""}" data-video-template="${esc(t.id)}"><strong>${esc(t.title)}</strong><span>${esc(t.desc)}</span></button>`).join("");renderSelectedPrompts();renderVideoCaptions();E.videoJobPreview.textContent=JSON.stringify(buildVideoJob(),null,2)}
+async function renderVideoPromptPool(){let q=videoPromptQuery||"视频";let data=await fetchJson(`${PUBLIC}/search?q=${encodeURIComponent(q)}&limit=6`).catch(()=>({prompts:[]}));E.videoPromptPool.innerHTML=(data.prompts||[]).map(p=>`<article class="selected-card"><strong>${esc(p.title)}</strong><span>${esc(p.summary||p.task||"")}</span><button data-video-add-prompt="${esc(p.id)}">加入任务</button></article>`).join("")||'<div class="empty">没有匹配提示词</div>'}
+function renderSelectedPrompts(){let items=(videoDraft.promptIds||[]).map(id=>videoPromptCache.get(id)).filter(Boolean);E.selectedPrompts.innerHTML=items.length?items.map(p=>`<article class="selected-card"><strong>${esc(p.title)}</strong><span>${esc(p.summary||"")}</span><button data-video-remove-prompt="${esc(p.id)}">移除</button></article>`).join(""):'<div class="empty">尚未选择提示词</div>'}
+function createCaptionBlocks(){let sentences=String(videoDraft.sourceText||"").split(/[。！？!?；;\n]/).map(x=>x.trim()).filter(Boolean).slice(0,5);return[{start:0,duration:4,type:"hook",headline:videoDraft.topic||"热点变化",captions:["反常识开场","关键冲突"]},{start:4,duration:8,type:"proof",headline:sentences[0]||"事实正在变化",captions:["来源信息","关键日期","直接结果"]},{start:12,duration:12,type:"analysis",headline:sentences[1]||"普通人要看结构",captions:["行业影响","岗位变化","行动建议"]},{start:24,duration:8,type:"action",headline:"现在可以做什么",captions:["复制提示词","拆任务","做交付"]}]}
+function renderVideoCaptions(){E.videoCaptions.innerHTML=(videoDraft.captionBlocks||[]).map(block=>`<article class="selected-card"><strong>${esc(block.start)}s · ${esc(block.headline)}</strong><span>${(block.captions||[]).map(esc).join(" / ")}</span></article>`).join("")}
+function buildVideoJob(){readVideoControls();let prompts=(videoDraft.promptIds||[]).map(id=>videoPromptCache.get(id)).filter(Boolean).map(p=>({id:p.id,title:p.title,summary:p.summary,body:(p.promptZh||p.promptPreview||"").slice(0,1600)}));return{videoJobVersion:2,createdAt:now(),topic:videoDraft.topic,sourceText:videoDraft.sourceText,promptIds:videoDraft.promptIds||[],prompts,templateRecipe:{id:"douyin-retention-stack",templates:videoDraft.templateIds||[]},captionBlocks:videoDraft.captionBlocks||[],assetQueries:arr(videoDraft.assetKeywords).map(query=>({query,providers:["pexels","pixabay","unsplash"]})),audio:{mode:videoDraft.audioMode||"none"},render:{target:{width:1080,height:1920,fps:30,durationSeconds:45,format:"mp4"},localWorkspace:"E:\\AISP\\video-generator-studio"}}}
 async function checkLocalBridge(){E.bridgeTitle.textContent="本地渲染桥检测中";E.bridgeText.textContent="正在请求 127.0.0.1:47892/health。";try{let res=await fetch(`${LOCAL_RENDERER_ORIGIN}/health`,{cache:"no-store"});let data=await res.json();bridgeOnline=Boolean(data.ok);E.bridgeTitle.textContent=bridgeOnline?"本地渲染桥已连接":"本地渲染桥不可用";E.bridgeText.textContent=bridgeOnline?`工作目录：${data.workspace||"E:\\AISP\\video-generator-studio"}`:"请先启动本地桥，或导出任务 JSON。"}catch{bridgeOnline=false;E.bridgeTitle.textContent="本地渲染桥未连接";E.bridgeText.textContent="浏览器可能阻止 localhost，或本地服务未启动。可先导出任务 JSON。"}}
-function downloadVideoJob(){let job=buildVideoJob();let blob=new Blob([JSON.stringify(job,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`video-job-${Date.now().toString(36)}.json`;a.click();URL.revokeObjectURL(a.href);toast("已导出视频任务 JSON")}
-async function sendLocalRender(){let job=buildVideoJob();try{let res=await fetch(`${LOCAL_RENDERER_ORIGIN}/render`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(job)});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);toast(data.output?`已提交渲染：${data.output}`:"已提交本机渲染")}catch(error){toast(`本机渲染不可用：${error.message||error}，请导出 JSON`)}}
-async function copyLocalCommand(){let text=E.localCommand.textContent.trim();try{await navigator.clipboard.writeText(text)}catch{let area=document.createElement("textarea");area.value=text;document.body.appendChild(area);area.select();document.execCommand("copy");area.remove()}toast("已复制本地启动命令")}
-async function startCheckout(productType,packId=""){try{let data=await fetchJson(API_CHECKOUT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({productType,packId})});if(data.checkoutUrl)location.assign(data.checkoutUrl);else toast("Stripe Checkout 未返回跳转地址")}catch(error){toast(`支付未配置：${error.message||error}`)}}
-async function openPortal(){try{let data=await fetchJson(API_PORTAL,{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});if(data.url)location.assign(data.url)}catch(error){toast(`订阅管理未配置：${error.message||error}`)}}
-document.addEventListener("click",event=>{let target=event.target.closest("button,a,article");if(!target)return;if(target.dataset.videoTemplate){let set=new Set(videoDraft.templateIds||[]);set.has(target.dataset.videoTemplate)?set.delete(target.dataset.videoTemplate):set.add(target.dataset.videoTemplate);videoDraft.templateIds=[...set];saveVideoDraft();renderVideoWorkbench();return}if(target.dataset.videoAddPrompt){let set=new Set(videoDraft.promptIds||[]);set.add(target.dataset.videoAddPrompt);videoDraft.promptIds=[...set].slice(0,8);saveVideoDraft();renderVideoWorkbench();return}if(target.dataset.videoRemovePrompt){videoDraft.promptIds=(videoDraft.promptIds||[]).filter(id=>id!==target.dataset.videoRemovePrompt);saveVideoDraft();renderVideoWorkbench();return}if(target.dataset.query){state.query=target.dataset.query;saveSearch(state.query);syncUrl();render();return}if(target.dataset.packSearch){state.pack=target.dataset.packSearch;state.access="pack";syncUrl();render();return}if(target.dataset.buyPack!==undefined){startCheckout("pack",target.dataset.buyPack);return}if(target.dataset.buyPro!==undefined||target.id==="buyPro"){startCheckout("pro");return}if(target.dataset.open){openDetail(target.dataset.open);return}if(target.dataset.copy){event.stopPropagation();copyPrompt(target.dataset.copy);return}if(target.dataset.edit){openEditor(target.dataset.edit);return}if(target.dataset.draftSuggestion){draftFromSuggestion(target.dataset.draftSuggestion);return}if(target.dataset.close){$(target.dataset.close).close();return}});
-$("runSearch").onclick=()=>{state.query=E.search.value.trim();saveSearch(state.query);syncUrl();render()};
-$("clearSearch").onclick=()=>{state.query="";E.search.value="";syncUrl();render();E.search.focus()};
+function downloadVideoJob(){let blob=new Blob([JSON.stringify(buildVideoJob(),null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`video-job-${Date.now().toString(36)}.json`;a.click();URL.revokeObjectURL(a.href);toast("已导出视频任务 JSON")}
+async function sendLocalRender(){try{let res=await fetch(`${LOCAL_RENDERER_ORIGIN}/render`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(buildVideoJob())});let data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.error||`HTTP ${res.status}`);toast(data.output?`已提交渲染：${data.output}`:"已提交本机渲染")}catch(error){toast(`本机渲染不可用：${error.message||error}，请导出 JSON`)}}
+
+document.addEventListener("click",async event=>{
+  let target=event.target.closest("button,article");if(!target)return;
+  if(target.dataset.department){selected={...selected,department:target.dataset.department,scenario:"",task:"",query:"",page:1};E.search.value="";await loadPrompts(1);return}
+  if(target.dataset.scenario){selected.scenario=target.dataset.scenario;selected.task="";selected.query="";await loadPrompts(1);return}
+  if(target.dataset.task){selected.task=target.dataset.task;selected.query="";await loadPrompts(1);return}
+  if(target.dataset.taskHot){let task=findCat(target.dataset.taskHot),scenario=findCat(task?.parentId),dept=findCat(scenario?.parentId);selected={...selected,department:dept?.id||"",scenario:scenario?.id||"",task:task?.id||"",query:"",page:1};E.search.value="";await loadPrompts(1);return}
+  if(target.dataset.crumb){let index=Number(target.dataset.crumb);if(index===0){selected.scenario="";selected.task=""}if(index===1)selected.task="";await loadPrompts(1);return}
+  if(target.dataset.page){await loadPrompts(Number(target.dataset.page));return}
+  if(target.dataset.open){await openDetail(target.dataset.open);return}
+  if(target.dataset.copy){await copyPrompt(target.dataset.copy);return}
+  if(target.dataset.close){$(target.dataset.close).close();return}
+  if(target.dataset.adminTab){adminTab=target.dataset.adminTab;renderAdmin();return}
+  if(target.dataset.adminEdit){openEditor(target.dataset.adminEdit);return}
+  if(target.dataset.adminPublish){await fetchJson(`${ADMIN}/prompts/${encodeURIComponent(target.dataset.adminPublish)}/publish`,{method:"POST"});toast("已发布");await loadAdmin();await loadPrompts(1);return}
+  if(target.dataset.adminArchive){await fetchJson(`${ADMIN}/prompts/${encodeURIComponent(target.dataset.adminArchive)}/archive`,{method:"POST"});toast("已归档");await loadAdmin();await loadPrompts(1);return}
+  if(target.dataset.categoryDelete){await fetchJson(`${ADMIN}/categories/${encodeURIComponent(target.dataset.categoryDelete)}`,{method:"DELETE"});toast("分类已停用");await loadAdmin();renderShell();return}
+  if(target.dataset.videoTemplate){let set=new Set(videoDraft.templateIds||[]);set.has(target.dataset.videoTemplate)?set.delete(target.dataset.videoTemplate):set.add(target.dataset.videoTemplate);videoDraft.templateIds=[...set];saveVideoDraft();renderVideoWorkbench();return}
+  if(target.dataset.videoAddPrompt){let data=await fetchJson(`${PUBLIC}/prompts/${encodeURIComponent(target.dataset.videoAddPrompt)}`);videoPromptCache.set(data.prompt.id,data.prompt);let set=new Set(videoDraft.promptIds||[]);set.add(data.prompt.id);videoDraft.promptIds=[...set].slice(0,8);saveVideoDraft();renderVideoWorkbench();return}
+  if(target.dataset.videoRemovePrompt){videoDraft.promptIds=(videoDraft.promptIds||[]).filter(id=>id!==target.dataset.videoRemovePrompt);saveVideoDraft();renderVideoWorkbench();return}
+});
+E.detailCopy.onclick=()=>activeDetail&&copyPrompt(activeDetail.id);
+$("runSearch").onclick=async()=>{selected.query=E.search.value.trim();selected.department="";selected.scenario="";selected.task="";selected.page=1;history.replaceState(null,"",`/prompts/${selected.query?`?q=${encodeURIComponent(selected.query)}`:""}`);await loadPrompts(1)};
+$("clearSearch").onclick=async()=>{selected.query="";E.search.value="";history.replaceState(null,"","/prompts/");await loadPrompts(1)};
 E.search.onkeydown=event=>{if(event.key==="Enter")$("runSearch").click()};
-E.search.oninput=()=>{state.query=E.search.value.trim();syncUrl();render()};
-[E.tool,E.mod,E.access,E.pack,E.sort].forEach(control=>control.onchange=()=>{state.tool=E.tool.value;state.modality=E.mod.value;state.access=E.access.value;state.pack=E.pack.value;state.sort=E.sort.value;syncUrl();render()});
-$("newPrompt").onclick=()=>openEditor();
-$("publishLibrary").onclick=publishLibrary;
-$("openSuggestionReview").onclick=renderSuggestionReview;
-$("managePortal").onclick=openPortal;
+[E.tool,E.modality,E.sort].forEach(control=>control.onchange=async()=>{selected.tool=E.tool.value;selected.modality=E.modality.value;selected.sort=E.sort.value;await loadPrompts(1)});
+$("refreshAdmin").onclick=loadAdmin;
 $("checkLocalBridge").onclick=checkLocalBridge;
-$("generateVideoCaptions").onclick=generateCaptionBlocks;
-$("resetVideoDraft").onclick=()=>{videoDraft=defaultVideoDraft();saveVideoDraft();renderVideoWorkbench();toast("已重置视频样例")};
-$("videoPromptSearchButton").onclick=()=>{videoPromptQuery=E.videoPromptSearch.value.trim();renderVideoWorkbench()};
+$("generateVideoCaptions").onclick=()=>{readVideoControls();videoDraft.captionBlocks=createCaptionBlocks();saveVideoDraft();renderVideoWorkbench();toast("字幕分镜已生成")};
+$("resetVideoDraft").onclick=()=>{videoDraft=defaultVideoDraft();saveVideoDraft();renderVideoWorkbench()};
+$("videoPromptSearchButton").onclick=async()=>{videoPromptQuery=E.videoPromptSearch.value.trim();await renderVideoPromptPool()};
+E.videoPromptSearch.onkeydown=event=>{if(event.key==="Enter")$("videoPromptSearchButton").click()};
 $("downloadVideoJob").onclick=downloadVideoJob;
 $("sendLocalRender").onclick=sendLocalRender;
-$("copyLocalCommand").onclick=copyLocalCommand;
-[E.videoTopic,E.videoSource,E.videoAssets,E.videoAudio].forEach(control=>control.oninput=()=>{readVideoControls();renderVideoWorkbench()});
-E.videoPromptSearch.onkeydown=event=>{if(event.key==="Enter")$("videoPromptSearchButton").click()};
-E.editorForm.onsubmit=saveEditor;
-E.detailCopy.onclick=()=>copyPrompt(activeDetailId);
+$("copyLocalCommand").onclick=()=>copyText(E.localCommand.textContent.trim()).then(()=>toast("已复制本地命令"));
+[E.videoTopic,E.videoSource,E.videoAssets,E.videoAudio].forEach(control=>control.addEventListener("input",()=>{readVideoControls();renderVideoWorkbench()}));
 loadAll();
-  </script>
+</script>
 </body>
 </html>

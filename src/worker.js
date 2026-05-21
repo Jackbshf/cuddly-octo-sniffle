@@ -1,11 +1,25 @@
+import {
+  handleAdminPromptsApi,
+  handlePromptDataAssetRequest,
+  handlePublicPromptsApi,
+  hasPromptWorkbench,
+  readWorkbenchCompatLibrary
+} from "./prompts-workbench.js";
+
 const PROMPTS_PREFIX = "/prompts";
 const PROMPT_ADMIN_PREFIX = "/prompts/admin";
 const VIEW_LOGIN_PATH = "/prompts/login";
 const PROMPT_ADMIN_LOGIN_PATH = "/prompts/admin/login";
+const PUBLIC_PROMPTS_API_PREFIX = "/api/public";
+const ADMIN_PROMPTS_API_PREFIX = "/api/admin";
 const PROMPTS_API_PREFIX = "/api/prompts";
 const PROMPTS_DATA_PREFIX = "/prompts-data";
 const PROMPT_LIBRARY_PATH = "prompts-data/library.json";
 const PROMPT_LIBRARY_MANIFEST_PATH = "prompts-data/library-manifest.json";
+const PROMPT_SEARCH_INDEX_PATH = "prompts-data/search-index.json";
+const PROMPT_SEARCH_INDEX_MANIFEST_PATH = "prompts-data/search-index-manifest.json";
+const PROMPT_SEARCH_LIMIT_DEFAULT = 36;
+const PROMPT_SEARCH_LIMIT_MAX = 72;
 const PROMPT_ENTITLEMENT_COOKIE_NAME = "prompt_commerce_entitlement";
 const PROMPT_ENTITLEMENT_TTL_SECONDS = 60 * 60 * 24 * 30;
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
@@ -66,6 +80,14 @@ const SECRET_PATTERNS = [
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith(PUBLIC_PROMPTS_API_PREFIX)) {
+      return handlePublicPromptsApi(request, env, url);
+    }
+
+    if (url.pathname.startsWith(ADMIN_PROMPTS_API_PREFIX)) {
+      return handleAdminPromptsApi(request, env, url);
+    }
 
     if (url.pathname.startsWith(PROMPTS_API_PREFIX)) {
       return handlePromptsApi(request, env, url);
@@ -199,6 +221,11 @@ async function handlePortfolioAdminPage(request, env, url) {
 
 async function handlePromptsApi(request, env, url) {
   if (url.pathname === `${PROMPTS_API_PREFIX}/library`) {
+    if (request.method === "GET" && hasPromptWorkbench(env)) {
+      const response = await readWorkbenchCompatLibrary(request, env);
+      if (response) return response;
+    }
+
     if (request.method === "GET") {
       return readPromptLibrary(request, env);
     }
@@ -211,6 +238,18 @@ async function handlePromptsApi(request, env, url) {
 
       return savePromptLibrary(request, env);
     }
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/meta` && request.method === "GET") {
+    return readPromptSearchMeta(request, env);
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/search` && request.method === "GET") {
+    return searchPrompts(request, env, url);
+  }
+
+  if (url.pathname === `${PROMPTS_API_PREFIX}/detail` && request.method === "GET") {
+    return readPromptDetail(request, env, url);
   }
 
   if (url.pathname === `${PROMPTS_API_PREFIX}/entitlement` && request.method === "GET") {
@@ -347,6 +386,9 @@ async function handleProtectedPromptDataAsset(request, env) {
     return textResponse("Method not allowed.", 405, { Allow: "GET, HEAD" });
   }
 
+  const workbenchResponse = await handlePromptDataAssetRequest(request, env);
+  if (workbenchResponse) return workbenchResponse;
+
   const url = new URL(request.url);
   if (url.pathname.replace(/^\/+/, "") === PROMPT_LIBRARY_PATH) {
     return readPromptLibrary(request, env);
@@ -408,6 +450,510 @@ async function readChunkedPromptLibrary(request, env) {
     prompts: promptSets.flat(),
     assets: asArray(manifest.assets)
   };
+}
+
+async function readPromptSearchMeta(request, env) {
+  const staticMeta = await readPromptSearchIndexMeta(request, env);
+  if (!env.PROMPTS_DB) return jsonResponse(staticMeta);
+
+  try {
+    const dbMeta = await readPromptSearchMetaFromD1(env, staticMeta);
+    return jsonResponse(dbMeta);
+  } catch (error) {
+    return jsonResponse({
+      ...staticMeta,
+      dataSource: "static",
+      databaseFallbackReason: error.message || "Prompt database metadata unavailable."
+    });
+  }
+}
+
+async function searchPrompts(request, env, url) {
+  const params = getPromptSearchParams(url);
+  const staticMeta = await readPromptSearchIndexMeta(request, env);
+  const meta = env.PROMPTS_DB
+    ? await readPromptSearchMetaFromD1(env, staticMeta).catch(() => staticMeta)
+    : staticMeta;
+  if (!hasPromptSearchIntent(params)) {
+    return jsonResponse({
+      ok: true,
+      ...meta,
+      dataSource: meta.dataSource || (env.PROMPTS_DB ? "d1" : "static"),
+      prompts: [],
+      total: 0,
+      limit: params.limit,
+      nextCursor: ""
+    });
+  }
+
+  if (env.PROMPTS_DB) {
+    try {
+      return jsonResponse(await searchPromptsFromD1(env, params, meta));
+    } catch (error) {
+      const fallback = await searchPromptsFromStaticIndex(request, env, params, meta);
+      return jsonResponse({
+        ...fallback,
+        databaseFallbackReason: error.message || "Prompt database search unavailable."
+      });
+    }
+  }
+
+  return jsonResponse(await searchPromptsFromStaticIndex(request, env, params, meta));
+}
+
+async function readPromptDetail(request, env, url) {
+  const id = cleanText(url.searchParams.get("id"));
+  if (!id) return jsonResponse({ ok: false, error: "id is required." }, 400);
+
+  const auth = await getPromptAuthState(request, env);
+  let prompt = null;
+  let dataSource = "static";
+  if (env.PROMPTS_DB) {
+    try {
+      prompt = await readPromptDetailFromD1(env, id, { admin: auth.admin });
+      if (prompt) dataSource = "d1";
+    } catch {
+      prompt = null;
+    }
+  }
+  if (!prompt) prompt = await readPromptDetailFromStaticLibrary(request, env, id);
+  if (!prompt) return jsonResponse({ ok: false, error: "Prompt not found." }, 404);
+
+  const entitlement = await getPromptEntitlementState(request, env);
+  const visiblePrompt = auth.admin || isPromptUnlocked(prompt, entitlement)
+    ? prompt
+    : redactPromptForAccess(prompt, entitlement);
+
+  return jsonResponse({
+    ok: true,
+    dataSource,
+    prompt: visiblePrompt,
+    entry: promptSearchEntryFromPrompt(visiblePrompt)
+  });
+}
+
+async function readPromptSearchIndexMeta(request, env) {
+  const manifest = await readPromptAssetJson(request, env, `/${PROMPT_SEARCH_INDEX_MANIFEST_PATH}`)
+    || await readPromptAssetJson(request, env, `/${PROMPT_SEARCH_INDEX_PATH}`);
+  if (!manifest) {
+    return {
+      version: 1,
+      promptCount: 0,
+      activePromptCount: 0,
+      counts: {},
+      packs: [],
+      facets: { tools: [], modalities: [] },
+      prompts: [],
+      dataSource: "static"
+    };
+  }
+
+  const prompts = asArray(manifest.prompts);
+  return {
+    ...manifest,
+    prompts: [],
+    facets: manifest.facets || buildPromptSearchFacets(prompts),
+    dataSource: "static"
+  };
+}
+
+async function readPromptSearchMetaFromD1(env, staticMeta) {
+  const countRows = await d1All(env.PROMPTS_DB, `
+    SELECT access, COUNT(*) AS count
+    FROM prompts
+    WHERE access = 'free' AND status = 'published' AND copy_ready = 1
+    GROUP BY access
+  `);
+  const counts = {};
+  for (const row of countRows) {
+    const access = cleanPromptAccess(row.access);
+    counts[access] = Number(row.count || 0);
+  }
+
+  const totalRows = await d1All(env.PROMPTS_DB, `
+    SELECT COUNT(*) AS count
+    FROM prompts
+    WHERE access = 'free' AND status = 'published' AND copy_ready = 1
+  `);
+  const packRows = await d1All(env.PROMPTS_DB, `
+    SELECT pack_id AS id, COUNT(*) AS count
+    FROM prompts
+    WHERE 1 = 0
+    GROUP BY pack_id
+  `);
+  const toolRows = await d1All(env.PROMPTS_DB, `
+    SELECT DISTINCT tool
+    FROM prompts
+    WHERE COALESCE(tool, '') <> '' AND access = 'free' AND status = 'published' AND copy_ready = 1
+    ORDER BY tool
+    LIMIT 80
+  `);
+  const modalityRows = await d1All(env.PROMPTS_DB, `
+    SELECT DISTINCT modality
+    FROM prompts
+    WHERE COALESCE(modality, '') <> '' AND access = 'free' AND status = 'published' AND copy_ready = 1
+    ORDER BY modality
+    LIMIT 40
+  `);
+
+  const packCounts = new Map(packRows.map((row) => [cleanText(row.id), Number(row.count || 0)]));
+  const packs = [];
+  for (const [id, count] of packCounts.entries()) {
+    if (!packs.some((pack) => cleanText(pack.id) === id)) {
+      packs.push({ id, title: id, description: "", audience: "", promptCount: count });
+    }
+  }
+
+  return {
+    ...staticMeta,
+    promptCount: Number(totalRows[0]?.count || 0),
+    activePromptCount: Number(totalRows[0]?.count || 0),
+    counts,
+    packs,
+    facets: {
+      tools: toolRows.map((row) => cleanText(row.tool)).filter(Boolean),
+      modalities: modalityRows.map((row) => cleanText(row.modality)).filter(Boolean)
+    },
+    prompts: [],
+    dataSource: "d1"
+  };
+}
+
+function getPromptSearchParams(url) {
+  const limit = Math.max(1, Math.min(PROMPT_SEARCH_LIMIT_MAX, cleanNumber(url.searchParams.get("limit")) || PROMPT_SEARCH_LIMIT_DEFAULT));
+  const cursor = Math.max(0, Number.parseInt(cleanText(url.searchParams.get("cursor") || "0"), 10) || 0);
+  const q = cleanText(url.searchParams.get("q")).slice(0, 160);
+  return {
+    q,
+    tokens: q.toLowerCase().split(/\s+/).map(cleanText).filter(Boolean).slice(0, 8),
+    tool: cleanText(url.searchParams.get("tool") || "all"),
+    modality: cleanText(url.searchParams.get("mod") || url.searchParams.get("modality") || "all"),
+    access: cleanText(url.searchParams.get("access") || "all"),
+    pack: cleanText(url.searchParams.get("pack") || "all"),
+    sort: cleanText(url.searchParams.get("sort") || "relevance"),
+    limit,
+    offset: cursor
+  };
+}
+
+function hasPromptSearchIntent(params) {
+  return Boolean(params.q)
+    || [params.tool, params.modality, params.access, params.pack].some((value) => value && value !== "all");
+}
+
+async function searchPromptsFromD1(env, params, meta) {
+  const where = ["access = 'free'", "status = 'published'", "copy_ready = 1"];
+  const bindings = [];
+
+  if (params.tool !== "all") {
+    where.push("tool = ?");
+    bindings.push(params.tool);
+  }
+  if (params.modality !== "all") {
+    where.push("modality = ?");
+    bindings.push(params.modality);
+  }
+  if (params.access !== "all") {
+    where.push("access = ?");
+    bindings.push(params.access);
+  }
+  if (params.pack !== "all") {
+    where.push("pack_id = ?");
+    bindings.push(params.pack);
+  }
+  for (const token of params.tokens) {
+    const like = `%${token}%`;
+    where.push(`(
+      lower(title) LIKE ?
+      OR lower(summary) LIKE ?
+      OR lower(prompt_zh) LIKE ?
+      OR lower(prompt_en) LIKE ?
+      OR lower(original_category) LIKE ?
+      OR lower(seo_keywords_json) LIKE ?
+      OR lower(COALESCE(search_text, original_json, '')) LIKE ?
+    )`);
+    bindings.push(like, like, like, like, like, like, like);
+  }
+
+  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const countRows = await d1All(env.PROMPTS_DB, `SELECT COUNT(*) AS total FROM prompts ${whereSql}`, bindings);
+  const total = Number(countRows[0]?.total || 0);
+  const orderBindings = [];
+  let orderSql = "ORDER BY quality_score DESC, updated_at DESC";
+  if (params.sort === "newest") {
+    orderSql = "ORDER BY updated_at DESC, published_at DESC";
+  } else if (params.sort === "quality") {
+    orderSql = "ORDER BY quality_score DESC, quality_level DESC, updated_at DESC";
+  } else if (params.q) {
+    orderSql = "ORDER BY CASE WHEN lower(title) LIKE ? THEN 0 ELSE 1 END ASC, quality_score DESC, updated_at DESC";
+    orderBindings.push(`%${params.q.toLowerCase()}%`);
+  }
+
+  const rows = await d1All(env.PROMPTS_DB, `
+    SELECT id, title, access, pack_id, quality_score, quality_level, copy_ready,
+      missing_fields_json, seo_keywords_json, source_type, updated_at, published_at,
+      model, modality, tool, output_type, language, use_case, original_category,
+      summary, variables_json, original_json
+    FROM prompts
+    ${whereSql}
+    ${orderSql}
+    LIMIT ? OFFSET ?
+  `, [...bindings, ...orderBindings, params.limit, params.offset]);
+
+  return {
+    ok: true,
+    ...meta,
+    dataSource: "d1",
+    prompts: rows.map(promptSearchEntryFromD1),
+    total,
+    limit: params.limit,
+    nextCursor: params.offset + rows.length < total ? String(params.offset + rows.length) : ""
+  };
+}
+
+async function searchPromptsFromStaticIndex(request, env, params, meta) {
+  const maxKeep = params.offset + params.limit;
+  const kept = [];
+  let total = 0;
+
+  await forEachPromptSearchIndexEntry(request, env, async (entry) => {
+    if (!promptSearchEntryMatches(entry, params)) return;
+    total += 1;
+    kept.push({
+      ...entry,
+      score: scorePromptSearchEntry(entry, params)
+    });
+    if (kept.length > Math.max(maxKeep * 3, PROMPT_SEARCH_LIMIT_MAX * 2)) {
+      kept.sort((left, right) => comparePromptSearchEntries(left, right, params));
+      kept.length = maxKeep;
+    }
+  });
+
+  kept.sort((left, right) => comparePromptSearchEntries(left, right, params));
+  const page = kept.slice(params.offset, params.offset + params.limit);
+  return {
+    ok: true,
+    ...meta,
+    dataSource: "static",
+    prompts: page.map(stripPromptSearchPrivateFields),
+    total,
+    limit: params.limit,
+    nextCursor: params.offset + page.length < total ? String(params.offset + page.length) : ""
+  };
+}
+
+async function forEachPromptSearchIndexEntry(request, env, onEntry) {
+  const manifest = await readPromptAssetJson(request, env, `/${PROMPT_SEARCH_INDEX_MANIFEST_PATH}`)
+    || await readPromptAssetJson(request, env, `/${PROMPT_SEARCH_INDEX_PATH}`);
+  if (!manifest) return;
+
+  const chunks = asArray(manifest.chunks);
+  if (!chunks.length) {
+    for (const entry of asArray(manifest.prompts)) await onEntry(entry);
+    return;
+  }
+
+  for (const chunk of chunks) {
+    const pathname = cleanText(chunk?.path);
+    if (!pathname.startsWith("/prompts-data/search-index-prompts-")) continue;
+    const data = await readPromptAssetJson(request, env, pathname);
+    for (const entry of asArray(data?.prompts)) await onEntry(entry);
+  }
+}
+
+function promptSearchEntryMatches(entry, params) {
+  if (entry?.archived) return false;
+  if (params.tool !== "all" && cleanText(entry.tool) !== params.tool) return false;
+  if (params.modality !== "all" && cleanText(entry.modality) !== params.modality) return false;
+  if (params.access !== "all" && cleanPromptAccess(entry.access) !== params.access) return false;
+  if (params.pack !== "all" && cleanText(entry.packId) !== params.pack) return false;
+  if (!params.tokens.length) return true;
+
+  const searchable = [
+    entry.title,
+    entry.summary,
+    entry.category,
+    entry.tool,
+    entry.modality,
+    entry.use,
+    entry.searchable
+  ].join(" ").toLowerCase();
+  return params.tokens.every((token) => searchable.includes(token));
+}
+
+function scorePromptSearchEntry(entry, params) {
+  let score = Number(entry.qualityScore || 0) / 10;
+  if (!params.tokens.length) return score;
+  const title = cleanText(entry.title).toLowerCase();
+  const searchable = cleanText(entry.searchable).toLowerCase();
+  for (const token of params.tokens) {
+    if (title.includes(token)) score += 26;
+    else if (searchable.includes(token)) score += 10;
+  }
+  return score;
+}
+
+function comparePromptSearchEntries(left, right, params) {
+  if (params.sort === "quality") return Number(right.qualityScore || 0) - Number(left.qualityScore || 0);
+  if (params.sort === "newest") return Date.parse(right.verifiedAt || 0) - Date.parse(left.verifiedAt || 0);
+  return Number(right.score || 0) - Number(left.score || 0)
+    || Number(right.qualityScore || 0) - Number(left.qualityScore || 0);
+}
+
+function stripPromptSearchPrivateFields(entry) {
+  const { searchable, score, ...publicEntry } = entry && typeof entry === "object" ? entry : {};
+  return publicEntry;
+}
+
+async function readPromptDetailFromD1(env, id, { admin = false } = {}) {
+  const publicFilter = admin ? "" : "AND access = 'free' AND status = 'published' AND copy_ready = 1";
+  const rows = await d1All(env.PROMPTS_DB, `
+    SELECT *
+    FROM prompts
+    WHERE id = ? ${publicFilter}
+    LIMIT 1
+  `, [id]);
+  const row = rows[0];
+  if (!row) return null;
+  return promptFromD1Row(row);
+}
+
+async function readPromptDetailFromStaticLibrary(request, env, id) {
+  const manifest = await readPromptAssetJson(request, env, `/${PROMPT_LIBRARY_MANIFEST_PATH}`);
+  if (!manifest) {
+    const library = await readPromptAssetJson(request, env, `/${PROMPT_LIBRARY_PATH}`);
+    const prompt = asArray(library?.prompts).find((entry) => cleanText(entry?.id) === id);
+    return prompt ? normalizeLibrary({ prompts: [prompt] }).prompts[0] : null;
+  }
+
+  for (const chunk of asArray(manifest.chunks)) {
+    const pathname = cleanText(chunk?.path);
+    if (!pathname.startsWith("/prompts-data/library-prompts-")) continue;
+    const data = await readPromptAssetJson(request, env, pathname);
+    const prompt = asArray(data?.prompts).find((entry) => cleanText(entry?.id) === id);
+    if (prompt) return normalizeLibrary({ prompts: [prompt] }).prompts[0];
+  }
+  return null;
+}
+
+function promptFromD1Row(row) {
+  const original = safeParseJson(row.original_json, {});
+  const base = normalizeLibrary({ prompts: [{ ...original, id: row.id }] }).prompts[0];
+  return {
+    ...base,
+    id: cleanText(row.id) || base.id,
+    title: cleanText(row.title) || base.title,
+    category: cleanText(original.category || row.original_category) || base.category,
+    summary: cleanText(row.summary) || base.summary,
+    body: cleanText(row.prompt_zh || base.body),
+    access: cleanPromptAccess(row.access || base.access),
+    packId: cleanText(row.pack_id || base.packId),
+    qualityScore: cleanNumber(row.quality_score) || base.qualityScore,
+    sourceType: cleanText(row.source_type || base.sourceType),
+    verifiedAt: cleanText(row.published_at || row.updated_at || base.verifiedAt),
+    seoKeywords: safeParseJson(row.seo_keywords_json, base.seoKeywords),
+    variables: safeParseJson(row.variables_json, base.variables),
+    model: cleanText(row.model || base.model),
+    platform: cleanText(row.tool || base.platform),
+    language: cleanText(row.language || base.language),
+    exampleOutput: cleanText(row.expected_result || base.exampleOutput),
+    usageTips: cleanText(row.usage_tips || base.usageTips),
+    qualityAudit: {
+      ...base.qualityAudit,
+      copyReady: Boolean(row.copy_ready),
+      qualityLevel: cleanText(row.quality_level || base.qualityAudit?.qualityLevel) || "basic",
+      missingFields: safeParseJson(row.missing_fields_json, base.qualityAudit?.missingFields || [])
+    },
+    archived: ["archived", "deleted"].includes(cleanText(row.status).toLowerCase())
+  };
+}
+
+function promptSearchEntryFromD1(row) {
+  const original = safeParseJson(row.original_json, {});
+  return stripPromptSearchPrivateFields({
+    id: cleanText(row.id),
+    title: cleanText(row.title),
+    category: cleanText(original.category || row.original_category),
+    summary: cleanText(row.summary),
+    tags: asArray(original.tags),
+    variablesCount: asArray(safeParseJson(row.variables_json, [])).length,
+    access: cleanPromptAccess(row.access),
+    packId: cleanText(row.pack_id),
+    qualityScore: cleanNumber(row.quality_score),
+    copyReady: Boolean(row.copy_ready),
+    qualityLevel: cleanText(row.quality_level) || "basic",
+    missingFields: safeParseJson(row.missing_fields_json, []),
+    improvementSuggestion: cleanText(original.qualityAudit?.improvementSuggestion),
+    sourceType: cleanText(row.source_type),
+    verifiedAt: cleanText(row.published_at || row.updated_at),
+    seoKeywords: safeParseJson(row.seo_keywords_json, []),
+    contentType: cleanText(original.contentType),
+    promptKind: cleanText(original.promptKind),
+    platform: cleanText(original.platform || row.tool),
+    model: cleanText(row.model),
+    language: cleanText(row.language || original.language),
+    parameterTips: cleanText(original.parameterTips),
+    tool: cleanText(row.tool),
+    modality: cleanText(row.modality),
+    use: cleanText(row.use_case || row.output_type),
+    difficulty: cleanText(original.difficulty),
+    archived: false
+  });
+}
+
+function promptSearchEntryFromPrompt(prompt) {
+  const audit = prompt?.qualityAudit || {};
+  return stripPromptSearchPrivateFields({
+    id: cleanText(prompt?.id),
+    title: cleanText(prompt?.title),
+    category: cleanText(prompt?.category),
+    summary: cleanText(prompt?.summary),
+    tags: asArray(prompt?.tags),
+    variablesCount: asArray(prompt?.variables).length,
+    access: cleanPromptAccess(prompt?.access),
+    packId: cleanText(prompt?.packId),
+    qualityScore: cleanNumber(prompt?.qualityScore),
+    copyReady: Boolean(audit.copyReady),
+    qualityLevel: cleanText(audit.qualityLevel) || "basic",
+    missingFields: asArray(audit.missingFields),
+    improvementSuggestion: cleanText(audit.improvementSuggestion),
+    sourceType: cleanText(prompt?.sourceType),
+    verifiedAt: cleanText(prompt?.verifiedAt || prompt?.updatedAt),
+    seoKeywords: asArray(prompt?.seoKeywords),
+    contentType: cleanText(prompt?.contentType),
+    promptKind: cleanText(prompt?.promptKind),
+    platform: cleanText(prompt?.platform),
+    model: cleanText(prompt?.model),
+    language: cleanText(prompt?.language),
+    parameterTips: cleanText(prompt?.parameterTips),
+    tool: cleanText(prompt?.platform || prompt?.model),
+    modality: cleanText(prompt?.promptKind),
+    use: cleanText(prompt?.category),
+    difficulty: "",
+    archived: Boolean(prompt?.archived)
+  });
+}
+
+function buildPromptSearchFacets(prompts) {
+  return {
+    tools: [...new Set(asArray(prompts).map((entry) => cleanText(entry.tool)).filter(Boolean))].sort(),
+    modalities: [...new Set(asArray(prompts).map((entry) => cleanText(entry.modality)).filter(Boolean))].sort()
+  };
+}
+
+function safeParseJson(value, fallback) {
+  if (value && typeof value === "object") return value;
+  try {
+    return JSON.parse(cleanText(value));
+  } catch {
+    return fallback;
+  }
+}
+
+async function d1All(database, sql, bindings = []) {
+  const statement = database.prepare(sql);
+  const result = bindings.length ? await statement.bind(...bindings).all() : await statement.all();
+  return asArray(result?.results);
 }
 
 function redactPromptLibrary(library, entitlement) {

@@ -46,10 +46,12 @@
 
 ## 提示词仓库
 
-- `/prompts/`：查看端，需要 `PROMPT_LIBRARY_PASSWORD`。
-- `/prompts/admin`：编辑端，需要 `PROMPT_LIBRARY_ADMIN_PASSWORD`。
-- `prompts-data/library.json` 是共享提示词和素材索引。
-- 上传到提示词仓库的图片写入 `prompts-data/assets/YYYY/MM/`。
+- `/prompts/`：互联网岗位 AI 提示词工作台，公开端只展示 `free + published + copyReady` 的精选提示词。
+- `/prompts/admin`：后台管理端，需要 `PROMPT_LIBRARY_ADMIN_PASSWORD` 登录 cookie；管理员 API 也支持 `ADMIN_TOKEN` Bearer。
+- `prompts-data/library.json` 是一次性迁移源和备份，不再作为线上全量公开静态资产发布。
+- D1 真源使用 `PROMPTS_DB=zhangwei-prompts`；KV 使用 `PROMPTS_KV` 保存设置和缓存。R2 未启用前不绑定到生产 Worker。
+- 本地初始化：`npm run prompts:d1:init`，本地运行：`npm run prompts:dev`。
+- 详细设置见 `docs/prompts-commerce-setup.md`。
 
 ## GitHub Secrets
 
@@ -58,6 +60,7 @@
 - `CLOUDFLARE_API_TOKEN`
 - `PROMPT_LIBRARY_PASSWORD`
 - `PROMPT_LIBRARY_ADMIN_PASSWORD`
+- `ADMIN_TOKEN`
 - `PROMPTS_GITHUB_TOKEN`
 - `PORTFOLIO_ADMIN_PASSWORD`
 - `PORTFOLIO_GITHUB_TOKEN`

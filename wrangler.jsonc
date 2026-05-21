@@ -2,13 +2,31 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "floral-leaf-4e44",
   "main": "./src/worker.js",
-  "compatibility_date": "2026-04-12",
+  "compatibility_date": "2026-05-01",
   "vars": {
     "PROMPTS_GITHUB_OWNER": "Jackbshf",
     "PROMPTS_GITHUB_REPO": "cuddly-octo-sniffle",
     "PROMPTS_GITHUB_BRANCH": "main",
     "CLOUDFLARE_STREAM_ACCOUNT_ID": "8ad8f870010a1f1de2a2bf7ca8220d4a"
   },
+  "kv_namespaces": [
+    {
+      "binding": "PROMPTS_KV",
+      "id": "b774e29b6cd44556884ea038c0528098"
+    },
+    {
+      "binding": "PROMPT_ENTITLEMENTS",
+      "id": "94a71c8a49314069aab6827f4f23bc34"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "PROMPTS_DB",
+      "database_name": "zhangwei-prompts",
+      "database_id": "96949623-6fd6-412f-9f19-81bd2f7e3970",
+      "migrations_dir": "./migrations"
+    }
+  ],
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
@@ -16,6 +34,8 @@
     "run_worker_first": [
       "/admin",
       "/admin/*",
+      "/api/public/*",
+      "/api/admin/*",
       "/api/portfolio-admin/*",
       "/api/prompts/*",
       "/prompts",

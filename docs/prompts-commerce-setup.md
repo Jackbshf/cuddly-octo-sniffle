@@ -1,78 +1,145 @@
-# Prompts Commerce Setup
+# Prompt Workbench Cloudflare Setup
 
-This phase keeps production on Cloudflare Workers and uses Docker only for local search relevance experiments.
+The `/prompts/` product now uses Cloudflare Worker + Assets with D1/KV bindings.
+The public experience is an internet job-task prompt workbench:
 
-## Local search sandbox
-
-Docker Desktop must be running before this command works:
-
-```powershell
-docker compose --profile search up -d meilisearch
+```text
+岗位部门 -> 工作场景 -> 具体任务 -> 可复制提示词
 ```
 
-Meilisearch listens on `http://localhost:7700`. The production `/prompts/` page does not depend on this service; it uses `prompts-data/search-index.json`.
+`prompts-data/library.json` remains the migration source and backup. It is not shipped as a full public static asset.
 
-## Stripe test mode
+## Bindings
 
-The Worker uses Stripe-hosted Checkout Sessions. It does not collect card data directly.
+`wrangler.jsonc` declares:
 
-Required Worker secrets before checkout can work:
+- `PROMPTS_DB`: D1 database `zhangwei-prompts`
+- `PROMPTS_KV`: site settings and cache
+- `PROMPT_ENTITLEMENTS`: legacy commerce entitlement cache
+- `ASSETS`: static `dist/` bundle
+
+Remote D1/KV resources must be created and bound before a real preview or production deploy. Do not create or switch production resources without approval.
+
+R2 is intentionally not bound in production until it is enabled for the Cloudflare account. Add a `PROMPTS_R2` binding only after R2 is available and the upload path is being shipped.
+
+## Initialize Local D1
 
 ```powershell
-wrangler secret put STRIPE_SECRET_KEY --config wrangler.jsonc
-wrangler secret put STRIPE_WEBHOOK_SECRET --config wrangler.jsonc
-wrangler secret put PROMPT_ENTITLEMENT_SECRET --config wrangler.jsonc
-wrangler secret put PROMPTS_STRIPE_PRICE_PRO_MONTHLY --config wrangler.jsonc
+npm run prompts:d1:migrate
+npm run prompts:d1:seed
 ```
 
-For one-time prompt packs, configure either a JSON map:
+Or run both:
 
 ```powershell
-wrangler secret put PROMPTS_STRIPE_PACK_PRICE_MAP --config wrangler.jsonc
+npm run prompts:d1:init
 ```
 
-Example map shape:
+The local D1 state is stored under `.wrangler/prompt-workbench-state` and ignored by git.
+
+## Admin Auth
+
+The admin page still supports the existing password cookie:
+
+```powershell
+wrangler secret put PROMPT_LIBRARY_ADMIN_PASSWORD --config wrangler.jsonc
+```
+
+Admin API automation can use a Bearer token:
+
+```powershell
+wrangler secret put ADMIN_TOKEN --config wrangler.jsonc
+```
+
+Do not put either value in source code. For local testing, use a temporary env file outside tracked source, for example under `output/`.
+
+## Run Locally
+
+```powershell
+npm run build:app
+npm run prepare:static
+npm run prompts:dev
+```
+
+Local URL:
+
+```text
+http://127.0.0.1:8787/prompts/
+```
+
+Admin URL:
+
+```text
+http://127.0.0.1:8787/prompts/admin/
+```
+
+## Public API Contract
+
+Public endpoints:
+
+- `GET /api/public/settings`
+- `GET /api/public/categories`
+- `GET /api/public/prompts`
+- `GET /api/public/prompts/:id`
+- `GET /api/public/search`
+
+When `publicAccessMode` is `free-only`, public API SQL always enforces:
+
+```sql
+access = 'free' AND status = 'published' AND copy_ready = 1
+```
+
+The compatibility endpoints `/api/prompts/library`, `/api/prompts/meta`, `/api/prompts/search`, and `/prompts-data/*` must not expose pro, pack, hidden, archived, or non-copyReady records to public users.
+
+## Verify Free-Only
+
+```powershell
+npx wrangler d1 execute zhangwei-prompts --local --persist-to .wrangler/prompt-workbench-state --config wrangler.jsonc --json --command "SELECT COUNT(*) AS public_count FROM prompts WHERE access='free' AND status='published' AND copy_ready=1; SELECT COUNT(*) AS leak_count FROM prompts WHERE status='published' AND access <> 'free';"
+```
+
+Expected local seed result:
+
+- `public_count = 800`
+- `leak_count = 0`
+
+HTTP smoke checks:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8787/api/public/prompts?limit=20
+Invoke-RestMethod http://127.0.0.1:8787/api/public/search?q=海报"&"limit=20
+Invoke-RestMethod http://127.0.0.1:8787/api/prompts/library
+```
+
+Every returned prompt must be `access = free`, `status = published`, and `copyReady = true`.
+
+## Deploy
+
+Preview first:
+
+```powershell
+npm run prepare:static
+npm run deploy:preview
+```
+
+Production remains the existing Worker release path:
+
+```powershell
+npm run deploy:worker
+```
+
+Production deploy requires separate confirmation plus the usual report: environment, URL, commit, deployment ID or Worker Version ID, verification result, and rollback method.
+
+## Stripe Notes
+
+Paid entry points are off by default:
 
 ```json
 {
-  "video-commerce-pro": "price_...",
-  "image-product-pro": "price_...",
-  "multi-modal-studio-pro": "price_..."
+  "showPaidEntry": false,
+  "showProBadges": false,
+  "showPackBadges": false,
+  "allowLockedPreview": false
 }
 ```
 
-or individual secrets:
-
-```powershell
-wrangler secret put PROMPTS_STRIPE_PRICE_PACK_VIDEO_COMMERCE --config wrangler.jsonc
-wrangler secret put PROMPTS_STRIPE_PRICE_PACK_IMAGE_PRODUCT --config wrangler.jsonc
-wrangler secret put PROMPTS_STRIPE_PRICE_PACK_MULTIMODAL --config wrangler.jsonc
-```
-
-## Cloudflare KV
-
-Entitlements need a KV binding named `PROMPT_ENTITLEMENTS`. This binding is intentionally not added in this phase because it changes production configuration.
-
-After confirmation, add a KV namespace and bind it in `wrangler.jsonc`, then deploy to Preview first.
-
-## Webhook route
-
-Configure the Stripe webhook endpoint to:
-
-```text
-https://www.zhangweivisual.cn/api/prompts/stripe-webhook
-```
-
-Recommended events:
-
-- `checkout.session.completed`
-- `customer.subscription.created`
-- `customer.subscription.updated`
-- `customer.subscription.deleted`
-
-## Safety notes
-
-- Do not paste live Stripe keys into source files.
-- Do not copy external prompt text into `web-suggestions.json`.
-- Public users receive redacted paid prompt bodies from `/api/prompts/library` until entitlement is active.
-- `/prompts-data/search-index.json` must not contain full prompt bodies.
+Legacy Stripe checkout, portal, webhook, and entitlement routes are retained, but the free public workbench does not show paid cards unless settings are explicitly changed by an administrator.

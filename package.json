@@ -16,7 +16,13 @@
     "generate:visual-prompts": "node scripts/prompts/generate-visual-prompts.mjs",
     "build:prompt-index": "node scripts/prompts/build-search-index.mjs",
     "enhance:prompts": "node scripts/prompts/build-search-index.mjs --write-library",
-    "validate:prompts": "node scripts/prompts/build-search-index.mjs --write-library && node scripts/prompts/validate-general-prompts.mjs"
+    "validate:prompts": "node scripts/prompts/build-search-index.mjs --write-library && node scripts/prompts/validate-general-prompts.mjs",
+    "prompts:d1:migrate": "wrangler d1 migrations apply zhangwei-prompts --local --persist-to .wrangler/prompt-workbench-state --config wrangler.jsonc",
+    "prompts:d1:migrate:remote": "wrangler d1 migrations apply zhangwei-prompts --remote --config wrangler.jsonc",
+    "prompts:d1:seed": "node scripts/prompts/seed-d1.mjs --local",
+    "prompts:d1:seed:remote": "node scripts/prompts/seed-d1.mjs --remote",
+    "prompts:d1:init": "npm run prompts:d1:migrate && npm run prompts:d1:seed",
+    "prompts:dev": "wrangler dev --config wrangler.jsonc --assets=./dist --local --persist-to .wrangler/prompt-workbench-state"
   },
   "dependencies": {
     "hls.js": "^1.6.16",
