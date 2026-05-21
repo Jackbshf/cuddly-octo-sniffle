@@ -80,6 +80,128 @@ const text = (value = "") => String(value ?? "").trim();
 const list = (value) => Array.isArray(value) ? value : [];
 const unique = (values) => [...new Set(values.map((item) => text(item)).filter(Boolean))];
 const lower = (value = "") => text(value).toLowerCase();
+const COPY_READY_BODY_MIN_LENGTH = 700;
+
+function hasTerm(value, terms) {
+  const haystack = text(value);
+  return terms.some((term) => haystack.includes(term));
+}
+
+function isGenericOnlyPrompt(value) {
+  const body = text(value);
+  if (body.length >= 180) return false;
+  const genericWords = ["高清", "电影感", "真实感", "8K", "氛围感", "镜头感", "高级感", "大片感"];
+  return genericWords.filter((word) => body.includes(word)).length >= 3;
+}
+
+function shortBodyExpansion(prompt, tool, modality, use) {
+  const body = text(prompt.body);
+  if (body.length >= COPY_READY_BODY_MIN_LENGTH && !isGenericOnlyPrompt(body)) return body;
+
+  const common = [
+    "复制即用补强模块：",
+    `请使用 ${tool} 完成「${use}」任务。`,
+    "输入变量：{主体/项目目标}、{使用场景}、{目标受众}、{风格方向}、{交付格式}、{限制条件}。",
+    "成品提示词结构：角色设定、任务背景、具体步骤、可见画面或可听结果、参数建议、负面约束、输出格式、检查清单。",
+    "输出要求：先复述任务目标，再给出可直接复制的完整提示词，最后列出负面约束、失败修正建议和验收标准。",
+    "质量标准：主体明确、场景具体、变量可替换、输出格式稳定、边界清晰，不能只堆砌高清、电影感、8K、真实感等空泛词。",
+    "边界提醒：不仿冒真实品牌、名人、受保护 IP 或第三方提示词原文；不生成规避审核、欺诈、侵权或保证效果的内容。"
+  ];
+
+  if (modality.includes("视频")) {
+    common.push(
+      "视频补强：明确主体运动、环境运动、镜头运动、节奏、时长、画幅比例、首尾帧衔接和图生视频一致性要求；图生视频不要重复描述图片已有元素，重点描述运动和变化。",
+      "镜头语言：包含景别、构图、角度、焦段感、运镜方式、转场方式、光影、色彩、情绪和负面词。"
+    );
+  } else if (modality.includes("图像")) {
+    common.push(
+      "图像补强：明确主体、人数关系、动作、场景、景别、构图、镜头角度、焦段、光影、色彩、情绪、画幅比例和负面词。",
+      "模型参数：如用于 Midjourney，请补充 --ar、--style raw、--v、--no 等适配参数；如用于 SDXL，请补充正向提示词、负面提示词和尺寸建议。"
+    );
+  } else if (modality.includes("音频")) {
+    common.push(
+      "音频补强：明确曲风、BPM、情绪、乐器、人声、结构段落、时长、循环方式和禁止模仿真实歌手或已有歌曲。"
+    );
+  } else {
+    common.push(
+      "通用补强：明确角色、上下文、执行步骤、输出格式、判断依据、风险边界和下一步动作。"
+    );
+  }
+
+  return [body, common.join("\n")].filter(Boolean).join("\n\n");
+}
+
+function buildQualityAudit(prompt, tool, modality) {
+  const body = text(prompt.body);
+  const allText = `${prompt.title}\n${prompt.category}\n${list(prompt.tags).join(" ")}\n${list(prompt.variables).join(" ")}\n${prompt.summary}\n${body}`;
+  const variables = list(prompt.variables);
+  const missing = [];
+  const addMissing = (label, ok) => {
+    if (!ok) missing.push(label);
+  };
+
+  const genericOnly = isGenericOnlyPrompt(body);
+  addMissing("正文过短或空泛", body.length >= COPY_READY_BODY_MIN_LENGTH && !genericOnly);
+  addMissing("可替换输入变量", variables.length >= 3 || /[{<].{1,28}[}>]/.test(body) || hasTerm(body, ["输入变量", "变量"]));
+  addMissing("输出格式或交付目标", hasTerm(body, ["输出", "交付", "格式", "结果", "目标"]));
+  addMissing("质量标准或验收标准", hasTerm(body, ["质量标准", "验收", "标准", "失败修正", "常见失败", "迭代"]));
+  addMissing("负面词或边界约束", hasTerm(body, ["负面", "不要", "避免", "排除", "--no", "边界", "限制", "禁止"]));
+
+  if (modality.includes("图像")) {
+    addMissing("图像主体/场景/动作", hasTerm(allText, ["主体", "人物", "产品", "角色", "场景", "动作", "姿态"]));
+    addMissing("图像构图/景别/镜头", hasTerm(allText, ["构图", "景别", "镜头", "角度", "焦段", "视角"]));
+    addMissing("图像光影/色彩/情绪", hasTerm(allText, ["光影", "光线", "色彩", "情绪", "氛围"]));
+    addMissing("图像画幅比例", hasTerm(allText, ["画幅", "比例", "--ar", "9:16", "16:9", "1:1", "3:4", "4:5"]));
+  }
+
+  if (modality.includes("视频")) {
+    addMissing("视频主体运动", hasTerm(allText, ["主体运动", "人物动作", "运动", "动作", "移动", "行走", "转身"]));
+    addMissing("视频镜头运动", hasTerm(allText, ["镜头运动", "运镜", "推镜", "跟拍", "平移", "环绕", "转场"]));
+    addMissing("视频节奏/时长", hasTerm(allText, ["节奏", "时长", "秒", "开头", "中段", "结尾", "首尾帧"]));
+    addMissing("视频一致性约束", hasTerm(allText, ["一致性", "连续", "首尾帧", "图生视频", "不跳帧", "不换人", "不变脸"]));
+  }
+
+  if (/Midjourney/i.test(allText)) {
+    addMissing("Midjourney 参数", /--ar\b/.test(body) && (/--no\b/.test(body) || hasTerm(body, ["负面", "排除"])) && (/--v\b|--style\b/.test(body)));
+  }
+
+  if (/Runway|Veo|可灵|即梦|Kling|Jimeng/i.test(allText)) {
+    addMissing("视频模型运动重点", hasTerm(allText, ["运动", "变化", "镜头", "运镜", "节奏", "首尾帧"]));
+  }
+
+  if (hasTerm(allText, ["多人", "群像", "对话", "对白"])) {
+    addMissing("多人位置/身份/关系", hasTerm(allText, ["位置", "站位", "身份", "角色", "关系", "主次"]));
+  }
+
+  if (hasTerm(allText, ["宫格", "多宫格", "九宫格", "分镜"])) {
+    addMissing("多宫格逐格与统一性", hasTerm(allText, ["逐格", "编号", "从左到右", "从上到下", "统一", "连续"]));
+  }
+
+  const criticalFields = new Set([
+    "正文过短或空泛",
+    "Midjourney 参数",
+    "视频模型运动重点",
+    "视频一致性约束",
+    "多人位置/身份/关系"
+  ]);
+  const hasCriticalGap = missing.some((field) => criticalFields.has(field));
+  const copyReady = !hasCriticalGap && missing.length <= 2;
+  const qualityLevel = copyReady && missing.length === 0 && body.length >= 1200 && variables.length >= 5
+    ? "professional"
+    : copyReady
+      ? "usable"
+      : "basic";
+  const improvementSuggestion = copyReady
+    ? "已具备直接复制使用的主要结构，建议继续用真实生成结果回填示例和失败修正。"
+    : `优先补齐：${missing.slice(0, 5).join("、")}。不要把空泛风格词当成完整提示词。`;
+
+  return {
+    copyReady,
+    qualityLevel,
+    missingFields: missing,
+    improvementSuggestion
+  };
+}
 
 function tagValue(prompt, prefixes) {
   const tags = list(prompt.tags);
@@ -92,9 +214,11 @@ function tagValue(prompt, prefixes) {
 
 function inferModality(prompt) {
   return tagValue(prompt, ["模态:", "模态："]) || firstMatch(prompt, [
+    ["音频", "音频"],
+    ["音乐", "音频"],
+    ["歌曲", "音频"],
     ["视频", "视频"],
     ["图像", "图像"],
-    ["音频", "音频"],
     ["多模态", "多模态"],
     ["代码", "代码"],
     ["文本", "文本"]
@@ -197,11 +321,15 @@ function enhancedPrompt(prompt, index) {
   const modality = inferModality(prompt);
   const use = inferUse(prompt);
   const difficulty = inferDifficulty(prompt);
-  const qualityScore = scorePrompt(prompt);
+  const body = shortBodyExpansion(prompt, tool, modality, use);
+  const bodyEnhancedPrompt = { ...prompt, body };
+  const qualityAudit = buildQualityAudit(bodyEnhancedPrompt, tool, modality);
+  const qualityScore = scorePrompt(bodyEnhancedPrompt);
   const packId = text(prompt.packId) || selectPack(prompt);
   const access = inferAccess(prompt, index, packId, qualityScore);
   return {
     ...prompt,
+    body,
     access,
     packId: access === "pack" ? packId : text(prompt.packId),
     stripePriceId: text(prompt.stripePriceId),
@@ -209,7 +337,8 @@ function enhancedPrompt(prompt, index) {
     exampleOutput: exampleOutputFor(prompt, modality, use),
     sourceType: text(prompt.sourceType) || (String(prompt.id || "").startsWith("v2-") ? "generated-library" : "curated"),
     verifiedAt: text(prompt.verifiedAt) || text(prompt.updatedAt) || text(prompt.createdAt),
-    seoKeywords: seoKeywords(prompt, tool, modality, use)
+    seoKeywords: seoKeywords(prompt, tool, modality, use),
+    qualityAudit
   };
 }
 
@@ -227,6 +356,19 @@ function indexEntry(prompt) {
     modality,
     use,
     difficulty,
+    prompt.contentType,
+    prompt.model,
+    prompt.language,
+    prompt.subjectCount,
+    prompt.gridType,
+    prompt.aspectRatio,
+    ...list(prompt.shotSize),
+    ...list(prompt.cameraAngle),
+    ...list(prompt.cameraMovement),
+    ...list(prompt.lighting),
+    ...list(prompt.colorGrade),
+    ...list(prompt.mood),
+    ...list(prompt.styleTags),
     ...list(prompt.tags),
     ...list(prompt.variables),
     ...list(prompt.seoKeywords)
@@ -242,9 +384,26 @@ function indexEntry(prompt) {
     access: prompt.access,
     packId: prompt.packId || "",
     qualityScore: prompt.qualityScore,
+    copyReady: Boolean(prompt.qualityAudit?.copyReady),
+    qualityLevel: prompt.qualityAudit?.qualityLevel || "basic",
+    missingFields: list(prompt.qualityAudit?.missingFields),
+    improvementSuggestion: text(prompt.qualityAudit?.improvementSuggestion),
     sourceType: prompt.sourceType,
     verifiedAt: prompt.verifiedAt,
     seoKeywords: list(prompt.seoKeywords),
+    contentType: text(prompt.contentType),
+    model: text(prompt.model),
+    language: text(prompt.language),
+    subjectCount: text(prompt.subjectCount),
+    gridType: text(prompt.gridType),
+    aspectRatio: text(prompt.aspectRatio),
+    shotSize: list(prompt.shotSize),
+    cameraAngle: list(prompt.cameraAngle),
+    cameraMovement: list(prompt.cameraMovement),
+    lighting: list(prompt.lighting),
+    colorGrade: list(prompt.colorGrade),
+    mood: list(prompt.mood),
+    styleTags: list(prompt.styleTags),
     tool,
     modality,
     use,

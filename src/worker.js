@@ -1512,6 +1512,17 @@ function cleanPromptAccess(value) {
   return ["free", "pro", "pack"].includes(access) ? access : "free";
 }
 
+function normalizePromptQualityAudit(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const qualityLevel = cleanText(source.qualityLevel).toLowerCase();
+  return {
+    copyReady: Boolean(source.copyReady),
+    qualityLevel: ["basic", "usable", "professional"].includes(qualityLevel) ? qualityLevel : "basic",
+    missingFields: cleanTextArray(source.missingFields).slice(0, 24),
+    improvementSuggestion: cleanText(source.improvementSuggestion).slice(0, 600) || "待质量审计。"
+  };
+}
+
 function getPromptPackStripePriceId(env, packId) {
   const id = cleanText(packId);
   if (!id) return "";
@@ -1748,7 +1759,8 @@ function normalizeLibrary(raw) {
     exampleOutput: cleanText(prompt?.exampleOutput),
     sourceType: cleanText(prompt?.sourceType) || "curated",
     verifiedAt: cleanText(prompt?.verifiedAt || prompt?.updatedAt || prompt?.createdAt) || now,
-    seoKeywords: cleanTextArray(prompt?.seoKeywords)
+    seoKeywords: cleanTextArray(prompt?.seoKeywords),
+    qualityAudit: normalizePromptQualityAudit(prompt?.qualityAudit)
   }));
   const promptIds = new Set(prompts.map((prompt) => prompt.id));
   const assets = asArray(raw?.assets).map((asset) => ({

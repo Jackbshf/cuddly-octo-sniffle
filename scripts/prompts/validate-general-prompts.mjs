@@ -11,9 +11,10 @@ const suggestionsPath = path.join(repoRoot, "prompts-data", "web-suggestions.jso
 
 const OLD_PREFIX = "general-template-";
 const V2_PREFIX = "v2-";
-const EXPECTED_TOTAL = 1810;
+const EXPECTED_TOTAL = 1930;
 const EXPECTED_V2 = 1800;
-const EXPECTED_PRESERVED = 10;
+const EXPECTED_PRESERVED = 130;
+const EXPECTED_CINEMATIC = 120;
 
 const expectedModalityCounts = new Map([
   ["图像", 500],
@@ -97,11 +98,13 @@ const preserved = prompts.filter((item) => {
   const id = String(item?.id || "");
   return !id.startsWith(V2_PREFIX) && !id.startsWith(OLD_PREFIX);
 });
+const cinematic = prompts.filter((item) => String(item?.id || "").startsWith("cinematic-"));
 
 if (prompts.length !== EXPECTED_TOTAL) fail(`Expected ${EXPECTED_TOTAL} total prompts, got ${prompts.length}`);
 if (v2.length !== EXPECTED_V2) fail(`Expected ${EXPECTED_V2} v2 prompts, got ${v2.length}`);
 if (old.length !== 0) fail(`Expected 0 old ${OLD_PREFIX} prompts, got ${old.length}`);
 if (preserved.length !== EXPECTED_PRESERVED) fail(`Expected ${EXPECTED_PRESERVED} preserved prompts, got ${preserved.length}`);
+if (cinematic.length !== EXPECTED_CINEMATIC) fail(`Expected ${EXPECTED_CINEMATIC} cinematic prompts, got ${cinematic.length}`);
 
 const duplicateIds = duplicates(prompts.map((item) => item.id));
 const duplicateTitles = duplicates(prompts.map((item) => item.title));
@@ -122,6 +125,22 @@ for (const prompt of prompts) {
   if (!prompt.verifiedAt) fail(`${prompt.id} missing verifiedAt`);
   if (!Array.isArray(prompt.seoKeywords) || !prompt.seoKeywords.length) {
     fail(`${prompt.id} missing seoKeywords`);
+  }
+  const audit = prompt.qualityAudit;
+  if (!audit || typeof audit !== "object") fail(`${prompt.id} missing qualityAudit`);
+  if (typeof audit.copyReady !== "boolean") fail(`${prompt.id} qualityAudit.copyReady must be boolean`);
+  if (!["basic", "usable", "professional"].includes(String(audit.qualityLevel || ""))) {
+    fail(`${prompt.id} has invalid qualityAudit.qualityLevel: ${audit.qualityLevel}`);
+  }
+  if (!Array.isArray(audit.missingFields)) fail(`${prompt.id} qualityAudit.missingFields must be an array`);
+  if (typeof audit.improvementSuggestion !== "string" || !audit.improvementSuggestion.trim()) {
+    fail(`${prompt.id} missing qualityAudit.improvementSuggestion`);
+  }
+  if (audit.copyReady && audit.qualityLevel === "basic") {
+    fail(`${prompt.id} is copyReady but still basic`);
+  }
+  if (!audit.copyReady && audit.missingFields.length === 0) {
+    fail(`${prompt.id} is not copyReady but has no missingFields`);
   }
   if (prompt.access === "pack" && !prompt.packId) {
     fail(`${prompt.id} is pack-gated but missing packId`);
@@ -164,6 +183,111 @@ for (const [category, items] of countGrouped(v2, (prompt) => prompt.category)) {
   }
 }
 
+const expectedCinematicCounts = new Map([
+  ["single-person-image", 25],
+  ["multi-person-image", 25],
+  ["single-panel-image", 25],
+  ["multi-panel-image", 25]
+]);
+const cinematicCounts = countBy(cinematic.map((prompt) => prompt.contentType));
+for (const [contentType, expected] of expectedCinematicCounts) {
+  const actual = cinematicCounts.get(contentType) || 0;
+  if (actual !== expected) fail(`Expected ${expected} cinematic ${contentType} prompts, got ${actual}`);
+}
+const cinematicVideoCount = ["text-to-video", "image-to-video", "storyboard"]
+  .reduce((sum, contentType) => sum + (cinematicCounts.get(contentType) || 0), 0);
+if (cinematicVideoCount !== 20) fail(`Expected 20 cinematic video prompts, got ${cinematicVideoCount}`);
+
+const allowedCinematicContentTypes = new Set([
+  "single-person-image",
+  "multi-person-image",
+  "single-panel-image",
+  "multi-panel-image",
+  "text-to-video",
+  "image-to-video",
+  "storyboard"
+]);
+const allowedCinematicModels = new Set([
+  "universal",
+  "midjourney",
+  "runway",
+  "veo",
+  "kling",
+  "seedance",
+  "stable-diffusion"
+]);
+const requiredCinematicTextFields = [
+  "zhPrompt",
+  "enPrompt",
+  "mjPrompt",
+  "videoPrompt",
+  "negativePrompt",
+  "copyPrompt",
+  "usageTips"
+];
+const requiredCinematicArrayFields = [
+  "shotSize",
+  "cameraAngle",
+  "cameraMovement",
+  "lighting",
+  "colorGrade",
+  "mood",
+  "styleTags",
+  "failureReasons",
+  "optimizationTips"
+];
+const cinematicRiskPatterns = [
+  /王家卫|宫崎骏|吉卜力|迪士尼|漫威|哈利波特|宝可梦|任天堂/i,
+  /周杰伦|成龙|刘德华|Taylor Swift|Elon Musk|特朗普|拜登/i,
+  /色情|未成年人|血腥|真实商标|真实明星|公众人物脸/i,
+  /\bundefined\b|\bnull\b|\bNaN\b/i
+];
+
+for (const prompt of cinematic) {
+  if (!allowedCinematicContentTypes.has(String(prompt.contentType || ""))) {
+    fail(`${prompt.id} has invalid cinematic contentType: ${prompt.contentType}`);
+  }
+  if (!allowedCinematicModels.has(String(prompt.model || ""))) {
+    fail(`${prompt.id} has invalid cinematic model: ${prompt.model}`);
+  }
+  if (prompt.access !== "free") fail(`${prompt.id} cinematic prompt must be free`);
+  if (!String(prompt.category || "").startsWith("影视提示词 / ")) {
+    fail(`${prompt.id} cinematic category must start with 影视提示词 /`);
+  }
+  if (!Array.isArray(prompt.variables) || prompt.variables.length < 8) {
+    fail(`${prompt.id} cinematic prompt has too few variables`);
+  }
+  for (const variable of prompt.variables) {
+    if (!/^{{[a-zA-Z][a-zA-Z0-9]*}}$/.test(String(variable))) {
+      fail(`${prompt.id} has invalid variable token: ${variable}`);
+    }
+  }
+  for (const field of requiredCinematicTextFields) {
+    if (!String(prompt[field] || "").trim()) fail(`${prompt.id} missing cinematic field ${field}`);
+  }
+  for (const field of requiredCinematicArrayFields) {
+    if (!Array.isArray(prompt[field]) || !prompt[field].length) {
+      fail(`${prompt.id} missing cinematic array field ${field}`);
+    }
+  }
+  if (!prompt.variableDefaults || typeof prompt.variableDefaults !== "object") {
+    fail(`${prompt.id} missing variableDefaults`);
+  }
+  for (const key of ["subject", "scene", "mood", "clothing", "lighting", "camera", "aspectRatio", "style"]) {
+    if (!String(prompt.variableDefaults[key] || "").trim()) {
+      fail(`${prompt.id} missing variableDefaults.${key}`);
+    }
+  }
+  if (!prompt.mjPrompt.includes("--ar") || !/--ar\s+\S+/.test(prompt.mjPrompt)) {
+    fail(`${prompt.id} missing Midjourney --ar parameter`);
+  }
+  if (prompt.copyPrompt !== prompt.zhPrompt) fail(`${prompt.id} copyPrompt must match zhPrompt`);
+  const serialized = JSON.stringify(prompt);
+  for (const pattern of cinematicRiskPatterns) {
+    if (pattern.test(serialized)) fail(`${prompt.id} matched cinematic risk pattern ${pattern}`);
+  }
+}
+
 if (!searchIndex || searchIndex.version !== 1) fail("search-index.json must have version 1");
 if (!Array.isArray(searchIndex.prompts) || searchIndex.prompts.length !== prompts.length) {
   fail(`search-index.json prompt count mismatch: ${searchIndex.prompts?.length || 0}`);
@@ -186,6 +310,11 @@ for (const entry of searchIndex.prompts) {
   if (!entry.searchable || String(entry.searchable).length < 20) {
     fail(`search-index.json entry has weak searchable text: ${entry.id}`);
   }
+  if (typeof entry.copyReady !== "boolean") fail(`search-index.json entry missing copyReady: ${entry.id}`);
+  if (!["basic", "usable", "professional"].includes(String(entry.qualityLevel || ""))) {
+    fail(`search-index.json entry has invalid qualityLevel: ${entry.id}`);
+  }
+  if (!Array.isArray(entry.missingFields)) fail(`search-index.json entry missing missingFields: ${entry.id}`);
 }
 
 if (!webSuggestions || webSuggestions.version !== 1) fail("web-suggestions.json must have version 1");
@@ -213,6 +342,7 @@ console.log("Prompt library validation passed");
 console.log(`Total prompts: ${prompts.length}`);
 console.log(`V2 prompts: ${v2.length}`);
 console.log(`Preserved prompts: ${preserved.length}`);
+console.log(`Cinematic prompts: ${cinematic.length}`);
 console.log(`Old general-template prompts: ${old.length}`);
 console.log(`Modalities: ${[...modalityCounts].map(([key, value]) => `${key}:${value}`).join(", ")}`);
 console.log(`Access: ${[...accessCounts].map(([key, value]) => `${key}:${value}`).join(", ")}`);
