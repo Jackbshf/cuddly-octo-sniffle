@@ -131,9 +131,56 @@ function shortBodyExpansion(prompt, tool, modality, use) {
   return [body, common.join("\n")].filter(Boolean).join("\n\n");
 }
 
+function structuredVisualExpansion(prompt, body) {
+  const haystack = [
+    prompt.title,
+    prompt.category,
+    prompt.summary,
+    list(prompt.tags).join(" "),
+    prompt.contentType,
+    body
+  ].join("\n");
+  const additions = [];
+
+  if (hasTerm(haystack, ["多宫格", "九宫格", "分镜", "multi-panel", "storyboard"]) && !hasTerm(haystack, ["逐格", "编号", "从左到右", "从上到下", "统一角色", "统一场景"])) {
+    additions.push([
+      "多宫格/分镜补强：",
+      "- 逐格编号：按镜头 1、镜头 2、镜头 3 或从左到右、从上到下描述，不把多个画面混成一句。",
+      "- 统一角色：每一格保持同一原创角色的身份、服装、脸部特征、道具和主次关系。",
+      "- 统一场景：每一格保持同一空间逻辑、时间段、色彩、光影和镜头风格，只有动作和景别按编号变化。",
+      "- 输出要求：每格都写清主体位置、动作、景别、构图、镜头角度、焦段感、光线方向、结尾状态和负面约束。"
+    ].join("\n"));
+  }
+
+  if (hasTerm(haystack, ["多人", "群像", "对话", "multi-person"]) && !hasTerm(haystack, ["站位", "主次关系", "左侧", "右侧"])) {
+    additions.push([
+      "多人画面补强：",
+      "- 明确每个人的位置、身份、动作、视线方向和主次关系。",
+      "- 左侧、右侧、前景、中景、背景分别描述，避免脸部混乱、身体重叠或身份互换。"
+    ].join("\n"));
+  }
+
+  return additions.length ? `${body}\n\n${additions.join("\n\n")}` : body;
+}
+
 function buildQualityAudit(prompt, tool, modality) {
   const body = text(prompt.body);
-  const allText = `${prompt.title}\n${prompt.category}\n${list(prompt.tags).join(" ")}\n${list(prompt.variables).join(" ")}\n${prompt.summary}\n${body}`;
+  const allText = [
+    prompt.title,
+    prompt.category,
+    list(prompt.tags).join(" "),
+    list(prompt.variables).join(" "),
+    prompt.summary,
+    body,
+    prompt.copyPrompt,
+    prompt.negativePrompt,
+    prompt.zhPrompt,
+    prompt.enPrompt,
+    prompt.mjPrompt,
+    prompt.videoPrompt,
+    prompt.usageTips,
+    prompt.parameterTips
+  ].join("\n");
   const variables = list(prompt.variables);
   const missing = [];
   const addMissing = (label, ok) => {
@@ -162,7 +209,7 @@ function buildQualityAudit(prompt, tool, modality) {
   }
 
   if (/Midjourney/i.test(allText)) {
-    addMissing("Midjourney 参数", /--ar\b/.test(body) && (/--no\b/.test(body) || hasTerm(body, ["负面", "排除"])) && (/--v\b|--style\b/.test(body)));
+    addMissing("Midjourney 参数", /--ar\b/.test(allText) && (/--no\b/.test(allText) || hasTerm(allText, ["负面", "排除"])) && (/--v\b|--style\b/.test(allText)));
   }
 
   if (/Runway|Veo|可灵|即梦|Kling|Jimeng/i.test(allText)) {
@@ -321,7 +368,7 @@ function enhancedPrompt(prompt, index) {
   const modality = inferModality(prompt);
   const use = inferUse(prompt);
   const difficulty = inferDifficulty(prompt);
-  const body = shortBodyExpansion(prompt, tool, modality, use);
+  const body = structuredVisualExpansion(prompt, shortBodyExpansion(prompt, tool, modality, use));
   const bodyEnhancedPrompt = { ...prompt, body };
   const qualityAudit = buildQualityAudit(bodyEnhancedPrompt, tool, modality);
   const qualityScore = scorePrompt(bodyEnhancedPrompt);
@@ -357,11 +404,18 @@ function indexEntry(prompt) {
     use,
     difficulty,
     prompt.contentType,
+    prompt.promptKind,
+    prompt.platform,
     prompt.model,
     prompt.language,
     prompt.subjectCount,
     prompt.gridType,
     prompt.aspectRatio,
+    prompt.copyPrompt,
+    prompt.negativePrompt,
+    prompt.usageTips,
+    prompt.parameterTips,
+    ...Object.values(prompt.variableDefaults || {}),
     ...list(prompt.shotSize),
     ...list(prompt.cameraAngle),
     ...list(prompt.cameraMovement),
@@ -392,8 +446,11 @@ function indexEntry(prompt) {
     verifiedAt: prompt.verifiedAt,
     seoKeywords: list(prompt.seoKeywords),
     contentType: text(prompt.contentType),
+    promptKind: text(prompt.promptKind),
+    platform: text(prompt.platform),
     model: text(prompt.model),
     language: text(prompt.language),
+    parameterTips: text(prompt.parameterTips),
     subjectCount: text(prompt.subjectCount),
     gridType: text(prompt.gridType),
     aspectRatio: text(prompt.aspectRatio),

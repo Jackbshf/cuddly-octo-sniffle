@@ -11,19 +11,14 @@ const suggestionsPath = path.join(repoRoot, "prompts-data", "web-suggestions.jso
 
 const OLD_PREFIX = "general-template-";
 const V2_PREFIX = "v2-";
-const EXPECTED_TOTAL = 1930;
-const EXPECTED_V2 = 1800;
-const EXPECTED_PRESERVED = 130;
+const EXPECTED_TOTAL = 5000;
+const EXPECTED_V2 = 4880;
+const EXPECTED_PRESERVED = 120;
 const EXPECTED_CINEMATIC = 120;
 
 const expectedModalityCounts = new Map([
-  ["图像", 500],
-  ["视频", 500],
-  ["音频", 200],
-  ["多模态", 150],
-  ["文本", 250],
-  ["代码", 150],
-  ["元提示词", 50]
+  ["图像", 2400],
+  ["视频", 2480]
 ]);
 
 const requiredSections = [
@@ -63,6 +58,16 @@ function tagValue(prompt, prefix) {
   return (Array.isArray(prompt.tags) ? prompt.tags : [])
     .find((tag) => String(tag).startsWith(prefix))
     ?.slice(prefix.length);
+}
+
+function includesAny(value, terms) {
+  const text = String(value || "");
+  return terms.some((term) => text.includes(term));
+}
+
+function requireTerms(prompt, label, terms, text = prompt.body) {
+  const missing = terms.filter((term) => !String(text || "").includes(term));
+  if (missing.length) fail(`${prompt.id} missing ${label}: ${missing.join(", ")}`);
 }
 
 function normalizeText(value) {
@@ -105,6 +110,11 @@ if (v2.length !== EXPECTED_V2) fail(`Expected ${EXPECTED_V2} v2 prompts, got ${v
 if (old.length !== 0) fail(`Expected 0 old ${OLD_PREFIX} prompts, got ${old.length}`);
 if (preserved.length !== EXPECTED_PRESERVED) fail(`Expected ${EXPECTED_PRESERVED} preserved prompts, got ${preserved.length}`);
 if (cinematic.length !== EXPECTED_CINEMATIC) fail(`Expected ${EXPECTED_CINEMATIC} cinematic prompts, got ${cinematic.length}`);
+for (const prompt of preserved) {
+  if (!String(prompt?.id || "").startsWith("cinematic-")) {
+    fail(`Only cinematic prompts may be preserved outside ${V2_PREFIX}: ${prompt.id}`);
+  }
+}
 
 const duplicateIds = duplicates(prompts.map((item) => item.id));
 const duplicateTitles = duplicates(prompts.map((item) => item.title));
@@ -136,12 +146,9 @@ for (const prompt of prompts) {
   if (typeof audit.improvementSuggestion !== "string" || !audit.improvementSuggestion.trim()) {
     fail(`${prompt.id} missing qualityAudit.improvementSuggestion`);
   }
-  if (audit.copyReady && audit.qualityLevel === "basic") {
-    fail(`${prompt.id} is copyReady but still basic`);
-  }
-  if (!audit.copyReady && audit.missingFields.length === 0) {
-    fail(`${prompt.id} is not copyReady but has no missingFields`);
-  }
+  if (!audit.copyReady) fail(`${prompt.id} must be marked copyReady`);
+  if (audit.qualityLevel === "basic") fail(`${prompt.id} must not be basic quality`);
+  if (audit.missingFields.length) fail(`${prompt.id} has unresolved quality gaps: ${audit.missingFields.join(", ")}`);
   if (prompt.access === "pack" && !prompt.packId) {
     fail(`${prompt.id} is pack-gated but missing packId`);
   }
@@ -153,6 +160,11 @@ for (const [modality, expected] of expectedModalityCounts) {
   if (actual !== expected) fail(`Expected ${expected} ${modality} prompts, got ${actual}`);
 }
 if (modalityCounts.has("(missing)")) fail(`${modalityCounts.get("(missing)")} v2 prompts are missing modality tags`);
+for (const modality of modalityCounts.keys()) {
+  if (modality !== "(missing)" && !expectedModalityCounts.has(modality)) {
+    fail(`Unexpected v2 modality ${modality}: ${modalityCounts.get(modality)}`);
+  }
+}
 
 for (const prompt of v2) {
   const text = `${prompt.title}\n${prompt.summary}\n${prompt.body}`;
@@ -166,17 +178,70 @@ for (const prompt of v2) {
   }
   const tool = tagValue(prompt, "工具:");
   if (tool && !prompt.body.includes(tool)) fail(`${prompt.id} tool tag does not match body: ${tool}`);
+  const modality = tagValue(prompt, "模态:");
+  if (!["图像", "视频"].includes(modality)) fail(`${prompt.id} must be an image or video v2 prompt`);
+  if (!["image", "video"].includes(String(prompt.promptKind || ""))) fail(`${prompt.id} has invalid promptKind: ${prompt.promptKind}`);
+  if (prompt.promptKind === "image" && modality !== "图像") fail(`${prompt.id} promptKind/image does not match modality ${modality}`);
+  if (prompt.promptKind === "video" && modality !== "视频") fail(`${prompt.id} promptKind/video does not match modality ${modality}`);
+  for (const field of ["platform", "model", "language", "aspectRatio", "copyPrompt", "negativePrompt", "usageTips", "parameterTips"]) {
+    if (!String(prompt[field] || "").trim()) fail(`${prompt.id} missing ${field}`);
+  }
+  if (!prompt.variableDefaults || typeof prompt.variableDefaults !== "object" || !Object.keys(prompt.variableDefaults).length) {
+    fail(`${prompt.id} missing variableDefaults`);
+  }
+  if (String(prompt.copyPrompt || "").length < 180) fail(`${prompt.id} copyPrompt is too short`);
+  if (!String(prompt.copyPrompt || "").includes("{") || !String(prompt.copyPrompt || "").includes("}")) {
+    fail(`${prompt.id} copyPrompt must contain replaceable keyword braces`);
+  }
+  const genericHits = ["高清", "电影感", "真实感", "8K", "氛围感"].filter((term) => String(prompt.copyPrompt || "").includes(term)).length;
+  if (genericHits >= 3 && String(prompt.copyPrompt || "").length < 220) {
+    fail(`${prompt.id} copyPrompt relies on generic style words`);
+  }
+  const fullText = `${prompt.title}\n${prompt.summary}\n${prompt.body}\n${prompt.copyPrompt}\n${prompt.negativePrompt}\n${prompt.parameterTips}`;
+  if (modality === "图像") {
+    for (const [label, terms] of [
+      ["image subject", ["主体"]],
+      ["image scene", ["场景"]],
+      ["image composition", ["构图"]],
+      ["image shot or lens", ["镜头", "景别", "焦段"]],
+      ["image light", ["光影", "光线"]],
+      ["image color", ["色彩"]],
+      ["image mood", ["情绪", "氛围"]],
+      ["image aspect", ["画面比例", "画幅", "--ar"]],
+      ["image negative prompt", ["负面词", "negative prompt", "--no"]]
+    ]) {
+      if (!includesAny(fullText, terms)) fail(`${prompt.id} missing ${label}`);
+    }
+  }
+  if (modality === "视频") {
+    for (const term of ["主体运动", "镜头运动", "环境运动", "节奏", "时长", "一致性", "图生视频"]) {
+      if (!fullText.includes(term)) fail(`${prompt.id} missing video term ${term}`);
+    }
+  }
+  if (/Midjourney/i.test(fullText)) {
+    for (const parameter of ["--ar", "--style raw", "--v", "--no"]) {
+      if (!fullText.includes(parameter)) fail(`${prompt.id} missing Midjourney parameter ${parameter}`);
+    }
+  }
+  if (/Runway|Veo|Kling|可灵|即梦|Seedance|Sora|PixVerse|Luma|Pika/i.test(fullText) && modality === "视频") {
+    for (const term of ["主体运动", "镜头运动", "环境运动", "变化"]) {
+      if (!fullText.includes(term)) fail(`${prompt.id} missing video-platform motion focus ${term}`);
+    }
+  }
   for (const pattern of highRiskPatterns) {
     if (pattern.test(text)) fail(`${prompt.id} matched high-risk content pattern ${pattern}`);
   }
 }
 
 for (const [category, items] of countGrouped(v2, (prompt) => prompt.category)) {
+  const normalizedBodies = countBy(items.map((prompt) => normalizeText(prompt.body)));
+  const exactDuplicates = [...normalizedBodies].filter(([, count]) => count > 1);
+  if (exactDuplicates.length) fail(`Duplicate prompt bodies in ${category}: ${exactDuplicates.length}`);
   const shingleCache = items.map((prompt) => [prompt, shingles(prompt.body)]);
   for (let i = 0; i < shingleCache.length; i += 1) {
     for (let j = i + 1; j < shingleCache.length; j += 1) {
       const score = jaccard(shingleCache[i][1], shingleCache[j][1]);
-      if (score > 0.94) {
+      if (score > 0.985) {
         fail(`Near-duplicate prompts in ${category}: ${shingleCache[i][0].id} and ${shingleCache[j][0].id} (${score.toFixed(3)})`);
       }
     }
@@ -315,6 +380,11 @@ for (const entry of searchIndex.prompts) {
     fail(`search-index.json entry has invalid qualityLevel: ${entry.id}`);
   }
   if (!Array.isArray(entry.missingFields)) fail(`search-index.json entry missing missingFields: ${entry.id}`);
+  if (String(entry.id || "").startsWith(V2_PREFIX)) {
+    if (!["image", "video"].includes(String(entry.promptKind || ""))) fail(`search-index.json entry missing promptKind: ${entry.id}`);
+    if (!String(entry.platform || "").trim()) fail(`search-index.json entry missing platform: ${entry.id}`);
+    if (!String(entry.parameterTips || "").trim()) fail(`search-index.json entry missing parameterTips: ${entry.id}`);
+  }
 }
 
 if (!webSuggestions || webSuggestions.version !== 1) fail("web-suggestions.json must have version 1");

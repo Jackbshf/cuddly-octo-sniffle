@@ -1523,6 +1523,14 @@ function normalizePromptQualityAudit(value) {
   };
 }
 
+function normalizePromptVariableDefaults(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value)
+    .map(([key, entry]) => [cleanText(key).slice(0, 80), cleanText(entry).slice(0, 240)])
+    .filter(([key, entry]) => key && entry)
+    .slice(0, 48));
+}
+
 function getPromptPackStripePriceId(env, packId) {
   const id = cleanText(packId);
   if (!id) return "";
@@ -1760,6 +1768,32 @@ function normalizeLibrary(raw) {
     sourceType: cleanText(prompt?.sourceType) || "curated",
     verifiedAt: cleanText(prompt?.verifiedAt || prompt?.updatedAt || prompt?.createdAt) || now,
     seoKeywords: cleanTextArray(prompt?.seoKeywords),
+    contentType: cleanText(prompt?.contentType),
+    promptKind: cleanText(prompt?.promptKind),
+    platform: cleanText(prompt?.platform),
+    model: cleanText(prompt?.model),
+    language: cleanText(prompt?.language),
+    aspectRatio: cleanText(prompt?.aspectRatio),
+    variableDefaults: normalizePromptVariableDefaults(prompt?.variableDefaults),
+    copyPrompt: cleanText(prompt?.copyPrompt),
+    negativePrompt: cleanText(prompt?.negativePrompt),
+    usageTips: cleanText(prompt?.usageTips),
+    parameterTips: cleanText(prompt?.parameterTips),
+    zhPrompt: cleanText(prompt?.zhPrompt),
+    enPrompt: cleanText(prompt?.enPrompt),
+    mjPrompt: cleanText(prompt?.mjPrompt),
+    videoPrompt: cleanText(prompt?.videoPrompt),
+    shotSize: cleanTextArray(prompt?.shotSize),
+    cameraAngle: cleanTextArray(prompt?.cameraAngle),
+    cameraMovement: cleanTextArray(prompt?.cameraMovement),
+    lighting: cleanTextArray(prompt?.lighting),
+    colorGrade: cleanTextArray(prompt?.colorGrade),
+    mood: cleanTextArray(prompt?.mood),
+    styleTags: cleanTextArray(prompt?.styleTags),
+    failureReasons: cleanTextArray(prompt?.failureReasons),
+    optimizationTips: cleanTextArray(prompt?.optimizationTips),
+    subjectCount: cleanText(prompt?.subjectCount),
+    gridType: cleanText(prompt?.gridType),
     qualityAudit: normalizePromptQualityAudit(prompt?.qualityAudit)
   }));
   const promptIds = new Set(prompts.map((prompt) => prompt.id));
