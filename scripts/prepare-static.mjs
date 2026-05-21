@@ -19,8 +19,11 @@ const root = path.resolve(__dirname, "..");
 const distDir = path.join(root, "dist");
 const sourceJsonPath = path.join(root, "data", "portfolio.json");
 const distJsonPath = path.join(distDir, "data", "portfolio.json");
+const distPromptLibraryPath = path.join(distDir, "prompts-data", "library.json");
+const distPromptLibraryManifestPath = path.join(distDir, "prompts-data", "library-manifest.json");
 const optimizedImagesDir = path.join(distDir, "images", "_optimized");
 const generatedPostersDir = path.join(distDir, "images", "_posters");
+const PROMPT_LIBRARY_CHUNK_MAX_BYTES = 20 * 1024 * 1024;
 const LARGE_IMAGE_BYTES = 500 * 1024;
 const MAX_IMAGE_WIDTH = 1600;
 const IMAGE_QUALITY = 82;
@@ -391,6 +394,51 @@ const resetDistDirectory = async () => {
   await mkdir(distDir, { recursive: true });
 };
 
+const splitPromptLibraryForWorkerAssets = async () => {
+  if (!existsSync(distPromptLibraryPath)) return;
+
+  const library = JSON.parse(await readFile(distPromptLibraryPath, "utf8"));
+  const prompts = Array.isArray(library.prompts) ? library.prompts : [];
+  const promptJson = prompts.map((prompt) => JSON.stringify(prompt));
+  const chunks = [];
+  let current = [];
+  let currentBytes = Buffer.byteLength('{"prompts":[]}', "utf8");
+
+  for (const serializedPrompt of promptJson) {
+    const nextBytes = currentBytes + Buffer.byteLength(serializedPrompt, "utf8") + (current.length ? 1 : 0);
+    if (current.length && nextBytes > PROMPT_LIBRARY_CHUNK_MAX_BYTES) {
+      chunks.push(current);
+      current = [];
+      currentBytes = Buffer.byteLength('{"prompts":[]}', "utf8");
+    }
+    current.push(serializedPrompt);
+    currentBytes += Buffer.byteLength(serializedPrompt, "utf8") + (current.length > 1 ? 1 : 0);
+  }
+  if (current.length) chunks.push(current);
+
+  const manifest = {
+    version: library.version,
+    migratedAt: library.migratedAt || "",
+    updatedAt: library.updatedAt || "",
+    assets: Array.isArray(library.assets) ? library.assets : [],
+    promptCount: prompts.length,
+    chunks: chunks.map((items, index) => ({
+      path: `/prompts-data/library-prompts-${String(index).padStart(3, "0")}.json`,
+      count: items.length
+    }))
+  };
+
+  await mkdir(path.dirname(distPromptLibraryManifestPath), { recursive: true });
+  for (const [index, items] of chunks.entries()) {
+    const chunkPath = path.join(distDir, "prompts-data", `library-prompts-${String(index).padStart(3, "0")}.json`);
+    await writeFile(chunkPath, `{"prompts":[${items.join(",")}]}`, "utf8");
+  }
+  await writeFile(distPromptLibraryManifestPath, `${JSON.stringify(manifest)}\n`, "utf8");
+  await rm(distPromptLibraryPath, { force: true });
+
+  console.log(`[prepare-static] Split prompt library into ${chunks.length} Worker asset chunks.`);
+};
+
 async function main() {
   await syncPortfolioArtifacts({
     repoRoot: root,
@@ -414,6 +462,7 @@ async function main() {
     await mkdir(path.dirname(destination), { recursive: true });
     await cp(source, destination, { recursive: true });
   }
+  await splitPromptLibraryForWorkerAssets();
 
   await mkdir(optimizedImagesDir, { recursive: true });
   await mkdir(generatedPostersDir, { recursive: true });

@@ -5,6 +5,7 @@ const PROMPT_ADMIN_LOGIN_PATH = "/prompts/admin/login";
 const PROMPTS_API_PREFIX = "/api/prompts";
 const PROMPTS_DATA_PREFIX = "/prompts-data";
 const PROMPT_LIBRARY_PATH = "prompts-data/library.json";
+const PROMPT_LIBRARY_MANIFEST_PATH = "prompts-data/library-manifest.json";
 const PROMPT_ENTITLEMENT_COOKIE_NAME = "prompt_commerce_entitlement";
 const PROMPT_ENTITLEMENT_TTL_SECONDS = 60 * 60 * 24 * 30;
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
@@ -356,23 +357,57 @@ async function handleProtectedPromptDataAsset(request, env) {
 }
 
 async function readPromptLibrary(request, env) {
-  const assetUrl = new URL(request.url);
-  assetUrl.pathname = `/${PROMPT_LIBRARY_PATH}`;
-  const response = await env.ASSETS.fetch(new Request(assetUrl, request));
-  if (!response.ok) return withNoStore(response);
-
   let library;
   try {
-    library = await response.json();
+    library = await readChunkedPromptLibrary(request, env);
   } catch {
     return jsonResponse({ ok: false, error: "Prompt library JSON is invalid." }, 502);
   }
+  if (!library) return withNoStore(await fetchPromptAssetJson(request, env, `/${PROMPT_LIBRARY_PATH}`));
 
   const auth = await getPromptAuthState(request, env);
   if (auth.admin) return jsonResponse(library);
 
   const entitlement = await getPromptEntitlementState(request, env);
   return jsonResponse(redactPromptLibrary(library, entitlement));
+}
+
+async function fetchPromptAssetJson(request, env, pathname) {
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = pathname;
+  return env.ASSETS.fetch(new Request(assetUrl, request));
+}
+
+async function readPromptAssetJson(request, env, pathname) {
+  const response = await fetchPromptAssetJson(request, env, pathname);
+  if (!response.ok) return null;
+  return response.json();
+}
+
+async function readChunkedPromptLibrary(request, env) {
+  const manifest = await readPromptAssetJson(request, env, `/${PROMPT_LIBRARY_MANIFEST_PATH}`);
+  if (!manifest) {
+    return readPromptAssetJson(request, env, `/${PROMPT_LIBRARY_PATH}`);
+  }
+
+  const chunks = asArray(manifest.chunks);
+  const promptSets = await Promise.all(chunks.map(async (chunk) => {
+    const pathname = cleanText(chunk?.path);
+    if (!pathname.startsWith("/prompts-data/library-prompts-")) {
+      throw new Error("Invalid prompt library chunk path.");
+    }
+    const data = await readPromptAssetJson(request, env, pathname);
+    if (!data || !Array.isArray(data.prompts)) throw new Error("Prompt library chunk JSON is invalid.");
+    return data.prompts;
+  }));
+
+  return {
+    version: cleanNumber(manifest.version) || 2,
+    migratedAt: cleanText(manifest.migratedAt),
+    updatedAt: cleanText(manifest.updatedAt),
+    prompts: promptSets.flat(),
+    assets: asArray(manifest.assets)
+  };
 }
 
 function redactPromptLibrary(library, entitlement) {
