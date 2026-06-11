@@ -1,0 +1,243 @@
+﻿<!--
+  workspace-index portal
+  该页仅展示公开入口，不含隐私信息、邮箱、环境变量、秘钥或本地路径。
+-->
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workspace Index · 作品集门户</title>
+    <style>
+      :root {
+        --bg-a: #0c1220;
+        --bg-b: #11182a;
+        --bg-c: #1c2040;
+        --text-main: #eef2ff;
+        --text-muted: #aeb6cc;
+        --accent: #8b83ff;
+        --accent-2: #46c7ff;
+        --card-border: rgba(255, 255, 255, 0.18);
+        --shadow: 0 20px 50px rgba(7, 12, 24, 0.45);
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+      }
+      body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Inter", "Segoe UI", sans-serif;
+        color: var(--text-main);
+        background: radial-gradient(circle at 15% 10%, #27314f 0%, transparent 45%),
+                    radial-gradient(circle at 85% 0%, #0f2743 0%, transparent 40%),
+                    linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 48%, var(--bg-c) 100%);
+      }
+      .wrap {
+        min-height: 100vh;
+        max-width: 1024px;
+        margin: 0 auto;
+        padding: 48px 20px 40px;
+        position: relative;
+        overflow: hidden;
+      }
+      .halo {
+        position: absolute;
+        inset: -180px auto auto -120px;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(79, 141, 255, 0.35), transparent 68%);
+        filter: blur(2px);
+        pointer-events: none;
+      }
+      .halo.right {
+        right: -90px;
+        left: auto;
+        top: 45%;
+        background: radial-gradient(circle, rgba(70, 199, 255, 0.22), transparent 68%);
+      }
+      header {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 36px;
+      }
+      .eyebrow {
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #aeb6cc;
+        opacity: 0.9;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 1.1;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        max-width: 760px;
+        line-height: 1.7;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 18px;
+      }
+      .card {
+        grid-column: span 12;
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 22px;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        overflow: hidden;
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      }
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        border: 1px solid transparent;
+        background: linear-gradient(120deg, transparent 20%, rgba(137, 132, 255, 0.22), transparent 80%);
+        opacity: 0;
+        transition: opacity 180ms ease;
+        pointer-events: none;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(139, 131, 255, 0.45);
+        box-shadow: 0 24px 48px rgba(5, 10, 24, 0.5);
+      }
+      .card:hover::after {
+        opacity: 1;
+      }
+      .card:focus-visible {
+        outline: 2px solid rgba(139, 131, 255, 0.65);
+        outline-offset: 3px;
+      }
+      .card h2 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.2rem;
+      }
+      .card h2::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      }
+      .card p {
+        margin: 12px 0 0;
+        color: var(--text-muted);
+        line-height: 1.7;
+      }
+      .meta {
+        margin-top: 14px;
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 0.9rem;
+        color: rgba(234, 240, 255, 0.9);
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 4px 12px;
+        background: rgba(70, 199, 255, 0.15);
+        border: 1px solid rgba(70, 199, 255, 0.35);
+        letter-spacing: 0.02em;
+        font-size: 0.78rem;
+      }
+      .card-link-indicator {
+        margin-left: auto;
+        font-size: 0.92rem;
+        color: #dfe7ff;
+      }
+      .note {
+        margin-top: 10px;
+        color: rgba(215, 221, 238, 0.8);
+        font-size: 0.95rem;
+      }
+      footer {
+        margin-top: 28px;
+        color: rgba(193, 202, 225, 0.8);
+        font-size: 0.9rem;
+      }
+      @media (min-width: 780px) {
+        .card {
+          grid-column: span 6;
+        }
+      }
+      @media (min-width: 1080px) {
+        .card { grid-column: span 4; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="halo"></div>
+      <div class="halo right"></div>
+
+      <header>
+        <div class="eyebrow">Workspace Index</div>
+        <h1>作品库入口</h1>
+        <div class="subtitle">这里聚合公开展示的项目入口，不展示本地路径或私有凭据；仅提供当前可对外访问的项目入口与公开说明。</div>
+      </header>
+
+      <main>
+        <div class="grid">
+          <a class="card" href="https://www.zhangweivisual.cn/" target="_blank" rel="noopener noreferrer">
+            <h2>张玮 AIGC 作品集</h2>
+            <p>互动作品展示、案例画廊与作品叙事内容的公开入口。支持响应式阅读体验与持续内容更新。</p>
+            <div class="meta">
+              <span class="pill">公开项目</span>
+              <span>点击前往</span>
+            </div>
+            <div class="card-link-indicator">↗</div>
+          </a>
+
+          <article class="card" role="region" aria-label="Jarvis Cleaner 本地项目说明">
+            <h2>Jarvis Cleaner</h2>
+            <p>Windows 本地工具项目</p>
+            <div class="meta">
+              <span class="pill">暂未公开下载</span>
+              <span>本地开发维护中</span>
+            </div>
+            <div class="note">该入口当前仅作说明，不对外提供下载与在线预览。</div>
+          </article>
+
+          <article class="card" role="region" aria-label="预留项目入口">
+            <h2>项目预留位 · 即将上线</h2>
+            <p>新项目将按同一门户风格继续补充，当前仅保留占位说明。</p>
+            <div class="meta">
+              <span class="pill">可在后续补充</span>
+              <span>建设中</span>
+            </div>
+          </article>
+
+          <article class="card" role="region" aria-label="预留项目入口">
+            <h2>项目预留位 · 立即可扩展</h2>
+            <p>用于存放后续新增的公开作品或工具入口，内容保持简洁一致。</p>
+            <div class="meta">
+              <span class="pill">可在后续补充</span>
+              <span>建设中</span>
+            </div>
+          </article>
+        </div>
+      </main>
+
+      <footer>
+        此页为公开项目索引页，仅包含对外可访问入口。
+      </footer>
+    </div>
+  </body>
+</html>
