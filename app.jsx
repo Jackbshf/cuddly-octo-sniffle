@@ -5,6 +5,7 @@ import * as THREE from "three";
 import GalleryWorldHome from "./src/components/GalleryWorldHome.jsx";
 
 const DATA_FILE_PATH = "data/portfolio.json";
+const QQ_MAIL_COMPOSE_URL = "https://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=2453193338%40qq.com";
 const DRAFT_STORAGE_KEY = "zhangwei_portfolio_draft_v1";
 const EMBEDDED_PORTFOLIO = window.__EMBEDDED_PORTFOLIO__ ?? [];
 const APP_BUNDLE_VERSION = window.__APP_BUNDLE_VERSION__ ?? "";
@@ -6345,7 +6346,7 @@ function App() {
   ];
   const contactItems = [
     { label: "职业方向", value: "AIGC 视觉设计师 / AI 视频创作者 / ComfyUI 工作流设计" },
-    { label: "邮箱", value: "2453193338@qq.com", href: "mailto:2453193338@qq.com" },
+    { label: "邮箱", value: "2453193338@qq.com", href: QQ_MAIL_COMPOSE_URL, kind: "email" },
     { label: "所在地", value: "广东" },
     { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
   ];
@@ -8805,13 +8806,13 @@ function App() {
           <div className="curated-contact-grid">
             {contactItems.map((item) => {
               const isExternalLink = /^https?:\/\//i.test(item.href || "");
-              const isEmailLink = /^mailto:/i.test(item.href || "");
+              const isEmailLink = item.kind === "email" || /^mailto:/i.test(item.href || "");
               const iconName = isEmailLink ? "Mail" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
-              const actionLabel = isEmailLink ? "发送邮件" : isExternalLink ? "打开作品集" : "可沟通";
+              const actionLabel = isEmailLink ? "打开 QQ 邮箱" : isExternalLink ? "打开作品集" : "";
               const content = <>
                 <span className="curated-contact-icon" aria-hidden="true"><Icon name={iconName} size={16} /></span>
                 <div className="curated-contact-card-copy"><span>{item.label}</span><strong>{item.value}</strong></div>
-                <span className="curated-contact-action">{actionLabel}</span>
+                {actionLabel && <span className="curated-contact-action">{actionLabel}</span>}
               </>;
               return item.href ? <a
                 key={item.label}
@@ -8826,7 +8827,7 @@ function App() {
           <div className="curated-contact-closer">
             <span>AIGC commercial visuals / AI video / ComfyUI workflow</span>
             <div>
-              <a href="mailto:2453193338@qq.com">发邮件沟通</a>
+              <a href={QQ_MAIL_COMPOSE_URL} target="_blank" rel="noopener noreferrer" aria-label="打开 QQ 邮箱给 2453193338@qq.com 写信">QQ 邮箱写信</a>
               <a href="#home" onClick={(event) => handleCuratedAnchorClick(event, "home")}>回到首屏</a>
             </div>
           </div>
