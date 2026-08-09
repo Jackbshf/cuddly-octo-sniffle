@@ -8808,7 +8808,7 @@ function App() {
               const isExternalLink = /^https?:\/\//i.test(item.href || "");
               const isEmailLink = item.kind === "email" || /^mailto:/i.test(item.href || "");
               const iconName = isEmailLink ? "Mail" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
-              const actionLabel = isEmailLink ? "打开 QQ 邮箱" : isExternalLink ? "打开作品集" : "";
+              const actionLabel = isEmailLink ? "QQ 邮箱" : isExternalLink ? "打开作品集" : "";
               const content = <>
                 <span className="curated-contact-icon" aria-hidden="true"><Icon name={iconName} size={16} /></span>
                 <div className="curated-contact-card-copy"><span>{item.label}</span><strong>{item.value}</strong></div>
@@ -8827,7 +8827,7 @@ function App() {
           <div className="curated-contact-closer">
             <span>AIGC commercial visuals / AI video / ComfyUI workflow</span>
             <div>
-              <a href={QQ_MAIL_COMPOSE_URL} target="_blank" rel="noopener noreferrer" aria-label="打开 QQ 邮箱给 2453193338@qq.com 写信">QQ 邮箱写信</a>
+              <a href={QQ_MAIL_COMPOSE_URL} target="_blank" rel="noopener noreferrer" aria-label="QQ 邮箱：2453193338@qq.com">QQ 邮箱</a>
               <a href="#home" onClick={(event) => handleCuratedAnchorClick(event, "home")}>回到首屏</a>
             </div>
           </div>
