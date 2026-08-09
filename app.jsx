@@ -30,6 +30,7 @@ const SLIDE_TRANSITION_OUT_MS = 120;
 const SLIDE_TRANSITION_IN_MS = 180;
 const PORTFOLIO_WARN_BYTES = 500 * 1024;
 const PORTFOLIO_BLOCK_BYTES = 1024 * 1024;
+const DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES = 25 * 1024 * 1024;
 const INLINE_AUDIO_SESSION_KEY = "zhangwei_portfolio_inline_audio_unlocked_v1";
 const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_v1";
 
@@ -743,7 +744,133 @@ const HOMEPAGE_CURATED_WORKS = {
       { label: "输出内容", value: "床垫宣传短视频、详情页封面和社媒素材" }
     ]
   },
+  "video-animated-street-story": {
+    id: "video-animated-street-story",
+    kind: "video",
+    category: "video",
+    duration: "01:48",
+    label: "视频入口",
+    title: "动画街景短片：商业场景叙事镜头",
+    description: "横版动画街区与角色运动镜头，适合展示场景调度、镜头节奏和连续叙事画面组织能力。",
+    tags: ["场景短片", "动画街景", "镜头调度"],
+    media: { kind: "video", url: "videos/commercial-animated-street-story.mp4", poster: "images/_posters/commercial-animated-street-story.webp", alt: "动画街景商业场景叙事短片封面" },
+    detailRows: [
+      { label: "项目类型", value: "横版场景叙事短片" },
+      { label: "我的职责", value: "场景镜头筛选、节奏整理、封面输出" },
+      { label: "输出内容", value: "可播放横版场景短片和视频封面" }
+    ]
+  },
+  "video-mirror-beauty-routine": {
+    id: "video-mirror-beauty-routine",
+    kind: "video",
+    category: "video",
+    duration: "00:10",
+    label: "视频入口",
+    title: "镜前美妆短片：护肤氛围镜头",
+    description: "竖屏镜前人物、美妆瓶身和柔和卧室光影组合，适合美妆氛围广告与社媒短片。",
+    tags: ["美妆氛围", "竖屏短片", "人物场景"],
+    media: { kind: "video", url: "videos/commercial-mirror-beauty-routine.mp4", poster: "images/_posters/commercial-mirror-beauty-routine.webp", alt: "镜前美妆护肤氛围竖屏短片封面" },
+    detailRows: [
+      { label: "项目类型", value: "美妆氛围广告短片" },
+      { label: "我的职责", value: "人物场景、产品露出、竖屏节奏整理" },
+      { label: "输出内容", value: "可用于社媒投放的 9:16 美妆短片" }
+    ]
+  },
+  "video-sereni-story-product": {
+    id: "video-sereni-story-product",
+    kind: "video",
+    category: "video",
+    duration: "00:10",
+    label: "视频入口",
+    title: "连续剧情短片：舒缓产品细节镜头",
+    description: "竖屏产品细节与生活方式氛围结合，展示短剧情视频里商品露出、细节推进和情绪节奏。",
+    tags: ["连续剧情", "产品细节", "竖屏短片"],
+    media: { kind: "video", url: "videos/commercial-sereni-story-product.mp4", poster: "images/_posters/commercial-sereni-story-product.webp", alt: "舒缓产品连续剧情竖屏短片封面" },
+    detailRows: [
+      { label: "项目类型", value: "产品剧情广告短片" },
+      { label: "我的职责", value: "商品细节、镜头节奏、剧情切片整理" },
+      { label: "输出内容", value: "可播放竖屏剧情短片和详情页视频素材" }
+    ]
+  },
 };
+
+const ECOMMERCE_DETAIL_SUITES = [
+  {
+    id: "suite-earbuds",
+    label: "套图 01",
+    title: "黑色耳机｜电商详情页套图",
+    shortTitle: "黑色耳机",
+    category: "产品广告详情套图",
+    referenceWorkId: "case-product-ad",
+    description: "基于黑色耳机主视觉延展首图、卖点、细节和交付页，保持同一商品结构与暗调高级感。",
+    tags: ["耳机产品", "电商详情", "材质光影"],
+    pages: [
+      { title: "黑色耳机英雄图", role: "主视觉", image: "images/curated/ecommerce/suite-earbuds-01.webp", description: "暗调岩石场景强化产品结构、金属高光和新品发布气质。" },
+      { title: "清晰主体与高级光影", role: "核心卖点", image: "images/curated/ecommerce/suite-earbuds-02.webp", description: "用低饱和背景承托产品轮廓，适合电商首屏与品牌 KV。" },
+      { title: "耳机曲面与光泽控制", role: "材质细节", image: "images/curated/ecommerce/suite-earbuds-03.webp", description: "从主体图中提取局部细节，强调硬朗材质、边缘反光和科技感。" },
+      { title: "暗场景产品陈列", role: "场景氛围", image: "images/curated/ecommerce/suite-earbuds-04.webp", description: "保留原有黑金光影和岩石质感，形成可延展的产品页氛围。" },
+      { title: "主图 / 详情 / 社媒统一", role: "系列延展", image: "images/curated/ecommerce/suite-earbuds-05.webp", description: "同一商品图可拆分为首图、细节图和社媒封面，减少视觉跳变。" },
+      { title: "可交付电商视觉资产", role: "收尾展示", image: "images/curated/ecommerce/suite-earbuds-06.webp", description: "围绕产品主体输出一组可用于新品发布和详情页的视觉页面。" }
+    ]
+  },
+  {
+    id: "suite-beauty",
+    label: "套图 02",
+    title: "美妆人像｜产品海报套图",
+    shortTitle: "美妆人像",
+    category: "美妆产品海报套图",
+    referenceWorkId: "case-beauty-live",
+    description: "基于美妆直播主图拆解人物、产品、补光和社媒转化场景，保持人物与产品同框逻辑。",
+    tags: ["美妆产品", "人像海报", "直播封面"],
+    pages: [
+      { title: "人像与产品同框", role: "主视觉", image: "images/curated/ecommerce/suite-beauty-01.webp", description: "保留直播补光场景，突出人物肤质、产品露出和干净广告氛围。" },
+      { title: "肤感、光泽与使用场景", role: "核心卖点", image: "images/curated/ecommerce/suite-beauty-02.webp", description: "围绕美妆产品的真实使用语境组织卖点，而不是孤立展示单品。" },
+      { title: "瓶身、妆面和补光层次", role: "材质细节", image: "images/curated/ecommerce/suite-beauty-03.webp", description: "通过局部裁切展示产品质感、肤质细节和画面洁净度。" },
+      { title: "直播与社媒转化画面", role: "场景氛围", image: "images/curated/ecommerce/suite-beauty-04.webp", description: "适合直播封面、种草图和产品海报的多平台视觉延展。" },
+      { title: "人像主图到产品卡片", role: "系列延展", image: "images/curated/ecommerce/suite-beauty-05.webp", description: "同一参考图拆解成主图、细节图和卖点图，保持人物与产品一致。" },
+      { title: "美妆广告视觉交付", role: "收尾展示", image: "images/curated/ecommerce/suite-beauty-06.webp", description: "形成从主视觉到详情说明的完整美妆产品页面节奏。" }
+    ]
+  },
+  {
+    id: "suite-brand-space",
+    label: "套图 03",
+    title: "冰蓝未来城市｜品牌空间视觉套图",
+    shortTitle: "品牌空间",
+    category: "品牌空间视觉套图",
+    referenceWorkId: "case-brand-space",
+    description: "按品牌空间案例处理，不伪装成具体 SKU 商品详情页，重点展示场景视觉的翻页拆解能力。",
+    tags: ["品牌空间", "场景概念", "视觉延展"],
+    pages: [
+      { title: "冰蓝未来城市空间", role: "主视觉", image: "images/curated/ecommerce/suite-brand-space-01.webp", description: "以完整场景建立品牌调性，不伪装成具体 SKU 商品详情页。" },
+      { title: "科技感、空间感与品牌气质", role: "核心卖点", image: "images/curated/ecommerce/suite-brand-space-02.webp", description: "通过冷调建筑、玻璃材质和远景透视表达未来品牌空间。" },
+      { title: "玻璃、冰晶与冷光结构", role: "材质细节", image: "images/curated/ecommerce/suite-brand-space-03.webp", description: "从场景图中拆解空间材质和光影层次，服务品牌视觉延展。" },
+      { title: "沉浸式品牌空间", role: "场景氛围", image: "images/curated/ecommerce/suite-brand-space-04.webp", description: "保留城市远景与建筑入口，适合展览、发布会和空间海报。" },
+      { title: "海报 / 展台 / KV 统一", role: "系列延展", image: "images/curated/ecommerce/suite-brand-space-05.webp", description: "同一场景可以拆成品牌 KV、社媒封面和空间视觉说明页。" },
+      { title: "可复用的场景视觉资产", role: "收尾展示", image: "images/curated/ecommerce/suite-brand-space-06.webp", description: "以统一色彩和空间语言完成品牌世界观视觉整理。" }
+    ]
+  },
+  {
+    id: "suite-fragrance",
+    label: "套图 04",
+    title: "香氛礼盒｜包装陈列详情套图",
+    shortTitle: "香氛礼盒",
+    category: "包装陈列详情套图",
+    referenceWorkId: "case-fragrance-packaging",
+    description: "基于香氛礼盒主图延展包装、瓶身、礼赠氛围和节日营销页面，保持黑金礼盒调性。",
+    tags: ["香氛礼盒", "包装陈列", "礼赠视觉"],
+    pages: [
+      { title: "香氛礼盒包装陈列", role: "主视觉", image: "images/curated/ecommerce/suite-fragrance-01.webp", description: "黑金礼盒、瓶身和道具组合形成高端礼赠主图。" },
+      { title: "礼赠感、层次与品牌调性", role: "核心卖点", image: "images/curated/ecommerce/suite-fragrance-02.webp", description: "用包装结构和环境光影表达节日礼盒的商业价值。" },
+      { title: "瓶身、礼盒与金色反光", role: "材质细节", image: "images/curated/ecommerce/suite-fragrance-03.webp", description: "从主体图中提取包装边缘、瓶身高光和道具层次。" },
+      { title: "高端香氛礼赠场景", role: "场景氛围", image: "images/curated/ecommerce/suite-fragrance-04.webp", description: "暗调背景和暖金灯光强化香氛产品的高级陈列感。" },
+      { title: "主图 / 礼盒页 / 社媒封面", role: "系列延展", image: "images/curated/ecommerce/suite-fragrance-05.webp", description: "同一礼盒视觉可拆分为产品页、节日海报和推广素材。" },
+      { title: "包装视觉交付能力", role: "收尾展示", image: "images/curated/ecommerce/suite-fragrance-06.webp", description: "形成从主视觉到详情说明的一组香氛礼盒视觉页面。" }
+    ]
+  }
+];
+
+const DEFAULT_ECOMMERCE_SUITE_ID = "suite-brand-space";
+const DEFAULT_ECOMMERCE_SUITE_INDEX = Math.max(0, ECOMMERCE_DETAIL_SUITES.findIndex((suite) => suite.id === DEFAULT_ECOMMERCE_SUITE_ID));
 
 const HOMEPAGE_CURATION = {
   hero: {
@@ -757,7 +884,10 @@ const HOMEPAGE_CURATION = {
     "video-mattress-healing-bedroom",
     "gallery-video-d9",
     "video-social-series",
-    "video-digital-human"
+    "video-digital-human",
+    "video-mirror-beauty-routine",
+    "video-sereni-story-product",
+    "video-animated-street-story"
   ],
   commercialImageCaseIds: [
     "case-product-ad",
@@ -933,7 +1063,7 @@ const HOMEPAGE_RADIUS_PRESETS = [
 
 const HOMEPAGE_DENSITY_PRESETS = [
   { id: "compact", label: "紧凑", sectionPadding: "clamp(48px, 5.6vw, 78px)", headingGap: "18px", cardGap: "12px" },
-  { id: "comfortable", label: "常规", sectionPadding: "clamp(62px, 7vw, 104px)", headingGap: "26px", cardGap: "18px" },
+  { id: "comfortable", label: "常规", sectionPadding: "clamp(58px, 5.4vw, 78px)", headingGap: "22px", cardGap: "18px" },
   { id: "spacious", label: "留白", sectionPadding: "clamp(78px, 8.4vw, 126px)", headingGap: "34px", cardGap: "24px" }
 ];
 
@@ -948,6 +1078,7 @@ const HOMEPAGE_SECTION_VISIBILITY_OPTIONS = [
   { id: "featured", label: "精选入口" },
   { id: "videos", label: "视频精选" },
   { id: "cases", label: "精选案例" },
+  { id: "ecommerce", label: "电商套图" },
   { id: "capabilities", label: "能力矩阵" },
   { id: "process", label: "工作流模块" },
   { id: "contact", label: "联系模块" }
@@ -1604,6 +1735,13 @@ const supportsHoverInteractions = () => {
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 };
 
+const prefersReducedMotion = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+
+const getMotionScrollBehavior = (behavior = "smooth") => prefersReducedMotion() ? "auto" : behavior;
+
 const getViewportSize = () => ({
   width: window.visualViewport?.width || window.innerWidth || 0,
   height: window.visualViewport?.height || window.innerHeight || 0
@@ -1836,13 +1974,52 @@ const measureImageFile = (file, previewUrl) => new Promise((resolve) => {
   image.src = previewUrl || URL.createObjectURL(file);
 });
 
+const sanitizeMediaItemForExport = (item) => {
+  const normalized = normalizeMediaItem(item);
+  if (!normalized) return null;
+  const cleaned = {
+    kind: normalized.kind,
+    url: normalized.kind === "youtube" ? extractYouTubeId(normalized.url) || normalized.url : normalized.url,
+    poster: normalized.poster,
+    meta: normalized.meta,
+    label: normalized.label,
+    fullUrl: normalized.fullUrl,
+    width: normalized.width,
+    height: normalized.height,
+    alt: normalized.alt,
+    externalProvider: normalized.externalProvider,
+    curatedHidden: normalized.curatedHidden,
+    curatedCategory: normalized.curatedCategory,
+    workflowSteps: normalized.workflowSteps,
+    workflowAbility: normalized.workflowAbility,
+    workflowOutcome: normalized.workflowOutcome,
+    delivery: normalized.delivery
+  };
+  if (!cleaned.poster) delete cleaned.poster;
+  if (!cleaned.meta) delete cleaned.meta;
+  if (!cleaned.label) delete cleaned.label;
+  if (!cleaned.fullUrl) delete cleaned.fullUrl;
+  if (!cleaned.width) delete cleaned.width;
+  if (!cleaned.height) delete cleaned.height;
+  if (!cleaned.alt) delete cleaned.alt;
+  if (!cleaned.externalProvider) delete cleaned.externalProvider;
+  if (!cleaned.curatedHidden) delete cleaned.curatedHidden;
+  if (!cleaned.curatedCategory) delete cleaned.curatedCategory;
+  if (!cleaned.workflowSteps?.length) delete cleaned.workflowSteps;
+  if (!cleaned.workflowAbility) delete cleaned.workflowAbility;
+  if (!cleaned.workflowOutcome) delete cleaned.workflowOutcome;
+  if (!cleaned.delivery?.provider || (!cleaned.delivery?.uid && !cleaned.delivery?.hlsUrl && !cleaned.delivery?.iframeUrl)) delete cleaned.delivery;
+  if (!cleaned.url) delete cleaned.url;
+  return cleaned;
+};
+
 const sanitizeSlidesForExport = (slides) => normalizeSlides(slides).map((slide) => ({
   ...slide,
   textBlocks: Array.isArray(slide.textBlocks) ? slide.textBlocks.map((block) => String(block ?? "")) : undefined,
   freeLayoutElements: Array.isArray(slide.freeLayoutElements) ? slide.freeLayoutElements.map((element) => {
     const normalized = normalizeFreeLayoutElement(element);
     if (normalized.type === "media") {
-      const media = normalizeMediaItem(normalized.media);
+      const media = sanitizeMediaItemForExport(normalized.media);
       return {
         id: normalized.id,
         type: normalized.type,
@@ -1851,23 +2028,7 @@ const sanitizeSlidesForExport = (slides) => normalizeSlides(slides).map((slide) 
         w: normalized.w,
         h: normalized.h,
         z: normalized.z,
-        media: {
-          kind: media.kind,
-          url: media.kind === "youtube" ? extractYouTubeId(media.url) || media.url : media.url,
-          poster: media.poster,
-          meta: media.meta,
-          label: media.label,
-          fullUrl: media.fullUrl,
-          width: media.width,
-          height: media.height,
-          alt: media.alt,
-          externalProvider: media.externalProvider,
-          curatedHidden: media.curatedHidden,
-          curatedCategory: media.curatedCategory,
-          workflowSteps: media.workflowSteps,
-          workflowAbility: media.workflowAbility,
-          workflowOutcome: media.workflowOutcome
-        }
+        media: media || { kind: "image" }
       };
     }
     return {
@@ -1884,42 +2045,7 @@ const sanitizeSlidesForExport = (slides) => normalizeSlides(slides).map((slide) 
       animationDelay: normalized.animationDelay
     };
   }) : undefined,
-  media: Array.isArray(slide.media) ? slide.media.map((item) => {
-    const normalized = normalizeMediaItem(item);
-    if (!normalized) return null;
-    const cleaned = {
-      kind: normalized.kind,
-      url: normalized.kind === "youtube" ? extractYouTubeId(normalized.url) || normalized.url : normalized.url,
-      poster: normalized.poster,
-      meta: normalized.meta,
-      label: normalized.label,
-      fullUrl: normalized.fullUrl,
-      width: normalized.width,
-      height: normalized.height,
-      alt: normalized.alt,
-      externalProvider: normalized.externalProvider,
-      curatedHidden: normalized.curatedHidden,
-      curatedCategory: normalized.curatedCategory,
-      workflowSteps: normalized.workflowSteps,
-      workflowAbility: normalized.workflowAbility,
-      workflowOutcome: normalized.workflowOutcome
-    };
-    if (!cleaned.poster) delete cleaned.poster;
-    if (!cleaned.meta) delete cleaned.meta;
-    if (!cleaned.label) delete cleaned.label;
-    if (!cleaned.fullUrl) delete cleaned.fullUrl;
-    if (!cleaned.width) delete cleaned.width;
-    if (!cleaned.height) delete cleaned.height;
-    if (!cleaned.alt) delete cleaned.alt;
-    if (!cleaned.externalProvider) delete cleaned.externalProvider;
-    if (!cleaned.curatedHidden) delete cleaned.curatedHidden;
-    if (!cleaned.curatedCategory) delete cleaned.curatedCategory;
-    if (!cleaned.workflowSteps?.length) delete cleaned.workflowSteps;
-    if (!cleaned.workflowAbility) delete cleaned.workflowAbility;
-    if (!cleaned.workflowOutcome) delete cleaned.workflowOutcome;
-    if (!cleaned.url) delete cleaned.url;
-    return cleaned;
-  }).filter(Boolean) : []
+  media: Array.isArray(slide.media) ? slide.media.map(sanitizeMediaItemForExport).filter(Boolean) : []
 })).map((slide) => {
   if (slide.textBlocks === undefined) return slide;
   slide.text = slide.textBlocks[0] || "";
@@ -2029,6 +2155,16 @@ const getMediaBindingInfo = (item) => {
 
   const urlValue = String(mediaItem.url || "").trim();
   const previewValue = String(mediaItem.draftPreviewUrl || "").trim();
+  const streamDelivery = mediaItem.kind === "video" && mediaItem.delivery?.provider === "cloudflare-stream" ? mediaItem.delivery : null;
+
+  if (streamDelivery?.hlsUrl || streamDelivery?.iframeUrl) {
+    const shortValue = streamDelivery.uid || streamDelivery.hlsUrl || streamDelivery.iframeUrl;
+    return {
+      state: "linked",
+      text: `已绑定：Cloudflare Stream ${shortValue.length > 24 ? `${shortValue.slice(0, 21)}...` : shortValue}`,
+      detail: "这个视频会通过 Cloudflare Stream 播放，并随发布 JSON 一起上线。"
+    };
+  }
 
   if (urlValue) {
     const shortValue = urlValue.length > 42 ? `${urlValue.slice(0, 39)}...` : urlValue;
@@ -2105,13 +2241,14 @@ const validateSlidesBeforeExport = async (slides) => {
 
       const slotLabel = `${pageLabel} 第 ${mediaIndex + 1} 个媒体框`;
       const urlValue = String(item.url || "").trim();
+      const hasStreamDelivery = item.kind === "video" && item.delivery?.provider === "cloudflare-stream" && Boolean(item.delivery.hlsUrl || item.delivery.iframeUrl);
 
-      if (!urlValue && item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && item.draftPreviewUrl) {
         issues.push(`${slotLabel} 仍是本地预览，未绑定发布路径。请重新拖入正式素材，直到出现“已绑定：images/... / videos/...”后再导出。`);
         continue;
       }
 
-      if (!urlValue && !item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && !item.draftPreviewUrl) {
         issues.push(`${slotLabel} 没有填写资源链接`);
         continue;
       }
@@ -2142,13 +2279,14 @@ const validateSlidesBeforeExport = async (slides) => {
       if (!item) continue;
       const slotLabel = `${pageLabel} 自由布局媒体 ${elementIndex + 1}`;
       const urlValue = String(item.url || "").trim();
+      const hasStreamDelivery = item.kind === "video" && item.delivery?.provider === "cloudflare-stream" && Boolean(item.delivery.hlsUrl || item.delivery.iframeUrl);
 
-      if (!urlValue && item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && item.draftPreviewUrl) {
         issues.push(`${slotLabel} 仍是本地预览，未绑定发布路径。请重新拖入正式素材，直到出现“已绑定：images/... / videos/...”后再导出。`);
         continue;
       }
 
-      if (!urlValue && !item.draftPreviewUrl) {
+      if (!urlValue && !hasStreamDelivery && !item.draftPreviewUrl) {
         issues.push(`${slotLabel} 没有填写资源链接`);
         continue;
       }
@@ -2205,6 +2343,9 @@ const Icon = ({ name, size = 24, className = "" }) => {
     RotateCcw: <><path d="M3 2v6h6" /><path d="M3 8a9 9 0 1 0 2.6-4.4L3 8" /></>,
     Link2: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07L11.8 5.1" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.66-1.66" /></>,
     Settings2: <><path d="M12 3v3" /><path d="M18.364 5.636 16.243 7.757" /><path d="M21 12h-3" /><path d="m18.364 18.364-2.121-2.121" /><path d="M12 18v3" /><path d="m7.757 16.243-2.121 2.121" /><path d="M6 12H3" /><path d="m7.757 7.757-2.121-2.121" /><circle cx="12" cy="12" r="3" /></>,
+    Briefcase: <><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /><path d="M2 13h20" /></>,
+    Mail: <><rect x="3" y="5" width="18" height="14" rx="2" ry="2" /><path d="m3 7 9 6 9-6" /></>,
+    MapPin: <><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></>,
     ExternalLink: <><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></>,
     Sparkles: <><path d="M12 3l1.9 4.8L19 10l-5.1 2.2L12 17l-1.9-4.8L5 10l5.1-2.2L12 3Z" /><path d="M5 3v2" /><path d="M19 19v2" /><path d="M3 5h2" /><path d="M19 3h2" /></>,
     Sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2.5" /><path d="M12 19.5V22" /><path d="M4.93 4.93l1.77 1.77" /><path d="M17.3 17.3l1.77 1.77" /><path d="M2 12h2.5" /><path d="M19.5 12H22" /><path d="M4.93 19.07l1.77-1.77" /><path d="M17.3 6.7l1.77-1.77" /></>,
@@ -2400,7 +2541,7 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
     if (!isDirectVideoSource(playbackUrl)) {
       if (typeof onMediaLoad === "function") window.setTimeout(() => onMediaLoad(), 0);
       return <div className="relative z-10 flex h-full w-full items-center justify-center p-6 text-center">
-        <a href={sourceUrl || playbackUrl} target="_blank" rel="noreferrer" onClick={handleSurfaceClick} className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100 hover:bg-cyan-500/20">
+        <a href={sourceUrl || playbackUrl} target="_blank" rel="noopener noreferrer" onClick={handleSurfaceClick} className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100 hover:bg-cyan-500/20">
           <Icon name="ExternalLink" size={14} /> 打开视频链接预览
         </a>
       </div>;
@@ -2450,14 +2591,14 @@ const InlineMediaControls = ({ visible, showPlayToggle = false, isPlaying = fals
   <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/78 via-black/28 to-transparent" />
   <div className="relative flex items-end justify-between gap-3 px-4 pb-4 pt-10">
     <div className="pointer-events-auto flex items-center gap-2">
-      {showPlayToggle && <button onClick={onTogglePlay} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
+      {showPlayToggle && <button type="button" aria-label={isPlaying ? "暂停视频预览" : "播放视频预览"} onClick={onTogglePlay} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
         <Icon name={isPlaying ? "Pause" : "Play"} size={16} className={isPlaying ? "" : "translate-x-[1px]"} />
       </button>}
-      {showPlayToggle && <button onClick={onToggleMute} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
+      {showPlayToggle && <button type="button" aria-label={isMuted ? "打开视频声音" : "关闭视频声音"} aria-pressed={!isMuted} onClick={onToggleMute} className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
         <Icon name={isMuted ? "VolumeX" : "Volume2"} size={16} />
       </button>}
     </div>
-    <button onClick={onToggleFullscreen} className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
+    <button type="button" aria-label="打开媒体全屏预览" onClick={onToggleFullscreen} className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white/85 backdrop-blur-sm transition hover:bg-black/70">
       <Icon name="Maximize2" size={16} />
     </button>
   </div>
@@ -2712,6 +2853,8 @@ function App() {
   const [visualFilter, setVisualFilter] = useState("all");
   const [visibleVideoCount, setVisibleVideoCount] = useState(6);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
+  const [activeEcommerceSuiteIndex, setActiveEcommerceSuiteIndex] = useState(DEFAULT_ECOMMERCE_SUITE_INDEX);
+  const [activeEcommercePageIndex, setActiveEcommercePageIndex] = useState(0);
   const featuredVideoRef = useRef(null);
   const [featuredVideoPlayback, setFeaturedVideoPlayback] = useState({ id: "", status: "poster", hasPlayed: false });
   const [visibleVisualCount, setVisibleVisualCount] = useState(24);
@@ -2747,7 +2890,12 @@ function App() {
   const [pendingMediaReplacement, setPendingMediaReplacement] = useState(null);
   const [isReplacingMedia, setIsReplacingMedia] = useState(false);
   const lightboxVideoRef = useRef(null);
+  const detailDrawerRef = useRef(null);
+  const lastDetailTriggerRef = useRef(null);
+  const detailScrollLockRef = useRef(null);
   const heroCanvasRef = useRef(null);
+  const curatedScrollTimersRef = useRef([]);
+  const ecommerceTouchStartX = useRef(null);
   const importInputRef = useRef(null);
   const pageJumpInputRef = useRef(null);
   const touchStartX = useRef(null);
@@ -2782,10 +2930,12 @@ function App() {
   const useGalleryWorldHome = false;
   const assetCapabilities = adminCapabilities?.capabilities?.assets || {};
   const deploymentCapabilities = adminCapabilities?.capabilities?.deployment || {};
+  const uploadLimits = adminCapabilities?.limits || {};
   const canListAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.list === true;
   const canWriteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.upload === true && assetCapabilities.replace === true;
   const canDeleteAssets = IS_PORTFOLIO_ADMIN_MODE && assetCapabilities.delete === true;
   const assetCapabilityReason = assetCapabilities.reason || adminCapabilityStatus || "Asset tools are not ready yet.";
+  const staticAssetUploadLimitBytes = Number(uploadLimits.staticAssetBytes || uploadLimits.videoUploadBytes || DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES);
   const homepageDesignerState = normalizeHomepageDesignerConfig(normalizeSiteMeta(portfolioData?.meta).homepageDesigner);
   const isHomepageSectionHidden = (sectionId) => sectionId !== "home" && homepageDesignerState.sections?.[sectionId]?.hidden === true;
   const isHomepageBlockHidden = (blockId) => homepageDesignerState.blocks?.[blockId]?.hidden === true;
@@ -2795,25 +2945,51 @@ function App() {
     { id: "featured", label: "入口" },
     { id: "videos", label: "视频" },
     { id: "cases", label: "案例" },
+    { id: "ecommerce", label: "套图" },
     { id: "capabilities", label: "能力" },
     { id: "process", label: "流程" },
     { id: "contact", label: "联系" }
   ].filter((item) => !isHomepageSectionHidden(item.id));
   const curatedSectionIds = curatedNavItems.map((item) => item.id);
+  const curatedSectionKey = curatedSectionIds.join("|");
 
   const closeMediaLightbox = () => setLightboxData(null);
-  const closeWorkDetail = () => setSelectedWorkItem(null);
+  const closeWorkDetail = () => {
+    const previousTrigger = lastDetailTriggerRef.current;
+    lastDetailTriggerRef.current = null;
+    const restoreTriggerFocus = () => {
+      if (!previousTrigger || typeof previousTrigger.focus !== "function" || !document.contains(previousTrigger)) return;
+      try {
+        previousTrigger.focus({ preventScroll: true });
+      } catch {
+        previousTrigger.focus();
+      }
+    };
+    setSelectedWorkItem(null);
+    window.requestAnimationFrame(() => {
+      restoreTriggerFocus();
+      window.setTimeout(restoreTriggerFocus, 80);
+    });
+  };
   const scrollToCuratedElement = (elementId, options = {}) => {
     const target = document.getElementById(elementId);
     if (!target) return;
+    curatedScrollTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    curatedScrollTimersRef.current = [];
     const behavior = options.behavior || "auto";
-    const targetTop = window.scrollY + target.getBoundingClientRect().top - sectionScrollOffset;
+    const getTargetTop = () => window.scrollY + target.getBoundingClientRect().top - sectionScrollOffset;
     if (options.replace) {
       window.history.replaceState(window.history.state, "", `#${elementId}`);
     } else {
       window.history.pushState(window.history.state, "", `#${elementId}`);
     }
-    window.scrollTo({ top: Math.max(0, targetTop), behavior });
+    window.scrollTo({ top: Math.max(0, getTargetTop()), behavior });
+    curatedScrollTimersRef.current = [140, 360, 720].map((delay) => window.setTimeout(() => {
+        const currentTarget = document.getElementById(elementId);
+        if (!currentTarget) return;
+        const alignedTop = window.scrollY + currentTarget.getBoundingClientRect().top - sectionScrollOffset;
+        window.scrollTo({ top: Math.max(0, alignedTop), behavior: "auto" });
+      }, delay));
   };
   const scrollToCuratedSection = (sectionId, options = {}) => {
     scrollToCuratedElement(sectionId, options);
@@ -2822,6 +2998,19 @@ function App() {
   const handleCuratedAnchorClick = (event, sectionId) => {
     event.preventDefault();
     scrollToCuratedSection(sectionId);
+  };
+  const handleSkipToContent = (event) => {
+    event.preventDefault();
+    scrollToCuratedSection("home", { replace: true });
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById("home");
+      if (!target || typeof target.focus !== "function") return;
+      try {
+        target.focus({ preventScroll: true });
+      } catch {
+        target.focus();
+      }
+    });
   };
   const openMediaLightbox = (item, options = {}) => {
     if (!item) return;
@@ -2920,7 +3109,11 @@ function App() {
         ready: false,
         capabilities: {
           assets: { list: false, upload: false, delete: false, replace: false, reason: message },
-          deployment: { status: false, reason: message }
+          deployment: { status: false, reason: message },
+          stream: { directUpload: false, status: false, reason: message }
+        },
+        limits: {
+          staticAssetBytes: DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES
         }
       });
       return null;
@@ -2997,11 +3190,70 @@ function App() {
 
   useEffect(() => {
     if (!selectedWorkItem) return undefined;
+    if (!detailScrollLockRef.current) {
+      detailScrollLockRef.current = {
+        bodyOverflow: document.body.style.overflow,
+        htmlOverflow: document.documentElement.style.overflow
+      };
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    }
+    window.requestAnimationFrame(() => {
+      const drawer = detailDrawerRef.current;
+      if (drawer && typeof drawer.focus === "function") drawer.focus({ preventScroll: true });
+    });
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") closeWorkDetail();
+      const drawer = detailDrawerRef.current;
+      if (event.key === "Escape") {
+        closeWorkDetail();
+        return;
+      }
+      if (event.key !== "Tab" || !drawer) return;
+      const focusableElements = Array.from(drawer.querySelectorAll([
+        "a[href]",
+        "button:not([disabled])",
+        "input:not([disabled])",
+        "select:not([disabled])",
+        "textarea:not([disabled])",
+        "[tabindex]:not([tabindex=\"-1\"])"
+      ].join(","))).filter((element) => {
+        if (!(element instanceof HTMLElement)) return false;
+        const hidden = element.hidden || element.getAttribute("aria-hidden") === "true";
+        const style = window.getComputedStyle(element);
+        return !hidden && style.display !== "none" && style.visibility !== "hidden";
+      });
+      if (!focusableElements.length) {
+        event.preventDefault();
+        drawer.focus({ preventScroll: true });
+        return;
+      }
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+      if (!drawer.contains(activeElement) || activeElement === drawer) {
+        event.preventDefault();
+        (event.shiftKey ? lastElement : firstElement).focus({ preventScroll: true });
+        return;
+      }
+      if (event.shiftKey && activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus({ preventScroll: true });
+        return;
+      }
+      if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus({ preventScroll: true });
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (detailScrollLockRef.current) {
+        document.body.style.overflow = detailScrollLockRef.current.bodyOverflow;
+        document.documentElement.style.overflow = detailScrollLockRef.current.htmlOverflow;
+        detailScrollLockRef.current = null;
+      }
+    };
   }, [selectedWorkItem]);
 
   useEffect(() => {
@@ -3009,7 +3261,7 @@ function App() {
   }, [visualFilter]);
 
   useEffect(() => {
-    if (IS_EDITOR_MODE) return undefined;
+    if (IS_EDITOR_MODE || isLoading) return undefined;
     let frameId = 0;
     const updateActiveSection = () => {
       frameId = 0;
@@ -3019,7 +3271,7 @@ function App() {
         setActiveCuratedSection("contact");
         return;
       }
-      const markerY = window.scrollY + sectionScrollOffset + Math.max(140, window.innerHeight * 0.56);
+      const markerY = window.scrollY + sectionScrollOffset + Math.max(140, window.innerHeight * 0.42);
       let nextActive = "home";
       curatedSectionIds.forEach((sectionId) => {
         const section = document.getElementById(sectionId);
@@ -3041,7 +3293,18 @@ function App() {
       window.removeEventListener("resize", requestUpdate);
       window.removeEventListener("hashchange", requestUpdate);
     };
-  }, []);
+  }, [isLoading, curatedSectionKey, sectionScrollOffset]);
+
+  useEffect(() => {
+    if (IS_EDITOR_MODE || !activeCuratedSection) return;
+    const nav = document.querySelector(".curated-topbar nav");
+    const activeLink = nav?.querySelector(`a[href="#${activeCuratedSection}"]`);
+    if (!nav || !activeLink || nav.scrollWidth <= nav.clientWidth + 1) return;
+    const navRect = nav.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    const targetLeft = nav.scrollLeft + linkRect.left - navRect.left - (navRect.width - linkRect.width) / 2;
+    nav.scrollTo({ left: Math.max(0, targetLeft), behavior: getMotionScrollBehavior() });
+  }, [activeCuratedSection]);
 
   useEffect(() => {
     if (IS_EDITOR_MODE || isLoading) return undefined;
@@ -3301,7 +3564,7 @@ function App() {
     if (!target) return;
     target.dataset.revealed = "true";
     const targetTop = window.scrollY + target.getBoundingClientRect().top - sectionScrollOffset;
-    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: getMotionScrollBehavior() });
     setCurrentSlide(nextIndex);
   };
 
@@ -3400,7 +3663,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!slidesData.length) return;
+    if (!IS_EDITOR_MODE || !slidesData.length) return;
     setCurrentSlide((value) => Math.min(value, slidesData.length - 1));
   }, [slidesData.length]);
 
@@ -3474,7 +3737,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!slidesData.length || typeof IntersectionObserver === "undefined") return;
+    if (!IS_EDITOR_MODE || !slidesData.length || typeof IntersectionObserver === "undefined") return;
     activeSlideRatiosRef.current.clear();
 
     const scheduleActiveSlideUpdate = () => {
@@ -3540,7 +3803,7 @@ function App() {
   }, [siteMeta]);
 
   useEffect(() => {
-    if (isMobileFeedMode) return;
+    if (!IS_EDITOR_MODE || isMobileFeedMode) return;
     const handleKeyDown = (event) => {
       const tag = event.target.tagName;
       if (event.target.isContentEditable || tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT") return;
@@ -3963,6 +4226,26 @@ function App() {
     }
   };
 
+  const validateMediaReplacementFile = (file, target, kind) => {
+    const path = buildPublishedAssetPath(file);
+    if (!path || !/^(images|videos)\//.test(path)) {
+      return "Only image and video files can be uploaded here.";
+    }
+    if (target.accept === "image" && kind !== "image") {
+      return "这个位置只能替换为图片。视频请拖到视频作品媒体位。";
+    }
+    if (target.accept === "video" && kind !== "video") {
+      return "这个位置只能替换为视频。图片请拖到视觉作品媒体位。";
+    }
+    if (kind === "image" && Number(file.size || 0) > staticAssetUploadLimitBytes) {
+      return `图片超过 ${formatBytes(staticAssetUploadLimitBytes)}，请先压缩后再上传。`;
+    }
+    if (kind === "video" && Number(file.size || 0) > staticAssetUploadLimitBytes) {
+      return `视频超过 ${formatBytes(staticAssetUploadLimitBytes)}。当前不启用付费直传存储，请压缩到限制以内后上传，或使用「外链视频」。`;
+    }
+    return "";
+  };
+
   const requestMediaReplacement = (file, target) => {
     if (!file) return;
     if (!IS_PORTFOLIO_ADMIN_MODE) {
@@ -3977,8 +4260,10 @@ function App() {
       return;
     }
     const kind = getFileMediaKind(file);
-    if (target.accept === "image" && kind !== "image") {
-      window.alert("这个位置只能替换为图片。视频请拖到视频作品媒体位。");
+    const validationMessage = validateMediaReplacementFile(file, target, kind);
+    if (validationMessage) {
+      window.alert(validationMessage);
+      setStatusMessage(validationMessage);
       return;
     }
     const previewUrl = URL.createObjectURL(file);
@@ -4700,7 +4985,7 @@ function App() {
     const bindingInfo = getMediaBindingInfo(item);
     const rootRef = useRef(null);
     const preferDraftPreview = IS_EDITOR_MODE && Boolean(item?.draftPreviewUrl);
-    const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster));
+    const hasUsableMedia = Boolean(item && (item.draftPreviewUrl || item.url || item.poster || item.delivery?.hlsUrl || item.delivery?.iframeUrl));
     const [isMuted, setIsMuted] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
@@ -4873,7 +5158,8 @@ function App() {
           type: "free-layout-media",
           slideId: slidesData[slideIndex]?.id,
           elementId: element.id,
-          label: element.media?.label || `自由布局媒体 ${element.id}`
+          label: element.media?.label || `自由布局媒体 ${element.id}`,
+          accept: item?.kind === "video" ? "video" : item?.kind === "image" ? "image" : ""
         });
         setIsDragTarget(false);
         setShowEditor(false);
@@ -5071,9 +5357,9 @@ function App() {
       {IS_EDITOR_MODE && isDragTarget && <div className="absolute inset-0 z-40 flex items-center justify-center border-2 border-dashed border-cyan-300/70 bg-cyan-400/10 text-center text-xs tracking-[0.18em] text-cyan-100 backdrop-blur-sm pointer-events-none">拖到这里替换媒体</div>}
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-3 left-3 z-30 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && <div className="portfolio-media-tools absolute top-12 right-3 z-30 flex flex-wrap justify-end gap-1.5">
-        <button onClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
-        {hasUsableMedia && <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>}
-        <button onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
+        <button type="button" aria-label={showEditor ? "关闭媒体设置" : "打开媒体设置"} onClick={(event) => { event.stopPropagation(); setShowEditor((value) => !value); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
+        {hasUsableMedia && <button type="button" aria-label="打开媒体预览" onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>}
+        <button type="button" aria-label="上传并替换媒体" onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
       </div>}
       {IS_EDITOR_MODE && showEditor && <div className="portfolio-media-editor-panel absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
         <div className="text-xs text-cyan-300 font-mono uppercase tracking-widest flex items-center gap-2"><Icon name="Link2" size={14} /> 自由布局媒体设置</div>
@@ -5101,7 +5387,7 @@ function App() {
       {hasUsableMedia ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-[11] h-full w-full object-cover object-center" />}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} audiblePreviewActive={directVideo && prefersHoverControls && isHovered && shouldInlinePreviewPlay} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={false} audiblePreviewActive={directVideo && prefersHoverControls && isHovered && shouldInlinePreviewPlay} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               setIsVideoReady(true);
@@ -5340,7 +5626,8 @@ function App() {
           type: "slide-media",
           slideId: slide.id,
           slotIndex,
-          label: slide.title || label || `媒体 ${slotIndex + 1}`
+          label: slide.title || label || `媒体 ${slotIndex + 1}`,
+          accept: item?.kind === "video" ? "video" : item?.kind === "image" ? "image" : ""
         });
         setIsDragTarget(false);
         setShowEditor(false);
@@ -5547,10 +5834,10 @@ function App() {
       </div>}
       {IS_EDITOR_MODE && bindingInfo && !showEditor && <div className={`absolute top-2 left-2 z-50 max-w-[70%] rounded-full border px-3 py-1 text-[10px] tracking-[0.16em] backdrop-blur-md pointer-events-none ${bindingInfo.state === "linked" ? "border-emerald-300/20 bg-emerald-500/15 text-emerald-50" : "border-amber-300/20 bg-amber-500/15 text-amber-50"}`}>{bindingInfo.text}</div>}
       {IS_EDITOR_MODE && item && <div className={cx("portfolio-media-tools absolute top-2 right-2 z-50 transition-opacity duration-300 flex flex-wrap justify-end gap-1.5 w-3/4", prefersHoverControls ? "opacity-0 group-hover:opacity-100" : "opacity-100")}>
-        {item.kind === "youtube" && item.url && <a href={`https://www.youtube.com/watch?v=${extractYouTubeId(item.url)}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="ExternalLink" size={12} /></a>}
-        <button onClick={(event) => { event.stopPropagation(); setShowEditor(!showEditor); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
-        <button onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>
-        <button onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
+        {item.kind === "youtube" && item.url && <a href={`https://www.youtube.com/watch?v=${extractYouTubeId(item.url)}`} target="_blank" rel="noopener noreferrer" aria-label="打开 YouTube 视频" onClick={(event) => event.stopPropagation()} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="ExternalLink" size={12} /></a>}
+        <button type="button" aria-label={showEditor ? "关闭媒体设置" : "打开媒体设置"} onClick={(event) => { event.stopPropagation(); setShowEditor(!showEditor); }} className={`p-1.5 rounded-full text-white/80 transition-all ${showEditor ? "bg-cyan-500" : "bg-black/60 hover:bg-black/90"}`}><Icon name="Settings2" size={12} /></button>
+        <button type="button" aria-label="打开媒体预览" onClick={(event) => { event.stopPropagation(); openMediaLightbox(item); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-white/80"><Icon name="Maximize2" size={12} /></button>
+        <button type="button" aria-label="上传并替换媒体" onClick={(event) => { event.stopPropagation(); document.getElementById(fileInputId).click(); }} className="p-1.5 bg-black/60 hover:bg-black/90 rounded-full text-yellow-300"><Icon name="UploadCloud" size={12} /></button>
       </div>}
       {IS_EDITOR_MODE && item && showEditor && <div className="portfolio-media-editor-panel absolute inset-0 z-40 p-4 bg-black/80 backdrop-blur-md flex flex-col gap-3 cursor-auto" onClick={(event) => event.stopPropagation()}>
         <div className="text-xs text-cyan-300 font-mono uppercase tracking-widest flex items-center gap-2"><Icon name="Link2" size={14} /> 资源链接设置</div>
@@ -5583,7 +5870,7 @@ function App() {
       {item ? <>
         {directVideo && item?.poster && !showEditor && !shouldInlinePreviewPlay && <img src={item.poster} alt="" aria-hidden="true" className={`pointer-events-none absolute inset-0 z-[11] ${shouldContainMedia ? "object-contain p-4" : "object-cover"} h-full w-full object-center`} />}
         <div className={`relative z-10 flex h-full w-full items-center justify-center ${shouldContainMedia ? "p-4" : ""}`}>
-          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={directVideo && !showEditor} audiblePreviewActive={directVideo && prefersHoverControls && isHovered && shouldInlinePreviewPlay} onMediaLoad={() => {
+          <MediaView mediaItem={item} muted={isMuted} onMediaSurfaceClick={handleMediaSurfaceClick} videoRef={videoRef} mediaClassName={mediaClassName} videoPreloadMode={directVideo && (isNearViewport || shouldInlinePreviewPlay || isPlaying) ? "auto" : "metadata"} showNativeVideoControls={false} audiblePreviewActive={directVideo && prefersHoverControls && isHovered && shouldInlinePreviewPlay} onMediaLoad={() => {
             setIsMediaLoading(false);
             if (directVideo) {
               setIsVideoReady(true);
@@ -6271,7 +6558,12 @@ function App() {
     <strong>{label}</strong>
   </div>;
 
-  const openWorkDetail = (item) => setSelectedWorkItem(item);
+  const openWorkDetail = (item) => {
+    curatedScrollTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    curatedScrollTimersRef.current = [];
+    lastDetailTriggerRef.current = typeof HTMLElement !== "undefined" && document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setSelectedWorkItem(item);
+  };
   const openWorkDetailFromKeyboard = (event, item) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
@@ -6280,10 +6572,13 @@ function App() {
 
   const renderHomepageEntryCard = (card, index) => {
     const detail = card.item ? buildHomepageCuratedDetail(card.item, index) : null;
+    const entryLabel = `跳转到${card.title}：${card.description || detail?.description || card.target}`;
     return <article
       key={card.key}
       className="curated-entry-card"
       role="button"
+      aria-label={entryLabel}
+      aria-controls={card.target}
       tabIndex={0}
       onClick={() => scrollToCuratedSection(card.target)}
       onKeyDown={(event) => {
@@ -6303,6 +6598,235 @@ function App() {
       <strong>{card.title}</strong>
       <p>{card.description || detail?.description}</p>
     </article>;
+  };
+
+  const buildEcommerceSuiteDetail = (suite, page, pageIndex) => ({
+    id: `${suite.id}-${String(pageIndex + 1).padStart(2, "0")}`,
+    kind: "case",
+    label: `${suite.label} · 第 ${pageIndex + 1} 页`,
+    title: `${suite.shortTitle}｜${page.title}`,
+    description: page.description || suite.description,
+    tags: ensureStringArray(suite.tags),
+    cover: page.image,
+    detailRows: [
+      { label: "套图类型", value: suite.category },
+      { label: "参考来源", value: HOMEPAGE_CURATED_WORKS[suite.referenceWorkId]?.title || "首页商业案例图" },
+      { label: "页面用途", value: page.role },
+      { label: "一致性控制", value: "基于现有案例图派生，不混入无关商品或工作流截图。" }
+    ]
+  });
+
+  const renderEcommerceSuiteReader = (suites, section) => {
+    const suiteItems = (Array.isArray(suites) ? suites : []).filter((suite) => suite && Array.isArray(suite.pages) && suite.pages.length);
+    if (!suiteItems.length) return null;
+    const normalizedSuiteIndex = ((activeEcommerceSuiteIndex % suiteItems.length) + suiteItems.length) % suiteItems.length;
+    const activeSuite = suiteItems[normalizedSuiteIndex];
+    const pages = Array.isArray(activeSuite.pages) ? activeSuite.pages : [];
+    const normalizedPageIndex = ((activeEcommercePageIndex % pages.length) + pages.length) % pages.length;
+    const activePage = pages[normalizedPageIndex];
+    const activeDetail = buildEcommerceSuiteDetail(activeSuite, activePage, normalizedPageIndex);
+    const suiteProgressPercent = `${Math.round(((normalizedPageIndex + 1) / pages.length) * 100)}%`;
+    const previousPage = pages[((normalizedPageIndex - 1 + pages.length) % pages.length)];
+    const nextPage = pages[((normalizedPageIndex + 1) % pages.length)];
+    const suitePanelId = "curated-suite-panel";
+    const activeSuiteTabId = `curated-suite-tab-${activeSuite.id}`;
+    const activePagePanelId = "curated-suite-page-panel";
+    const activePageTabId = `curated-suite-page-tab-${activeSuite.id}-${normalizedPageIndex}`;
+    const selectSuite = (index) => {
+      setActiveEcommerceSuiteIndex(index);
+      setActiveEcommercePageIndex(0);
+    };
+    const selectPage = (index) => {
+      const nextIndex = ((index % pages.length) + pages.length) % pages.length;
+      setActiveEcommercePageIndex(nextIndex);
+    };
+    const movePage = (offset) => selectPage(normalizedPageIndex + offset);
+    const getNextTabIndex = (event, currentIndex, total) => {
+      if (!total) return null;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") return (currentIndex + 1) % total;
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") return (currentIndex - 1 + total) % total;
+      if (event.key === "Home") return 0;
+      if (event.key === "End") return total - 1;
+      return null;
+    };
+    const focusEcommerceTab = (selector, index) => {
+      window.requestAnimationFrame(() => {
+        const target = Array.from(document.querySelectorAll(selector))[index];
+        if (!target || typeof target.focus !== "function") return;
+        try {
+          target.focus({ preventScroll: true });
+        } catch {
+          target.focus();
+        }
+      });
+    };
+    const handleSuiteTabKeyDown = (event, index) => {
+      const nextIndex = getNextTabIndex(event, index, suiteItems.length);
+      if (nextIndex === null) return;
+      event.preventDefault();
+      selectSuite(nextIndex);
+      focusEcommerceTab(".curated-suite-tabs [role=\"tab\"]", nextIndex);
+    };
+    const handlePageTabKeyDown = (event, index, focusSelector = ".curated-suite-dots [role=\"tab\"]") => {
+      const nextIndex = getNextTabIndex(event, index, pages.length);
+      if (nextIndex === null) return;
+      event.preventDefault();
+      selectPage(nextIndex);
+      focusEcommerceTab(focusSelector, nextIndex);
+    };
+    const handleTouchStart = (event) => {
+      ecommerceTouchStartX.current = event.touches?.[0]?.clientX ?? null;
+    };
+    const handleTouchEnd = (event) => {
+      const startX = ecommerceTouchStartX.current;
+      ecommerceTouchStartX.current = null;
+      const endX = event.changedTouches?.[0]?.clientX ?? null;
+      if (!Number.isFinite(startX) || !Number.isFinite(endX)) return;
+      const delta = endX - startX;
+      if (Math.abs(delta) < 42) return;
+      movePage(delta < 0 ? 1 : -1);
+    };
+    const handleSuiteMediaKeyDown = (event) => {
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        movePage(1);
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        movePage(-1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        selectPage(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        selectPage(pages.length - 1);
+      }
+    };
+
+    return <div className="curated-ecommerce-layout" data-ecommerce-suite-count={suiteItems.length}>
+      <div className="curated-suite-tabs" role="tablist" aria-label="选择电商详情页套图">
+        {suiteItems.map((suite, index) => {
+          const isActive = index === normalizedSuiteIndex;
+          const reference = HOMEPAGE_CURATED_WORKS[suite.referenceWorkId];
+          return <button
+            key={suite.id}
+            id={`curated-suite-tab-${suite.id}`}
+            type="button"
+            role="tab"
+            aria-label={`选择套图：${suite.label} ${suite.shortTitle}，${suite.category}`}
+            aria-selected={isActive}
+            aria-controls={suitePanelId}
+            tabIndex={isActive ? 0 : -1}
+            className={isActive ? "is-active" : ""}
+            onClick={() => selectSuite(index)}
+            onKeyDown={(event) => handleSuiteTabKeyDown(event, index)}
+            data-ecommerce-suite={suite.id}
+          >
+            <img
+              src={suite.pages[0]?.image || reference?.media?.url}
+              alt=""
+              aria-hidden="true"
+              width="1200"
+              height="1600"
+              loading={isActive ? "eager" : "lazy"}
+              decoding={index === normalizedSuiteIndex ? "sync" : "async"}
+              fetchPriority={index === normalizedSuiteIndex ? "high" : "auto"}
+            />
+            <span>{suite.label}</span>
+            <strong>{suite.shortTitle}</strong>
+            <em>{suite.category}</em>
+          </button>;
+        })}
+      </div>
+      <article
+        id={suitePanelId}
+        className="curated-suite-reader"
+        role="tabpanel"
+        aria-labelledby={activeSuiteTabId}
+        data-ecommerce-active-suite={activeSuite.id}
+        data-ecommerce-active-page={normalizedPageIndex + 1}
+      >
+        <div
+          id={activePagePanelId}
+          className="curated-suite-media"
+          role="tabpanel"
+          aria-labelledby={activePageTabId}
+          aria-label={`${activeSuite.shortTitle} ${activePage.role} ${activePage.title} 大图`}
+          tabIndex={0}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onKeyDown={handleSuiteMediaKeyDown}
+        >
+          <img
+            src={activePage.image}
+            alt={`${activeSuite.shortTitle} ${activePage.role} ${activePage.title}`}
+            width="1200"
+            height="1600"
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
+          />
+          <div className="curated-suite-progress" aria-hidden="true">
+            <span style={{ width: suiteProgressPercent }} />
+          </div>
+        </div>
+        <div className="curated-suite-copy" {...getDesignerSectionProps("ecommerce", "电商套图")}>
+          <span>{activeSuite.category}</span>
+          <h3>{activePage.title}</h3>
+          <p>{activePage.description}</p>
+          <div className="curated-suite-meta" aria-live="polite">
+            <span>{activePage.role}</span>
+            <span>{String(normalizedPageIndex + 1).padStart(2, "0")} / {String(pages.length).padStart(2, "0")}</span>
+          </div>
+          <div className="curated-suite-actions">
+            <button type="button" onClick={() => movePage(-1)} aria-label={`上一页套图：${previousPage?.title || "上一页"}`}><Icon name="ChevronLeft" size={15} />上一页</button>
+            <button type="button" onClick={() => openWorkDetail(activeDetail)} aria-label={`查看大图：${activeSuite.shortTitle} ${activePage.role} ${activePage.title}`}>查看大图</button>
+            <button type="button" onClick={() => movePage(1)} aria-label={`下一页套图：${nextPage?.title || "下一页"}`}>下一页<Icon name="ChevronRight" size={15} /></button>
+          </div>
+          <div className="curated-suite-dots" role="tablist" aria-label="选择套图页面">
+            {pages.map((page, index) => <button
+              key={activeSuite.id + "-" + page.image}
+              id={`curated-suite-page-tab-${activeSuite.id}-${index}`}
+              type="button"
+              role="tab"
+              className={index === normalizedPageIndex ? "is-active" : ""}
+              aria-controls={activePagePanelId}
+              aria-label={`查看第 ${index + 1} 页：${page.role}`}
+              aria-selected={index === normalizedPageIndex}
+              tabIndex={index === normalizedPageIndex ? 0 : -1}
+              onClick={() => selectPage(index)}
+              onKeyDown={(event) => handlePageTabKeyDown(event, index)}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+            </button>)}
+          </div>
+          <div className="curated-suite-thumbs" role="listbox" aria-label="套图页面缩略图">
+            {pages.map((page, index) => <button
+              key={activeSuite.id + "-thumb-" + page.image}
+              type="button"
+              role="option"
+              className={index === normalizedPageIndex ? "is-active" : ""}
+              aria-label={`查看第 ${index + 1} 页缩略图：${page.title}`}
+              aria-selected={index === normalizedPageIndex}
+              aria-current={index === normalizedPageIndex ? "true" : undefined}
+              tabIndex={index === normalizedPageIndex ? 0 : -1}
+              onClick={() => selectPage(index)}
+              onKeyDown={(event) => handlePageTabKeyDown(event, index, ".curated-suite-thumbs [role=\"option\"]")}
+              title={page.title}
+            >
+              <img
+                src={page.image}
+                alt=""
+                width="1200"
+                height="1600"
+                loading={index === normalizedPageIndex ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={index === normalizedPageIndex ? "high" : "auto"}
+              />
+            </button>)}
+          </div>
+        </div>
+      </article>
+    </div>;
   };
 
   const selectDesignerNode = (nodeId, status = "已选中可编辑元素。") => {
@@ -6395,7 +6919,8 @@ function App() {
       type: "slide-media",
       slideId: entry.slide.id,
       slotIndex,
-      label
+      label,
+      accept: isVideoCard ? "video" : "image"
     };
     const replaceTargetKey = getCuratedDropTargetKey(replaceTarget);
     const uploadInputId = `curated-upload-${entry.slide.id}-${slotIndex}`;
@@ -6626,7 +7151,7 @@ function App() {
     const displayTitle = preview?.title || item.title;
     const displayDescription = preview?.description || item.description;
     const displayTags = preview?.tags?.length ? preview.tags : item.tags;
-    return <article key={item.title} className="curated-capability-card" data-curation-section="capability" data-curation-id={preview?.curation?.id || item.workId} data-curation-category={preview?.curation?.category || ""} data-curation-kind={preview?.kind || ""} tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)} {...getDesignerWorkProps(preview?.curation?.id || item.workId, preview?.title || item.title)}>
+    return <article key={item.title} className="curated-capability-card" data-curation-section="capability" data-curation-id={preview?.curation?.id || item.workId} data-curation-category={preview?.curation?.category || ""} data-curation-kind={preview?.kind || ""} role={preview ? "button" : undefined} aria-label={preview ? `查看能力作品：${displayTitle}` : undefined} tabIndex={preview ? 0 : -1} onClick={() => preview && openWorkDetail(preview)} onKeyDown={(event) => preview && openWorkDetailFromKeyboard(event, preview)} {...getDesignerWorkProps(preview?.curation?.id || item.workId, preview?.title || item.title)}>
       {preview ? renderCuratedMediaBox(preview.entry, preview.mediaEntry, { compact: true, disableInlinePreview: true, label: preview.title, key: item.title, variant: "capability", workId: preview.curation?.id }) : <div className="curated-capability-placeholder"><Icon name="Sparkles" size={22} /></div>}
       <div className="curated-capability-copy">
         <span>{String(index + 1).padStart(2, "0")}</span>
@@ -6646,7 +7171,7 @@ function App() {
       return null;
     }
     const detail = buildVideoWorkDetail(item, index);
-    return <article key={detail.id} className="curated-video-card" data-curation-section="video-featured" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+    return <article key={detail.id} className="curated-video-card" data-curation-section="video-featured" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} role="button" aria-label={`查看视频作品：${detail.title}`} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, duration: detail.duration, variant: "video", workId: detail.curation?.id })}
       <div className="curated-video-copy">
         <span>{detail.label}</span>
@@ -6657,7 +7182,7 @@ function App() {
           {detail.duration && <span>{detail.duration}</span>}
           <span>可播放</span>
         </div>
-        <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看详情</button>
+        <span className="curated-card-cta" aria-hidden="true">查看详情</span>
       </div>
     </article>;
   };
@@ -6761,7 +7286,7 @@ function App() {
         <div>
           <Icon name="Play" size={18} />
           <span>视频资源恢复中</span>
-          {(sourceUrl || playbackUrl) && <a href={sourceUrl || playbackUrl} target="_blank" rel="noreferrer">打开视频链接</a>}
+          {(sourceUrl || playbackUrl) && <a href={sourceUrl || playbackUrl} target="_blank" rel="noopener noreferrer">打开视频链接</a>}
         </div>
       </div>;
     }
@@ -6774,8 +7299,8 @@ function App() {
         videoRef={featuredVideoRef}
         mediaClassName="curated-video-inline-video"
         muted={false}
-        showNativeVideoControls
-        videoPreloadMode="metadata"
+        showNativeVideoControls={false}
+        videoPreloadMode={playerState === "loading" || playbackState.hasPlayed ? "auto" : "none"}
         poster={posterUrl || undefined}
         onMediaLoad={() => setFeaturedVideoPlayback((current) => current.id === detail.id && current.hasPlayed
           ? current
@@ -6829,14 +7354,54 @@ function App() {
     const details = videoItems.map((item, index) => buildVideoWorkDetail(item, index));
     const activeItem = videoItems[normalizedActiveIndex];
     const activeDetail = details[normalizedActiveIndex];
-    const selectVideoIndex = (index) => {
+    const activePlayback = getFeaturedVideoPlaybackState(activeDetail.id);
+    const activeVideoStateLabel = activePlayback.status === "playing"
+      ? "正在播放"
+      : activePlayback.status === "paused"
+        ? "已暂停"
+        : activePlayback.status === "loading"
+          ? "加载中"
+          : "封面预览";
+    const scrollVideoStripOptionIntoView = (index, options = {}) => {
+      window.requestAnimationFrame(() => {
+        const target = Array.from(document.querySelectorAll(".curated-video-strip [role=\"option\"]"))[index];
+        if (!target) return;
+        if (options.focus && typeof target.focus === "function") {
+          try {
+            target.focus({ preventScroll: true });
+          } catch {
+            target.focus();
+          }
+        }
+        target.scrollIntoView({
+          block: "nearest",
+          inline: "center",
+          behavior: getMotionScrollBehavior()
+        });
+      });
+    };
+    const selectVideoIndex = (index, options = {}) => {
       const nextIndex = ((index % itemCount) + itemCount) % itemCount;
       if (nextIndex !== normalizedActiveIndex) {
         resetFeaturedVideoPlayback(details[nextIndex]?.id || "");
       }
       setActiveVideoIndex(nextIndex);
+      scrollVideoStripOptionIntoView(nextIndex, options);
     };
-    const moveVideoIndex = (offset) => selectVideoIndex(normalizedActiveIndex + offset);
+    const moveVideoIndex = (offset, options = {}) => selectVideoIndex(normalizedActiveIndex + offset, options);
+    const getNextVideoOptionIndex = (event, currentIndex) => {
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") return (currentIndex + 1) % itemCount;
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") return (currentIndex - 1 + itemCount) % itemCount;
+      if (event.key === "Home") return 0;
+      if (event.key === "End") return itemCount - 1;
+      return null;
+    };
+    const handleVideoStripKeyDown = (event, index) => {
+      const nextIndex = getNextVideoOptionIndex(event, index);
+      if (nextIndex === null) return;
+      event.preventDefault();
+      selectVideoIndex(nextIndex, { focus: true });
+    };
     const getWheelOffset = (index) => {
       let offset = index - normalizedActiveIndex;
       if (offset > itemCount / 2) offset -= itemCount;
@@ -6853,6 +7418,12 @@ function App() {
       } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
         event.preventDefault();
         moveVideoIndex(-1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        selectVideoIndex(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        selectVideoIndex(itemCount - 1);
       }
     };
 
@@ -6869,6 +7440,11 @@ function App() {
         {renderFeaturedInlineVideoPlayer(activeItem, activeDetail)}
         <div className="curated-video-copy curated-video-feature-copy">
           <span>{activeDetail.label}</span>
+          <div className="curated-video-feature-state" aria-live="polite">
+            <span>{activeVideoStateLabel}</span>
+            <span>{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(itemCount).padStart(2, "0")}</span>
+            {activeDetail.duration && <span>{activeDetail.duration}</span>}
+          </div>
           <h3>{activeDetail.title}</h3>
           <p>{activeDetail.description}</p>
           <div className="curated-card-tags">
@@ -6882,6 +7458,10 @@ function App() {
           <button type="button" onClick={() => moveVideoIndex(-1)} aria-label="上一个视频"><Icon name="ChevronLeft" size={15} />上一个</button>
           <strong>{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(itemCount).padStart(2, "0")}</strong>
           <button type="button" onClick={() => moveVideoIndex(1)} aria-label="下一个视频">下一个<Icon name="ChevronRight" size={15} /></button>
+        </div>
+        <div className="curated-video-wheel-current" aria-live="polite">
+          <span>当前视频</span>
+          <strong>{activeDetail.title}</strong>
         </div>
         <div className="curated-video-stage" aria-label="3D 视频滚轮">
           {videoItems.map((item, index) => {
@@ -6902,8 +7482,11 @@ function App() {
               key={detail.id}
               className={cx("curated-video-wheel-card", isActive && "is-active", isDistant && "is-distant")}
               style={style}
+              role="button"
               tabIndex={isDistant ? -1 : 0}
               aria-hidden={isDistant ? "true" : undefined}
+              aria-pressed={isActive}
+              aria-current={isActive ? "true" : undefined}
               aria-label={`选择视频：${detail.title}`}
               onClick={() => selectVideoIndex(index)}
               onKeyDown={(event) => handleWheelCardKeyDown(event, index)}
@@ -6926,8 +7509,10 @@ function App() {
             aria-selected={isActive}
             aria-label={`选择视频：${detail.title}`}
             title={detail.title}
+            tabIndex={isActive ? 0 : -1}
             className={isActive ? "is-active" : ""}
             onClick={() => selectVideoIndex(index)}
+            onKeyDown={(event) => handleVideoStripKeyDown(event, index)}
           >
             {renderVideoSelectorPreview(item, detail, { compact: true })}
             <span>{String(index + 1).padStart(2, "0")}</span>
@@ -6946,7 +7531,7 @@ function App() {
     const coverTarget = { type: "case-cover", caseId: caseItem.id, label: `${caseItem.title} 封面`, accept: "image" };
     const coverTargetKey = getCuratedDropTargetKey(coverTarget);
     const coverInputId = `curated-case-cover-${caseItem.id}`;
-    return <article key={caseItem.id} id={"case-" + caseItem.id} className="curated-case-card" data-curation-section="commercial-case" data-curation-id={caseItem.id} data-curation-category={service.curation?.category || caseItem.category} data-curation-kind={caseClassification.kind === "video" ? "video" : "case"} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(service.curation?.id || caseItem.id, caseItem.title)}>
+    return <article key={caseItem.id} id={"case-" + caseItem.id} className="curated-case-card" data-curation-section="commercial-case" data-curation-id={caseItem.id} data-curation-category={service.curation?.category || caseItem.category} data-curation-kind={caseClassification.kind === "video" ? "video" : "case"} role="button" aria-label={`查看项目案例：${caseItem.title}`} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(service.curation?.id || caseItem.id, caseItem.title)}>
       <div
         className={cx(
           "curated-case-cover",
@@ -6958,7 +7543,15 @@ function App() {
         {caseClassification.kind === "video" && service.curatedItem ? <>
           {renderCuratedMediaBox(service.curatedItem.entry, service.curatedItem.mediaEntry, { compact: true, disableInlinePreview: true, label: caseItem.title, duration: service.curation?.duration || "", variant: "case", workId: service.curation?.id })}
           <span className="curated-case-video-badge">视频{service.curation?.duration ? ` · ${service.curation.duration}` : ""} · 可播放</span>
-        </> : caseItem.cover ? <img src={caseItem.cover} alt={caseItem.title} loading="eager" decoding="async" fetchPriority={index < 4 ? "high" : "auto"} /> : <div>暂无封面</div>}
+        </> : caseItem.cover ? <img
+          src={caseItem.cover}
+          alt={caseItem.title}
+          width="1586"
+          height="992"
+          loading="eager"
+          decoding={index < 4 ? "sync" : "async"}
+          fetchPriority={index < 4 ? "high" : "auto"}
+        /> : <div>暂无封面</div>}
         {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-admin-media-tools">
           <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换封面" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
         </div>}
@@ -6982,7 +7575,7 @@ function App() {
             <span>{stats.images} 张图像</span>
             <span>{stats.videos} 条视频</span>
           </>}
-          <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看案例</button>
+          <span className="curated-card-cta" aria-hidden="true">查看案例</span>
         </div>
       </div>
     </article>;
@@ -6995,7 +7588,7 @@ function App() {
       return null;
     }
     const detail = buildVisualWorkDetail(item, index);
-    return <article key={detail.id} className="curated-visual-card" data-curation-section="gallery" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+    return <article key={detail.id} className="curated-visual-card" data-curation-section="gallery" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || ""} data-curation-kind={detail.kind} role="button" aria-label={`查看视觉作品：${detail.title}`} tabIndex={0} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, variant: "gallery", workId: detail.curation?.id })}
       <div className="curated-visual-copy">
         <span>{detail.label}</span>
@@ -7004,7 +7597,7 @@ function App() {
         <div className="curated-card-tags">
           {detail.tags.slice(0, 3).map((tag) => <span key={detail.id + "-" + tag}>{tag}</span>)}
         </div>
-        <button type="button" onClick={(event) => { event.stopPropagation(); openWorkDetail(detail); }}>查看详情</button>
+        <span className="curated-card-cta" aria-hidden="true">查看详情</span>
       </div>
     </article>;
   };
@@ -7017,7 +7610,7 @@ function App() {
     }
     const detail = buildWorkflowEvidenceDetail(item, index);
     const workflowNote = WORKFLOW_EVIDENCE_NOTES[detail.curation?.id || detail.id] || detail.description;
-    return <article key={detail.id} className="curated-workflow-card curated-workflow-card-image-only" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} tabIndex={0} aria-label={detail.title} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
+    return <article key={detail.id} className="curated-workflow-card curated-workflow-card-image-only" data-curation-section="workflow-evidence" data-curation-id={detail.curation?.id || detail.id} data-curation-category={detail.curation?.category || "workflow"} data-curation-kind={classification.kind} role="button" tabIndex={0} aria-label={`查看工作流证据：${detail.title}`} onClick={() => openWorkDetail(detail)} onKeyDown={(event) => openWorkDetailFromKeyboard(event, detail)} {...getDesignerWorkProps(detail.curation?.id, detail.title)}>
       {renderCuratedMediaBox(item.entry, item.mediaEntry, { compact: true, disableInlinePreview: true, label: detail.title, variant: "workflow", workId: detail.curation?.id })}
       {workflowNote && <p className="curated-workflow-note">{workflowNote}</p>}
     </article>;
@@ -7026,6 +7619,8 @@ function App() {
   const renderWorkflowLabCard = (card, index) => {
     const detail = card.item ? buildHomepageCuratedDetail(card.item, index) : null;
     const commonProps = detail ? {
+      role: "button",
+      "aria-label": `查看工作流作品：${card.title}`,
       tabIndex: 0,
       onClick: () => openWorkDetail(detail),
       onKeyDown: (event) => openWorkDetailFromKeyboard(event, detail)
@@ -7116,7 +7711,7 @@ function App() {
         }
         return <div className="curated-detail-external">
           {displayUrl && <img src={displayUrl} alt="" aria-hidden="true" />}
-          <a href={sourceUrl} target="_blank" rel="noreferrer"><Icon name="ExternalLink" size={16} /> 打开外部视频</a>
+          <a href={sourceUrl} target="_blank" rel="noopener noreferrer"><Icon name="ExternalLink" size={16} /> 打开外部视频</a>
         </div>;
       }
     }
@@ -7130,7 +7725,8 @@ function App() {
       type: "slide-media",
       slideId: selectedWorkItem.entry.slide.id,
       slotIndex: selectedWorkItem.mediaEntry.slotIndex,
-      label: selectedWorkItem.title
+      label: selectedWorkItem.title,
+      accept: isVideoMedia(selectedWorkItem.mediaEntry?.media) ? "video" : "image"
     } : selectedWorkItem.caseItem ? {
       type: "case-cover",
       caseId: selectedWorkItem.caseItem.id,
@@ -7139,9 +7735,22 @@ function App() {
     } : null;
     const detailTargetKey = detailTarget ? getCuratedDropTargetKey(detailTarget) : "";
     const detailUploadInputId = selectedWorkItem ? `curated-detail-upload-${selectedWorkItem.id}` : "";
+    const detailDialogId = `curated-detail-${String(selectedWorkItem.id || selectedWorkItem.title || "work").replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
+    const detailTitleId = `${detailDialogId}-title`;
+    const detailDescriptionId = `${detailDialogId}-description`;
     return <div className="curated-detail-layer" onClick={closeWorkDetail}>
-      <aside className="curated-detail-drawer" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="curated-detail-close" onClick={closeWorkDetail}>关闭</button>
+      <aside
+        ref={detailDrawerRef}
+        id={detailDialogId}
+        className="curated-detail-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={detailTitleId}
+        aria-describedby={detailDescriptionId}
+        tabIndex={-1}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button type="button" className="curated-detail-close" aria-label="关闭作品详情" onClick={closeWorkDetail}>关闭</button>
         <div
           className={cx(
             "curated-detail-media",
@@ -7163,8 +7772,8 @@ function App() {
         </div>
         <div className="curated-detail-body">
           <span>{selectedWorkItem.label}</span>
-          <h2>{selectedWorkItem.title}</h2>
-          <p>{selectedWorkItem.description}</p>
+          <h2 id={detailTitleId}>{selectedWorkItem.title}</h2>
+          <p id={detailDescriptionId}>{selectedWorkItem.description}</p>
           <div className="curated-info-rows curated-info-rows-detail">
             {selectedWorkItem.detailRows?.map((row) => <div key={row.label}><span>{row.label}</span><strong>{row.value}</strong></div>)}
           </div>
@@ -7192,6 +7801,7 @@ function App() {
     if (!pendingMediaReplacement) return null;
     const { file, previewUrl, kind, target, summary } = pendingMediaReplacement;
     const targetPath = kind === "video" ? "videos/uploads/YYYY/MM/" : "images/uploads/YYYY/MM/";
+    const replacementFields = kind === "video" ? "url / poster" : "url / fullUrl / width / height / alt";
     return <div className="curated-upload-confirm-layer" onClick={cancelPendingMediaReplacement}>
       <aside className="curated-upload-confirm" onClick={(event) => event.stopPropagation()}>
         <div className="curated-upload-preview">
@@ -7200,18 +7810,18 @@ function App() {
             : <img src={previewUrl} alt="" />}
         </div>
         <div className="curated-upload-copy">
-          <span>确认替换到草稿</span>
+          <span>确认保存到作品集数据</span>
           <h2>{target.label || "当前作品媒体"}</h2>
-          <p>确认后会先上传文件，再原位替换当前草稿预览；不会自动上线。确认页面无误后，再点击保存到代码仓库发布。</p>
+          <p>确认后会上传到仓库静态素材目录，并写入作品集 JSON。生产站仍需按部署流程发布后才会生效。</p>
           <div className="curated-upload-rows">
             <div><span>文件</span><strong>{file.name}</strong></div>
             <div><span>类型 / 大小</span><strong>{summary}</strong></div>
-            <div><span>写入目录</span><strong>{targetPath}</strong></div>
-            <div><span>替换字段</span><strong>{kind === "video" ? "url / poster" : "url / fullUrl / width / height / alt"}</strong></div>
+            <div><span>存储方式</span><strong>{targetPath}</strong></div>
+            <div><span>替换字段</span><strong>{replacementFields}</strong></div>
           </div>
           <div className="curated-upload-actions">
             <button type="button" onClick={cancelPendingMediaReplacement} disabled={isReplacingMedia}>取消</button>
-            <button type="button" onClick={confirmPendingMediaReplacement} disabled={isReplacingMedia}>{isReplacingMedia ? "正在上传..." : "确认替换到草稿"}</button>
+            <button type="button" onClick={confirmPendingMediaReplacement} disabled={isReplacingMedia}>{isReplacingMedia ? "正在保存..." : "确认保存"}</button>
           </div>
         </div>
       </aside>
@@ -7513,20 +8123,23 @@ function App() {
 
   const renderCuratedTopbar = () => {
     const progressWidth = Math.round(scrollProgress * 100) + "%";
-    return <div className="curated-topbar">
+    const activeNavItem = curatedNavItems.find((item) => item.id === activeCuratedSection) || curatedNavItems[0];
+    return <header className="curated-topbar">
       <div className="curated-topbar-inner">
         <a href="#home" className="curated-brand" onClick={(event) => handleCuratedAnchorClick(event, "home")}>张玮<span /></a>
-        <nav>
+        <nav aria-label="作品集分区导航">
           {curatedNavItems.map((item) => <a
             key={item.id}
             href={"#" + item.id}
             className={activeCuratedSection === item.id ? "is-active" : ""}
+            aria-current={activeCuratedSection === item.id ? "page" : undefined}
             onClick={(event) => handleCuratedAnchorClick(event, item.id)}
           >{item.label}</a>)}
         </nav>
+        {activeNavItem && <span className="curated-topbar-status" aria-live="polite">{activeNavItem.label}</span>}
       </div>
       <div className="curated-scroll-progress"><span style={{ width: progressWidth }} /></div>
-    </div>;
+    </header>;
   };
 
   const renderHeroKineticStage = (heroDetail, stageItems) => {
@@ -7536,7 +8149,8 @@ function App() {
       type: "slide-media",
       slideId: heroItem.entry.slide.id,
       slotIndex: heroItem.mediaEntry.slotIndex,
-      label: "首页动态舞台"
+      label: "首页动态舞台",
+      accept: isVideoMedia(heroItem.mediaEntry?.media) ? "video" : "image"
     } : null;
     const targetKey = target ? getCuratedDropTargetKey(target) : "";
     const handlers = target ? getCuratedDropHandlers(target) : {};
@@ -7643,11 +8257,13 @@ function App() {
     const visibleVideoEntries = homepageVideoEntries;
     const visibleVisualEntries = filteredVisualEntries;
     const visibleWorkflowEntries = visibleWorkflowEntriesForDisplay;
+    const visibleEcommerceSuites = ECOMMERCE_DETAIL_SUITES;
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
       featured: { label: "精选入口", eyebrow: "精选入口", title: "核心能力快速入口", description: "从视频、商业视觉、能力矩阵到 ComfyUI 工作流，快速了解我的 AIGC 视觉生产能力。" },
       videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频与商业短片精选", description: "精选 AI 视频案例，覆盖食品广告、产品展示、场景氛围与镜头运动控制。" },
       cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "商业视觉案例", description: siteMeta.caseSectionDesc || "覆盖产品广告、美妆人像、未来场景与包装陈列，展示商业审美、质感控制与视觉一致性。" },
+      ecommerce: { label: "电商套图", eyebrow: "电商套图", title: "电商详情页 / 视觉套图", description: "基于首页商业案例图延展成翻页阅读套图，展示商品一致性、详情页节奏和视觉交付能力。" },
       capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "以商业项目流程为核心，拆解从需求分析、视觉生成、局部优化到视频输出的完整 AIGC 生产能力。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
       process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI 工作流 / 创作流程", description: "通过节点化流程搭建，实现从图像生成、角色一致性、局部重绘到视频输出的可复用生产流程。" },
@@ -7657,6 +8273,7 @@ function App() {
     const featuredSection = getDesignerSection("featured", sectionDefaults.featured);
     const videoSection = getDesignerSection("videos", sectionDefaults.videos);
     const caseSection = getDesignerSection("cases", sectionDefaults.cases);
+    const ecommerceSection = getDesignerSection("ecommerce", sectionDefaults.ecommerce);
     const capabilitySection = getDesignerSection("capabilities", sectionDefaults.capabilities);
     const gallerySection = getDesignerSection("gallery", sectionDefaults.gallery);
     const processSection = getDesignerSection("process", sectionDefaults.process);
@@ -7664,9 +8281,11 @@ function App() {
     const homeTags = ensureStringArray(homeSection.tags).length ? ensureStringArray(homeSection.tags) : heroRoleTags;
     const designerThemeStyle = getHomepageDesignerThemeStyle(getHomepageDesignerState().theme);
 
-    return <div className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
+    return <main id="main-content" className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
       {renderCuratedLayoutStyles()}
-      <section id="home" className="curated-hero" style={publishedSectionStyle}>
+      <a href="#home" className="curated-skip-link" onClick={handleSkipToContent}>跳过导航</a>
+      {renderCuratedTopbar()}
+      <section id="home" className="curated-hero" tabIndex={-1} style={publishedSectionStyle}>
         <div className="portfolio-container curated-hero-container">
           <div className="curated-hero-copy">
             <div className="curated-hero-copy-editable" {...getDesignerSectionProps("home", "首页首屏")}>
@@ -7675,6 +8294,11 @@ function App() {
               <p>{homeSection.description}</p>
               <div className="curated-hero-tags">
                 {homeTags.map((tag) => <span key={tag}>{tag}</span>)}
+              </div>
+              <div className="curated-hero-route" aria-label="核心服务方向">
+                <span>Commercial visual</span>
+                <span>AI video</span>
+                <span>ComfyUI workflow</span>
               </div>
             </div>
             <div className="curated-hero-actions">
@@ -7723,9 +8347,20 @@ function App() {
         </div>
       </section>}
 
+      {!isHomepageSectionHidden("ecommerce") && <section id="ecommerce" className="curated-section curated-section-ecommerce" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(4, ecommerceSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("ecommerce", "电商套图")}>
+            <h2>{ecommerceSection.title}</h2>
+            <p>{ecommerceSection.description}</p>
+          </div>
+          {renderEcommerceSuiteReader(visibleEcommerceSuites, ecommerceSection)}
+        </div>
+      </section>}
+
       {!isHomepageSectionHidden("capabilities") && <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(4, capabilitySection.eyebrow)}
+          {renderCuratedEyebrow(5, capabilitySection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
             <h2>{capabilitySection.title}</h2>
             <p>{capabilitySection.description}</p>
@@ -7746,7 +8381,7 @@ function App() {
 
       {!isHomepageSectionHidden("process") && <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(5, processSection.eyebrow)}
+          {renderCuratedEyebrow(6, processSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
             <h2>{processSection.title}</h2>
             <p>{processSection.description}</p>
@@ -7768,9 +8403,31 @@ function App() {
           </div>
           <div className="curated-contact-grid">
             {contactItems.map((item) => {
-              const content = <div><span>{item.label}</span><strong>{item.value}</strong></div>;
-              return item.href ? <a key={item.label} href={item.href}>{content}</a> : <div key={item.label}>{content}</div>;
+              const isExternalLink = /^https?:\/\//i.test(item.href || "");
+              const isEmailLink = /^mailto:/i.test(item.href || "");
+              const iconName = isEmailLink ? "Mail" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
+              const actionLabel = isEmailLink ? "发送邮件" : isExternalLink ? "打开作品集" : "可沟通";
+              const content = <>
+                <span className="curated-contact-icon" aria-hidden="true"><Icon name={iconName} size={16} /></span>
+                <div className="curated-contact-card-copy"><span>{item.label}</span><strong>{item.value}</strong></div>
+                <span className="curated-contact-action">{actionLabel}</span>
+              </>;
+              return item.href ? <a
+                key={item.label}
+                className="curated-contact-card"
+                href={item.href}
+                aria-label={`${item.label}: ${item.value}`}
+                target={isExternalLink ? "_blank" : undefined}
+                rel={isExternalLink ? "noopener noreferrer" : undefined}
+              >{content}</a> : <div key={item.label} className="curated-contact-card">{content}</div>;
             })}
+          </div>
+          <div className="curated-contact-closer">
+            <span>AIGC commercial visuals / AI video / ComfyUI workflow</span>
+            <div>
+              <a href="mailto:2453193338@qq.com">发邮件沟通</a>
+              <a href="#home" onClick={(event) => handleCuratedAnchorClick(event, "home")}>回到首屏</a>
+            </div>
           </div>
         </div>
       </section>}
@@ -7778,7 +8435,7 @@ function App() {
       {renderMediaReplacementDialog()}
       {renderCuratedAdminDock()}
       {renderHomepageDesignInspector(sectionDefaults)}
-    </div>;
+    </main>;
   };
 
   const renderSlide = (slide, index) => {
@@ -7994,7 +8651,7 @@ function App() {
         const sourceVideoUrl = getSourceMediaUrl(lightboxData, { preferDraftPreview });
         const embedUrl = getVideoEmbedUrl(sourceVideoUrl);
         if (embedUrl && !isDirectVideoSource(sourceVideoUrl) && !isBilibiliVideoUrl(sourceVideoUrl) && !isBilibiliVideoUrl(embedUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
-        if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
+        if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
         return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
