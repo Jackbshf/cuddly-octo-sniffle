@@ -1,7 +1,8 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { build } from "esbuild";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -49,24 +50,60 @@ export const buildAppAssets = async () => {
     }
   });
 
-  await build({
+  const shared = {
+    absWorkingDir: root,
     entryPoints: [jsEntry],
-    outfile: jsOutput,
     bundle: true,
     minify: true,
     sourcemap: false,
     platform: "browser",
-    format: "iife",
     target: ["es2020"],
     jsx: "automatic",
     legalComments: "none",
     define: {
       "process.env.NODE_ENV": "\"production\""
     }
+  };
+  const runtime = await build({
+    ...shared,
+    outdir: assetsDir,
+    entryNames: "runtime-[hash]",
+    chunkNames: "chunks/[name]-[hash]",
+    format: "esm",
+    splitting: true,
+    metafile: true
   });
+  const entry = Object.entries(runtime.metafile.outputs).find(([, value]) => value.entryPoint === "app.jsx");
+  if (!entry) throw new Error("Missing portfolio runtime entry");
+  const runtimeName = path.basename(entry[0]);
 
-  const bundledJs = await readFile(jsOutput, "utf8");
-  await writeFile(jsOutput, bundledJs.replace(/[ \t]+$/gm, ""), "utf8");
+  // A classic bundle preserves the existing direct-file portfolio/editor path.
+  const offline = await build({ ...shared, outfile: jsOutput, format: "iife", write: false });
+  const offlineCode = offline.outputFiles[0].contents;
+  const offlineHash = createHash("sha256").update(offlineCode).digest("hex").slice(0, 10);
+  const offlineName = `offline/app.${offlineHash}.js`;
+  await mkdir(path.join(assetsDir, "offline"), { recursive: true });
+  await writeFile(path.join(assetsDir, offlineName), offlineCode);
+  await writeFile(jsOutput, `(() => {
+    const base = document.currentScript.src;
+    const fail = () => {
+      const root = document.getElementById("root");
+      const message = document.createElement("p");
+      message.textContent = "页面加载失败，请刷新重试。";
+      const retry = document.createElement("button");
+      retry.textContent = "重新加载";
+      retry.onclick = () => location.reload();
+      root.replaceChildren(message, retry);
+    };
+    if (location.protocol === "file:") {
+      const script = document.createElement("script");
+      script.src = new URL(${JSON.stringify(offlineName)}, base).href;
+      script.onerror = fail;
+      document.head.appendChild(script);
+    } else {
+      import(new URL(${JSON.stringify(runtimeName)}, base).href).catch(fail);
+    }
+  })();\n`, "utf8");
 };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {

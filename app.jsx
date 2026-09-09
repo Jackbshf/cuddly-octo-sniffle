@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState, startTransition } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState, startTransition } from "react";
 import { createRoot } from "react-dom/client";
-import Hls from "hls.js";
 import * as THREE from "three";
-import GalleryWorldHome from "./src/components/GalleryWorldHome.jsx";
+const GalleryWorldHome = lazy(() => import("./src/components/GalleryWorldHome.jsx"));
 
 const DATA_FILE_PATH = "data/portfolio.json";
 const QQ_MAIL_COMPOSE_URL = "https://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=2453193338%40qq.com";
@@ -2601,27 +2600,51 @@ const StreamVideoElement = ({
     if (!video) return undefined;
 
     let hls = null;
+    let disposed = false;
+    let observer = null;
     const canUseNativeHls = isHlsManifestUrl(playbackUrl) && typeof video.canPlayType === "function" && Boolean(video.canPlayType("application/vnd.apple.mpegurl"));
 
     delete video.dataset.hlsManaged;
     video.crossOrigin = "anonymous";
 
-    if (playbackUrl && isHlsManifestUrl(playbackUrl) && !canUseNativeHls && Hls.isSupported()) {
+    if (playbackUrl && isHlsManifestUrl(playbackUrl) && !canUseNativeHls) {
       setNativeVideoSrc("");
       video.removeAttribute("src");
       video.dataset.hlsManaged = "1";
-      hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: false,
-        backBufferLength: 90
-      });
-      hls.loadSource(playbackUrl);
-      hls.attachMedia(video);
+      const useLocalSource = () => {
+        if (disposed) return;
+        hls?.destroy();
+        hls = null;
+        delete video.dataset.hlsManaged;
+        setNativeVideoSrc(sourceUrl && !isHlsManifestUrl(sourceUrl) ? sourceUrl : playbackUrl);
+      };
+      const loadPlayer = () => import("hls.js").then(({ default: Hls }) => {
+          if (disposed) return;
+          if (!Hls.isSupported()) return useLocalSource();
+          hls = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 });
+          hls.on(Hls.Events.ERROR, (_event, data) => {
+            if (data.fatal) useLocalSource();
+          });
+          hls.loadSource(playbackUrl);
+          hls.attachMedia(video);
+        }).catch(useLocalSource);
+      if ("IntersectionObserver" in window) {
+        observer = new IntersectionObserver((entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          loadPlayer();
+        }, { rootMargin: "300px" });
+        observer.observe(video);
+      } else {
+        loadPlayer();
+      }
     } else {
       setNativeVideoSrc(playbackUrl || sourceUrl || "");
     }
 
     return () => {
+      disposed = true;
+      observer?.disconnect();
       if (hls) {
         hls.destroy();
       }
@@ -3079,6 +3102,7 @@ function App() {
   const [deploymentStatus, setDeploymentStatus] = useState(null);
   const [metaEditorValue, setMetaEditorValue] = useState("");
   const [metaEditorError, setMetaEditorError] = useState("");
+  const [emailCopyStatus, setEmailCopyStatus] = useState("");
   const [casesEditorValue, setCasesEditorValue] = useState("");
   const [casesEditorError, setCasesEditorError] = useState("");
   const [isPublishingPortfolio, setIsPublishingPortfolio] = useState(false);
@@ -3141,17 +3165,15 @@ function App() {
   const isHomepageBlockHidden = (blockId) => homepageDesignerState.blocks?.[blockId]?.hidden === true;
 
   const curatedNavItems = [
-    { id: "home", label: "首页" },
-    { id: "featured", label: "入口" },
-    { id: "videos", label: "视频" },
-    { id: "cases", label: "案例" },
-    { id: "details", label: "详情图" },
-    { id: "ecommerce", label: "套图" },
-    { id: "capabilities", label: "能力" },
-    { id: "process", label: "流程" },
-    { id: "contact", label: "联系" }
+    { id: "cases", label: "作品", sections: ["home", "featured", "cases"] },
+    { id: "videos", label: "视频", sections: ["videos"] },
+    { id: "details", label: "电商", sections: ["details", "ecommerce"] },
+    { id: "process", label: "关于", sections: ["process", "capabilities"] },
+    { id: "contact", label: "联系", sections: ["contact"] }
   ].filter((item) => !isHomepageSectionHidden(item.id));
-  const curatedSectionIds = curatedNavItems.map((item) => item.id);
+  const curatedSectionIds = ["home", "featured", "cases", "videos", "details", "ecommerce", "process", "capabilities", "contact"]
+    .filter((id) => !isHomepageSectionHidden(id));
+  const activeNavId = curatedNavItems.find((item) => item.sections.includes(activeCuratedSection))?.id;
   const curatedSectionKey = curatedSectionIds.join("|");
 
   const closeMediaLightbox = () => setLightboxData(null);
@@ -3500,13 +3522,13 @@ function App() {
   useEffect(() => {
     if (IS_EDITOR_MODE || !activeCuratedSection) return;
     const nav = document.querySelector(".curated-topbar nav");
-    const activeLink = nav?.querySelector(`a[href="#${activeCuratedSection}"]`);
+    const activeLink = nav?.querySelector(`a[href="#${activeNavId}"]`);
     if (!nav || !activeLink || nav.scrollWidth <= nav.clientWidth + 1) return;
     const navRect = nav.getBoundingClientRect();
     const linkRect = activeLink.getBoundingClientRect();
     const targetLeft = nav.scrollLeft + linkRect.left - navRect.left - (navRect.width - linkRect.width) / 2;
     nav.scrollTo({ left: Math.max(0, targetLeft), behavior: getMotionScrollBehavior() });
-  }, [activeCuratedSection]);
+  }, [activeNavId]);
 
   useEffect(() => {
     if (IS_EDITOR_MODE || isLoading) return undefined;
@@ -6951,7 +6973,7 @@ function App() {
               onClick={() => selectItem(index)}
               title={item.title}
             >
-              <img src={item.image} alt="" loading="eager" decoding="async" />
+              <img src={item.image} alt="" loading="lazy" decoding="async" />
             </button>)}
           </div>
         </div>
@@ -7306,9 +7328,9 @@ function App() {
         alt={label}
         width={normalizedMedia?.width || undefined}
         height={normalizedMedia?.height || undefined}
-        loading={options.eager || isManualEntry ? "eager" : "lazy"}
-        decoding={options.eager || isManualEntry ? "sync" : "async"}
-        fetchPriority={options.eager || isManualEntry ? "high" : "auto"}
+        loading={options.eager ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={options.eager ? "high" : "auto"}
         className={cx("curated-static-media", portrait && "curated-static-media-contain")}
       /> : <div className="curated-static-fallback">
         <Icon name={isVideoCard ? "Play" : "Grid"} size={22} />
@@ -8511,7 +8533,6 @@ function App() {
 
   const renderCuratedTopbar = () => {
     const progressWidth = Math.round(scrollProgress * 100) + "%";
-    const activeNavItem = curatedNavItems.find((item) => item.id === activeCuratedSection) || curatedNavItems[0];
     return <header className="curated-topbar">
       <div className="curated-topbar-inner">
         <a href="#home" className="curated-brand" onClick={(event) => handleCuratedAnchorClick(event, "home")}>张玮<span /></a>
@@ -8519,12 +8540,11 @@ function App() {
           {curatedNavItems.map((item) => <a
             key={item.id}
             href={"#" + item.id}
-            className={activeCuratedSection === item.id ? "is-active" : ""}
-            aria-current={activeCuratedSection === item.id ? "page" : undefined}
+            className={activeNavId === item.id ? "is-active" : ""}
+            aria-current={activeNavId === item.id ? "page" : undefined}
             onClick={(event) => handleCuratedAnchorClick(event, item.id)}
           >{item.label}</a>)}
         </nav>
-        {activeNavItem && <span className="curated-topbar-status" aria-live="polite">{activeNavItem.label}</span>}
       </div>
       <div className="curated-scroll-progress"><span style={{ width: progressWidth }} /></div>
     </header>;
@@ -8628,8 +8648,8 @@ function App() {
   const renderCuratedExperience = () => {
     const coverSlide = slidesData.find((slide) => slide?.type === "cover") || slidesData[0] || {};
     const heroTitle = coverSlide.title || "张玮";
-    const heroSubtitle = "AIGC Visual Designer\nAI Video Creator / Commercial Visual Designer / ComfyUI Workflow Builder";
-    const heroDescription = "专注 AIGC 商业视觉、AI 视频短片与 ComfyUI 工作流搭建，覆盖产品广告、品牌视觉、角色一致性与场景概念设计。";
+    const heroSubtitle = "AIGC 视觉工程师";
+    const heroDescription = "为品牌制作产品广告、AI 短片与成套电商视觉。";
     const heroDetail = heroVisualEntry ? buildVisualWorkDetail(heroVisualEntry, 0) : null;
     const heroStageItems = (heroVisualEntry ? [heroVisualEntry] : []).map((item, index) => {
       const media = normalizeMediaItem(item.mediaEntry.media);
@@ -8683,29 +8703,18 @@ function App() {
               <h1>{homeSection.title}</h1>
               <h2>{String(homeSection.subtitle || "").split("\n").map((line) => <span key={line}>{line}</span>)}</h2>
               <p>{homeSection.description}</p>
-              <div className="curated-hero-tags">
-                {homeTags.map((tag) => <span key={tag}>{tag}</span>)}
-              </div>
-              <div className="curated-hero-route" aria-label="核心服务方向">
-                <span>Commercial visual</span>
-                <span>AI video</span>
-                <span>ComfyUI workflow</span>
-              </div>
             </div>
             <div className="curated-hero-actions">
-              <a href="#featured" onClick={(event) => handleCuratedAnchorClick(event, "featured")}>查看作品集</a>
-              <a href="#capabilities" onClick={(event) => handleCuratedAnchorClick(event, "capabilities")}>核心能力</a>
+              <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>查看作品</a>
+              <a href="#videos" onClick={(event) => handleCuratedAnchorClick(event, "videos")}>AI 视频</a>
               <a href="#contact" onClick={(event) => handleCuratedAnchorClick(event, "contact")}>联系我</a>
             </div>
           </div>
           {renderHeroKineticStage(heroDetail, heroStageItems)}
-          <div className="curated-hero-proof">
-            {curatedStats.map((item) => <div key={item.label}><span>{item.label}</span><strong>{item.value}</strong></div>)}
-          </div>
         </div>
       </section>
 
-      {!isHomepageSectionHidden("featured") && <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
+      {IS_PORTFOLIO_ADMIN_MODE && !isHomepageSectionHidden("featured") && <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
         <div className="portfolio-container">
           {renderCuratedEyebrow(1, featuredSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("featured", "精选入口")}>
@@ -8713,6 +8722,18 @@ function App() {
             <p>{featuredSection.description}</p>
           </div>
           <div className="curated-feature-grid">{homepageEntryCards.map(renderHomepageEntryCard)}</div>
+        </div>
+      </section>}
+
+      {!isHomepageSectionHidden("cases") && <section id="cases" className="curated-section" style={publishedSectionStyle}>
+        {!IS_PORTFOLIO_ADMIN_MODE && <span id="featured" />}
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(1, caseSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
+            <h2>{caseSection.title}</h2>
+            <p>{caseSection.description}</p>
+          </div>
+          <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
         </div>
       </section>}
 
@@ -8727,25 +8748,25 @@ function App() {
         </div>
       </section>}
 
-      {!isHomepageSectionHidden("cases") && <section id="cases" className="curated-section" style={publishedSectionStyle}>
-        <div className="portfolio-container">
-          {renderCuratedEyebrow(3, caseSection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
-            <h2>{caseSection.title}</h2>
-            <p>{caseSection.description}</p>
-          </div>
-          <div className="curated-case-stack">{homepageCommercialCases.map(renderFeaturedCaseCard)}</div>
-        </div>
-      </section>}
-
       {!isHomepageSectionHidden("details") && <section id="details" className="curated-section curated-section-details" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(4, detailSection.eyebrow)}
+          {renderCuratedEyebrow(3, detailSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("details", "详情图展示")}>
             <h2>{detailSection.title}</h2>
             <p>{detailSection.description}</p>
           </div>
           {renderDetailPageShowcase(visibleDetailPages, detailSection)}
+        </div>
+      </section>}
+
+      {!isHomepageSectionHidden("ecommerce") && <section id="ecommerce" className="curated-section curated-section-ecommerce" style={publishedSectionStyle}>
+        <div className="portfolio-container">
+          {renderCuratedEyebrow(4, ecommerceSection.eyebrow)}
+          <div className="curated-section-heading" {...getDesignerSectionProps("ecommerce", "电商套图")}>
+            <h2>{ecommerceSection.title}</h2>
+            <p>{ecommerceSection.description}</p>
+          </div>
+          {renderEcommerceSuiteReader(visibleEcommerceSuites, ecommerceSection)}
         </div>
       </section>}
 
@@ -8762,17 +8783,6 @@ function App() {
             {processSteps.map((step, stepIndex) => <article key={step.title} className="curated-process-card"><span>{String(stepIndex + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}
           </div>}
           {!isHomepageBlockHidden("process.skills") && <div className="curated-skill-grid">{skillGroups.map(renderSkillGroupCard)}</div>}
-        </div>
-      </section>}
-
-      {!isHomepageSectionHidden("ecommerce") && <section id="ecommerce" className="curated-section curated-section-ecommerce" style={publishedSectionStyle}>
-        <div className="portfolio-container">
-          {renderCuratedEyebrow(4, ecommerceSection.eyebrow)}
-          <div className="curated-section-heading" {...getDesignerSectionProps("ecommerce", "电商套图")}>
-            <h2>{ecommerceSection.title}</h2>
-            <p>{ecommerceSection.description}</p>
-          </div>
-          {renderEcommerceSuiteReader(visibleEcommerceSuites, ecommerceSection)}
         </div>
       </section>}
 
@@ -8828,6 +8838,15 @@ function App() {
             <span>AIGC commercial visuals / AI video / ComfyUI workflow</span>
             <div>
               <a href={QQ_MAIL_COMPOSE_URL} target="_blank" rel="noopener noreferrer" aria-label="QQ 邮箱：2453193338@qq.com">QQ 邮箱</a>
+              <button type="button" title="复制邮箱" aria-label="复制邮箱地址" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText("2453193338@qq.com");
+                  setEmailCopyStatus("邮箱已复制");
+                } catch {
+                  setEmailCopyStatus("暂时无法复制，请使用 QQ 邮箱");
+                }
+              }}><Icon name="Copy" size={16} /></button>
+              <span className="curated-copy-status" role="status">{emailCopyStatus}</span>
               <a href="#home" onClick={(event) => handleCuratedAnchorClick(event, "home")}>回到首屏</a>
             </div>
           </div>
@@ -9269,9 +9288,19 @@ function App() {
   </div>;
 }
 
+class GalleryLoadBoundary extends React.Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    return this.state.failed
+      ? <main className="portfolio-loading"><p role="alert">展厅暂时无法加载</p><a href="./">返回作品集</a></main>
+      : this.props.children;
+  }
+}
+
 const root = createRoot(document.getElementById("root"));
 root.render(
   USE_GALLERY_WORLD_HOME && (!IS_EDITOR_MODE || IS_PORTFOLIO_ADMIN_MODE)
-    ? <GalleryWorldHome admin={IS_PORTFOLIO_ADMIN_MODE} />
+    ? <GalleryLoadBoundary><Suspense fallback={<main className="portfolio-loading" aria-busy="true"><p role="status">展厅加载中</p><a href="./">返回作品集</a></main>}><GalleryWorldHome admin={IS_PORTFOLIO_ADMIN_MODE} /></Suspense></GalleryLoadBoundary>
     : <App />
 );
