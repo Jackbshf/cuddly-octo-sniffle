@@ -2481,17 +2481,21 @@ button.curated-hero-stage {
   box-shadow: -28px 0 72px rgba(17, 24, 39, 0.18);
 }
 
-.curated-detail-cover-image {
+.curated-detail-drawer.curated-detail-drawer-image {
+  grid-template-rows: auto max-content auto;
+}
+
+.curated-page .curated-detail-cover.curated-detail-cover-image {
   aspect-ratio: auto;
-  max-height: 72dvh;
+  max-height: none;
   background: #f8fafc;
 }
 
-.curated-detail-cover-image img {
+.curated-page .curated-detail-cover.curated-detail-cover-image img {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 72dvh;
+  max-height: none;
   object-fit: contain;
 }
 

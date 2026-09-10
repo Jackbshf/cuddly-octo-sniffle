@@ -8138,7 +8138,7 @@ function App() {
         </div>;
       }
     }
-    if (item.cover) return <div className="curated-detail-cover"><img src={item.cover} alt={item.title} /></div>;
+    if (item.cover) return <div className="curated-detail-cover curated-detail-cover-image"><img src={item.cover} alt={item.title} /></div>;
     return null;
   };
 
@@ -8161,11 +8161,15 @@ function App() {
     const detailDialogId = `curated-detail-${String(selectedWorkItem.id || selectedWorkItem.title || "work").replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
     const detailTitleId = `${detailDialogId}-title`;
     const detailDescriptionId = `${detailDialogId}-description`;
+    const detailMedia = selectedWorkItem.entry && selectedWorkItem.mediaEntry
+      ? normalizeMediaItem(selectedWorkItem.mediaEntry.media)
+      : null;
+    const isImageDetail = detailMedia?.kind === "image" || (!detailMedia && Boolean(selectedWorkItem.cover));
     return <div className="curated-detail-layer" onClick={closeWorkDetail}>
       <aside
         ref={detailDrawerRef}
         id={detailDialogId}
-        className="curated-detail-drawer"
+        className={cx("curated-detail-drawer", isImageDetail && "curated-detail-drawer-image")}
         role="dialog"
         aria-modal="true"
         aria-labelledby={detailTitleId}
@@ -8732,6 +8736,16 @@ function App() {
     const contactSection = getDesignerSection("contact", sectionDefaults.contact);
     const homeTags = ensureStringArray(homeSection.tags).length ? ensureStringArray(homeSection.tags) : heroRoleTags;
     const designerThemeStyle = getHomepageDesignerThemeStyle(getHomepageDesignerState().theme);
+    const visibleCuratedSectionIds = [
+      IS_PORTFOLIO_ADMIN_MODE && !isHomepageSectionHidden("featured") && "featured",
+      !isHomepageSectionHidden("cases") && "cases",
+      !isHomepageSectionHidden("videos") && "videos",
+      !isHomepageSectionHidden("details") && "details",
+      !isHomepageSectionHidden("ecommerce") && "ecommerce",
+      !isHomepageSectionHidden("process") && "process",
+      !isHomepageSectionHidden("capabilities") && "capabilities"
+    ].filter(Boolean);
+    const getVisibleSectionNumber = (sectionId) => visibleCuratedSectionIds.indexOf(sectionId) + 1;
 
     return <main id="main-content" className={cx("curated-page curated-shell curated-studio", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
       {renderCuratedLayoutStyles()}
@@ -8760,7 +8774,7 @@ function App() {
 
       {IS_PORTFOLIO_ADMIN_MODE && !isHomepageSectionHidden("featured") && <section id="featured" className="curated-section curated-section-entry" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(1, featuredSection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("featured"), featuredSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("featured", "精选入口")}>
             <h2>{featuredSection.title}</h2>
             <p>{featuredSection.description}</p>
@@ -8779,7 +8793,7 @@ function App() {
               <button type="button" onClick={() => openWorkDetail(heroDetail)}>查看完整作品 <Icon name="ChevronRight" size={18} /></button>
             </div>
           </div>}
-          {renderCuratedEyebrow(1, caseSection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("cases"), caseSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
             <h2>{caseSection.title}</h2>
             <p>{caseSection.description}</p>
@@ -8790,7 +8804,7 @@ function App() {
 
       {!isHomepageSectionHidden("videos") && <section id="videos" className="curated-section curated-section-videos" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(2, videoSection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("videos"), videoSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("videos", "视频精选")}>
             <h2>{videoSection.title}</h2>
             <p>{videoSection.description}</p>
@@ -8801,7 +8815,7 @@ function App() {
 
       {!isHomepageSectionHidden("details") && <section id="details" className="curated-section curated-section-details" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(3, detailSection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("details"), detailSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("details", "详情图展示")}>
             <h2>{detailSection.title}</h2>
             <p>{detailSection.description}</p>
@@ -8812,7 +8826,7 @@ function App() {
 
       {!isHomepageSectionHidden("ecommerce") && <section id="ecommerce" className="curated-section curated-section-ecommerce" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(4, ecommerceSection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("ecommerce"), ecommerceSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("ecommerce", "电商套图")}>
             <h2>{ecommerceSection.title}</h2>
             <p>{ecommerceSection.description}</p>
@@ -8823,7 +8837,7 @@ function App() {
 
       {!isHomepageSectionHidden("process") && <section id="process" className="curated-section curated-section-process curated-section-workflows" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(5, processSection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("process"), processSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("process", "工作流证明")}>
             <h2>{processSection.title}</h2>
             <p>{processSection.description}</p>
@@ -8839,7 +8853,7 @@ function App() {
 
       {!isHomepageSectionHidden("capabilities") && <section id="capabilities" className="curated-section curated-section-capabilities" style={publishedSectionStyle}>
         <div className="portfolio-container">
-          {renderCuratedEyebrow(6, capabilitySection.eyebrow)}
+          {renderCuratedEyebrow(getVisibleSectionNumber("capabilities"), capabilitySection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("capabilities", "能力矩阵")}>
             <h2>{capabilitySection.title}</h2>
             <p>{capabilitySection.description}</p>
