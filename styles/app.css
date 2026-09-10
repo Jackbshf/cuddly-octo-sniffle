@@ -10140,24 +10140,17 @@ button.curated-hero-stage {
 .curated-page.curated-studio .studio-disciplines small { display: block; color: var(--studio-muted); font-family: var(--studio-serif); font-size: 10px; margin-top: 5px; }
 
 .curated-page.curated-studio #cases { padding-top: 32px; }
-.curated-page.curated-studio .studio-project-intro { margin-bottom: 72px; }
+.curated-page.curated-studio .studio-project-intro { margin-bottom: 64px; padding-bottom: 24px; border-bottom: 1px solid var(--studio-line); }
 .curated-page.curated-studio .studio-project-heading { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: baseline; margin-bottom: 24px; }
 .curated-page.curated-studio .studio-project-heading h2 { font-size: 32px; margin: 0; }
 .curated-page.curated-studio .studio-project-heading p { font-size: 12px; margin: 0; }
 .curated-page.curated-studio .studio-project-heading button { display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 44px; padding: 0; color: var(--studio-accent); font-size: 13px; background: none; border: 0; }
-.curated-page.curated-studio .studio-project-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.curated-page.curated-studio .studio-project-details button { padding: 0; background: none; border: 0; color: var(--studio-muted); text-align: left; }
-.curated-page.curated-studio .studio-project-details button > div { position: relative; aspect-ratio: 1.4; overflow: hidden; }
-.curated-page.curated-studio .studio-project-details img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.8); }
-.curated-page.curated-studio .studio-project-details button > span { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; font-size: 13px; }
 .curated-page.curated-studio .curated-case-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 28px; }
 .curated-page.curated-studio .curated-case-card { padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; transform: none; }
 .curated-page.curated-studio .curated-case-card:first-child { grid-column: 1 / -1; }
-.curated-page.curated-studio .curated-case-cover { aspect-ratio: 1.6; height: auto; min-height: 0; border-radius: 0; background: #111; }
-.curated-page.curated-studio .curated-case-cover img { object-fit: cover; }
+.curated-page.curated-studio .curated-case-cover { aspect-ratio: 1586 / 992; height: auto; min-height: 0; border-radius: 0; background: none; }
+.curated-page.curated-studio .curated-case-cover img { object-fit: contain; object-position: center; transform: none; filter: none; }
 .curated-page.curated-studio .curated-case-card:hover .curated-case-cover img { transform: none; filter: none; }
-.curated-page.curated-studio .curated-case-card:first-child .curated-case-cover { aspect-ratio: 2.8; }
-.curated-page.curated-studio .curated-case-card:first-child .curated-case-cover img { object-fit: contain; object-position: right center; }
 .curated-page.curated-studio .curated-case-copy { padding: 22px 0 0; background: none; }
 .curated-page.curated-studio .curated-case-copy > span { color: var(--studio-accent); font-size: 11px; font-weight: 400; }
 .curated-page.curated-studio .curated-case-copy h3 { font-size: 25px; line-height: 1.5; margin-top: 10px; }
@@ -10275,12 +10268,7 @@ button.curated-hero-stage {
   .curated-page.curated-studio .studio-project-heading h2 { font-size: 27px; }
   .curated-page.curated-studio .studio-project-heading p { width: 100%; font-size: 11px; }
   .curated-page.curated-studio .studio-project-heading button { margin-left: 0; }
-  .curated-page.curated-studio .studio-project-details { gap: 8px; }
-  .curated-page.curated-studio .studio-project-details button > div { aspect-ratio: 1; }
-  .curated-page.curated-studio .studio-project-details button > span { font-size: 11px; }
-  .curated-page.curated-studio .studio-project-details button > span svg { display: none; }
   .curated-page.curated-studio .curated-case-stack { grid-template-columns: minmax(0, 1fr); gap: 36px; }
-  .curated-page.curated-studio .curated-case-card:first-child .curated-case-cover { aspect-ratio: 1.6; }
   .curated-page.curated-studio .curated-case-copy h3 { font-size: 23px; }
   .curated-page.curated-studio .curated-video-feature-copy { min-height: 254px; }
   .curated-page.curated-studio .curated-video-feature-copy h3 { font-size: 24px; }

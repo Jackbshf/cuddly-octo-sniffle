@@ -1010,6 +1010,10 @@ const ECOMMERCE_DETAIL_SUITES = [
 const DEFAULT_ECOMMERCE_SUITE_ID = "suite-brand-space";
 const DEFAULT_ECOMMERCE_SUITE_INDEX = Math.max(0, ECOMMERCE_DETAIL_SUITES.findIndex((suite) => suite.id === DEFAULT_ECOMMERCE_SUITE_ID));
 
+// Public video picks remain empty until clean source exports pass visual review.
+// Keep the original library available in the authenticated editor.
+const REVIEWED_PUBLIC_VIDEO_IDS = [];
+
 const HOMEPAGE_CURATION = {
   hero: {
     featuredId: "case-fragrance-packaging"
@@ -1028,9 +1032,9 @@ const HOMEPAGE_CURATION = {
     "video-animated-street-story"
   ],
   commercialImageCaseIds: [
+    "case-brand-space",
     "case-product-ad",
-    "case-beauty-live",
-    "case-brand-space"
+    "case-beauty-live"
   ],
   commercialVideoCaseIds: [],
   capabilityCards: [
@@ -3180,7 +3184,10 @@ function App() {
   const staticAssetUploadLimitBytes = Number(uploadLimits.staticAssetBytes || uploadLimits.videoUploadBytes || DEFAULT_STATIC_ASSET_UPLOAD_LIMIT_BYTES);
   const streamDirectUploadLimitBytes = Number(uploadLimits.streamDirectUploadBytes || streamCapabilities.maxUploadBytes || DEFAULT_STREAM_DIRECT_UPLOAD_LIMIT_BYTES);
   const homepageDesignerState = normalizeHomepageDesignerConfig(normalizeSiteMeta(portfolioData?.meta).homepageDesigner);
-  const isHomepageSectionHidden = (sectionId) => sectionId !== "home" && homepageDesignerState.sections?.[sectionId]?.hidden === true;
+  const isHomepageSectionHidden = (sectionId) => sectionId !== "home" && (
+    homepageDesignerState.sections?.[sectionId]?.hidden === true
+    || (sectionId === "videos" && !IS_PORTFOLIO_ADMIN_MODE && REVIEWED_PUBLIC_VIDEO_IDS.length === 0)
+  );
   const isHomepageBlockHidden = (blockId) => homepageDesignerState.blocks?.[blockId]?.hidden === true;
 
   const curatedNavItems = [
@@ -6587,7 +6594,8 @@ function App() {
   if (heroVisualEntry && !heroVisualEntry.classification?.canUseInHero) {
     pushHomepageCurationError(`Hero 使用了不可作为主视觉的素材: ${heroVisualEntry.curation.id}`);
   }
-  const homepageVideoEntries = buildHomepageCuratedItems(HOMEPAGE_CURATION.videoFeaturedIds, "video-featured")
+  const selectedVideoIds = IS_PORTFOLIO_ADMIN_MODE ? HOMEPAGE_CURATION.videoFeaturedIds : REVIEWED_PUBLIC_VIDEO_IDS;
+  const homepageVideoEntries = buildHomepageCuratedItems(selectedVideoIds, "video-featured")
     .filter((item) => {
       if (item.classification?.kind === "video") {
         if (item.classification?.needsVideoRecovery) {
@@ -6598,7 +6606,7 @@ function App() {
       pushHomepageCurationError(`视频精选自动移除非视频素材: ${item.curation.id}`);
       return false;
     });
-  if (homepageVideoEntries.length < 3) {
+  if (selectedVideoIds.length > 0 && homepageVideoEntries.length < 3) {
     pushHomepageCurationError(`视频精选少于 3 个: ${homepageVideoEntries.length}`);
   }
   const homepageCommercialCaseIds = [
@@ -8769,16 +8777,6 @@ function App() {
               <h2>香氛礼盒</h2>
               <p>包装陈列 / 材质光影 / 礼赠视觉</p>
               <button type="button" onClick={() => openWorkDetail(heroDetail)}>查看完整作品 <Icon name="ChevronRight" size={18} /></button>
-            </div>
-            <div className="studio-project-details">
-              {[
-                { id: "bottle", title: "瓶身光泽", position: "36% 72%" },
-                { id: "structure", title: "包装结构", position: "50% 22%" },
-                { id: "ribbon", title: "礼赠细节", position: "90% 55%" }
-              ].map((detail) => <button key={detail.id} type="button" onClick={() => openWorkDetail(heroDetail)} aria-label={`查看香氛礼盒：${detail.title}`}>
-                <div><img src={heroDetail.cover} alt={`香氛礼盒主视觉局部：${detail.title}`} loading="lazy" decoding="async" style={{ objectPosition: detail.position, transformOrigin: detail.position }} /></div>
-                <span>{detail.title}<Icon name="ChevronRight" size={16} /></span>
-              </button>)}
             </div>
           </div>}
           {renderCuratedEyebrow(1, caseSection.eyebrow)}
