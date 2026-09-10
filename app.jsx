@@ -1012,7 +1012,7 @@ const DEFAULT_ECOMMERCE_SUITE_INDEX = Math.max(0, ECOMMERCE_DETAIL_SUITES.findIn
 
 const HOMEPAGE_CURATION = {
   hero: {
-    featuredId: "hero-main-visual"
+    featuredId: "case-fragrance-packaging"
   },
   videoFeaturedIds: [
     "gallery-video-food",
@@ -1030,8 +1030,7 @@ const HOMEPAGE_CURATION = {
   commercialImageCaseIds: [
     "case-product-ad",
     "case-beauty-live",
-    "case-brand-space",
-    "case-fragrance-packaging"
+    "case-brand-space"
   ],
   commercialVideoCaseIds: [],
   capabilityCards: [
@@ -1124,6 +1123,23 @@ const HOMEPAGE_FONT_PRESETS = [
 
 const HOMEPAGE_COLOR_PRESETS = [
   {
+    id: "studio",
+    label: "视觉工作室",
+    swatches: ["#101110", "#f0f1ed", "#a0c6b7"],
+    style: {
+      "--portfolio-accent": "#a0c6b7",
+      "--portfolio-border": "#343a35",
+      "--curated-accent": "#a0c6b7",
+      "--curated-accent-2": "#a0c6b7",
+      "--curated-border": "#343a35",
+      "--curated-cyan": "#a0c6b7",
+      "--curated-gold": "#a0c6b7",
+      "--curated-line-strong": "#343a35",
+      "--curated-card-bg": "#181a18",
+      "--curated-card-bg-strong": "#181a18"
+    }
+  },
+  {
     id: "cyan-amber",
     label: "冷青 / 金色",
     swatches: ["#66d9ff", "#e3c979", "#07121b"],
@@ -1194,6 +1210,7 @@ const HOMEPAGE_COLOR_PRESETS = [
 ];
 
 const HOMEPAGE_RADIUS_PRESETS = [
+  { id: "studio", label: "利落", value: "2px" },
   { id: "sharp", label: "硬朗", value: "8px" },
   { id: "soft", label: "柔和", value: "14px" },
   { id: "poster", label: "海报", value: "22px" }
@@ -1240,9 +1257,9 @@ const HOMEPAGE_BLOCK_DEFAULTS = {
 const getPresetById = (presets, presetId, fallbackId) => presets.find((preset) => preset.id === presetId) || presets.find((preset) => preset.id === fallbackId) || presets[0];
 
 const normalizeHomepageDesignerTheme = (theme = {}) => ({
-  fontPreset: getPresetById(HOMEPAGE_FONT_PRESETS, theme?.fontPreset, "system").id,
-  colorPreset: getPresetById(HOMEPAGE_COLOR_PRESETS, theme?.colorPreset, "cyan-amber").id,
-  radiusPreset: getPresetById(HOMEPAGE_RADIUS_PRESETS, theme?.radiusPreset, "soft").id,
+  fontPreset: getPresetById(HOMEPAGE_FONT_PRESETS, theme?.fontPreset, "editorial").id,
+  colorPreset: getPresetById(HOMEPAGE_COLOR_PRESETS, theme?.colorPreset, "studio").id,
+  radiusPreset: getPresetById(HOMEPAGE_RADIUS_PRESETS, theme?.radiusPreset, "studio").id,
   densityPreset: getPresetById(HOMEPAGE_DENSITY_PRESETS, theme?.densityPreset, "comfortable").id
 });
 
@@ -1253,6 +1270,8 @@ const getHomepageDesignerThemeStyle = (theme = {}) => {
   const radius = getPresetById(HOMEPAGE_RADIUS_PRESETS, normalized.radiusPreset, "soft");
   const density = getPresetById(HOMEPAGE_DENSITY_PRESETS, normalized.densityPreset, "comfortable");
   return {
+    "--studio-serif": font.css,
+    "--studio-accent": color.style["--portfolio-accent"],
     "--curated-font-family": font.css,
     "--portfolio-radius-card": radius.value,
     "--curated-radius": radius.value,
@@ -3529,6 +3548,20 @@ function App() {
     const targetLeft = nav.scrollLeft + linkRect.left - navRect.left - (navRect.width - linkRect.width) / 2;
     nav.scrollTo({ left: Math.max(0, targetLeft), behavior: getMotionScrollBehavior() });
   }, [activeNavId]);
+
+  useEffect(() => {
+    const alignSelectedTabs = () => {
+      document.querySelectorAll(".curated-suite-tabs, .curated-detail-page-tabs").forEach((tabs) => {
+        const selected = tabs.querySelector('[aria-selected="true"], .is-active');
+        if (!selected || tabs.scrollWidth <= tabs.clientWidth) return;
+        const left = tabs.scrollLeft + selected.getBoundingClientRect().left - tabs.getBoundingClientRect().left;
+        tabs.scrollTo({ left: Math.max(0, left - (tabs.clientWidth - selected.offsetWidth) / 2), behavior: getMotionScrollBehavior() });
+      });
+    };
+    alignSelectedTabs();
+    window.addEventListener("resize", alignSelectedTabs);
+    return () => window.removeEventListener("resize", alignSelectedTabs);
+  }, [activeEcommerceSuiteIndex, activeDetailPageIndex, isLoading]);
 
   useEffect(() => {
     if (IS_EDITOR_MODE || isLoading) return undefined;
@@ -7838,15 +7871,15 @@ function App() {
       </article>
       <div className="curated-video-wheel-panel" aria-label="视频选择器">
         <div className="curated-video-wheel-controls">
-          <button type="button" onClick={() => moveVideoIndex(-1)} aria-label="上一个视频"><Icon name="ChevronLeft" size={15} />上一个</button>
+          <button type="button" onClick={() => moveVideoIndex(-1)} aria-label="上一个视频" title="上一个视频"><Icon name="ChevronLeft" size={18} /></button>
           <strong>{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(itemCount).padStart(2, "0")}</strong>
-          <button type="button" onClick={() => moveVideoIndex(1)} aria-label="下一个视频">下一个<Icon name="ChevronRight" size={15} /></button>
+          <button type="button" onClick={() => moveVideoIndex(1)} aria-label="下一个视频" title="下一个视频"><Icon name="ChevronRight" size={18} /></button>
         </div>
         <div className="curated-video-wheel-current" aria-live="polite">
           <span>当前视频</span>
           <strong>{activeDetail.title}</strong>
         </div>
-        <div className="curated-video-stage" aria-label="3D 视频滚轮">
+        {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-video-stage" aria-label="3D 视频滚轮">
           {videoItems.map((item, index) => {
             const detail = details[index];
             const offset = getWheelOffset(index);
@@ -7879,7 +7912,7 @@ function App() {
               <strong>{detail.title}</strong>
             </article>;
           })}
-        </div>
+        </div>}
       </div>
       <div className="curated-video-strip" role="listbox" aria-label="选择视频">
         {videoItems.map((item, index) => {
@@ -7931,9 +7964,8 @@ function App() {
           alt={caseItem.title}
           width="1586"
           height="992"
-          loading="eager"
-          decoding={index < 4 ? "sync" : "async"}
-          fetchPriority={index < 4 ? "high" : "auto"}
+          loading="lazy"
+          decoding="async"
         /> : <div>暂无封面</div>}
         {IS_PORTFOLIO_ADMIN_MODE && <div className="curated-admin-media-tools">
           <button type="button" disabled={!canWriteAssets || isApplyingAsset} title={canWriteAssets ? "上传并替换封面" : assetCapabilityReason} onClick={(event) => { event.stopPropagation(); document.getElementById(coverInputId).click(); }}><Icon name="UploadCloud" size={14} /> 替换封面</button>
@@ -7958,7 +7990,7 @@ function App() {
             <span>{stats.images} 张图像</span>
             <span>{stats.videos} 条视频</span>
           </>}
-          <span className="curated-card-cta" aria-hidden="true">查看案例</span>
+          <span className="curated-card-cta" aria-hidden="true">查看项目 <Icon name="ChevronRight" size={18} /></span>
         </div>
       </div>
     </article>;
@@ -8545,6 +8577,7 @@ function App() {
             onClick={(event) => handleCuratedAnchorClick(event, item.id)}
           >{item.label}</a>)}
         </nav>
+        <span className="studio-signature">AIGC VISUAL<br />ENGINEER</span>
       </div>
       <div className="curated-scroll-progress"><span style={{ width: progressWidth }} /></div>
     </header>;
@@ -8670,13 +8703,13 @@ function App() {
     const sectionDefaults = {
       home: { label: "首页首屏", title: heroTitle, subtitle: heroSubtitle, description: heroDescription, tags: heroRoleTags },
       featured: { label: "精选入口", eyebrow: "精选入口", title: "核心能力快速入口", description: "从视频、商业视觉、能力矩阵到 ComfyUI 工作流，快速了解我的 AIGC 视觉生产能力。" },
-      videos: { label: "视频精选", eyebrow: "视频精选", title: "生成式视频与商业短片精选", description: "精选 AI 视频案例，覆盖食品广告、产品展示、场景氛围与镜头运动控制。" },
+      videos: { label: "视频精选", eyebrow: "AI FILM", title: "让画面开始叙事", description: "产品、场景与镜头语言。生成式商业短片精选。" },
       cases: { label: "精选案例", eyebrow: "精选案例", title: siteMeta.caseSectionTitle || "商业视觉案例", description: siteMeta.caseSectionDesc || "覆盖产品广告、美妆人像、未来场景与包装陈列，展示商业审美、质感控制与视觉一致性。" },
-      details: { label: "详情图展示", eyebrow: "详情图展示", title: "产品详情图展示", description: "集中展示多品类电商详情页长图，覆盖口腔护理、个护电器、旅行用品、数码音频、家居健康和厨房用品。" },
-      ecommerce: { label: "电商套图", eyebrow: "电商套图", title: "电商详情页 / 视觉套图", description: "基于首页商业案例图延展成翻页阅读套图，展示商品一致性、详情页节奏和视觉交付能力。" },
+      details: { label: "详情图展示", eyebrow: "PRODUCT DETAILS", title: "从产品，到购买理由", description: "围绕产品结构、核心卖点与使用场景组织详情页。" },
+      ecommerce: { label: "电商套图", eyebrow: "VISUAL SERIES", title: "一件产品，一组完整表达", description: "主视觉、材质细节与场景延展，保持同一组商品的视觉一致性。" },
       capabilities: { label: "能力矩阵", eyebrow: "能力矩阵", title: "核心能力矩阵", description: "以商业项目流程为核心，拆解从需求分析、视觉生成、局部优化到视频输出的完整 AIGC 生产能力。" },
       gallery: { label: "视觉精选", eyebrow: "视觉精选", title: "视觉作品精选", description: "12 张单图作品覆盖产品广告、人像角色、场景世界观和品牌延展，标题、描述和标签都对应画面主体。" },
-      process: { label: "工作流证明", eyebrow: "工作流证明", title: "ComfyUI 工作流 / 创作流程", description: "通过节点化流程搭建，实现从图像生成、角色一致性、局部重绘到视频输出的可复用生产流程。" },
+      process: { label: "工作流证明", eyebrow: "BEHIND THE WORK", title: "画面之外，是可控的流程", description: "用 ComfyUI 组织生成、控制与精修，让视觉创作可以复用。" },
       contact: { label: "联系", title: siteMeta.contactSectionTitle || "联系我", description: siteMeta.contactSectionDesc || "面向 AIGC 视觉设计、AI 视频制作和生成式内容设计岗位，欢迎通过邮箱或招聘平台联系。" }
     };
     const homeSection = getDesignerSection("home", sectionDefaults.home);
@@ -8692,7 +8725,7 @@ function App() {
     const homeTags = ensureStringArray(homeSection.tags).length ? ensureStringArray(homeSection.tags) : heroRoleTags;
     const designerThemeStyle = getHomepageDesignerThemeStyle(getHomepageDesignerState().theme);
 
-    return <main id="main-content" className={cx("curated-page curated-shell", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
+    return <main id="main-content" className={cx("curated-page curated-shell curated-studio", IS_PORTFOLIO_ADMIN_MODE && "curated-admin-preview")} style={designerThemeStyle}>
       {renderCuratedLayoutStyles()}
       <a href="#home" className="curated-skip-link" onClick={handleSkipToContent}>跳过导航</a>
       {renderCuratedTopbar()}
@@ -8705,10 +8738,13 @@ function App() {
               <p>{homeSection.description}</p>
             </div>
             <div className="curated-hero-actions">
-              <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>查看作品</a>
-              <a href="#videos" onClick={(event) => handleCuratedAnchorClick(event, "videos")}>AI 视频</a>
-              <a href="#contact" onClick={(event) => handleCuratedAnchorClick(event, "contact")}>联系我</a>
+              <a href="#cases" onClick={(event) => handleCuratedAnchorClick(event, "cases")}>浏览作品 <Icon name="ChevronRight" size={18} /></a>
             </div>
+          </div>
+          <div className="studio-disciplines" aria-label="创作方向">
+            <div><span>01</span><strong>产品广告</strong><small>PRODUCT</small></div>
+            <div><span>02</span><strong>品牌视觉</strong><small>BRAND</small></div>
+            <div><span>03</span><strong>AI 短片</strong><small>AI FILM</small></div>
           </div>
           {renderHeroKineticStage(heroDetail, heroStageItems)}
         </div>
@@ -8728,6 +8764,23 @@ function App() {
       {!isHomepageSectionHidden("cases") && <section id="cases" className="curated-section" style={publishedSectionStyle}>
         {!IS_PORTFOLIO_ADMIN_MODE && <span id="featured" />}
         <div className="portfolio-container">
+          {heroDetail && <div id="case-case-fragrance-packaging" className="studio-project-intro">
+            <div className="studio-project-heading">
+              <h2>香氛礼盒</h2>
+              <p>包装陈列 / 材质光影 / 礼赠视觉</p>
+              <button type="button" onClick={() => openWorkDetail(heroDetail)}>查看完整作品 <Icon name="ChevronRight" size={18} /></button>
+            </div>
+            <div className="studio-project-details">
+              {[
+                { id: "bottle", title: "瓶身光泽", position: "36% 72%" },
+                { id: "structure", title: "包装结构", position: "50% 22%" },
+                { id: "ribbon", title: "礼赠细节", position: "90% 55%" }
+              ].map((detail) => <button key={detail.id} type="button" onClick={() => openWorkDetail(heroDetail)} aria-label={`查看香氛礼盒：${detail.title}`}>
+                <div><img src={heroDetail.cover} alt={`香氛礼盒主视觉局部：${detail.title}`} loading="lazy" decoding="async" style={{ objectPosition: detail.position, transformOrigin: detail.position }} /></div>
+                <span>{detail.title}<Icon name="ChevronRight" size={16} /></span>
+              </button>)}
+            </div>
+          </div>}
           {renderCuratedEyebrow(1, caseSection.eyebrow)}
           <div className="curated-section-heading" {...getDesignerSectionProps("cases", "精选案例")}>
             <h2>{caseSection.title}</h2>
@@ -8818,7 +8871,7 @@ function App() {
               const isExternalLink = /^https?:\/\//i.test(item.href || "");
               const isEmailLink = item.kind === "email" || /^mailto:/i.test(item.href || "");
               const iconName = isEmailLink ? "Mail" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
-              const actionLabel = isEmailLink ? "QQ 邮箱" : isExternalLink ? "打开作品集" : "";
+              const actionLabel = isEmailLink ? "QQ 邮箱" : isExternalLink ? "作品集" : "";
               const content = <>
                 <span className="curated-contact-icon" aria-hidden="true"><Icon name={iconName} size={16} /></span>
                 <div className="curated-contact-card-copy"><span>{item.label}</span><strong>{item.value}</strong></div>
@@ -8847,7 +8900,7 @@ function App() {
                 }
               }}><Icon name="Copy" size={16} /></button>
               <span className="curated-copy-status" role="status">{emailCopyStatus}</span>
-              <a href="#home" onClick={(event) => handleCuratedAnchorClick(event, "home")}>回到首屏</a>
+              <a href="#home" onClick={(event) => handleCuratedAnchorClick(event, "home")} aria-label="回到首屏" title="回到首屏"><Icon name="ArrowUp" size={18} /></a>
             </div>
           </div>
         </div>
