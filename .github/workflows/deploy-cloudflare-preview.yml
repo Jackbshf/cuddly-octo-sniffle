@@ -21,7 +21,7 @@ concurrency:
 jobs:
   deploy-preview:
     name: Deploy preview Worker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       DEFAULT_PREVIEW_REF: codex/homepage-visual-upgrade-preview
