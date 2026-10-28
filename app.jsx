@@ -2592,6 +2592,8 @@ const withStreamPlaybackParams = (streamPlayerUrl, { autoPlay = false, muted = f
   try {
     const url = new URL(streamPlayerUrl, window.location.href);
     url.searchParams.delete("autoplay");
+    url.searchParams.delete("muted");
+    url.searchParams.delete("loop");
     if (autoPlay) url.searchParams.set("autoplay", "true");
     if (muted) url.searchParams.set("muted", "true");
     if (loop) url.searchParams.set("loop", "true");
@@ -2695,8 +2697,7 @@ const StreamVideoElement = ({
   handleSurfaceClick,
   audiblePreviewActive = false,
   loop = true,
-  autoPlay = false,
-  pauseWhenOffscreen = false
+  autoPlay = false
 }) => {
   const internalVideoRef = useRef(null);
   const [nativeVideoSrc, setNativeVideoSrc] = useState("");
@@ -2785,7 +2786,7 @@ const StreamVideoElement = ({
       reducedMotionQuery?.removeEventListener?.("change", handlePolicyChange);
       connection?.removeEventListener?.("change", handlePolicyChange);
     };
-  }, [autoPlay, pauseWhenOffscreen, playbackUrl, sourceUrl, nativeVideoSrc]);
+  }, [autoPlay, playbackUrl, sourceUrl, nativeVideoSrc]);
 
   useEffect(() => {
     const video = internalVideoRef.current;
@@ -7874,7 +7875,6 @@ function App() {
         handleSurfaceClick={(event) => handleFeaturedVideoSurfaceClick(event, detail.id)}
         loop
         autoPlay
-        pauseWhenOffscreen
       />
       <span className="curated-video-badge">VIDEO</span>
       {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
@@ -8258,7 +8258,7 @@ function App() {
             ref={lightboxVideoRef}
             src={withEmbedPlaybackParams(embedUrl, true)}
             title={item.title}
-            mediaClassName="curated-detail-player"
+            className="curated-detail-player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
@@ -8274,8 +8274,7 @@ function App() {
             showNativeVideoControls
             videoPreloadMode="metadata"
             autoPlay
-            pauseWhenOffscreen
-            className="curated-detail-player"
+            mediaClassName="curated-detail-player"
           />;
         }
         if (!sourceUrl) {
@@ -9269,7 +9268,7 @@ function App() {
         const embedUrl = getVideoEmbedUrl(sourceVideoUrl);
         if (embedUrl && !isDirectVideoSource(sourceVideoUrl) && !isBilibiliVideoUrl(sourceVideoUrl) && !isBilibiliVideoUrl(embedUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
-        return <StreamVideoElement videoRef={lightboxVideoRef} playbackUrl={sourceVideoUrl} sourceUrl={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} muted={false} showNativeVideoControls videoPreloadMode="metadata" autoPlay pauseWhenOffscreen mediaClassName="max-w-full max-h-full object-contain rounded-lg shadow-2xl" handleSurfaceClick={(event) => event.stopPropagation()} />;
+        return <StreamVideoElement videoRef={lightboxVideoRef} playbackUrl={sourceVideoUrl} sourceUrl={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} muted={false} showNativeVideoControls videoPreloadMode="metadata" autoPlay mediaClassName="max-w-full max-h-full object-contain rounded-lg shadow-2xl" handleSurfaceClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} alt={lightboxData.alt || lightboxData.label || "作品大图"} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
     {IS_EDITOR_MODE && !useGalleryWorldHome && (isMobilePreviewMode ? <>
