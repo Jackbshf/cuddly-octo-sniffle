@@ -1,0 +1,7 @@
+# Replace with your GitHub handle, e.g. @Jackbshf
+*       @Jackbshf
+
+# Workflow and dependency config is security-relevant: force a human review.
+/.github/        @Jackbshf
+/package.json    @Jackbshf
+/package-lock.json  @Jackbshf
