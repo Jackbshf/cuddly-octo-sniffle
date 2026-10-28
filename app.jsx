@@ -2569,6 +2569,113 @@ const assignMediaRef = (refTarget, value) => {
   refTarget.current = value;
 };
 
+const allowsAutomaticVideoPlayback = () => {
+  if (typeof window === "undefined") return false;
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+  const saveData = navigator.connection?.saveData === true;
+  return !reducedMotion && !saveData;
+};
+
+const isElementInViewport = (element, minimumRatio = 0.4) => {
+  if (!element || typeof window === "undefined") return false;
+  const rect = element.getBoundingClientRect();
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+  const visibleWidth = Math.max(0, Math.min(rect.right, viewportWidth) - Math.max(rect.left, 0));
+  const visibleHeight = Math.max(0, Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0));
+  const area = Math.max(1, rect.width * rect.height);
+  return (visibleWidth * visibleHeight) / area >= minimumRatio;
+};
+
+const withStreamPlaybackParams = (streamPlayerUrl, { autoPlay = false, muted = false, loop = false } = {}) => {
+  if (!streamPlayerUrl) return "";
+  try {
+    const url = new URL(streamPlayerUrl, window.location.href);
+    url.searchParams.delete("autoplay");
+    if (autoPlay) url.searchParams.set("autoplay", "true");
+    if (muted) url.searchParams.set("muted", "true");
+    if (loop) url.searchParams.set("loop", "true");
+    return url.toString();
+  } catch {
+    return streamPlayerUrl;
+  }
+};
+
+const ManagedStreamIframe = ({
+  streamPlayerUrl,
+  iframeRef,
+  title,
+  className,
+  autoPlay = false,
+  muted = false,
+  loop = false,
+  onClick
+}) => {
+  const internalFrameRef = useRef(null);
+  const [isInViewport, setIsInViewport] = useState(false);
+  const [pageVisible, setPageVisible] = useState(() => typeof document !== "undefined" && document.visibilityState === "visible");
+  const [autoPlayAllowed, setAutoPlayAllowed] = useState(allowsAutomaticVideoPlayback);
+
+  useEffect(() => {
+    assignMediaRef(iframeRef, internalFrameRef.current);
+    return () => assignMediaRef(iframeRef, null);
+  }, [iframeRef]);
+
+  useEffect(() => {
+    const frame = internalFrameRef.current;
+    if (!frame) return undefined;
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(([entry]) => {
+        setIsInViewport(Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.4));
+      }, { threshold: [0, 0.4] });
+      observer.observe(frame);
+      return () => observer.disconnect();
+    }
+    const updateViewport = () => setIsInViewport(isElementInViewport(frame));
+    updateViewport();
+    window.addEventListener("scroll", updateViewport, { passive: true });
+    window.addEventListener("resize", updateViewport);
+    return () => {
+      window.removeEventListener("scroll", updateViewport);
+      window.removeEventListener("resize", updateViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    const reducedMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const connection = navigator.connection;
+    const updatePolicy = () => setAutoPlayAllowed(allowsAutomaticVideoPlayback());
+    const updateVisibility = () => setPageVisible(document.visibilityState === "visible");
+    reducedMotionQuery?.addEventListener?.("change", updatePolicy);
+    connection?.addEventListener?.("change", updatePolicy);
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => {
+      reducedMotionQuery?.removeEventListener?.("change", updatePolicy);
+      connection?.removeEventListener?.("change", updatePolicy);
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
+  }, []);
+
+  const shouldLoadFrame = pageVisible && isInViewport;
+  const shouldAutoPlay = Boolean(autoPlay && autoPlayAllowed && isInViewport && pageVisible);
+  const activeSrc = shouldLoadFrame
+    ? withStreamPlaybackParams(streamPlayerUrl, { autoPlay: shouldAutoPlay, muted, loop })
+    : "about:blank";
+
+  return <iframe
+    ref={internalFrameRef}
+    src={activeSrc}
+    title={title}
+    className={className}
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+    data-stream-frame-active={shouldLoadFrame ? "true" : "false"}
+    data-stream-autoplay-allowed={shouldAutoPlay ? "true" : "false"}
+    onClick={onClick}
+  />;
+};
+
 const StreamVideoElement = ({
   playbackUrl,
   sourceUrl,
@@ -2610,47 +2717,73 @@ const StreamVideoElement = ({
   useEffect(() => {
     const video = internalVideoRef.current;
     if (!video || !autoPlay) return undefined;
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    const saveData = navigator.connection?.saveData === true;
-    if (reducedMotion || saveData) {
-      video.pause();
-      return undefined;
-    }
+    let isInViewport = false;
+    let autoPlayAllowed = allowsAutomaticVideoPlayback();
 
+    const pausePlayback = () => {
+      if (!video.paused) video.pause();
+    };
     const ensureAutoplay = () => {
+      if (!autoPlayAllowed || !isInViewport || document.visibilityState !== "visible") return;
       video.defaultMuted = true;
       video.muted = true;
       const playback = video.play();
       if (playback && typeof playback.catch === "function") playback.catch(() => {});
     };
-    const handleVisibility = () => {
-      if (document.hidden) video.pause();
-      else ensureAutoplay();
+    const syncViewportPlayback = () => {
+      if (!isInViewport || document.visibilityState !== "visible") pausePlayback();
+      else if (autoPlayAllowed) ensureAutoplay();
     };
-    video.addEventListener("canplay", ensureAutoplay);
+    const handleCanPlay = () => {
+      if (autoPlayAllowed) ensureAutoplay();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState !== "visible") pausePlayback();
+      else if (autoPlayAllowed && isInViewport) ensureAutoplay();
+    };
+    const handlePolicyChange = () => {
+      autoPlayAllowed = allowsAutomaticVideoPlayback();
+      if (!autoPlayAllowed) pausePlayback();
+      else if (isInViewport && document.visibilityState === "visible") ensureAutoplay();
+    };
+    const reducedMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const connection = navigator.connection;
+    video.addEventListener("canplay", handleCanPlay);
     document.addEventListener("visibilitychange", handleVisibility);
+    reducedMotionQuery?.addEventListener?.("change", handlePolicyChange);
+    connection?.addEventListener?.("change", handlePolicyChange);
 
     let observer = null;
-    if (pauseWhenOffscreen && "IntersectionObserver" in window) {
+    let fallbackViewportHandler = null;
+    if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.preload = "metadata";
-            ensureAutoplay();
-          } else {
-            video.pause();
-          }
+          isInViewport = Boolean(entry.isIntersecting && entry.intersectionRatio >= 0.4);
+          if (isInViewport) video.preload = "metadata";
+          syncViewportPlayback();
         });
-      }, { threshold: 0.4 });
+      }, { threshold: [0, 0.4] });
       observer.observe(video);
     } else {
-      ensureAutoplay();
+      fallbackViewportHandler = () => {
+        isInViewport = isElementInViewport(video);
+        syncViewportPlayback();
+      };
+      fallbackViewportHandler();
+      window.addEventListener("scroll", fallbackViewportHandler, { passive: true });
+      window.addEventListener("resize", fallbackViewportHandler);
     }
 
     return () => {
       observer?.disconnect();
-      video.removeEventListener("canplay", ensureAutoplay);
+      if (fallbackViewportHandler) {
+        window.removeEventListener("scroll", fallbackViewportHandler);
+        window.removeEventListener("resize", fallbackViewportHandler);
+      }
+      video.removeEventListener("canplay", handleCanPlay);
       document.removeEventListener("visibilitychange", handleVisibility);
+      reducedMotionQuery?.removeEventListener?.("change", handlePolicyChange);
+      connection?.removeEventListener?.("change", handlePolicyChange);
     };
   }, [autoPlay, pauseWhenOffscreen, playbackUrl, sourceUrl, nativeVideoSrc]);
 
@@ -2692,7 +2825,6 @@ const StreamVideoElement = ({
     src={nativeVideoSrc || undefined}
     data-media-source={sourceUrl || playbackUrl || ""}
     loop={loop}
-    autoPlay={autoPlay}
     controls={showNativeVideoControls}
     data-audible-preview-active={audiblePreviewActive ? "true" : "false"}
     playsInline
@@ -7677,13 +7809,13 @@ function App() {
     if (streamPlayerUrl) {
       return <div className="curated-video-inline-player" data-video-inline-player="true" data-video-inline-state="ready">
         {posterUrl && <img className="curated-video-inline-poster-preload" src={posterUrl} alt="" aria-hidden="true" loading="eager" decoding="sync" fetchPriority="high" />}
-        <iframe
-          src={`${streamPlayerUrl}?autoplay=true&muted=true&loop=true`}
+        <ManagedStreamIframe
+          streamPlayerUrl={streamPlayerUrl}
           title={detail.title}
           className="curated-video-inline-frame"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
+          autoPlay
+          muted
+          loop
         />
         <span className="curated-video-badge">VIDEO</span>
         {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
@@ -8112,14 +8244,13 @@ function App() {
         const embedUrl = getVideoEmbedUrl(sourceUrl);
         const isBilibiliEmbed = isBilibiliVideoUrl(sourceUrl) || isBilibiliVideoUrl(embedUrl);
         if (streamPlayerUrl) {
-          return <iframe
-            ref={lightboxVideoRef}
-            src={`${streamPlayerUrl}?autoplay=true`}
+          return <ManagedStreamIframe
+            iframeRef={lightboxVideoRef}
+            streamPlayerUrl={streamPlayerUrl}
             title={item.title}
             className="curated-detail-player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
+            autoPlay
+            muted
           />;
         }
         if (embedUrl && !isDirectVideoSource(sourceUrl) && !isBilibiliEmbed) {
@@ -8127,21 +8258,23 @@ function App() {
             ref={lightboxVideoRef}
             src={withEmbedPlaybackParams(embedUrl, true)}
             title={item.title}
-            className="curated-detail-player"
+            mediaClassName="curated-detail-player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />;
         }
         if (isDirectVideoSource(sourceUrl)) {
-          return <video
-            ref={lightboxVideoRef}
-            src={sourceUrl}
+          return <StreamVideoElement
+            videoRef={lightboxVideoRef}
+            playbackUrl={sourceUrl}
+            sourceUrl={sourceUrl}
             poster={displayUrl || undefined}
-            controls
+            muted={false}
+            showNativeVideoControls
+            videoPreloadMode="metadata"
             autoPlay
-            playsInline
-            preload="auto"
+            pauseWhenOffscreen
             className="curated-detail-player"
           />;
         }
@@ -9131,12 +9264,12 @@ function App() {
       {lightboxData.kind === "youtube" ? <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(getYouTubeEmbedUrl(lightboxData.url), true)} title="YouTube player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} /> : lightboxData.kind === "video" ? (() => {
         const preferDraftPreview = IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl);
         const streamPlayerUrl = getLightboxVideoPlayerUrl(lightboxData, { preferDraftPreview });
-        if (streamPlayerUrl) return <iframe ref={lightboxVideoRef} src={`${streamPlayerUrl}?autoplay=true`} title="Cloudflare Stream player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0 bg-black" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
+        if (streamPlayerUrl) return <ManagedStreamIframe iframeRef={lightboxVideoRef} streamPlayerUrl={streamPlayerUrl} title="Cloudflare Stream player" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0 bg-black" autoPlay muted onClick={(event) => event.stopPropagation()} />;
         const sourceVideoUrl = getSourceMediaUrl(lightboxData, { preferDraftPreview });
         const embedUrl = getVideoEmbedUrl(sourceVideoUrl);
         if (embedUrl && !isDirectVideoSource(sourceVideoUrl) && !isBilibiliVideoUrl(sourceVideoUrl) && !isBilibiliVideoUrl(embedUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
-        return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
+        return <StreamVideoElement videoRef={lightboxVideoRef} playbackUrl={sourceVideoUrl} sourceUrl={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} muted={false} showNativeVideoControls videoPreloadMode="metadata" autoPlay pauseWhenOffscreen mediaClassName="max-w-full max-h-full object-contain rounded-lg shadow-2xl" handleSurfaceClick={(event) => event.stopPropagation()} />;
       })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} alt={lightboxData.alt || lightboxData.label || "作品大图"} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
     {IS_EDITOR_MODE && !useGalleryWorldHome && (isMobilePreviewMode ? <>
