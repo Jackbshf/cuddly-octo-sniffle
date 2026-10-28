@@ -37,6 +37,12 @@ const STREAM_UPLOAD_POLL_INTERVAL_MS = 4000;
 const STREAM_UPLOAD_MAX_POLLS = 90;
 const INLINE_AUDIO_SESSION_KEY = "zhangwei_portfolio_inline_audio_unlocked_v1";
 const INLINE_AUDIO_PREFERENCE_KEY = "zhangwei_portfolio_inline_audio_preference_v1";
+const OPTIMIZED_AVIF_SOURCES = new Map([
+  ["images/curated/case-fragrance-giftbox-set.webp", "images/avif/case-fragrance-giftbox-set.avif"],
+  ["images/generated/celestial-whale-city.webp", "images/avif/celestial-whale-city.avif"]
+]);
+
+const getOptimizedAvifSource = (value = "") => OPTIMIZED_AVIF_SOURCES.get(String(value || "").replace(/^\/+/, "")) || "";
 
 const DEFAULT_SITE_META = {
   siteTitle: "张玮｜AIGC 视觉作品集",
@@ -121,8 +127,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["产品广告片", "耳机产品", "可播放"],
     media: {
       kind: "video",
-      url: "videos/b6a39d08c7e48ae9e9604df1f825b8e5.mp4",
-      poster: "images/_posters/b6a39d08c7e48ae9e9604df1f825b8e5.webp",
+      url: "videos/commercial-earbuds-unboxing-01-9x16-10s.mp4",
+      poster: "images/_posters/commercial-earbuds-unboxing-01-9x16-10s.webp",
       alt: "无线耳机产品广告视频封面"
     },
     detailRows: [
@@ -142,8 +148,8 @@ const HOMEPAGE_CURATED_WORKS = {
     tags: ["数字人视频", "角色镜头", "可播放"],
     media: {
       kind: "video",
-      url: "videos/ffcffe00a999d24e399f2eeb2fc45b73.mp4",
-      poster: "images/_posters/ffcffe00a999d24e399f2eeb2fc45b73.webp",
+      url: "videos/digitalhuman-courtyard-01-9x16-10s.mp4",
+      poster: "images/_posters/digitalhuman-courtyard-01-9x16-10s.webp",
       alt: "东方庭院数字人角色视频封面"
     },
     detailRows: [
@@ -270,6 +276,8 @@ const HOMEPAGE_CURATED_WORKS = {
       kind: "image",
       url: "images/curated/case-fragrance-giftbox-set.webp",
       fullUrl: "images/curated/case-fragrance-giftbox-set.webp",
+      width: 1586,
+      height: 992,
       alt: "黑金香氛礼盒套装包装商业主图"
     },
     detailRows: [
@@ -618,7 +626,7 @@ const HOMEPAGE_CURATED_WORKS = {
     title: "美妆产品短片：粉底液质感镜头",
     description: "粉底液瓶身在大理石台面上的近景展示，重点呈现产品材质和柔光质感。",
     tags: ["美妆产品", "粉底液", "可播放"],
-    media: { kind: "video", url: "videos/d9c14d8520e106a0803087b55aaea7ad.mp4", poster: "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp", alt: "粉底液产品质感短视频封面" }
+    media: { kind: "video", url: "videos/commercial-foundation-texture-01-9x16-10s.mp4", poster: "images/_posters/commercial-foundation-texture-01-9x16-10s.webp", alt: "粉底液产品质感短视频封面" }
   },
   "gallery-video-a6537": {
     id: "gallery-video-a6537",
@@ -2539,6 +2547,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
     Link2: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07L11.8 5.1" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.66-1.66" /></>,
     Settings2: <><path d="M12 3v3" /><path d="M18.364 5.636 16.243 7.757" /><path d="M21 12h-3" /><path d="m18.364 18.364-2.121-2.121" /><path d="M12 18v3" /><path d="m7.757 16.243-2.121 2.121" /><path d="M6 12H3" /><path d="m7.757 7.757-2.121-2.121" /><circle cx="12" cy="12" r="3" /></>,
     Briefcase: <><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /><path d="M2 13h20" /></>,
+    Phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z" />,
     Mail: <><rect x="3" y="5" width="18" height="14" rx="2" ry="2" /><path d="m3 7 9 6 9-6" /></>,
     MapPin: <><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></>,
     ExternalLink: <><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></>,
@@ -2578,7 +2587,9 @@ const StreamVideoElement = ({
   onVideoTimeUpdate,
   handleSurfaceClick,
   audiblePreviewActive = false,
-  loop = true
+  loop = true,
+  autoPlay = false,
+  pauseWhenOffscreen = false
 }) => {
   const internalVideoRef = useRef(null);
   const [nativeVideoSrc, setNativeVideoSrc] = useState("");
@@ -2595,6 +2606,53 @@ const StreamVideoElement = ({
     video.defaultMuted = nextMuted;
     video.muted = nextMuted;
   }, [audiblePreviewActive, muted, nativeVideoSrc]);
+
+  useEffect(() => {
+    const video = internalVideoRef.current;
+    if (!video || !autoPlay) return undefined;
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const saveData = navigator.connection?.saveData === true;
+    if (reducedMotion || saveData) {
+      video.pause();
+      return undefined;
+    }
+
+    const ensureAutoplay = () => {
+      video.defaultMuted = true;
+      video.muted = true;
+      const playback = video.play();
+      if (playback && typeof playback.catch === "function") playback.catch(() => {});
+    };
+    const handleVisibility = () => {
+      if (document.hidden) video.pause();
+      else ensureAutoplay();
+    };
+    video.addEventListener("canplay", ensureAutoplay);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    let observer = null;
+    if (pauseWhenOffscreen && "IntersectionObserver" in window) {
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.preload = "metadata";
+            ensureAutoplay();
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.4 });
+      observer.observe(video);
+    } else {
+      ensureAutoplay();
+    }
+
+    return () => {
+      observer?.disconnect();
+      video.removeEventListener("canplay", ensureAutoplay);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [autoPlay, pauseWhenOffscreen, playbackUrl, sourceUrl, nativeVideoSrc]);
 
   useEffect(() => {
     const video = internalVideoRef.current;
@@ -2634,6 +2692,7 @@ const StreamVideoElement = ({
     src={nativeVideoSrc || undefined}
     data-media-source={sourceUrl || playbackUrl || ""}
     loop={loop}
+    autoPlay={autoPlay}
     controls={showNativeVideoControls}
     data-audible-preview-active={audiblePreviewActive ? "true" : "false"}
     playsInline
@@ -2766,7 +2825,9 @@ const MediaView = ({ mediaItem, muted, stopClick, onMediaSurfaceClick, videoRef,
   if (!src) return null;
   return <img
     src={src}
-    alt="asset"
+    alt={item.alt || item.label || "作品视觉"}
+    width={item.width || undefined}
+    height={item.height || undefined}
     loading="lazy"
     decoding="async"
     fetchPriority="auto"
@@ -6346,8 +6407,10 @@ function App() {
   ];
   const contactItems = [
     { label: "职业方向", value: "AIGC 视觉设计师 / AI 视频创作者 / ComfyUI 工作流设计" },
+    { label: "电话", value: "15767761446", href: "tel:+8615767761446", kind: "phone" },
     { label: "邮箱", value: "2453193338@qq.com", href: QQ_MAIL_COMPOSE_URL, kind: "email" },
-    { label: "所在地", value: "广东" },
+    { label: "所在地", value: "广东深圳" },
+    { label: "到岗状态", value: "已离职，1 周内可到岗" },
     { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
   ];
   const capabilityHighlights = HOMEPAGE_CURATION.capabilityCards;
@@ -6919,7 +6982,7 @@ function App() {
             className={isActive ? "is-active" : ""}
             onClick={() => selectItem(index)}
           >
-            <img src={item.image} alt="" loading="eager" decoding="async" />
+            <img src={item.image} alt={`${item.shortTitle}详情图预览`} loading="eager" decoding="async" />
             <span>{item.label}</span>
             <strong>{item.shortTitle}</strong>
             <em>{item.category}</em>
@@ -6951,7 +7014,7 @@ function App() {
               onClick={() => selectItem(index)}
               title={item.title}
             >
-              <img src={item.image} alt="" loading="eager" decoding="async" />
+              <img src={item.image} alt={`${item.shortTitle}详情图缩略图`} loading="eager" decoding="async" />
             </button>)}
           </div>
         </div>
@@ -7262,6 +7325,7 @@ function App() {
     const portrait = isLikelyPortraitMedia(media);
     const isVideoCard = normalizedMedia?.kind === "video" || normalizedMedia?.kind === "youtube";
     const displayUrl = getDisplayUrl(normalizedMedia);
+    const optimizedAvifUrl = getOptimizedAvifSource(displayUrl);
     const videoSourceUrl = isVideoCard ? getSourceMediaUrl(normalizedMedia) : "";
     const hasVideoSource = isVideoCard && Boolean(videoSourceUrl || normalizedMedia?.delivery?.hlsUrl || normalizedMedia?.delivery?.iframeUrl);
     const showVideoRecovery = isVideoCard && !hasVideoSource;
@@ -7301,16 +7365,19 @@ function App() {
       data-media-count="1"
       data-video-state={showVideoRecovery ? "recovering" : isVideoCard ? "ready" : undefined}
     >
-      {displayUrl ? <img
-        src={displayUrl}
-        alt={label}
-        width={normalizedMedia?.width || undefined}
-        height={normalizedMedia?.height || undefined}
-        loading={options.eager || isManualEntry ? "eager" : "lazy"}
-        decoding={options.eager || isManualEntry ? "sync" : "async"}
-        fetchPriority={options.eager || isManualEntry ? "high" : "auto"}
-        className={cx("curated-static-media", portrait && "curated-static-media-contain")}
-      /> : <div className="curated-static-fallback">
+      {displayUrl ? <picture className="curated-media-picture">
+        {optimizedAvifUrl && <source type="image/avif" srcSet={optimizedAvifUrl} />}
+        <img
+          src={displayUrl}
+          alt={label}
+          width={normalizedMedia?.width || undefined}
+          height={normalizedMedia?.height || undefined}
+          loading={options.eager || isManualEntry ? "eager" : "lazy"}
+          decoding={options.eager || isManualEntry ? "sync" : "async"}
+          fetchPriority={options.eager || isManualEntry ? "high" : "auto"}
+          className={cx("curated-static-media", portrait && "curated-static-media-contain")}
+        />
+      </picture> : <div className="curated-static-fallback">
         <Icon name={isVideoCard ? "Play" : "Grid"} size={22} />
         <span>{showVideoRecovery ? "视频资源恢复中" : isVideoCard ? "视频封面生成中" : "视觉素材"}</span>
       </div>}
@@ -7611,7 +7678,7 @@ function App() {
       return <div className="curated-video-inline-player" data-video-inline-player="true" data-video-inline-state="ready">
         {posterUrl && <img className="curated-video-inline-poster-preload" src={posterUrl} alt="" aria-hidden="true" loading="eager" decoding="sync" fetchPriority="high" />}
         <iframe
-          src={`${streamPlayerUrl}?autoplay=false`}
+          src={`${streamPlayerUrl}?autoplay=true&muted=true&loop=true`}
           title={detail.title}
           className="curated-video-inline-frame"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -7659,9 +7726,9 @@ function App() {
         sourceUrl={sourceUrl}
         videoRef={featuredVideoRef}
         mediaClassName="curated-video-inline-video"
-        muted={false}
+        muted
         showNativeVideoControls={false}
-        videoPreloadMode={playerState === "loading" || playbackState.hasPlayed ? "auto" : "none"}
+        videoPreloadMode="metadata"
         poster={posterUrl || undefined}
         onMediaLoad={() => setFeaturedVideoPlayback((current) => current.id === detail.id && current.hasPlayed
           ? current
@@ -7673,7 +7740,9 @@ function App() {
           hasPlayed: event.currentTarget.currentTime > 0
         })}
         handleSurfaceClick={(event) => handleFeaturedVideoSurfaceClick(event, detail.id)}
-        loop={false}
+        loop
+        autoPlay
+        pauseWhenOffscreen
       />
       <span className="curated-video-badge">VIDEO</span>
       {detail.duration && <span className="curated-video-duration">{detail.duration}</span>}
@@ -7889,6 +7958,15 @@ function App() {
     const caseSlides = getSlidesForCase(caseItem);
     const stats = getCaseMediaStats(caseItem);
     const detail = buildCaseWorkDetail(service, index);
+    const resultItems = normalizeResultItems(caseItem.results);
+    const verifiedOutput = service.output
+      || resultItems.find((item) => /输出|交付/.test(item.label))?.value
+      || formatMediaStats(stats);
+    const caseFacts = [
+      { label: "我的角色", value: service.responsibility || "视觉设定、生成与后期整理" },
+      { label: "周期", value: "按项目范围排期" },
+      { label: "产出", value: verifiedOutput }
+    ];
     const coverTarget = { type: "case-cover", caseId: caseItem.id, label: `${caseItem.title} 封面`, accept: "image" };
     const coverTargetKey = getCuratedDropTargetKey(coverTarget);
     const coverInputId = `curated-case-cover-${caseItem.id}`;
@@ -7926,6 +8004,9 @@ function App() {
         <span>项目案例 {String(index + 1).padStart(2, "0")}</span>
         <h3>{caseItem.title}</h3>
         <p>{caseItem.description || service.ability}</p>
+        <dl className="case-facts" aria-label={`${caseItem.title} 项目事实`}>
+          {caseFacts.map((fact) => <div key={`${caseItem.id}-${fact.label}`}><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}
+        </dl>
         <div className="curated-case-meta">
           {service.curation ? <>
             <span>{caseItem.category}</span>
@@ -8807,8 +8888,9 @@ function App() {
             {contactItems.map((item) => {
               const isExternalLink = /^https?:\/\//i.test(item.href || "");
               const isEmailLink = item.kind === "email" || /^mailto:/i.test(item.href || "");
-              const iconName = isEmailLink ? "Mail" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
-              const actionLabel = isEmailLink ? "QQ 邮箱" : isExternalLink ? "打开作品集" : "";
+              const isPhoneLink = item.kind === "phone" || /^tel:/i.test(item.href || "");
+              const iconName = isEmailLink ? "Mail" : isPhoneLink ? "Phone" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
+              const actionLabel = isEmailLink ? "QQ 邮箱" : isPhoneLink ? "拨打" : isExternalLink ? "打开作品集" : "";
               const content = <>
                 <span className="curated-contact-icon" aria-hidden="true"><Icon name={iconName} size={16} /></span>
                 <div className="curated-contact-card-copy"><span>{item.label}</span><strong>{item.value}</strong></div>
@@ -9055,7 +9137,7 @@ function App() {
         if (embedUrl && !isDirectVideoSource(sourceVideoUrl) && !isBilibiliVideoUrl(sourceVideoUrl) && !isBilibiliVideoUrl(embedUrl)) return <iframe ref={lightboxVideoRef} src={withEmbedPlaybackParams(embedUrl, true)} title="视频播放器" className="w-full max-w-5xl aspect-video rounded-lg shadow-2xl border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onClick={(event) => event.stopPropagation()} />;
         if (!isDirectVideoSource(sourceVideoUrl)) return <a href={sourceVideoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-5 py-3 text-sm text-cyan-100 hover:bg-cyan-500/20" onClick={(event) => event.stopPropagation()}><Icon name="ExternalLink" size={16} /> 打开视频链接</a>;
         return <video ref={lightboxVideoRef} src={sourceVideoUrl} poster={lightboxData.poster || lightboxData.delivery?.thumbnailUrl || undefined} controls autoPlay playsInline preload="auto" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />;
-      })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
+      })() : <img src={getDisplayUrl(lightboxData, { preferDraftPreview: IS_EDITOR_MODE && Boolean(lightboxData.draftPreviewUrl) })} alt={lightboxData.alt || lightboxData.label || "作品大图"} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(event) => event.stopPropagation()} />}
     </div>}
     {IS_EDITOR_MODE && !useGalleryWorldHome && (isMobilePreviewMode ? <>
       <div className="portfolio-editor-dock portfolio-editor-dock-mobile fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-[#1A1A1A]/84 px-4 py-3 shadow-2xl backdrop-blur-3xl">
