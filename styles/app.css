@@ -6973,41 +6973,41 @@ button.curated-hero-stage {
 
 /* Visual QA dark system: final cascade guard for the public portfolio homepage. */
 :root {
-  --portfolio-bg: #03080d;
-  --portfolio-surface: rgba(7, 18, 28, 0.92);
-  --portfolio-surface-2: rgba(10, 27, 40, 0.92);
-  --portfolio-border: rgba(120, 210, 255, 0.16);
-  --portfolio-text: rgba(245, 250, 255, 0.96);
-  --portfolio-muted: rgba(195, 215, 230, 0.72);
-  --portfolio-soft: rgba(170, 195, 210, 0.56);
-  --portfolio-accent: #66d9ff;
+  --portfolio-bg: #0a0a0b;
+  --portfolio-surface: rgba(20, 20, 22, 0.92);
+  --portfolio-surface-2: rgba(26, 26, 29, 0.92);
+  --portfolio-border: rgba(255, 255, 255, 0.10);
+  --portfolio-text: #ececee;
+  --portfolio-muted: #a1a1a6;
+  --portfolio-soft: #8b8d93;
+  --portfolio-accent: #5b8fd6;
   --portfolio-radius-card: 14px;
   --portfolio-radius-media: 10px;
 }
 
 .curated-page {
   --curated-bg: var(--portfolio-bg);
-  --curated-bg-2: #07121b;
+  --curated-bg-2: #101012;
   --curated-surface: var(--portfolio-surface);
   --curated-surface-strong: var(--portfolio-surface-2);
   --curated-panel: var(--portfolio-surface);
   --curated-panel-strong: var(--portfolio-surface-2);
   --curated-line: var(--portfolio-border);
-  --curated-line-strong: rgba(120, 210, 255, 0.28);
+  --curated-line-strong: rgba(255, 255, 255, 0.18);
   --curated-text: var(--portfolio-text);
   --curated-muted: var(--portfolio-muted);
   --curated-faint: var(--portfolio-soft);
   --curated-border: var(--portfolio-border);
   --curated-accent: var(--portfolio-accent);
-  --curated-cyan: #8ee8ff;
-  --curated-gold: #e3c979;
-  --curated-card-bg: linear-gradient(180deg, rgba(12, 30, 44, 0.94), rgba(5, 14, 22, 0.96));
-  --curated-card-bg-strong: linear-gradient(180deg, rgba(15, 38, 54, 0.96), rgba(7, 18, 28, 0.98));
+  --curated-cyan: #c9ced6;
+  --curated-gold: #c8c2b4;
+  --curated-card-bg: linear-gradient(180deg, rgba(22, 22, 24, 0.94), rgba(10, 10, 11, 0.96));
+  --curated-card-bg-strong: linear-gradient(180deg, rgba(28, 28, 31, 0.96), rgba(12, 12, 13, 0.98));
   --curated-radius: var(--portfolio-radius-card);
   --curated-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
   background:
-    radial-gradient(circle at 18% 4%, rgba(102, 217, 255, 0.14), transparent 28rem),
-    radial-gradient(circle at 82% 8%, rgba(227, 201, 121, 0.08), transparent 22rem),
+    radial-gradient(circle at 18% 4%, rgba(255, 255, 255, 0.05), transparent 28rem),
+    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.035), transparent 22rem),
     linear-gradient(180deg, #03080d 0%, #06111a 44%, #03080d 100%);
   color: var(--portfolio-text);
 }
@@ -7511,12 +7511,68 @@ button.curated-hero-stage {
   line-height: 1;
 }
 
-.curated-page .curated-contact-grid > a {
+.curated-page .curated-contact-cell {
+  position: relative;
+  min-width: 0;
+}
+
+.curated-page .curated-contact-grid > a,
+.curated-page .curated-contact-cell > a {
   text-decoration: none;
 }
 
+.curated-page .curated-contact-copy {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  padding: 0 9px;
+  min-height: 24px;
+  border: 1px solid var(--portfolio-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--portfolio-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.curated-page .curated-contact-copy:hover,
+.curated-page .curated-contact-copy:focus-visible {
+  color: var(--portfolio-text);
+  border-color: var(--portfolio-accent);
+  background: rgba(91, 143, 214, 0.14);
+  outline: none;
+}
+
+.portfolio-copy-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  z-index: 9999;
+  transform: translate(-50%, 10px);
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(20, 20, 22, 0.94);
+  color: #ececee;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.portfolio-copy-toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .curated-page .curated-contact-grid > a:hover,
-.curated-page .curated-contact-grid > a:focus-visible {
+.curated-page .curated-contact-grid > a:focus-visible,
+.curated-page .curated-contact-cell > a:hover,
+.curated-page .curated-contact-cell > a:focus-visible {
   border-color: rgba(102, 217, 255, 0.38);
   background: var(--curated-card-bg-strong);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
