@@ -57,6 +57,7 @@ try {
       emptyAlts: [...document.images].filter((image) => !image.hasAttribute("alt") || !image.alt.trim()).length,
       navVisible: getComputedStyle(document.querySelector("header nav")).display !== "none",
       pinPaused: document.querySelector("#pin-video").paused,
+      pinControls: document.querySelector("#pin-video").controls,
       qrVisible: document.querySelector(".qr-window").getBoundingClientRect().width > 0,
       cases: [...document.querySelectorAll(".cases-rows .case")].map((caseElement) => ({ height: Math.round(caseElement.getBoundingClientRect().height), imageWidth: caseElement.querySelector("img")?.naturalWidth, opacity: getComputedStyle(caseElement).opacity })),
       heading: document.querySelector("h1")?.textContent.trim()
@@ -72,7 +73,7 @@ try {
   await browser.close();
   if (server) await new Promise((resolve) => server.close(resolve));
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.pinPaused && r.qrVisible && r.lightboxOpen && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length);
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.pinPaused && r.pinControls && r.qrVisible && r.lightboxOpen && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length);
 await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, results }, null, 2));
 console.log(JSON.stringify({ base, passed, results }, null, 2));
 if (!passed) process.exitCode = 1;

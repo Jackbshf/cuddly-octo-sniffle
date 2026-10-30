@@ -260,7 +260,7 @@
   .pin-media video{width:100%;height:100%;object-fit:cover;display:block}
   .pin-mask{position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(180deg,rgba(5,7,10,.85) 0%,rgba(5,7,10,.15) 26%,rgba(5,7,10,.15) 72%,rgba(5,7,10,.92) 100%)}
-  .pin-caps{position:relative;z-index:2;width:100%;max-width:1180px;padding:0 28px;height:100%}
+  .pin-caps{position:relative;z-index:2;width:100%;max-width:1180px;padding:0 28px;height:100%;pointer-events:none}
   .pin-cap{position:absolute;left:28px;bottom:14vh;max-width:520px;opacity:0;will-change:opacity,transform}
   .pin-cap .k{font-size:11px;letter-spacing:.18em;color:#9fb6d4;margin-bottom:10px}
   .pin-cap h3{font-size:clamp(26px,3.4vw,44px);font-weight:750;letter-spacing:-.03em;margin:0 0 10px}
@@ -320,9 +320,16 @@
   if (!pin || !media || !video) return;
 
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var saveData = Boolean(navigator.connection?.saveData);
+  var top = 0, span = 1, vh = 0, lastP = -1, playing = false, visibleEnough = false;
+  video.controls = reduce || saveData;
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { video.pause(); playing = false; } else if (!reduce && !saveData) { lastP = -1; paint(); } });
+  new IntersectionObserver(function (entries) {
+    visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.4;
+    if (!visibleEnough) { video.pause(); playing = false; }
+    else if (!reduce && !saveData) { lastP = -1; paint(); }
+  }, { threshold: [0, 0.4] }).observe(media);
   if (reduce) { video.pause(); return; }
-
-  var top = 0, span = 1, vh = 0, lastP = -1, playing = false;
 
   function measure() {
     vh = window.innerHeight;
@@ -357,9 +364,9 @@
     bar.style.width = (p * 100).toFixed(1) + '%';
 
     // 只在段落可见时播放，避免后台解码耗电
-    var inView = p > 0 && p < 1 && !document.hidden && !navigator.connection?.saveData;
+    var inView = p > 0 && p < 1 && visibleEnough && !document.hidden && !saveData;
     if (inView && !playing) { video.play().catch(function () {}); playing = true; }
-    if (!inView && playing) { video.pause(); playing = false; }
+    if (!inView && !video.paused) { video.pause(); playing = false; }
   }
 
   var ticking = false;
@@ -369,7 +376,6 @@
     requestAnimationFrame(function () { paint(); ticking = false; });
   }, { passive: true });
   window.addEventListener('resize', function () { measure(); lastP = -1; paint(); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) { video.pause(); playing = false; } else { lastP = -1; paint(); } });
   window.addEventListener('load', function () { measure(); paint(); });
 
   measure(); paint();
