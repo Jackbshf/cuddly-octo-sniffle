@@ -517,6 +517,15 @@ async function main() {
     await mkdir(path.dirname(destination), { recursive: true });
     await cp(source, destination, { recursive: true });
   }
+  for (const name of ["03_electric_suv_studio_2x", "commercial-animated-street-story"]) {
+    const videoDir = path.join(distDir, "showcase", "videos");
+    await runCommand("ffmpeg", [
+      "-hide_banner", "-loglevel", "error", "-y",
+      "-i", path.join(videoDir, `${name}.mp4`),
+      "-c", "copy", "-movflags", "+faststart",
+      path.join(videoDir, `${name}-faststart.mp4`)
+    ]);
+  }
   await splitPromptLibraryForWorkerAssets();
   await splitPromptSearchIndexForWorkerAssets();
 
