@@ -106,11 +106,23 @@ try {
     await page.locator("#lb-close").click();
 
     await page.locator("#pin-open").click();
-    const pinVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("03_electric_suv_studio_2x.mp4") && getComputedStyle(video).objectFit === "contain");
+    const pinVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("03_electric_suv_studio_2x-faststart.mp4") && getComputedStyle(video).objectFit === "contain");
+    const pinVideoPlaying = await page.waitForFunction(() => {
+      const video = document.querySelector("#lb-video");
+      return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
+    }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
     await page.screenshot({ path: path.join(output, `${size.name}-video-viewer.png`) });
     await page.locator("#lb-close").click();
 
-    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseImageOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, errors });
+    await page.locator("#vg-portrait .vcard[role='button']").last().click();
+    const longVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("commercial-animated-street-story-faststart.mp4"));
+    const longVideoPlaying = await page.waitForFunction(() => {
+      const video = document.querySelector("#lb-video");
+      return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
+    }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
+    await page.locator("#lb-close").click();
+
+    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseImageOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, longVideoOpen, longVideoPlaying, errors });
     await context.close();
   }
 
@@ -139,7 +151,7 @@ try {
   await browser.close();
   if (server) await new Promise((resolve) => server.close(resolve));
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.qrVisible && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseImageOpened && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean);
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.qrVisible && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseImageOpened && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.longVideoOpen && r.longVideoPlaying && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean);
 await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, results }, null, 2));
 console.log(JSON.stringify({ base, passed, motionPolicy, results }, null, 2));
 if (!passed) process.exitCode = 1;

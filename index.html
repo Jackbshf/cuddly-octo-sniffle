@@ -264,7 +264,7 @@
 
 <section class="pin" id="pin" aria-label="暗棚电动车视频">
   <div class="pin-media" id="pin-media">
-    <video id="pin-video" src="showcase/videos/03_electric_suv_studio_2x.mp4"
+    <video id="pin-video" src="showcase/videos/03_electric_suv_studio_2x-faststart.mp4"
            poster="showcase/videos/03_electric_suv_studio.jpg"
            muted loop playsinline preload="metadata"></video>
     <button class="pin-open" id="pin-open" type="button" aria-label="完整观看暗棚电动车视频"><span aria-hidden="true">▶</span></button>
@@ -295,7 +295,7 @@
   document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
   button.addEventListener('click', function () {
     video.pause();
-    if (window.__openLightbox) window.__openLightbox({ f: '03_electric_suv_studio_2x', title: '暗棚电动车', meta: '汽车光影 / 完整视频' });
+    if (window.__openLightbox) window.__openLightbox({ f: '03_electric_suv_studio_2x-faststart', title: '暗棚电动车', meta: '汽车光影 / 完整视频' });
   });
 })();
 </script>
@@ -488,11 +488,11 @@
     { f: 'ffcffe00a999d24e399f2eeb2fc45b73', title: '东方庭院 · 数字人', meta: '数字人 / 10s', dur: '00:10', wide: false, local: false },
     { f: 'commercial-mirror-beauty-routine', title: '镜前美妆 · 护肤氛围', meta: '美妆 / 10s', dur: '00:10', wide: false, local: false },
     { f: 'commercial-sereni-story-product', title: '舒缓产品 · 剧情短片', meta: '剧情 / 10s', dur: '00:10', wide: false, local: false },
-    { f: 'commercial-animated-street-story', title: '动画街景 · 商业叙事', meta: '剧情 / 1′48″', dur: '01:48', wide: false, local: false }
+    { f: 'commercial-animated-street-story', srcFile: 'commercial-animated-street-story-faststart', title: '动画街景 · 商业叙事', meta: '剧情 / 1′48″', dur: '01:48', wide: false, local: false }
   ];
 
   window.__DSH_VIDEOS__ = VIDEOS;
-  function srcOf(v) { return MEDIA + v.f + '.mp4'; }
+  function srcOf(v) { return MEDIA + (v.srcFile || v.f) + '.mp4'; }
   function posterOf(v) { return v.local ? MEDIA + v.f.replace(/_00001_$/, '') + '.jpg' : 'showcase/images/_posters/' + v.f + '.webp'; }
 
   var DETAILS = [
