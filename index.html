@@ -1101,7 +1101,7 @@
   /* ——— 自定义播放器皮肤（替换原生 controls） ——— */
   #lb .lb-inner{max-width:min(1180px,94vw)}
   #lb .vwrap{position:relative;display:inline-block;line-height:0;max-width:100%}
-  #lb video{max-height:78vh;border-radius:10px}
+  #lb video{max-height:78vh;border-radius:10px;cursor:pointer}
   #lb-video::-webkit-media-controls{display:none !important}
 
   .pl{position:absolute;left:0;right:0;bottom:0;padding:14px 16px 12px;border-radius:0 0 10px 10px;
@@ -1144,9 +1144,6 @@
   wrap.className = 'pl idle';
   wrap.innerHTML =
     '<div class="pl-row">' +
-      '<button class="pl-play" aria-label="播放 / 暂停">' +
-        '<svg viewBox="0 0 24 24"><path class="ico-play" d="M8 5v14l11-7z"/><path class="ico-pause" d="M6 5h4v14H6zm8 0h4v14h-4z" style="display:none"/></svg>' +
-      '</button>' +
       '<div class="bar"><div class="track"><div class="buf"></div><div class="fill"></div></div><div class="knob"></div></div>' +
       '<span class="time">0:00 / 0:00</span>' +
       '<button class="pl-mute" aria-label="静音切换">' +
@@ -1156,7 +1153,10 @@
   vwrap.appendChild(wrap);
 
   function $(s) { return wrap.querySelector(s); }
-  var play = $('.pl-play'), mute = $('.pl-mute'), bar = $('.bar'),
+  video.tabIndex = 0;
+  video.setAttribute('role', 'button');
+  video.setAttribute('aria-label', '播放或暂停视频');
+  var mute = $('.pl-mute'), bar = $('.bar'),
       fill = $('.fill'), buf = $('.buf'), knob = $('.knob'), time = $('.time');
 
   function fmt(t) {
@@ -1170,11 +1170,6 @@
     fill.style.width = (p * 100).toFixed(2) + '%';
     knob.style.left = (p * 100).toFixed(2) + '%';
     time.textContent = fmt(c) + ' / ' + fmt(d);
-    var iconPlay = wrap.querySelector('.ico-play'), iconPause = wrap.querySelector('.ico-pause');
-    if (iconPlay && iconPause) {
-      iconPlay.style.display = video.paused ? '' : 'none';
-      iconPause.style.display = video.paused ? 'none' : '';
-    }
     try {
       if (video.buffered.length) buf.style.width = (video.buffered.end(video.buffered.length - 1) / d * 100) + '%';
     } catch (e) {}
@@ -1183,7 +1178,7 @@
   function wake() { wrap.classList.remove('idle'); clearTimeout(t); t = setTimeout(idle, 2600); }
   var t = null;
 
-  play.addEventListener('click', function (e) {
+  video.addEventListener('click', function (e) {
     e.stopPropagation();
     video.paused ? video.play().catch(function () {}) : video.pause();
     wake();
