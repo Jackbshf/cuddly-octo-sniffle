@@ -182,6 +182,9 @@ const writeDistHeaders = async () => {
     "/videos/*",
     "  Cache-Control: public, max-age=31536000, immutable",
     "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    "/showcase/*",
+    "  Cache-Control: public, max-age=3600",
+    "  CDN-Cache-Control: public, max-age=86400",
     ""
   ].join("\n");
 

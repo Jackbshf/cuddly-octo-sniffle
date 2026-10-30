@@ -57,6 +57,7 @@ try {
       brokenImages: [...document.images].filter((image) => image.complete && image.naturalWidth === 0).map((image) => image.src),
       emptyAlts: [...document.images].filter((image) => !image.hasAttribute("alt") || !image.alt.trim()).length,
       navVisible: getComputedStyle(document.querySelector("header nav")).display !== "none",
+      contactLinkGone: !document.querySelector('header nav a[href="#contact"]') && document.querySelector("header .cta")?.textContent.trim() === "聊聊合作",
       pinPaused: document.querySelector("#pin-video").paused,
       pinCopyGone: document.querySelectorAll(".pin-cap").length === 0 && !document.querySelector("#pin").textContent.includes("停在最亮的那一帧"),
       pinOpenVisible: document.querySelector("#pin-open").getBoundingClientRect().width > 0,
@@ -111,6 +112,10 @@ try {
       const video = document.querySelector("#lb-video");
       return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
     }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
+    const playerIconGone = await page.locator("#lb .pl-play").count() === 0;
+    await page.locator("#lb-video").click({ position: { x: 30, y: 30 } });
+    const playerTapWorks = await page.locator("#lb-video").evaluate((video) => video.paused);
+    await page.locator("#lb-video").click({ position: { x: 30, y: 30 } });
     await page.screenshot({ path: path.join(output, `${size.name}-video-viewer.png`) });
     await page.locator("#lb-close").click();
 
@@ -122,7 +127,7 @@ try {
     }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
     await page.locator("#lb-close").click();
 
-    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseImageOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, longVideoOpen, longVideoPlaying, errors });
+    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseImageOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, playerIconGone, playerTapWorks, longVideoOpen, longVideoPlaying, errors });
     await context.close();
   }
 
@@ -130,6 +135,7 @@ try {
   const motionPage = await motionContext.newPage();
   await motionPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
   const offscreenPaused = await motionPage.locator("#pin-video").evaluate((video) => video.paused);
+  const offscreenUnloaded = await motionPage.locator("#pin-video").evaluate((video) => !video.currentSrc && !video.poster);
   await motionPage.locator("#pin-media").scrollIntoViewIfNeeded();
   const onscreenPlaying = await motionPage.waitForFunction(() => !document.querySelector("#pin-video").paused, undefined, { timeout: 10000 }).then(() => true).catch(() => false);
   await motionPage.locator("#contact").scrollIntoViewIfNeeded();
@@ -146,12 +152,26 @@ try {
   await saveDataPage.locator("#pin-open").click();
   const saveDataManualOpen = await saveDataPage.locator("#lb").getAttribute("data-open") === "1";
   await saveDataContext.close();
-  motionPolicy = { offscreenPaused, onscreenPlaying, pausedAfterScroll, saveDataPaused, saveDataManualOpen };
+  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, pausedAfterScroll, saveDataPaused, saveDataManualOpen };
 } finally {
   await browser.close();
   if (server) await new Promise((resolve) => server.close(resolve));
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.qrVisible && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseImageOpened && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.longVideoOpen && r.longVideoPlaying && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean);
-await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, results }, null, 2));
-console.log(JSON.stringify({ base, passed, motionPolicy, results }, null, 2));
+let rangeDelivery = null;
+if (remote) {
+  rangeDelivery = {};
+  for (const [name, filename] of Object.entries({ suv: "03_electric_suv_studio_2x-faststart.mp4", long: "commercial-animated-street-story-faststart.mp4" })) {
+    try {
+      const response = await fetch(new URL(`showcase/videos/${filename}`, base), {
+        headers: { Range: "bytes=0-1023" }, signal: AbortSignal.timeout(20000)
+      });
+      rangeDelivery[name] = response.status === 206 && (await response.arrayBuffer()).byteLength === 1024 && response.headers.get("content-range")?.startsWith("bytes 0-1023/");
+    } catch {
+      rangeDelivery[name] = false;
+    }
+  }
+}
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.qrVisible && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseImageOpened && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
+await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
+console.log(JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
 if (!passed) process.exitCode = 1;
