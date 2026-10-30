@@ -520,7 +520,7 @@ async function main() {
     await mkdir(path.dirname(destination), { recursive: true });
     await cp(source, destination, { recursive: true });
   }
-  for (const name of ["03_electric_suv_studio_2x", "commercial-animated-street-story"]) {
+  for (const name of ["03_electric_suv_studio_00001_", "03_electric_suv_studio_2x", "commercial-animated-street-story"]) {
     const videoDir = path.join(distDir, "showcase", "videos");
     await runCommand("ffmpeg", [
       "-hide_banner", "-loglevel", "error", "-y",

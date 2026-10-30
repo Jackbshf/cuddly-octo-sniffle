@@ -137,6 +137,7 @@ try {
       const video = document.querySelector("#lb-video");
       return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
     }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
+    await page.locator("#lb-video").hover({ position: { x: 30, y: 30 } });
     await page.locator("#lb .bar").click();
     const longVideoSeek = await page.waitForFunction(() => {
       const video = document.querySelector("#lb-video");
@@ -156,6 +157,7 @@ try {
   const offscreenUnloaded = await motionPage.locator("#pin-video").evaluate((video) => !video.currentSrc && !video.poster);
   await motionPage.locator("#pin-media").scrollIntoViewIfNeeded();
   const onscreenPlaying = await motionPage.waitForFunction(() => !document.querySelector("#pin-video").paused, undefined, { timeout: 10000 }).then(() => true).catch(() => false);
+  const previewSourceCorrect = await motionPage.locator("#pin-video").evaluate((video) => video.currentSrc.includes("03_electric_suv_studio_00001_-faststart.mp4"));
   await motionPage.locator("#contact").scrollIntoViewIfNeeded();
   const pausedAfterScroll = await motionPage.waitForFunction(() => document.querySelector("#pin-video").paused, undefined, { timeout: 3000 }).then(() => true).catch(() => false);
   await motionContext.close();
@@ -170,7 +172,7 @@ try {
   await saveDataPage.locator("#pin-open").click();
   const saveDataManualOpen = await saveDataPage.locator("#lb").getAttribute("data-open") === "1";
   await saveDataContext.close();
-  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, pausedAfterScroll, saveDataPaused, saveDataManualOpen };
+  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, previewSourceCorrect, pausedAfterScroll, saveDataPaused, saveDataManualOpen };
 } finally {
   await browser.close();
   if (server) await new Promise((resolve) => server.close(resolve));
