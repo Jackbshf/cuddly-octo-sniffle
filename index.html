@@ -280,7 +280,7 @@
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = Boolean(navigator.connection?.saveData);
   var visibleEnough = false;
-  new IntersectionObserver(function (entries, observer) {
+  var nearObserver = new IntersectionObserver(function (entries, observer) {
     if (!entries[0].isIntersecting) return;
     video.poster = video.dataset.poster;
     if (!reduce && !saveData && !video.src) {
@@ -288,7 +288,7 @@
       video.src = video.dataset.src;
     }
     observer.disconnect();
-  }, { rootMargin: '650px' }).observe(media);
+  }, { rootMargin: '650px' });
   function updatePlayback() {
     if (reduce || saveData || document.hidden || !visibleEnough || document.getElementById('lb')?.getAttribute('data-open') === '1') {
       video.pause();
@@ -297,10 +297,14 @@
     if (!video.src) video.src = video.dataset.src;
     video.play().catch(function () {});
   }
-  new IntersectionObserver(function (entries) {
+  var playbackObserver = new IntersectionObserver(function (entries) {
     visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.4;
     updatePlayback();
-  }, { threshold: [0, 0.4] }).observe(media);
+  }, { threshold: [0, 0.4] });
+  document.addEventListener('DOMContentLoaded', function () {
+    nearObserver.observe(media);
+    playbackObserver.observe(media);
+  }, { once: true });
   document.addEventListener('visibilitychange', updatePlayback);
   document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
   button.addEventListener('click', function () {
