@@ -253,133 +253,50 @@
 </section>
 
 <style>
-  /* ——— Pinned 滚动段落：画面钉住，滚动推进 ——— */
-  .pin{position:relative;height:190vh;background:var(--bg)}
-  .pin-stage{position:sticky;top:0;height:100vh;overflow:hidden;display:grid;place-items:center}
-  .pin-media{position:absolute;inset:0;will-change:transform,filter;transform-origin:50% 45%}
+  .pin{padding:0;background:#05070a}
+  .pin-media{position:relative;height:min(72vh,740px);min-height:420px;overflow:hidden}
   .pin-media video{width:100%;height:100%;object-fit:cover;display:block}
-  .pin-mask{position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg,rgba(5,7,10,.85) 0%,rgba(5,7,10,.15) 26%,rgba(5,7,10,.15) 72%,rgba(5,7,10,.92) 100%)}
-  .pin-caps{position:relative;z-index:2;width:100%;max-width:1180px;padding:0 28px;height:100%;pointer-events:none}
-  .pin-cap{position:absolute;left:28px;bottom:14vh;max-width:520px;opacity:0;will-change:opacity,transform}
-  .pin-cap .k{font-size:11px;letter-spacing:.18em;color:#9fb6d4;margin-bottom:10px}
-  .pin-cap h3{font-size:clamp(26px,3.4vw,44px);font-weight:750;letter-spacing:-.03em;margin:0 0 10px}
-  .pin-cap p{margin:0;font-size:14px;line-height:1.8;color:#b9c9dd}
-  .pin-progress{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.12);z-index:3}
-  .pin-progress i{display:block;height:100%;width:0;background:#e8eef7}
-  @media (max-width:640px){
-    .pin{height:155vh}
-    .pin-cap{left:18px;right:18px;bottom:12vh;max-width:none}
-    .pin-cap h3{font-size:24px}
-    .pin-cap p{font-size:13px}
-  }
-  @media (prefers-reduced-motion: reduce){
-    .pin{height:auto}
-    .pin-stage{position:relative;height:70vh}
-    .pin-cap{position:static;opacity:1;margin:18px 0}
-    .pin-caps{height:auto;display:flex;flex-direction:column;justify-content:center}
-  }
+  .pin-open{position:absolute;inset:0;width:100%;border:0;background:transparent;color:#fff;cursor:pointer}
+  .pin-open span{position:absolute;right:28px;bottom:28px;display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(255,255,255,.42);border-radius:50%;background:rgba(5,7,10,.54);font-size:18px;backdrop-filter:blur(8px)}
+  .pin-open:hover span,.pin-open:focus-visible span{background:rgba(5,7,10,.82)}
+  @media(max-width:640px){.pin-media{height:58vh;min-height:320px}.pin-open span{right:18px;bottom:18px}}
 </style>
 
-<section class="pin" id="pin" aria-label="暗棚电动车 · 滚动演示">
-  <div class="pin-stage">
-    <div class="pin-media" id="pin-media">
-      <video id="pin-video" src="showcase/videos/03_electric_suv_studio_2x.mp4"
-             poster="showcase/videos/03_electric_suv_studio.jpg"
-             muted loop playsinline preload="metadata"></video>
-    </div>
-    <div class="pin-mask"></div>
-    <div class="pin-caps">
-      <div class="pin-cap" data-cap="0">
-        <div class="k">01 / 暗棚</div>
-        <h3>车身从黑里浮出来</h3>
-        <p>一条缝光从车头扫到车尾，肩线和轮拱自己显形。</p>
-      </div>
-      <div class="pin-cap" data-cap="1">
-        <div class="k">02 / 光</div>
-        <h3>只留一条缝的光</h3>
-        <p>不做均匀补光——明暗交界把体积交代清楚，比多灯位更像实拍。</p>
-      </div>
-      <div class="pin-cap" data-cap="2">
-        <div class="k">03 / 收</div>
-        <h3>停在最亮的那一帧</h3>
-        <p>窗格的反光落在车门上，整段只有这一处高光。</p>
-      </div>
-    </div>
-    <div class="pin-progress"><i id="pin-bar"></i></div>
+<section class="pin" id="pin" aria-label="暗棚电动车视频">
+  <div class="pin-media" id="pin-media">
+    <video id="pin-video" src="showcase/videos/03_electric_suv_studio_2x.mp4"
+           poster="showcase/videos/03_electric_suv_studio.jpg"
+           muted loop playsinline preload="metadata"></video>
+    <button class="pin-open" id="pin-open" type="button" aria-label="完整观看暗棚电动车视频"><span aria-hidden="true">▶</span></button>
   </div>
 </section>
 
 <script>
 (function () {
-  var pin = document.getElementById('pin');
   var media = document.getElementById('pin-media');
   var video = document.getElementById('pin-video');
-  var bar = document.getElementById('pin-bar');
-  var caps = [].slice.call(document.querySelectorAll('.pin-cap'));
-  if (!pin || !media || !video) return;
-
+  var button = document.getElementById('pin-open');
+  if (!media || !video || !button) return;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = Boolean(navigator.connection?.saveData);
-  var top = 0, span = 1, vh = 0, lastP = -1, playing = false, visibleEnough = false;
-  video.controls = reduce || saveData;
-  document.addEventListener('visibilitychange', function () { if (document.hidden) { video.pause(); playing = false; } else if (!reduce && !saveData) { lastP = -1; paint(); } });
+  var visibleEnough = false;
+  function updatePlayback() {
+    if (reduce || saveData || document.hidden || !visibleEnough || document.getElementById('lb')?.getAttribute('data-open') === '1') {
+      video.pause();
+      return;
+    }
+    video.play().catch(function () {});
+  }
   new IntersectionObserver(function (entries) {
     visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.4;
-    if (!visibleEnough) { video.pause(); playing = false; }
-    else if (!reduce && !saveData) { lastP = -1; paint(); }
+    updatePlayback();
   }, { threshold: [0, 0.4] }).observe(media);
-  if (reduce) { video.pause(); return; }
-
-  function measure() {
-    vh = window.innerHeight;
-    var r = pin.getBoundingClientRect();
-    top = r.top + window.scrollY;
-    span = Math.max(1, pin.offsetHeight - vh);
-  }
-
-  function paint() {
-    var p = (window.scrollY - top) / span;
-    p = p < 0 ? 0 : p > 1 ? 1 : p;
-    if (Math.abs(p - lastP) < 0.002) return;
-    lastP = p;
-
-    // 画面推进：轻微推近 + 压暗
-    var scale = 1.0 + p * 0.10;
-    var shift = -p * 26;
-    media.style.transform = 'scale(' + scale.toFixed(3) + ') translateY(' + shift.toFixed(1) + 'px)';
-    media.style.filter = 'brightness(' + (1 - p * 0.28).toFixed(2) + ')';
-
-    // 三段文案，按进度分段交叉淡入
-    caps.forEach(function (c, i) {
-      var start = i * 0.33;
-      var local = (p - start) / 0.33;
-      var o = local <= 0 ? 0 : local >= 1 ? 0 : Math.sin(local * Math.PI);
-      if (i === 0 && p < 0.02) o = 1;
-      if (i === 2 && p > 0.98) o = 1;
-      c.style.opacity = o.toFixed(3);
-      c.style.transform = 'translateY(' + ((1 - Math.min(1, local)) * 18).toFixed(1) + 'px)';
-    });
-
-    bar.style.width = (p * 100).toFixed(1) + '%';
-
-    // 只在段落可见时播放，避免后台解码耗电
-    var inView = p > 0 && p < 1 && visibleEnough && !document.hidden && !saveData;
-    if (inView && !playing) { video.play().catch(function () {}); playing = true; }
-    if (!inView && !video.paused) { video.pause(); playing = false; }
-  }
-
-  var ticking = false;
-  window.addEventListener('scroll', function () {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function () { paint(); ticking = false; });
-  }, { passive: true });
-  window.addEventListener('resize', function () { measure(); lastP = -1; paint(); });
-  window.addEventListener('load', function () { measure(); paint(); });
-
-  measure(); paint();
-  setTimeout(function () { measure(); lastP = -1; paint(); }, 600);
+  document.addEventListener('visibilitychange', updatePlayback);
+  document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
+  button.addEventListener('click', function () {
+    video.pause();
+    if (window.__openLightbox) window.__openLightbox({ f: '03_electric_suv_studio_2x', title: '暗棚电动车', meta: '汽车光影 / 完整视频' });
+  });
 })();
 </script>
 
@@ -482,13 +399,79 @@
 
 </main><footer><div class="wrap">© 2026 张玮 · AIGC 视觉设计师 · 深圳</div></footer>
 
-<div class="lb" id="lb">
+<dialog class="image-viewer" id="image-viewer" aria-labelledby="image-viewer-title">
+  <div class="image-viewer-toolbar">
+    <strong id="image-viewer-title">完整图片</strong>
+    <div class="image-viewer-actions">
+      <button type="button" id="image-viewer-zoom">查看原图尺寸</button>
+      <button type="button" id="image-viewer-close" aria-label="关闭图片">×</button>
+    </div>
+  </div>
+  <div class="image-viewer-scroll" id="image-viewer-scroll"></div>
+</dialog>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="完整视频查看" aria-hidden="true">
   <div class="lb-inner">
     <button class="lb-close" id="lb-close" aria-label="关闭">×</button>
     <video id="lb-video" controls playsinline></video>
     <div class="lb-cap" id="lb-cap"></div>
   </div>
 </div>
+
+<script>
+(function () {
+  var dialog = document.getElementById('image-viewer');
+  var scroll = document.getElementById('image-viewer-scroll');
+  var title = document.getElementById('image-viewer-title');
+  var zoom = document.getElementById('image-viewer-zoom');
+  var close = document.getElementById('image-viewer-close');
+  var previousFocus = null;
+  if (!dialog || !scroll || !title || !zoom || !close) return;
+
+  window.__openImageViewer = function (src, label) {
+    previousFocus = document.activeElement;
+    title.textContent = label;
+    var image = document.createElement('img');
+    image.src = src;
+    image.alt = label;
+    scroll.replaceChildren(image);
+    scroll.scrollTo(0, 0);
+    dialog.removeAttribute('data-zoom');
+    zoom.textContent = '查看原图尺寸';
+    zoom.setAttribute('aria-pressed', 'false');
+    dialog.showModal();
+    document.body.classList.add('media-viewer-open');
+    close.focus();
+  };
+
+  zoom.addEventListener('click', function () {
+    var enlarged = dialog.getAttribute('data-zoom') === '1';
+    if (enlarged) dialog.removeAttribute('data-zoom');
+    else dialog.setAttribute('data-zoom', '1');
+    zoom.textContent = enlarged ? '查看原图尺寸' : '适应屏幕';
+    zoom.setAttribute('aria-pressed', String(!enlarged));
+    scroll.scrollTo(0, 0);
+  });
+  close.addEventListener('click', function () { dialog.close(); });
+  dialog.addEventListener('close', function () {
+    scroll.replaceChildren();
+    document.body.classList.remove('media-viewer-open');
+    if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+    previousFocus = null;
+  });
+  dialog.addEventListener('click', function (event) { if (event.target === dialog) dialog.close(); });
+
+  document.querySelectorAll('.cases-rows .case img').forEach(function (image) {
+    image.tabIndex = 0;
+    image.setAttribute('role', 'button');
+    image.setAttribute('aria-label', '查看完整图片：' + image.alt);
+    image.addEventListener('click', function () { window.__openImageViewer(image.src, image.alt); });
+    image.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.__openImageViewer(image.src, image.alt); }
+    });
+  });
+})();
+</script>
 
 <script>
 (function () {
@@ -569,6 +552,9 @@
   function addCard(src, label) {
     var fig = document.createElement('figure');
     fig.className = 'gcard';
+    fig.tabIndex = 0;
+    fig.setAttribute('role', 'button');
+    fig.setAttribute('aria-label', '查看完整图片：' + label);
     var img = document.createElement('img');
     img.loading = 'lazy';
     img.alt = label;
@@ -579,6 +565,10 @@
     cap.textContent = label;
     fig.appendChild(img);
     fig.appendChild(cap);
+    fig.addEventListener('click', function () { window.__openImageViewer(src, label); });
+    fig.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.__openImageViewer(src, label); }
+    });
     gg.appendChild(fig);
   }
   DETAILS.forEach(function (d) {
@@ -597,25 +587,39 @@
   var lb = document.getElementById('lb');
   var lbVideo = document.getElementById('lb-video');
   var lbCap = document.getElementById('lb-cap');
+  var previousVideoFocus = null;
 
   function closeLightbox() {
+    if (lb.getAttribute('data-open') !== '1') return;
     lb.removeAttribute('data-open');
+    lb.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('media-viewer-open');
     lbVideo.pause();
     lbVideo.removeAttribute('src');
+    lbVideo.load();
+    if (previousVideoFocus && previousVideoFocus.isConnected) previousVideoFocus.focus();
+    previousVideoFocus = null;
+    document.dispatchEvent(new Event('portfolio:video-viewer-closed'));
   }
 
   window.__openLightbox = openLightbox;
   function openLightbox(v) {
+    previousVideoFocus = document.activeElement;
+    document.querySelectorAll('.vcard video, #pin-video').forEach(function (preview) { preview.pause(); });
     lbVideo.src = srcOf(v);
     lbCap.textContent = v.title + ' · ' + v.meta;
     lb.setAttribute('data-open', '1');
+    lb.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('media-viewer-open');
     lbVideo.muted = false;
+    document.getElementById('lb-close').focus();
     var p = lbVideo.play(); if (p && p.catch) p.catch(function () {});
   }
 
   document.getElementById('lb-close').addEventListener('click', closeLightbox);
   lb.addEventListener('click', function (e) { if (e.target === lb) closeLightbox(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) lbVideo.pause(); });
 })();
 </script>
 <style>
@@ -709,14 +713,16 @@
       if (e.pointerType === 'touch') return;      // 触屏交给原生惯性
       down = true; moved = 0;
       startX = e.clientX; startLeft = shelf.scrollLeft;
-      shelf.classList.add('is-dragging');
-      shelf.setPointerCapture(e.pointerId);
     });
     shelf.addEventListener('pointermove', function (e) {
       if (!down) return;
       var dx = e.clientX - startX;
       moved = Math.max(moved, Math.abs(dx));
-      if (moved > 4) shelf.scrollLeft = startLeft - dx;
+      if (moved > 4) {
+        if (!shelf.hasPointerCapture(e.pointerId)) shelf.setPointerCapture(e.pointerId);
+        shelf.classList.add('is-dragging');
+        shelf.scrollLeft = startLeft - dx;
+      }
     });
     function end(e) {
       if (!down) return;
@@ -1223,7 +1229,22 @@
 <style>
   :focus-visible{outline:2px solid var(--accent-2);outline-offset:3px}
   section[id]{scroll-margin-top:108px}
+  body.media-viewer-open{overflow:hidden}
+  .gcard[role="button"],.cases-rows .case img[role="button"]{cursor:zoom-in}
+  .image-viewer{inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#06080b;color:var(--text)}
+  .image-viewer[open]{display:flex;flex-direction:column}
+  .image-viewer::backdrop{background:rgba(0,0,0,.92)}
+  .image-viewer-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:0 0 64px;padding:0 24px;border-bottom:1px solid var(--line)}
+  .image-viewer-toolbar strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600}
+  .image-viewer-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .image-viewer-actions button{min-height:40px;padding:6px 12px;border:1px solid rgba(255,255,255,.18);border-radius:6px;background:#101722;color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+  #image-viewer-close{width:40px;padding:0;font-size:24px;line-height:1}
+  .image-viewer-scroll{flex:1;min-height:0;overflow:auto;display:grid;place-items:center;padding:18px}
+  .image-viewer-scroll img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100dvh - 100px);object-fit:contain}
+  .image-viewer[data-zoom="1"] .image-viewer-scroll{display:block;text-align:center}
+  .image-viewer[data-zoom="1"] .image-viewer-scroll img{max-width:none;max-height:none;margin:0 auto}
   .lb-close{z-index:5}
+  #lb video{width:auto;max-width:min(94vw,1200px);max-height:calc(100dvh - 118px);object-fit:contain}
   .feat{border:0;background:transparent;color:inherit;text-align:left;padding:0;width:100%;font:inherit}
   .vcard[role="button"]{cursor:pointer}
   .contact{grid-template-columns:1fr 1fr 1.2fr}
@@ -1251,10 +1272,10 @@
   }
   @media(max-width:640px){
     section[id]{scroll-margin-top:116px}
+    .image-viewer-toolbar{padding:0 14px}
+    .image-viewer-scroll{padding:10px}
     .contact{grid-template-columns:1fr}
     .ccard-wechat{grid-column:1}
-    .pin-cap p{color:#e3ecf9;text-shadow:0 2px 10px #000}
-    .pin-mask{background:linear-gradient(180deg,rgba(5,7,10,.62),rgba(5,7,10,.42) 48%,rgba(5,7,10,.88))}
   }
 </style>
 </body>
