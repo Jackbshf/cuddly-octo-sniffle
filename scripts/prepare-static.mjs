@@ -529,6 +529,13 @@ async function main() {
       path.join(videoDir, `${name}-faststart.mp4`)
     ]);
   }
+  await runCommand("ffmpeg", [
+    "-hide_banner", "-loglevel", "error", "-y",
+    "-i", path.join(distDir, "showcase", "videos", "lunar-rover.mp4"),
+    "-vf", "scale=320:-2", "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "31",
+    "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+    path.join(distDir, "showcase", "videos", "lunar-rover-backdrop.mp4")
+  ]);
   for (const name of ["01_air_fryer_wings", "03_electric_suv_studio", "05_healing_mattress"]) {
     const videoDir = path.join(distDir, "showcase", "videos");
     await sharp(path.join(videoDir, `${name}-wide.jpg`))

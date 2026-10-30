@@ -256,20 +256,23 @@
 
 <style>
   .pin{padding:0;background:#05070a}
-  .pin-media{position:relative;width:min(100%,420px);height:min(72vh,740px);min-height:420px;margin:auto;overflow:hidden}
-  .pin-media video{width:100%;height:100%;object-fit:contain;display:block}
-  .pin-open{position:absolute;inset:0;width:100%;border:0;background:transparent;color:#fff;cursor:pointer}
-  .pin-open span{position:absolute;right:28px;bottom:28px;display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(255,255,255,.42);border-radius:50%;background:rgba(5,7,10,.54);font-size:18px;backdrop-filter:blur(8px)}
-  .pin-open:hover span,.pin-open:focus-visible span{background:rgba(5,7,10,.82)}
-  @media(max-width:640px){.pin-media{height:58vh;min-height:320px}.pin-open span{right:18px;bottom:18px}}
+  .pin-media{position:relative;width:100%;height:100vh;height:100svh;overflow:hidden;background:#05070a}
+  .pin-media video{display:block}
+  .pin-backdrop{position:absolute;inset:-32px;width:calc(100% + 64px);height:calc(100% + 64px);object-fit:cover;filter:blur(28px) brightness(.65)}
+  .pin-media #pin-video{position:relative;width:min(100%,56.25vh);width:min(100%,56.25svh);height:100%;margin:auto;object-fit:contain;mask-image:linear-gradient(90deg,transparent,black 22%,black 78%,transparent)}
+  .pin-open{position:absolute;inset:0;width:100%;border:0;background:transparent;cursor:pointer}
+  .pin-open:focus-visible{outline:2px solid #9fd4ff;outline-offset:-4px}
+  @media(max-width:640px){.pin-media #pin-video{width:100%;object-fit:cover;mask-image:none}}
 </style>
 
 <section class="pin" id="pin" aria-label="月面探测车视频">
   <div class="pin-media" id="pin-media">
+    <video class="pin-backdrop" id="pin-backdrop" data-src="showcase/videos/lunar-rover-backdrop.mp4"
+           data-poster="showcase/videos/lunar-rover.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
     <video id="pin-video" data-src="showcase/videos/lunar-rover-faststart.mp4"
            data-poster="showcase/videos/lunar-rover.jpg"
            muted loop playsinline preload="none"></video>
-    <button class="pin-open" id="pin-open" type="button" aria-label="完整观看月面探测车视频"><span aria-hidden="true">▶</span></button>
+    <button class="pin-open" id="pin-open" type="button" aria-label="完整观看月面探测车视频"></button>
   </div>
 </section>
 
@@ -277,27 +280,41 @@
 (function () {
   var media = document.getElementById('pin-media');
   var video = document.getElementById('pin-video');
+  var backdrop = document.getElementById('pin-backdrop');
   var button = document.getElementById('pin-open');
-  if (!media || !video || !button) return;
+  if (!media || !video || !backdrop || !button) return;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = Boolean(navigator.connection?.saveData);
+  var backdropMedia = matchMedia('(min-width:641px)');
   var visibleEnough = false;
   var nearObserver = new IntersectionObserver(function (entries, observer) {
     if (!entries[0].isIntersecting) return;
     video.poster = video.dataset.poster;
+    if (backdropMedia.matches) backdrop.poster = backdrop.dataset.poster;
     if (!reduce && !saveData && !video.src) {
       video.preload = 'auto';
       video.src = video.dataset.src;
+      if (backdropMedia.matches) backdrop.src = backdrop.dataset.src;
     }
     observer.disconnect();
   }, { rootMargin: '650px' });
   function updatePlayback() {
     if (reduce || saveData || document.hidden || !visibleEnough || document.getElementById('lb')?.getAttribute('data-open') === '1') {
       video.pause();
+      backdrop.pause();
       return;
     }
     if (!video.src) video.src = video.dataset.src;
-    video.play().catch(function () {});
+    if (!backdropMedia.matches) {
+      backdrop.pause();
+      video.play().catch(function () {});
+      return;
+    }
+    if (!backdrop.src) backdrop.src = backdrop.dataset.src;
+    video.play().then(function () {
+      if (backdrop.readyState >= 1 && Math.abs(backdrop.currentTime - video.currentTime) > .25) backdrop.currentTime = video.currentTime;
+      backdrop.play().catch(function () {});
+    }).catch(function () {});
   }
   var playbackObserver = new IntersectionObserver(function (entries) {
     visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.4;
@@ -308,9 +325,14 @@
     playbackObserver.observe(media);
   }, { once: true });
   document.addEventListener('visibilitychange', updatePlayback);
+  backdropMedia.addEventListener('change', function () {
+    if (backdropMedia.matches && !backdrop.poster) backdrop.poster = backdrop.dataset.poster;
+    updatePlayback();
+  });
   document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
   button.addEventListener('click', function () {
     video.pause();
+    backdrop.pause();
     if (window.__openLightbox) window.__openLightbox({ f: 'lunar-rover-faststart', title: '月面探测车', meta: '场景短片 / 完整视频' });
   });
 })();
@@ -330,28 +352,24 @@
       <article class="case">
         <button class="case-video" type="button" data-video="pet-cats-product-faststart" data-title="猫咪与宠物产品" aria-label="完整观看猫咪与宠物产品视频">
           <video data-src="showcase/videos/pet-cats-product-faststart.mp4" poster="showcase/videos/pet-cats-product.jpg" muted loop playsinline preload="none"></video>
-          <span class="case-play" aria-hidden="true">▶</span>
         </button>
         <div class="body"><h3>猫咪与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
       </article>
       <article class="case">
         <button class="case-video" type="button" data-video="pet-golden-product-faststart" data-title="金毛与宠物产品" aria-label="完整观看金毛与宠物产品视频">
           <video data-src="showcase/videos/pet-golden-product-faststart.mp4" poster="showcase/videos/pet-golden-product.jpg" muted loop playsinline preload="none"></video>
-          <span class="case-play" aria-hidden="true">▶</span>
         </button>
         <div class="body"><h3>金毛与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
       </article>
       <article class="case">
         <button class="case-video" type="button" data-video="pet-orange-cat-product-faststart" data-title="橘猫与宠物产品" aria-label="完整观看橘猫与宠物产品视频">
           <video data-src="showcase/videos/pet-orange-cat-product-faststart.mp4" poster="showcase/videos/pet-orange-cat-product.jpg" muted loop playsinline preload="none"></video>
-          <span class="case-play" aria-hidden="true">▶</span>
         </button>
         <div class="body"><h3>橘猫与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
       </article>
       <article class="case">
         <button class="case-video" type="button" data-video="pet-dogs-product-faststart" data-title="狗狗与宠物产品" aria-label="完整观看狗狗与宠物产品视频">
           <video data-src="showcase/videos/pet-dogs-product-faststart.mp4" poster="showcase/videos/pet-dogs-product.jpg" muted loop playsinline preload="none"></video>
-          <span class="case-play" aria-hidden="true">▶</span>
         </button>
         <div class="body"><h3>狗狗与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
       </article>
@@ -640,7 +658,7 @@
   });
   function openLightbox(v) {
     previousVideoFocus = document.activeElement;
-    document.querySelectorAll('.vcard video, .case-video video, #pin-video').forEach(function (preview) { preview.pause(); });
+    document.querySelectorAll('.vcard video, .case-video video, #pin-video, #pin-backdrop').forEach(function (preview) { preview.pause(); });
     lbVideo.src = srcOf(v);
     lbCap.textContent = v.title + ' · ' + v.meta;
     lb.setAttribute('data-open', '1');
@@ -917,12 +935,11 @@
   .cases-rows .case{display:block;min-width:0;border-radius:14px;overflow:hidden;background:rgba(9,11,16,.72)}
   .cases-rows .case-video{display:block;position:relative;width:100%;padding:0;border:0;background:#05070a;color:#fff;cursor:pointer}
   .cases-rows .case-video video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover}
-  .cases-rows .case-play{position:absolute;right:14px;bottom:14px;display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(5,7,10,.62);font-size:15px}
   .cases-rows .case .body{padding:16px 16px 18px}
   .cases-rows .case h3{font-size:16px;line-height:1.4}
   .cases-rows .case p{font-size:12px;line-height:1.5;color:#8ea2bb;margin:6px 0 0}
   @media (max-width:1100px){.cases-rows{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (max-width:640px){.cases-rows{gap:10px}.cases-rows .case .body{padding:11px}.cases-rows .case h3{font-size:13px}.cases-rows .case p{font-size:11px}.cases-rows .case-play{right:10px;bottom:10px;width:32px;height:32px;font-size:12px}}
+  @media (max-width:640px){.cases-rows{gap:10px}.cases-rows .case .body{padding:11px}.cases-rows .case h3{font-size:13px}.cases-rows .case p{font-size:11px}}
 
   /* ——— 手机端单独一版 ——— */
   @media (max-width:640px){
