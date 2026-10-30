@@ -48,6 +48,7 @@ const copyTargets = [
   "sitemap.xml",
   "prompts",
   "prompts-data",
+  "library-data",
   "videos",
 ];
 
