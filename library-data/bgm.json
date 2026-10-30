@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "note": "BGM 元数据。自产合成曲 license=CC0；外购/授权曲目请如实填写 license 与 source。",
+  "tracks": [
+    {
+      "id": "bgm-guofeng-72-01",
+      "file": "guofeng/道德经-古风-72bpm.wav",
+      "title": "古风素琴 · 72bpm",
+      "style": "古风/纯器乐",
+      "instruments": [
+        "古筝(合成拨弦)",
+        "低鼓",
+        "混响"
+      ],
+      "bpm": 72,
+      "key": "D 宫(五声)",
+      "mood": [
+        "沉静",
+        "克制",
+        "适合哲理/人文"
+      ],
+      "source": "本项目 bgm_gen.py 合成（Karplus-Strong + 抽头混响）",
+      "license": "CC0（自产，可商用）",
+      "loopable": true,
+      "usage": "解说片铺底，压到人声 25–30%"
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "note": "音色元数据。音频放 R2，library-data/media-manifest.json 里做 id→URL 映射。",
+  "policy": {
+    "male_allowed": [
+      "zh-CN-YunjianNeural"
+    ],
+    "default_male": "zh-CN-YunjianNeural",
+    "default_female": "zh-CN-XiaoxiaoNeural"
+  },
+  "voices": [
+    {
+      "id": "zh-CN-YunjianNeural",
+      "name": "云健",
+      "sex": "male",
+      "styles": [
+        "沉稳",
+        "磁性",
+        "男中音"
+      ],
+      "uses": [
+        "历史人文",
+        "哲理解说",
+        "纪录片旁白"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-YunjianNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "active"
+    },
+    {
+      "id": "zh-CN-YunxiNeural",
+      "name": "云希",
+      "sex": "male",
+      "styles": [
+        "年轻",
+        "清亮",
+        "偏快"
+      ],
+      "uses": [
+        "科技数码",
+        "教程"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-YunxiNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "disabled"
+    },
+    {
+      "id": "zh-CN-YunyangNeural",
+      "name": "云扬",
+      "sex": "male",
+      "styles": [
+        "播报",
+        "标准",
+        "新闻感"
+      ],
+      "uses": [
+        "新闻资讯",
+        "科普"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-YunyangNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "disabled"
+    },
+    {
+      "id": "zh-CN-YunxiaNeural",
+      "name": "云夏",
+      "sex": "male",
+      "styles": [
+        "少年",
+        "轻快"
+      ],
+      "uses": [
+        "轻松吐槽",
+        "游戏"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-YunxiaNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "disabled"
+    },
+    {
+      "id": "zh-CN-XiaoxiaoNeural",
+      "name": "晓晓",
+      "sex": "female",
+      "styles": [
+        "温柔",
+        "标准",
+        "偏快"
+      ],
+      "uses": [
+        "生活",
+        "情感",
+        "知识分享"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-XiaoxiaoNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "active"
+    },
+    {
+      "id": "zh-CN-XiaoyiNeural",
+      "name": "晓伊",
+      "sex": "female",
+      "styles": [
+        "清甜",
+        "少女"
+      ],
+      "uses": [
+        "美妆",
+        "生活方式"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-XiaoyiNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "active"
+    },
+    {
+      "id": "zh-CN-liaoning-XiaobeiNeural",
+      "name": "晓北(东北)",
+      "sex": "female",
+      "styles": [
+        "东北话",
+        "豪爽"
+      ],
+      "uses": [
+        "搞笑",
+        "探店"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-liaoning-XiaobeiNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "disabled"
+    },
+    {
+      "id": "zh-CN-shaanxi-XiaoniNeural",
+      "name": "晓妮(陕西)",
+      "sex": "female",
+      "styles": [
+        "陕西话",
+        "亲和"
+      ],
+      "uses": [
+        "地方题材"
+      ],
+      "provider": "microsoft-edge-tts",
+      "rateDefault": "-4%",
+      "sample": "samples/zh-CN-shaanxi-XiaoniNeural.mp3",
+      "license": "微软在线语音服务；商用前请确认 Azure 条款；不得用于克隆他人音色",
+      "status": "disabled"
+    }
+  ]
+}

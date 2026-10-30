@@ -470,6 +470,124 @@ function indexEntry(prompt) {
   };
 }
 
+// ---------------------------------------------------------------- 资源库（音色 / 文本 / 音乐）
+// 数据在 library-data/，媒体文件在 R2，索引里只放元数据 + 公网 URL。
+const libraryDataDir = path.join(repoRoot, "library-data");
+
+async function readLibraryJson(relativePath) {
+  try {
+    return JSON.parse(await readFile(path.join(libraryDataDir, relativePath), "utf8"));
+  } catch (error) {
+    console.warn(`[library-data] skipped ${relativePath}: ${error.message}`);
+    return null;
+  }
+}
+
+function librarySearchable(fields) {
+  return fields.flat().map((item) => text(item)).filter(Boolean).join(" ").toLowerCase();
+}
+
+function voiceEntry(voice, mediaUrl) {
+  return {
+    id: text(voice.id),
+    name: text(voice.name),
+    sex: text(voice.sex),
+    styles: list(voice.styles),
+    uses: list(voice.uses),
+    provider: text(voice.provider),
+    status: text(voice.status) || "disabled",
+    sampleUrl: mediaUrl || "",
+    license: text(voice.license),
+    searchable: librarySearchable([
+      voice.name, voice.sex, voice.provider, voice.license,
+      list(voice.styles), list(voice.uses), voice.id
+    ])
+  };
+}
+
+function bgmEntry(track, mediaUrl) {
+  return {
+    id: text(track.id),
+    title: text(track.title),
+    style: text(track.style),
+    instruments: list(track.instruments),
+    mood: list(track.mood),
+    bpm: Number(track.bpm) || 0,
+    key: text(track.key),
+    loopable: Boolean(track.loopable),
+    usage: text(track.usage),
+    license: text(track.license),
+    audioUrl: mediaUrl || "",
+    searchable: librarySearchable([
+      track.title, track.style, track.key, track.usage, track.license,
+      list(track.instruments), list(track.mood), track.id, String(track.bpm || "")
+    ])
+  };
+}
+
+function textEntry(doc, sourceFile) {
+  const lines = list(doc.lines).map((line) => ({
+    id: text(line.id),
+    glyph: text(line.glyph),
+    label: text(line.label),
+    sub: text(line.sub),
+    voice: text(line.voice),
+    mode: text(line.mode)
+  }));
+  return {
+    id: text(doc.id) || path.basename(sourceFile, ".json"),
+    kind: text(doc.kind) || "copy",
+    title: text(doc.title),
+    topic: text(doc.topic),
+    tone: text(doc.tone),
+    lineCount: lines.length,
+    lines,
+    sourceFile,
+    searchable: librarySearchable([
+      doc.title, doc.topic, doc.tone, doc.kind,
+      lines.map((line) => [line.glyph, line.label, line.sub, line.voice])
+    ])
+  };
+}
+
+const mediaManifest = (await readLibraryJson("media-manifest.json")) || { baseUrl: "", media: {} };
+const mediaBaseUrl = text(mediaManifest.baseUrl).replace(/\/+$/, "");
+const mediaUrl = (relativePath) => {
+  const key = text(relativePath);
+  if (!key) return "";
+  const mapped = mediaManifest.media?.[key];
+  if (mapped) return mapped;
+  return mediaBaseUrl ? `${mediaBaseUrl}/${key}` : "";
+};
+
+const voicesDoc = await readLibraryJson("voices.json");
+const bgmDoc = await readLibraryJson("bgm.json");
+const textLibraryIndex = await readLibraryJson("text/index.json");
+const textDocs = [];
+for (const entry of list(textLibraryIndex?.files)) {
+  const file = text(entry.file);
+  if (!file) continue;
+  const doc = await readLibraryJson(`text/${file}`);
+  if (doc) textDocs.push(textEntry(doc, `text/${file}`));
+}
+const outOfLineTexts = await readLibraryJson("text/hooks.json");
+const outOfLineEndings = await readLibraryJson("text/endings.json");
+for (const [kind, doc, file] of [["hooks", outOfLineTexts, "text/hooks.json"], ["endings", outOfLineEndings, "text/endings.json"]]) {
+  for (const item of list(doc?.items)) {
+    textDocs.push(textEntry({ ...item, kind, title: item.text }, file));
+  }
+}
+
+const libraryIndex = {
+  version: 1,
+  generatedAt: new Date().toISOString(),
+  mediaBaseUrl,
+  voices: list(voicesDoc?.voices).map((voice) => voiceEntry(voice, mediaUrl(voice.sample))),
+  bgm: list(bgmDoc?.tracks).map((track) => bgmEntry(track, mediaUrl(track.file))),
+  text: textDocs
+};
+const libraryItemCount = libraryIndex.voices.length + libraryIndex.bgm.length + libraryIndex.text.length;
+
 const library = JSON.parse(await readFile(libraryPath, "utf8"));
 const prompts = list(library.prompts).map(enhancedPrompt);
 const enhancedLibrary = {
@@ -497,7 +615,14 @@ const searchIndex = {
     ...pack,
     promptCount: activePrompts.filter((prompt) => prompt.packId === pack.id).length
   })),
-  prompts: prompts.map(indexEntry)
+  prompts: prompts.map(indexEntry),
+  library: libraryIndex,
+  libraryCount: {
+    voices: libraryIndex.voices.length,
+    bgm: libraryIndex.bgm.length,
+    text: libraryIndex.text.length,
+    total: libraryItemCount
+  }
 };
 
 const suggestions = {
@@ -519,4 +644,5 @@ await writeFile(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`, "u
 await writeFile(suggestionsPath, `${JSON.stringify(suggestions, null, 2)}\n`, "utf8");
 
 console.log(`Prompt search index written: ${searchIndex.prompts.length} prompts`);
+console.log(`Library index included: ${libraryIndex.voices.length} voices, ${libraryIndex.bgm.length} bgm, ${libraryIndex.text.length} texts`);
 console.log(`Access counts: free=${counts.free || 0}, pro=${counts.pro || 0}, pack=${counts.pack || 0}`);
