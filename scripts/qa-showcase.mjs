@@ -61,6 +61,7 @@ try {
       await image.evaluate((element) => element.decode().catch(() => {}));
     }
     await page.locator("#cases").screenshot({ path: path.join(output, `${size.name}-cases.png`) });
+    await page.locator("#pin-media").screenshot({ path: path.join(output, `${size.name}-lunar-rover.png`) });
     await page.locator(".ccard-wechat").screenshot({ path: path.join(output, `${size.name}-wechat.png`) });
     const metrics = await page.evaluate(() => ({
       width: document.documentElement.scrollWidth,
@@ -74,7 +75,8 @@ try {
       pinCopyGone: document.querySelectorAll(".pin-cap").length === 0 && !document.querySelector("#pin").textContent.includes("停在最亮的那一帧"),
       pinOpenVisible: document.querySelector("#pin-open").getBoundingClientRect().width > 0,
       qrVisible: document.querySelector(".qr-window").getBoundingClientRect().width > 0,
-      cases: [...document.querySelectorAll(".cases-rows .case")].map((caseElement) => ({ height: Math.round(caseElement.getBoundingClientRect().height), imageWidth: caseElement.querySelector("img")?.naturalWidth, opacity: getComputedStyle(caseElement).opacity })),
+      cases: [...document.querySelectorAll(".cases-rows .case")].map((caseElement) => ({ height: Math.round(caseElement.getBoundingClientRect().height), videoWidth: caseElement.querySelector("video")?.getBoundingClientRect().width, poster: caseElement.querySelector("video")?.getAttribute("poster"), opacity: getComputedStyle(caseElement).opacity })),
+      caseSourcesUnloaded: [...document.querySelectorAll(".case-video video")].every((video) => !video.currentSrc),
       heading: document.querySelector("h1")?.textContent.trim()
     }));
     await page.screenshot({ path: path.join(output, `${size.name}.png`), fullPage: true });
@@ -95,10 +97,17 @@ try {
     await page.keyboard.press("Escape");
     const escapeClosesImage = await page.locator("#image-viewer").evaluate((dialog) => !dialog.open);
 
-    await page.locator(".cases-rows .case img").first().focus();
-    await page.keyboard.press("Enter");
-    const caseImageOpened = await page.locator("#image-viewer").evaluate((dialog) => dialog.open && dialog.querySelector("img")?.src.includes("case-product-earbuds"));
-    await page.locator("#image-viewer-close").click();
+    const caseVideoOpened = [];
+    for (const name of ["pet-cats-product", "pet-golden-product", "pet-orange-cat-product", "pet-dogs-product"]) {
+      const button = page.locator(`.case-video[data-video="${name}-faststart"]`);
+      await button.click();
+      const caseVideoReady = await page.waitForFunction(() => {
+        const video = document.querySelector("#lb-video");
+        return video.videoWidth === 720 && video.videoHeight === 1280 && video.readyState >= 2;
+      }, undefined, { timeout: 12000 }).then(() => true).catch(() => false);
+      caseVideoOpened.push(caseVideoReady && await page.locator("#lb-video").evaluate((video, expected) => video.src.endsWith(`${expected}-faststart.mp4`) && getComputedStyle(video).objectFit === "contain", name));
+      await page.locator("#lb-close").click();
+    }
 
     const shelf = page.locator("#gallery-grid");
     await shelf.scrollIntoViewIfNeeded();
@@ -119,7 +128,7 @@ try {
     await page.locator("#lb-close").click();
 
     await page.locator("#pin-open").click();
-    const pinVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("03_electric_suv_studio_2x-faststart.mp4") && getComputedStyle(video).objectFit === "contain");
+    const pinVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("lunar-rover-faststart.mp4") && getComputedStyle(video).objectFit === "contain");
     const pinVideoPlaying = await page.waitForFunction(() => {
       const video = document.querySelector("#lb-video");
       return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
@@ -146,7 +155,7 @@ try {
     const longVideoSeekState = await page.locator("#lb-video").evaluate((video) => ({ currentTime: video.currentTime, duration: video.duration, readyState: video.readyState, seeking: video.seeking }));
     await page.locator("#lb-close").click();
 
-    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseImageOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, playerIconGone, playerTapWorks, longVideoOpen, longVideoPlaying, longVideoSeek, longVideoSeekState, errors });
+    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseVideoOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, playerIconGone, playerTapWorks, longVideoOpen, longVideoPlaying, longVideoSeek, longVideoSeekState, errors });
     await context.close();
   }
 
@@ -157,7 +166,7 @@ try {
   const offscreenUnloaded = await motionPage.locator("#pin-video").evaluate((video) => !video.currentSrc && !video.poster);
   await motionPage.locator("#pin-media").scrollIntoViewIfNeeded();
   const onscreenPlaying = await motionPage.waitForFunction(() => !document.querySelector("#pin-video").paused, undefined, { timeout: 10000 }).then(() => true).catch(() => false);
-  const previewSourceCorrect = await motionPage.locator("#pin-video").evaluate((video) => video.currentSrc.includes("03_electric_suv_studio_00001_-faststart.mp4"));
+  const previewSourceCorrect = await motionPage.locator("#pin-video").evaluate((video) => video.currentSrc.includes("lunar-rover-faststart.mp4") && getComputedStyle(video).objectFit === "contain");
   await motionPage.locator("#contact").scrollIntoViewIfNeeded();
   const pausedAfterScroll = await motionPage.waitForFunction(() => document.querySelector("#pin-video").paused, undefined, { timeout: 3000 }).then(() => true).catch(() => false);
   await motionContext.close();
@@ -180,7 +189,7 @@ try {
 let rangeDelivery = null;
 if (remote) {
   rangeDelivery = {};
-  for (const [name, filename] of Object.entries({ suv: "03_electric_suv_studio_2x-faststart.mp4", long: "commercial-animated-street-story-faststart.mp4" })) {
+  for (const [name, filename] of Object.entries({ cats: "pet-cats-product-faststart.mp4", golden: "pet-golden-product-faststart.mp4", orangeCat: "pet-orange-cat-product-faststart.mp4", dogs: "pet-dogs-product-faststart.mp4", rover: "lunar-rover-faststart.mp4", long: "commercial-animated-street-story-faststart.mp4" })) {
     try {
       const response = await fetch(new URL(`showcase/videos/${filename}`, base), {
         headers: { Range: "bytes=0-1023" }, signal: AbortSignal.timeout(20000)
@@ -191,7 +200,7 @@ if (remote) {
     }
   }
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.qrVisible && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseImageOpened && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.qrVisible && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
 await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
 console.log(JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
 if (!passed) process.exitCode = 1;

@@ -256,20 +256,20 @@
 
 <style>
   .pin{padding:0;background:#05070a}
-  .pin-media{position:relative;height:min(72vh,740px);min-height:420px;overflow:hidden}
-  .pin-media video{width:100%;height:100%;object-fit:cover;display:block}
+  .pin-media{position:relative;width:min(100%,420px);height:min(72vh,740px);min-height:420px;margin:auto;overflow:hidden}
+  .pin-media video{width:100%;height:100%;object-fit:contain;display:block}
   .pin-open{position:absolute;inset:0;width:100%;border:0;background:transparent;color:#fff;cursor:pointer}
   .pin-open span{position:absolute;right:28px;bottom:28px;display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(255,255,255,.42);border-radius:50%;background:rgba(5,7,10,.54);font-size:18px;backdrop-filter:blur(8px)}
   .pin-open:hover span,.pin-open:focus-visible span{background:rgba(5,7,10,.82)}
   @media(max-width:640px){.pin-media{height:58vh;min-height:320px}.pin-open span{right:18px;bottom:18px}}
 </style>
 
-<section class="pin" id="pin" aria-label="暗棚电动车视频">
+<section class="pin" id="pin" aria-label="月面探测车视频">
   <div class="pin-media" id="pin-media">
-    <video id="pin-video" data-src="showcase/videos/03_electric_suv_studio_00001_-faststart.mp4"
-           data-poster="showcase/videos/03_electric_suv_studio.jpg"
+    <video id="pin-video" data-src="showcase/videos/lunar-rover-faststart.mp4"
+           data-poster="showcase/videos/lunar-rover.jpg"
            muted loop playsinline preload="none"></video>
-    <button class="pin-open" id="pin-open" type="button" aria-label="完整观看暗棚电动车视频"><span aria-hidden="true">▶</span></button>
+    <button class="pin-open" id="pin-open" type="button" aria-label="完整观看月面探测车视频"><span aria-hidden="true">▶</span></button>
   </div>
 </section>
 
@@ -311,7 +311,7 @@
   document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
   button.addEventListener('click', function () {
     video.pause();
-    if (window.__openLightbox) window.__openLightbox({ f: '03_electric_suv_studio_2x-faststart', title: '暗棚电动车', meta: '汽车光影 / 完整视频' });
+    if (window.__openLightbox) window.__openLightbox({ f: 'lunar-rover-faststart', title: '月面探测车', meta: '场景短片 / 完整视频' });
   });
 })();
 </script>
@@ -323,32 +323,37 @@
         <div class="eyebrow">02 — Commercial Visual</div>
         <h2>商业视觉案例</h2>
       </div>
-      <p>产品广告、包装陈列与场景概念。</p>
+      <p>宠物产品包装与场景短片。</p>
     </div>
 
     <div class="cases-rows">
       <article class="case">
-        <img src="showcase/images/curated/case-product-earbuds-black-rock.webp" alt="黑色无线耳机产品广告主视觉：岩石暗调背景" loading="lazy" width="1200" height="750">
-        <div class="body">
-          <h3>黑色耳机 · 产品广告视觉</h3>
-          <p>强化产品质感、光影层次与高级感构图，适用于品牌 KV、电商主图与详情页视觉。</p>
-          <dl>
-            <div><dt>我的角色</dt><dd>概念 · 材质光影 · 精修</dd></div>
-            <div><dt>展示</dt><dd>产品主视觉</dd></div>
-          </dl>
-        </div>
+        <button class="case-video" type="button" data-video="pet-cats-product-faststart" data-title="猫咪与宠物产品" aria-label="完整观看猫咪与宠物产品视频">
+          <video data-src="showcase/videos/pet-cats-product-faststart.mp4" poster="showcase/videos/pet-cats-product.jpg" muted loop playsinline preload="none"></video>
+          <span class="case-play" aria-hidden="true">▶</span>
+        </button>
+        <div class="body"><h3>猫咪与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
       </article>
-
       <article class="case">
-        <img src="showcase/images/curated/case-brand-ice-city-space.webp" alt="冰蓝未来城市场景概念视觉" loading="lazy" width="1200" height="750">
-        <div class="body">
-          <h3>冰蓝未来城市 · 场景概念</h3>
-          <p>通过空间透视、色彩氛围与建筑细节，构建具有科技感的未来城市画面。</p>
-          <dl>
-            <div><dt>我的角色</dt><dd>世界观 · 构图 · 系列延展</dd></div>
-            <div><dt>展示</dt><dd>场景概念图</dd></div>
-          </dl>
-        </div>
+        <button class="case-video" type="button" data-video="pet-golden-product-faststart" data-title="金毛与宠物产品" aria-label="完整观看金毛与宠物产品视频">
+          <video data-src="showcase/videos/pet-golden-product-faststart.mp4" poster="showcase/videos/pet-golden-product.jpg" muted loop playsinline preload="none"></video>
+          <span class="case-play" aria-hidden="true">▶</span>
+        </button>
+        <div class="body"><h3>金毛与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
+      </article>
+      <article class="case">
+        <button class="case-video" type="button" data-video="pet-orange-cat-product-faststart" data-title="橘猫与宠物产品" aria-label="完整观看橘猫与宠物产品视频">
+          <video data-src="showcase/videos/pet-orange-cat-product-faststart.mp4" poster="showcase/videos/pet-orange-cat-product.jpg" muted loop playsinline preload="none"></video>
+          <span class="case-play" aria-hidden="true">▶</span>
+        </button>
+        <div class="body"><h3>橘猫与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
+      </article>
+      <article class="case">
+        <button class="case-video" type="button" data-video="pet-dogs-product-faststart" data-title="狗狗与宠物产品" aria-label="完整观看狗狗与宠物产品视频">
+          <video data-src="showcase/videos/pet-dogs-product-faststart.mp4" poster="showcase/videos/pet-dogs-product.jpg" muted loop playsinline preload="none"></video>
+          <span class="case-play" aria-hidden="true">▶</span>
+        </button>
+        <div class="body"><h3>狗狗与宠物产品</h3><p>宠物产品短片 · 00:04</p></div>
       </article>
     </div>
   </div>
@@ -479,15 +484,6 @@
   });
   dialog.addEventListener('click', function (event) { if (event.target === dialog) dialog.close(); });
 
-  document.querySelectorAll('.cases-rows .case img').forEach(function (image) {
-    image.tabIndex = 0;
-    image.setAttribute('role', 'button');
-    image.setAttribute('aria-label', '查看完整图片：' + image.alt);
-    image.addEventListener('click', function () { window.__openImageViewer(image.src, image.alt); });
-    image.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.__openImageViewer(image.src, image.alt); }
-    });
-  });
 })();
 </script>
 
@@ -630,9 +626,21 @@
   }
 
   window.__openLightbox = openLightbox;
+  document.querySelectorAll('.case-video').forEach(function (button) {
+    var preview = button.querySelector('video');
+    button.addEventListener('pointerenter', function (event) {
+      if (event.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData) return;
+      if (!preview.src) preview.src = preview.dataset.src;
+      preview.play().catch(function () {});
+    });
+    button.addEventListener('pointerleave', function () { preview.pause(); });
+    button.addEventListener('click', function () {
+      openLightbox({ f: button.dataset.video, title: button.dataset.title, meta: '宠物产品短片 / 完整视频' });
+    });
+  });
   function openLightbox(v) {
     previousVideoFocus = document.activeElement;
-    document.querySelectorAll('.vcard video, #pin-video').forEach(function (preview) { preview.pause(); });
+    document.querySelectorAll('.vcard video, .case-video video, #pin-video').forEach(function (preview) { preview.pause(); });
     lbVideo.src = srcOf(v);
     lbCap.textContent = v.title + ' · ' + v.meta;
     lb.setAttribute('data-open', '1');
@@ -904,20 +912,17 @@
   }
   @media (max-width:900px){#featured .feat .shot{aspect-ratio:16/10}}
 
-  /* ——— 案例：大图 + 事实条，竖排 ——— */
-  .cases-rows{display:grid;gap:26px}
-  .cases-rows .case{display:grid;grid-template-columns:1.12fr .88fr;align-items:stretch;
-    border-radius:14px;overflow:hidden;background:rgba(9,11,16,.72)}
-  .cases-rows .case img{width:100%;height:auto;object-fit:cover;aspect-ratio:16/10;align-self:center}
-  .cases-rows .case .body{padding:30px 32px;display:flex;flex-direction:column;justify-content:center}
-  .cases-rows .case h3{font-size:20px;margin-bottom:10px}
-  .cases-rows .case p{font-size:13.5px;line-height:1.75;color:#8ea2bb;margin:0 0 20px}
-  .cases-rows .case dl{margin-top:auto}
-  @media (max-width:820px){
-    .cases-rows .case{grid-template-columns:1fr}
-    .cases-rows .case img{aspect-ratio:16/10;height:auto}
-    .cases-rows .case .body{padding:20px 18px}
-  }
+  /* ——— 商业视觉案例：竖屏短片 ——— */
+  .cases-rows{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .cases-rows .case{display:block;min-width:0;border-radius:14px;overflow:hidden;background:rgba(9,11,16,.72)}
+  .cases-rows .case-video{display:block;position:relative;width:100%;padding:0;border:0;background:#05070a;color:#fff;cursor:pointer}
+  .cases-rows .case-video video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover}
+  .cases-rows .case-play{position:absolute;right:14px;bottom:14px;display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(5,7,10,.62);font-size:15px}
+  .cases-rows .case .body{padding:16px 16px 18px}
+  .cases-rows .case h3{font-size:16px;line-height:1.4}
+  .cases-rows .case p{font-size:12px;line-height:1.5;color:#8ea2bb;margin:6px 0 0}
+  @media (max-width:1100px){.cases-rows{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:640px){.cases-rows{gap:10px}.cases-rows .case .body{padding:11px}.cases-rows .case h3{font-size:13px}.cases-rows .case p{font-size:11px}.cases-rows .case-play{right:10px;bottom:10px;width:32px;height:32px;font-size:12px}}
 
   /* ——— 手机端单独一版 ——— */
   @media (max-width:640px){
@@ -1252,7 +1257,7 @@
   :focus-visible{outline:2px solid var(--accent-2);outline-offset:3px}
   section[id]{scroll-margin-top:108px}
   body.media-viewer-open{overflow:hidden}
-  .gcard[role="button"],.cases-rows .case img[role="button"]{cursor:zoom-in}
+  .gcard[role="button"]{cursor:zoom-in}
   .image-viewer{inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#06080b;color:var(--text)}
   .image-viewer[open]{display:flex;flex-direction:column}
   .image-viewer::backdrop{background:rgba(0,0,0,.92)}
