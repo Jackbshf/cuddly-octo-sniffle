@@ -38,6 +38,8 @@ const VIDEO_POSTER_SECOND = 1;
 
 const copyTargets = [
   "index.html",
+  "admin.html",
+  "showcase",
   "assets",
   "embedded-data.js",
   "data",
@@ -128,7 +130,7 @@ const getReadyStreamEntry = (manifest, assetUrl) => {
 };
 
 const rewriteDistIndexHtml = async (versionedAssets) => {
-  const distIndexPath = path.join(distDir, "index.html");
+  const distIndexPath = path.join(distDir, "admin.html");
   let html = await readFile(distIndexPath, "utf8");
 
   html = html.replace(/href="assets\/app\.css"/, `href="${versionedAssets.css.relativePath}"`);
@@ -148,6 +150,9 @@ const writeDistHeaders = async () => {
     "  Cache-Control: no-store",
     "  CDN-Cache-Control: no-store",
     "/index.html",
+    "  Cache-Control: no-store",
+    "  CDN-Cache-Control: no-store",
+    "/admin.html",
     "  Cache-Control: no-store",
     "  CDN-Cache-Control: no-store",
     "/data/*",

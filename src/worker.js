@@ -356,7 +356,7 @@ async function handlePortfolioAdminApi(request, env, url) {
 
 async function servePortfolioEditorApp(request, env, url) {
   const assetUrl = new URL(url);
-  assetUrl.pathname = "/";
+  assetUrl.pathname = "/admin.html";
   assetUrl.search = "";
   const response = await env.ASSETS.fetch(new Request(assetUrl, request));
   const contentType = response.headers.get("Content-Type") || "";

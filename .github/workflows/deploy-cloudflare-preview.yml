@@ -205,7 +205,7 @@ jobs:
         env:
           QA_URL: "${{ env.PREVIEW_URL }}?qa=${{ steps.commit.outputs.short_sha }}-${{ github.run_id }}"
           QA_OUTPUT_DIR: output/preview-qa
-        run: node scripts/qa-preview.mjs
+        run: node scripts/qa-showcase.mjs "$QA_URL"
 
       - name: Upload preview QA evidence
         id: upload_qa
