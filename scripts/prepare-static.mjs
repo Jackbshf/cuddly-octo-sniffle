@@ -529,6 +529,13 @@ async function main() {
       path.join(videoDir, `${name}-faststart.mp4`)
     ]);
   }
+  for (const name of ["01_air_fryer_wings", "03_electric_suv_studio", "05_healing_mattress"]) {
+    const videoDir = path.join(distDir, "showcase", "videos");
+    await sharp(path.join(videoDir, `${name}-wide.jpg`))
+      .resize({ width: 1600, withoutEnlargement: true })
+      .webp({ quality: 85, effort: 4 })
+      .toFile(path.join(videoDir, `${name}-wide.webp`));
+  }
   await splitPromptLibraryForWorkerAssets();
   await splitPromptSearchIndexForWorkerAssets();
 

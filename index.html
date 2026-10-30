@@ -7,7 +7,8 @@
 <meta name="description" content="张玮，AIGC 视觉设计师。2 年经验，做商业视觉、AI 短视频与 ComfyUI 工作流。深圳，1 周内可到岗。">
 <meta name="theme-color" content="#070b12">
 <link rel="canonical" href="https://www.zhangweivisual.cn/">
-<link rel="preload" as="image" href="showcase/assets/hero2-2560.avif" fetchpriority="high">
+<link rel="preload" as="image" href="showcase/assets/hero2-1600.avif" media="(max-width: 640px)" fetchpriority="high">
+<link rel="preload" as="image" href="showcase/assets/hero2-2560.avif" media="(min-width: 641px)" fetchpriority="high">
 <meta property="og:type" content="website">
 <meta property="og:title" content="张玮｜AIGC 视觉设计师 · 商业视觉与 AI 视频">
 <meta property="og:description" content="商业视觉、AI 视频与 ComfyUI 工作流作品。">
@@ -22,6 +23,7 @@
     --text:#e8eef8; --muted:#8fa3bd; --accent:#4c9aff; --accent-2:#9fd4ff;
     --hero:url("showcase/assets/hero2-2560.avif");
   }
+  @media(max-width:640px){:root{--hero:url("showcase/assets/hero2-1600.avif")}}
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--text);
@@ -865,7 +867,7 @@
     a.className = 'feat';
     a.type = 'button';
     a.innerHTML =
-      '<div class="shot"><img src="showcase/videos/' + v.f.replace(/_00001_$/, '') + '-wide.jpg" alt="' + v.title + '" loading="lazy">' +
+      '<div class="shot"><img src="showcase/videos/' + v.f.replace(/_00001_$/, '') + '-wide.webp" alt="' + v.title + '" loading="lazy">' +
       '<span class="play">▶</span></div>' +
       '<h3>' + v.title + '</h3><span>' + v.meta + '</span>';
     a.addEventListener('click', function () {
