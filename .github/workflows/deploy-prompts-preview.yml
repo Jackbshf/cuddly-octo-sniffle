@@ -1,0 +1,36 @@
+name: Deploy Prompts Preview Worker
+
+# 这个 workflow 放在作品集仓库里，是因为 CLOUDFLARE_API_TOKEN 只配置在这个仓库。
+# 它只部署 prompt 画廊的 preview worker（wrangler.preview.jsonc，无 routes），
+# 也就是「部署但不上线」：不会绑定 /prompts 生产路由。
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prompts-preview
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout prompt gallery
+        uses: actions/checkout@v6.0.2
+        with:
+          repository: Jackbshf/zhongwen-prompt-community
+          token: ${{ secrets.PROMPTS_GITHUB_TOKEN }}
+          path: gallery
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 22
+
+      - name: Deploy preview worker (no routes)
+        working-directory: gallery
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 8ad8f870010a1f1de2a2bf7ca8220d4a
+        run: npx --yes wrangler@4.94.0 deploy --config wrangler.preview.jsonc
