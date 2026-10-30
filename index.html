@@ -7,6 +7,7 @@
 <meta name="description" content="张玮，AIGC 视觉设计师。2 年经验，做商业视觉、AI 短视频与 ComfyUI 工作流。深圳，1 周内可到岗。">
 <meta name="theme-color" content="#070b12">
 <link rel="canonical" href="https://www.zhangweivisual.cn/">
+<link rel="preload" as="image" href="showcase/assets/hero2-2560.avif" fetchpriority="high">
 <meta property="og:type" content="website">
 <meta property="og:title" content="张玮｜AIGC 视觉设计师 · 商业视觉与 AI 视频">
 <meta property="og:description" content="商业视觉、AI 视频与 ComfyUI 工作流作品。">
@@ -264,9 +265,9 @@
 
 <section class="pin" id="pin" aria-label="暗棚电动车视频">
   <div class="pin-media" id="pin-media">
-    <video id="pin-video" src="showcase/videos/03_electric_suv_studio_2x-faststart.mp4"
-           poster="showcase/videos/03_electric_suv_studio.jpg"
-           muted loop playsinline preload="metadata"></video>
+    <video id="pin-video" data-src="showcase/videos/03_electric_suv_studio_2x-faststart.mp4"
+           data-poster="showcase/videos/03_electric_suv_studio.jpg"
+           muted loop playsinline preload="none"></video>
     <button class="pin-open" id="pin-open" type="button" aria-label="完整观看暗棚电动车视频"><span aria-hidden="true">▶</span></button>
   </div>
 </section>
@@ -280,11 +281,17 @@
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = Boolean(navigator.connection?.saveData);
   var visibleEnough = false;
+  new IntersectionObserver(function (entries, observer) {
+    if (!entries[0].isIntersecting) return;
+    video.poster = video.dataset.poster;
+    observer.disconnect();
+  }, { rootMargin: '250px' }).observe(media);
   function updatePlayback() {
     if (reduce || saveData || document.hidden || !visibleEnough || document.getElementById('lb')?.getAttribute('data-open') === '1') {
       video.pause();
       return;
     }
+    if (!video.src) video.src = video.dataset.src;
     video.play().catch(function () {});
   }
   new IntersectionObserver(function (entries) {
@@ -513,6 +520,14 @@
   document.getElementById('vg-label-p').textContent = '竖屏 · ' + VIDEOS.filter(function (x) { return !x.wide; }).length + ' 条';
 
 
+  var posterObserver = new IntersectionObserver(function (entries, observer) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var video = entry.target.querySelector('video');
+      video.poster = video.dataset.poster;
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '250px' });
   VIDEOS.forEach(function (v, i) {
     var vg = v.wide ? vgL : vgP;
     var art = document.createElement('article');
@@ -522,12 +537,13 @@
     art.setAttribute('aria-label', '播放视频：' + v.title);
     art.innerHTML =
       '<div class="frame">' +
-        '<video src="' + srcOf(v) + '" poster="' + posterOf(v) + '"' +
+        '<video src="' + srcOf(v) + '" data-poster="' + posterOf(v) + '"' +
         ' muted loop playsinline preload="none"></video>' +
         '<span class="badge">VIDEO</span><span class="dur">' + v.dur + '</span>' +
       '</div>' +
       '<div class="meta"><h3>' + v.title + '</h3><small>' + v.meta + '</small></div>';
     var video = art.querySelector('video');
+    posterObserver.observe(art);
     var frame = art.querySelector('.frame');
     art.style.width = (v.wide ? 533 : 236) + 'px';
     art.addEventListener('mouseenter', function () {
@@ -1101,7 +1117,7 @@
   /* ——— 自定义播放器皮肤（替换原生 controls） ——— */
   #lb .lb-inner{max-width:min(1180px,94vw)}
   #lb .vwrap{position:relative;display:inline-block;line-height:0;max-width:100%}
-  #lb video{max-height:78vh;border-radius:10px}
+  #lb video{max-height:78vh;border-radius:10px;cursor:pointer}
   #lb-video::-webkit-media-controls{display:none !important}
 
   .pl{position:absolute;left:0;right:0;bottom:0;padding:14px 16px 12px;border-radius:0 0 10px 10px;
@@ -1144,9 +1160,6 @@
   wrap.className = 'pl idle';
   wrap.innerHTML =
     '<div class="pl-row">' +
-      '<button class="pl-play" aria-label="播放 / 暂停">' +
-        '<svg viewBox="0 0 24 24"><path class="ico-play" d="M8 5v14l11-7z"/><path class="ico-pause" d="M6 5h4v14H6zm8 0h4v14h-4z" style="display:none"/></svg>' +
-      '</button>' +
       '<div class="bar"><div class="track"><div class="buf"></div><div class="fill"></div></div><div class="knob"></div></div>' +
       '<span class="time">0:00 / 0:00</span>' +
       '<button class="pl-mute" aria-label="静音切换">' +
@@ -1156,7 +1169,10 @@
   vwrap.appendChild(wrap);
 
   function $(s) { return wrap.querySelector(s); }
-  var play = $('.pl-play'), mute = $('.pl-mute'), bar = $('.bar'),
+  video.tabIndex = 0;
+  video.setAttribute('role', 'button');
+  video.setAttribute('aria-label', '播放或暂停视频');
+  var mute = $('.pl-mute'), bar = $('.bar'),
       fill = $('.fill'), buf = $('.buf'), knob = $('.knob'), time = $('.time');
 
   function fmt(t) {
@@ -1170,11 +1186,6 @@
     fill.style.width = (p * 100).toFixed(2) + '%';
     knob.style.left = (p * 100).toFixed(2) + '%';
     time.textContent = fmt(c) + ' / ' + fmt(d);
-    var iconPlay = wrap.querySelector('.ico-play'), iconPause = wrap.querySelector('.ico-pause');
-    if (iconPlay && iconPause) {
-      iconPlay.style.display = video.paused ? '' : 'none';
-      iconPause.style.display = video.paused ? 'none' : '';
-    }
     try {
       if (video.buffered.length) buf.style.width = (video.buffered.end(video.buffered.length - 1) / d * 100) + '%';
     } catch (e) {}
@@ -1183,7 +1194,7 @@
   function wake() { wrap.classList.remove('idle'); clearTimeout(t); t = setTimeout(idle, 2600); }
   var t = null;
 
-  play.addEventListener('click', function (e) {
+  video.addEventListener('click', function (e) {
     e.stopPropagation();
     video.paused ? video.play().catch(function () {}) : video.pause();
     wake();
