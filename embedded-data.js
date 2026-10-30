@@ -47,7 +47,11 @@ window.__EMBEDDED_PORTFOLIO__ = {
           }
         }
       },
-      "sections": {},
+      "sections": {
+        "ecommerce": {
+          "hidden": true
+        }
+      },
       "theme": {}
     }
   },
@@ -447,13 +451,13 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "video",
-          "url": "videos/b6a39d08c7e48ae9e9604df1f825b8e5.mp4",
-          "poster": "images/_posters/b6a39d08c7e48ae9e9604df1f825b8e5.webp"
+          "url": "videos/commercial-earbuds-unboxing-01-9x16-10s.mp4",
+          "poster": "images/_posters/commercial-earbuds-unboxing-01-9x16-10s.webp"
         },
         {
           "kind": "video",
-          "url": "videos/d9c14d8520e106a0803087b55aaea7ad.mp4",
-          "poster": "images/_posters/d9c14d8520e106a0803087b55aaea7ad.webp"
+          "url": "videos/commercial-foundation-texture-01-9x16-10s.mp4",
+          "poster": "images/_posters/commercial-foundation-texture-01-9x16-10s.webp"
         },
         {
           "kind": "video",
@@ -495,8 +499,8 @@ window.__EMBEDDED_PORTFOLIO__ = {
       "media": [
         {
           "kind": "video",
-          "url": "videos/ffcffe00a999d24e399f2eeb2fc45b73.mp4",
-          "poster": "images/_posters/ffcffe00a999d24e399f2eeb2fc45b73.webp"
+          "url": "videos/digitalhuman-courtyard-01-9x16-10s.mp4",
+          "poster": "images/_posters/digitalhuman-courtyard-01-9x16-10s.webp"
         }
       ],
       "textBlocks": [

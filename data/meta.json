@@ -46,7 +46,11 @@
         }
       }
     },
-    "sections": {},
+    "sections": {
+      "ecommerce": {
+        "hidden": true
+      }
+    },
     "theme": {}
   }
 }

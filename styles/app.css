@@ -9787,6 +9787,41 @@ button.curated-hero-stage {
   gap: 8px;
 }
 
+.curated-page .curated-media-picture {
+  display: contents;
+}
+
+.curated-page .case-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 4px;
+}
+
+.curated-page .case-facts > div {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(120, 210, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(5, 14, 22, 0.62);
+}
+
+.curated-page .case-facts dt {
+  color: rgba(170, 195, 210, 0.66);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.curated-page .case-facts dd {
+  margin: 5px 0 0;
+  color: rgba(241, 248, 252, 0.92);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .curated-page .curated-contact-closer a {
   display: inline-flex;
   min-height: 34px;
@@ -9854,6 +9889,10 @@ button.curated-hero-stage {
     display: grid;
     gap: 10px;
     padding: 14px;
+  }
+
+  .curated-page .case-facts {
+    grid-template-columns: 1fr;
   }
 
   .curated-page .curated-contact-closer > div {

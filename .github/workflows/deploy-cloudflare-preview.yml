@@ -21,7 +21,7 @@ concurrency:
 jobs:
   deploy-preview:
     name: Deploy preview Worker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       DEFAULT_PREVIEW_REF: codex/homepage-visual-upgrade-preview
@@ -177,7 +177,48 @@ jobs:
             rm -f "$PREVIEW_SECRETS_FILE"
           fi
 
+      - name: Wait for preview reachability
+        id: reachability
+        continue-on-error: true
+        env:
+          QA_URL: "${{ env.PREVIEW_URL }}?qa=${{ steps.commit.outputs.short_sha }}-${{ github.run_id }}"
+        run: |
+          set -uo pipefail
+          mkdir -p output/preview-qa
+          : > output/preview-qa/reachability.log
+          for attempt in 1 2 3 4 5 6; do
+            status="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --connect-timeout 10 --max-time 30 "$QA_URL" || true)"
+            printf 'attempt=%s status=%s url=%s\n' "$attempt" "${status:-000}" "$QA_URL" | tee -a output/preview-qa/reachability.log
+            if [[ "$status" =~ ^(2|3)[0-9][0-9]$ ]]; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 6 ]; then
+              sleep $((attempt * 5))
+            fi
+          done
+          echo "::error title=Preview unreachable::Preview did not return HTTP 2xx/3xx after 6 bounded attempts."
+          exit 1
+
+      - name: Run deployed preview QA
+        id: preview_qa
+        timeout-minutes: 12
+        env:
+          QA_URL: "${{ env.PREVIEW_URL }}?qa=${{ steps.commit.outputs.short_sha }}-${{ github.run_id }}"
+          QA_OUTPUT_DIR: output/preview-qa
+        run: node scripts/qa-showcase.mjs "$QA_URL"
+
+      - name: Upload preview QA evidence
+        id: upload_qa
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: preview-qa-${{ github.run_id }}
+          path: output/preview-qa/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Summarize preview deployment
+        if: always()
         run: |
           set -euo pipefail
           qa_url="${PREVIEW_URL}?qa=${{ steps.commit.outputs.short_sha }}-${GITHUB_RUN_ID}"
@@ -190,6 +231,9 @@ jobs:
             echo "- Actions URL: ${actions_url}"
             echo "- Commit hash: ${{ steps.commit.outputs.sha }}"
             echo "- Worker name: ${PREVIEW_WORKER_NAME}"
+            echo "- Reachability result: ${{ steps.reachability.outcome }}"
+            echo "- Preview QA result: ${{ steps.preview_qa.outcome }}"
+            echo "- QA artifact: preview-qa-${GITHUB_RUN_ID}"
             echo "- Production touched: No"
             echo "- Production domain binding: Not configured"
           } >> "$GITHUB_STEP_SUMMARY"

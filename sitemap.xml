@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.zhangweivisual.cn/</loc>
-    <lastmod>2026-05-15</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.zhangweivisual.cn/images/curated/case-fragrance-giftbox-set.webp</image:loc>
+      <image:title>香氛礼盒 · 包装陈列视觉</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://www.zhangweivisual.cn/images/curated/case-product-earbuds-black-rock.webp</image:loc>
+      <image:title>黑色耳机 · 产品广告视觉</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://www.zhangweivisual.cn/prompts/</loc>
-    <lastmod>2026-05-15</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
