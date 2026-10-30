@@ -81,6 +81,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname.startsWith("/showcase/videos/") && url.pathname.endsWith(".mp4")) {
+      return serveShowcaseVideo(request, env);
+    }
+
     if (url.pathname.startsWith(PUBLIC_PROMPTS_API_PREFIX)) {
       return handlePublicPromptsApi(request, env, url);
     }
@@ -139,6 +143,39 @@ export default {
     return handlePromptPage(request, env, url);
   }
 };
+
+async function serveShowcaseVideo(request, env) {
+  const asset = await env.ASSETS.fetch(new Request(request.url, { method: request.method }));
+  const headers = new Headers(asset.headers);
+  headers.set("Accept-Ranges", "bytes");
+  const range = request.headers.get("Range");
+  if (request.method !== "GET" || !range || !asset.ok) {
+    return new Response(asset.body, { status: asset.status, headers });
+  }
+
+  const ifRange = request.headers.get("If-Range");
+  if (ifRange && ifRange !== asset.headers.get("ETag") && ifRange !== asset.headers.get("Last-Modified")) {
+    return new Response(asset.body, { status: asset.status, headers });
+  }
+
+  const bytes = new Uint8Array(await asset.arrayBuffer());
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+  let start = match?.[1] ? Number(match[1]) : 0;
+  let end = match?.[2] ? Number(match[2]) : bytes.length - 1;
+  if (match && !match[1] && match[2]) {
+    start = Math.max(0, bytes.length - Number(match[2]));
+    end = bytes.length - 1;
+  }
+  if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start >= bytes.length || end < start) {
+    headers.set("Content-Range", `bytes */${bytes.length}`);
+    headers.set("Content-Length", "0");
+    return new Response(null, { status: 416, headers });
+  }
+  end = Math.min(end, bytes.length - 1);
+  headers.set("Content-Range", `bytes ${start}-${end}/${bytes.length}`);
+  headers.set("Content-Length", String(end - start + 1));
+  return new Response(bytes.subarray(start, end + 1), { status: 206, headers });
+}
 
 function isPromptsPath(pathname) {
   return pathname === PROMPTS_PREFIX || pathname === VIEW_LOGIN_PATH || pathname.startsWith(`${PROMPTS_PREFIX}/`);

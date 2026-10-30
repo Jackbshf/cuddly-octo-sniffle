@@ -7,6 +7,7 @@
 <meta name="description" content="张玮，AIGC 视觉设计师。2 年经验，做商业视觉、AI 短视频与 ComfyUI 工作流。深圳，1 周内可到岗。">
 <meta name="theme-color" content="#070b12">
 <link rel="canonical" href="https://www.zhangweivisual.cn/">
+<link rel="preload" as="image" href="showcase/assets/hero2-2560.avif" fetchpriority="high">
 <meta property="og:type" content="website">
 <meta property="og:title" content="张玮｜AIGC 视觉设计师 · 商业视觉与 AI 视频">
 <meta property="og:description" content="商业视觉、AI 视频与 ComfyUI 工作流作品。">
@@ -200,7 +201,6 @@
       <a href="#cases">商业视觉</a>
       <a href="#gallery">详情页</a>
       <a href="#workflow">工作流</a>
-      <a href="#contact">联系</a>
     </nav>
     <a class="cta" href="#contact">聊聊合作</a>
   </div>
@@ -264,9 +264,9 @@
 
 <section class="pin" id="pin" aria-label="暗棚电动车视频">
   <div class="pin-media" id="pin-media">
-    <video id="pin-video" src="showcase/videos/03_electric_suv_studio_2x-faststart.mp4"
-           poster="showcase/videos/03_electric_suv_studio.jpg"
-           muted loop playsinline preload="metadata"></video>
+    <video id="pin-video" data-src="showcase/videos/03_electric_suv_studio_2x-faststart.mp4"
+           data-poster="showcase/videos/03_electric_suv_studio.jpg"
+           muted loop playsinline preload="none"></video>
     <button class="pin-open" id="pin-open" type="button" aria-label="完整观看暗棚电动车视频"><span aria-hidden="true">▶</span></button>
   </div>
 </section>
@@ -280,17 +280,31 @@
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = Boolean(navigator.connection?.saveData);
   var visibleEnough = false;
+  var nearObserver = new IntersectionObserver(function (entries, observer) {
+    if (!entries[0].isIntersecting) return;
+    video.poster = video.dataset.poster;
+    if (!reduce && !saveData && !video.src) {
+      video.preload = 'auto';
+      video.src = video.dataset.src;
+    }
+    observer.disconnect();
+  }, { rootMargin: '650px' });
   function updatePlayback() {
     if (reduce || saveData || document.hidden || !visibleEnough || document.getElementById('lb')?.getAttribute('data-open') === '1') {
       video.pause();
       return;
     }
+    if (!video.src) video.src = video.dataset.src;
     video.play().catch(function () {});
   }
-  new IntersectionObserver(function (entries) {
+  var playbackObserver = new IntersectionObserver(function (entries) {
     visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.4;
     updatePlayback();
-  }, { threshold: [0, 0.4] }).observe(media);
+  }, { threshold: [0, 0.4] });
+  document.addEventListener('DOMContentLoaded', function () {
+    nearObserver.observe(media);
+    playbackObserver.observe(media);
+  }, { once: true });
   document.addEventListener('visibilitychange', updatePlayback);
   document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
   button.addEventListener('click', function () {
@@ -454,9 +468,11 @@
   });
   close.addEventListener('click', function () { dialog.close(); });
   dialog.addEventListener('close', function () {
+    if (dialog.open) return;
     scroll.replaceChildren();
     document.body.classList.remove('media-viewer-open');
-    if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+    if (previousFocus && previousFocus.isConnected &&
+        (document.activeElement === document.body || dialog.contains(document.activeElement))) previousFocus.focus();
     previousFocus = null;
   });
   dialog.addEventListener('click', function (event) { if (event.target === dialog) dialog.close(); });
@@ -513,6 +529,14 @@
   document.getElementById('vg-label-p').textContent = '竖屏 · ' + VIDEOS.filter(function (x) { return !x.wide; }).length + ' 条';
 
 
+  var posterObserver = new IntersectionObserver(function (entries, observer) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var video = entry.target.querySelector('video');
+      video.poster = video.dataset.poster;
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '250px' });
   VIDEOS.forEach(function (v, i) {
     var vg = v.wide ? vgL : vgP;
     var art = document.createElement('article');
@@ -522,12 +546,13 @@
     art.setAttribute('aria-label', '播放视频：' + v.title);
     art.innerHTML =
       '<div class="frame">' +
-        '<video src="' + srcOf(v) + '" poster="' + posterOf(v) + '"' +
+        '<video src="' + srcOf(v) + '" data-poster="' + posterOf(v) + '"' +
         ' muted loop playsinline preload="none"></video>' +
         '<span class="badge">VIDEO</span><span class="dur">' + v.dur + '</span>' +
       '</div>' +
       '<div class="meta"><h3>' + v.title + '</h3><small>' + v.meta + '</small></div>';
     var video = art.querySelector('video');
+    posterObserver.observe(art);
     var frame = art.querySelector('.frame');
     art.style.width = (v.wide ? 533 : 236) + 'px';
     art.addEventListener('mouseenter', function () {
