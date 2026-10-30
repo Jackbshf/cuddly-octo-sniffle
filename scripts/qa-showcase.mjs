@@ -63,6 +63,8 @@ try {
     await page.locator("#cases").screenshot({ path: path.join(output, `${size.name}-cases.png`) });
     await page.locator("#pin-media").screenshot({ path: path.join(output, `${size.name}-lunar-rover.png`) });
     await page.locator(".ccard-wechat").screenshot({ path: path.join(output, `${size.name}-wechat.png`) });
+    await page.locator(".qr-window").screenshot({ path: path.join(output, `${size.name}-qr.png`) });
+    await page.locator("#featured .feat").first().screenshot({ path: path.join(output, `${size.name}-featured.png`) });
     const metrics = await page.evaluate(() => ({
       width: document.documentElement.scrollWidth,
       viewport: innerWidth,
@@ -75,8 +77,9 @@ try {
       pinCopyGone: document.querySelectorAll(".pin-cap").length === 0 && !document.querySelector("#pin").textContent.includes("停在最亮的那一帧"),
       pinOpenVisible: document.querySelector("#pin-open").getBoundingClientRect().width > 0,
       pinFullBleed: Math.round(document.querySelector("#pin-media").getBoundingClientRect().width) === innerWidth && document.querySelector("#pin-media").getBoundingClientRect().height >= innerHeight - 1,
-      playIconsGone: !document.querySelector("#pin-open span, .cases-rows .case-play"),
+      playIconsGone: !document.querySelector("#pin-open span, .cases-rows .case-play, #featured .feat .play"),
       qrVisible: document.querySelector(".qr-window").getBoundingClientRect().width > 0,
+      qrToneApplied: getComputedStyle(document.querySelector(".qr-window img")).filter.includes("grayscale(1)") && getComputedStyle(document.querySelector(".qr-window")).backgroundColor === "rgb(201, 209, 217)",
       cases: [...document.querySelectorAll(".cases-rows .case")].map((caseElement) => ({ height: Math.round(caseElement.getBoundingClientRect().height), videoWidth: caseElement.querySelector("video")?.getBoundingClientRect().width, poster: caseElement.querySelector("video")?.getAttribute("poster"), opacity: getComputedStyle(caseElement).opacity })),
       caseSourcesUnloaded: [...document.querySelectorAll(".case-video video")].every((video) => !video.currentSrc),
       heading: document.querySelector("h1")?.textContent.trim()
@@ -219,7 +222,7 @@ if (remote) {
     }
   }
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.pinFullBleed && r.playIconsGone && r.qrVisible && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.pinFullBleed && r.playIconsGone && r.qrVisible && r.qrToneApplied && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
 await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
 console.log(JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
 if (!passed) process.exitCode = 1;
