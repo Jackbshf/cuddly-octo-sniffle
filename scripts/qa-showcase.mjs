@@ -42,6 +42,7 @@ const base = remote || `http://127.0.0.1:${server.address().port}/`;
 const browser = await chromium.launch({ headless: true });
 const results = [];
 let motionPolicy = {};
+let warmPolicy = {};
 try {
   for (const size of sizes) {
     const context = await browser.newContext({ viewport: { width: size.width, height: size.height }, reducedMotion: "reduce" });
@@ -193,10 +194,38 @@ try {
   await mobileMotionPage.locator("#pin-media").screenshot({ path: path.join(output, "mobile-390-lunar-rover-playing.png") });
   await mobileMotionContext.close();
 
+  const warmContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
+  const warmPage = await warmContext.newPage();
+  await warmPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
+  const noWarmAtTop = await warmPage.locator('#lb-video').evaluate((video) => !video.getAttribute('src'));
+  const warmItem = warmPage.locator('#featured .feat').first();
+  await warmItem.scrollIntoViewIfNeeded();
+  await warmItem.hover();
+  const visibleWarm = await warmPage.waitForFunction(() => document.querySelector('#lb-video').src.includes('01_air_fryer_wings_00001_.mp4'), undefined, { timeout: 5000 }).then(() => true).catch(() => false);
+  const warmPaused = await warmPage.locator('#lb-video').evaluate((video) => video.paused && video.currentTime === 0);
+  const warmSrc = await warmPage.locator('#lb-video').evaluate((video) => video.src);
+  await warmItem.click();
+  const warmOpen = await warmPage.waitForFunction(() => document.querySelector('#lb-video').currentTime > 0, undefined, { timeout: 12000 }).then(() => true).catch(() => false);
+  const warmKept = await warmPage.locator('#lb-video').evaluate((video, src) => video.src === src, warmSrc);
+  await warmContext.close();
+
+  const reducedContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "reduce" });
+  const reducedPage = await reducedContext.newPage();
+  await reducedPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
+  await reducedPage.locator('#featured .feat').first().scrollIntoViewIfNeeded();
+  await reducedPage.locator('#featured .feat').first().hover();
+  await reducedPage.waitForTimeout(1000);
+  const reducedWarmBlocked = await reducedPage.locator('#lb-video').evaluate((video) => !video.getAttribute('src'));
+  await reducedContext.close();
+
   const saveDataContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
   await saveDataContext.addInitScript(() => { Object.defineProperty(navigator, "connection", { configurable: true, value: { saveData: true } }); });
   const saveDataPage = await saveDataContext.newPage();
   await saveDataPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
+  await saveDataPage.locator('#featured .feat').first().scrollIntoViewIfNeeded();
+  await saveDataPage.locator('#featured .feat').first().hover();
+  await saveDataPage.waitForTimeout(1000);
+  const saveDataWarmBlocked = await saveDataPage.locator('#lb-video').evaluate((video) => !video.getAttribute('src'));
   await saveDataPage.locator("#pin-media").scrollIntoViewIfNeeded();
   await saveDataPage.waitForTimeout(400);
   const saveDataPaused = await saveDataPage.locator("#pin-media").evaluate((media) => navigator.connection?.saveData === true && [...media.querySelectorAll("video")].every((video) => video.paused && !video.currentSrc));
@@ -204,6 +233,7 @@ try {
   const saveDataManualOpen = await saveDataPage.locator("#lb").getAttribute("data-open") === "1";
   await saveDataContext.close();
   motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, previewSourceCorrect, pausedAfterScroll, mobilePlaying, mobileBackdropUnloaded, saveDataPaused, saveDataManualOpen };
+  warmPolicy = { noWarmAtTop, visibleWarm, warmPaused, warmOpen, warmKept, reducedWarmBlocked, saveDataWarmBlocked };
 } finally {
   await browser.close();
   if (server) await new Promise((resolve) => server.close(resolve));
@@ -222,7 +252,7 @@ if (remote) {
     }
   }
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.pinFullBleed && r.playIconsGone && r.qrVisible && r.qrToneApplied && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
-await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
-console.log(JSON.stringify({ base, passed, motionPolicy, rangeDelivery, results }, null, 2));
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.pinFullBleed && r.playIconsGone && r.qrVisible && r.qrToneApplied && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && Object.values(warmPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
+await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, warmPolicy, rangeDelivery, results }, null, 2));
+console.log(JSON.stringify({ base, passed, motionPolicy, warmPolicy, rangeDelivery, results }, null, 2));
 if (!passed) process.exitCode = 1;
