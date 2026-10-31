@@ -158,23 +158,55 @@ async function serveShowcaseVideo(request, env) {
     return new Response(asset.body, { status: asset.status, headers });
   }
 
-  const bytes = new Uint8Array(await asset.arrayBuffer());
+  const lengthHeader = headers.get("Content-Length");
+  let total = lengthHeader === null ? NaN : Number(lengthHeader);
+  let fallbackBytes = null;
+  if (!Number.isSafeInteger(total) || total < 0) {
+    fallbackBytes = new Uint8Array(await asset.arrayBuffer());
+    total = fallbackBytes.length;
+  }
   const match = /^bytes=(\d*)-(\d*)$/.exec(range);
   let start = match?.[1] ? Number(match[1]) : 0;
-  let end = match?.[2] ? Number(match[2]) : bytes.length - 1;
+  let end = match?.[2] ? Number(match[2]) : total - 1;
   if (match && !match[1] && match[2]) {
-    start = Math.max(0, bytes.length - Number(match[2]));
-    end = bytes.length - 1;
+    start = Math.max(0, total - Number(match[2]));
+    end = total - 1;
   }
-  if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start >= bytes.length || end < start) {
-    headers.set("Content-Range", `bytes */${bytes.length}`);
+  if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start >= total || end < start) {
+    if (asset.body && !fallbackBytes) await asset.body.cancel();
+    headers.set("Content-Range", `bytes */${total}`);
     headers.set("Content-Length", "0");
     return new Response(null, { status: 416, headers });
   }
-  end = Math.min(end, bytes.length - 1);
-  headers.set("Content-Range", `bytes ${start}-${end}/${bytes.length}`);
+  end = Math.min(end, total - 1);
+  headers.set("Content-Range", `bytes ${start}-${end}/${total}`);
   headers.set("Content-Length", String(end - start + 1));
-  return new Response(bytes.subarray(start, end + 1), { status: 206, headers });
+  if (fallbackBytes) return new Response(fallbackBytes.subarray(start, end + 1), { status: 206, headers });
+  if (start === 0 && end === total - 1) return new Response(asset.body, { status: 206, headers });
+
+  const reader = asset.body.getReader();
+  let offset = 0;
+  const body = new ReadableStream({
+    async pull(controller) {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) { controller.close(); return; }
+        const chunkStart = offset;
+        offset += value.byteLength;
+        if (offset <= start) continue;
+        const from = Math.max(0, start - chunkStart);
+        const to = Math.min(value.byteLength, end + 1 - chunkStart);
+        if (to > from) controller.enqueue(value.subarray(from, to));
+        if (offset > end) {
+          controller.close();
+          await reader.cancel();
+        }
+        return;
+      }
+    },
+    cancel(reason) { return reader.cancel(reason); }
+  });
+  return new Response(body, { status: 206, headers });
 }
 
 function isPromptsPath(pathname) {
