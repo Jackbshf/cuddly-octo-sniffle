@@ -1124,6 +1124,47 @@ const colorPalettes = [
   { id: "amber", a: "bg-amber-600/20", b: "bg-red-600/15", c: "bg-orange-600/20", line: "bg-amber-500/50", text: "text-amber-100/60" }
 ];
 
+function showCopyToast(message) {
+  let el = typeof document !== "undefined" ? document.getElementById("portfolio-copy-toast") : null;
+  if (!el && typeof document !== "undefined") {
+    el = document.createElement("div");
+    el.id = "portfolio-copy-toast";
+    el.className = "portfolio-copy-toast";
+    document.body.appendChild(el);
+  }
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add("is-on");
+  clearTimeout(el.__timer);
+  el.__timer = setTimeout(() => el.classList.remove("is-on"), 1600);
+}
+
+function copyTextToClipboard(text) {
+  const value = String(text ?? "");
+  if (!value) return;
+  const done = () => showCopyToast("已复制 " + value);
+  if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(value).then(done).catch(() => showCopyToast("复制失败，请手动选择"));
+    return;
+  }
+  if (typeof document === "undefined") return;
+  const area = document.createElement("textarea");
+  area.value = value;
+  area.setAttribute("readonly", "readonly");
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.appendChild(area);
+  area.select();
+  try {
+    document.execCommand("copy");
+    done();
+  } catch (error) {
+    showCopyToast("复制失败，请手动选择");
+  } finally {
+    document.body.removeChild(area);
+  }
+}
+
 const HOMEPAGE_FONT_PRESETS = [
   { id: "system", label: "系统清爽", css: 'Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
   { id: "editorial", label: "杂志标题", css: 'Georgia, "Songti SC", "SimSun", "PingFang SC", serif' },
@@ -1134,19 +1175,19 @@ const HOMEPAGE_FONT_PRESETS = [
 const HOMEPAGE_COLOR_PRESETS = [
   {
     id: "cyan-amber",
-    label: "冷青 / 金色",
-    swatches: ["#66d9ff", "#e3c979", "#07121b"],
+    label: "中性黑灰 / 冷蓝点缀",
+    swatches: ["#5b8fd6", "#c8c2b4", "#0a0a0b"],
     style: {
-      "--portfolio-accent": "#66d9ff",
-      "--portfolio-border": "rgba(120, 210, 255, 0.14)",
-      "--curated-accent": "#66d9ff",
-      "--curated-accent-2": "#e3c979",
-      "--curated-border": "rgba(120, 210, 255, 0.14)",
-      "--curated-cyan": "#8ee8ff",
-      "--curated-gold": "#e3c979",
-      "--curated-line-strong": "rgba(120, 210, 255, 0.28)",
-      "--curated-card-bg": "linear-gradient(180deg, rgba(12, 30, 44, 0.94), rgba(5, 14, 22, 0.96))",
-      "--curated-card-bg-strong": "linear-gradient(180deg, rgba(15, 38, 54, 0.96), rgba(7, 18, 28, 0.98))"
+      "--portfolio-accent": "#5b8fd6",
+      "--portfolio-border": "rgba(255, 255, 255, 0.10)",
+      "--curated-accent": "#5b8fd6",
+      "--curated-accent-2": "#c8c2b4",
+      "--curated-border": "rgba(255, 255, 255, 0.10)",
+      "--curated-cyan": "#c9ced6",
+      "--curated-gold": "#c8c2b4",
+      "--curated-line-strong": "rgba(255, 255, 255, 0.18)",
+      "--curated-card-bg": "linear-gradient(180deg, rgba(22, 22, 24, 0.94), rgba(10, 10, 11, 0.96))",
+      "--curated-card-bg-strong": "linear-gradient(180deg, rgba(28, 28, 31, 0.96), rgba(12, 12, 13, 0.98))"
     }
   },
   {
@@ -6540,8 +6581,9 @@ function App() {
   ];
   const contactItems = [
     { label: "职业方向", value: "AIGC 视觉设计师 / AI 视频创作者 / ComfyUI 工作流设计" },
-    { label: "电话", value: "15767761446", href: "tel:+8615767761446", kind: "phone" },
-    { label: "邮箱", value: "2453193338@qq.com", href: QQ_MAIL_COMPOSE_URL, kind: "email" },
+    { label: "电话", value: "15767761446", href: "tel:+8615767761446", kind: "phone", copyValue: "15767761446" },
+    { label: "邮箱", value: "2453193338@qq.com", href: QQ_MAIL_COMPOSE_URL, kind: "email", copyValue: "2453193338@qq.com" },
+    { label: "微信", value: "同手机号", kind: "wechat", copyValue: "15767761446" },
     { label: "所在地", value: "广东深圳" },
     { label: "到岗状态", value: "已离职，1 周内可到岗" },
     { label: "作品集", value: "www.zhangweivisual.cn", href: "https://www.zhangweivisual.cn/" }
@@ -9021,21 +9063,29 @@ function App() {
               const isExternalLink = /^https?:\/\//i.test(item.href || "");
               const isEmailLink = item.kind === "email" || /^mailto:/i.test(item.href || "");
               const isPhoneLink = item.kind === "phone" || /^tel:/i.test(item.href || "");
-              const iconName = isEmailLink ? "Mail" : isPhoneLink ? "Phone" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
+              const isWechat = item.kind === "wechat";
+              const iconName = isEmailLink ? "Mail" : isPhoneLink ? "Phone" : isWechat ? "MessageCircle" : isExternalLink ? "ExternalLink" : String(item.label || "").includes("地") ? "MapPin" : "Briefcase";
               const actionLabel = isEmailLink ? "QQ 邮箱" : isPhoneLink ? "拨打" : isExternalLink ? "打开作品集" : "";
               const content = <>
                 <span className="curated-contact-icon" aria-hidden="true"><Icon name={iconName} size={16} /></span>
                 <div className="curated-contact-card-copy"><span>{item.label}</span><strong>{item.value}</strong></div>
                 {actionLabel && <span className="curated-contact-action">{actionLabel}</span>}
               </>;
-              return item.href ? <a
-                key={item.label}
-                className="curated-contact-card"
-                href={item.href}
-                aria-label={`${item.label}: ${item.value}`}
-                target={isExternalLink ? "_blank" : undefined}
-                rel={isExternalLink ? "noopener noreferrer" : undefined}
-              >{content}</a> : <div key={item.label} className="curated-contact-card">{content}</div>;
+              return <div key={item.label} className="curated-contact-cell">
+                {item.href ? <a
+                  className="curated-contact-card"
+                  href={item.href}
+                  aria-label={`${item.label}: ${item.value}`}
+                  target={isExternalLink ? "_blank" : undefined}
+                  rel={isExternalLink ? "noopener noreferrer" : undefined}
+                >{content}</a> : <div className="curated-contact-card">{content}</div>}
+                {item.copyValue && <button
+                  type="button"
+                  className="curated-contact-copy"
+                  aria-label={`复制${item.label}`}
+                  onClick={() => copyTextToClipboard(item.copyValue)}
+                >复制</button>}
+              </div>;
             })}
           </div>
           <div className="curated-contact-closer">
