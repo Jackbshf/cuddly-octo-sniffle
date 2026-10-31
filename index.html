@@ -557,6 +557,7 @@
     var vg = v.wide ? vgL : vgP;
     var art = document.createElement('article');
     art.className = 'vcard';
+    if (v.dur !== '01:48') art.dataset.warmSrc = srcOf(v);
     art.tabIndex = 0;
     art.setAttribute('role', 'button');
     art.setAttribute('aria-label', '播放视频：' + v.title);
@@ -644,6 +645,20 @@
   }
 
   window.__openLightbox = openLightbox;
+  window.__warmLightbox = function (source) {
+    var connection = navigator.connection;
+    if (lb.getAttribute('data-open') === '1' || document.hidden || connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || '') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!source || source.indexOf('showcase/videos/') !== 0) return;
+    var absolute = new URL(source, location.href).href;
+    if (lbVideo.src === absolute) return;
+    lbVideo.preload = 'auto';
+    lbVideo.src = absolute;
+  };
+  window.__cancelWarmLightbox = function () {
+    if (lb.getAttribute('data-open') === '1' || !lbVideo.getAttribute('src')) return;
+    lbVideo.removeAttribute('src');
+    lbVideo.load();
+  };
   document.querySelectorAll('.case-video').forEach(function (button) {
     var preview = button.querySelector('video');
     button.addEventListener('pointerenter', function (event) {
@@ -659,7 +674,8 @@
   function openLightbox(v) {
     previousVideoFocus = document.activeElement;
     document.querySelectorAll('.vcard video, .case-video video, #pin-video, #pin-backdrop').forEach(function (preview) { preview.pause(); });
-    lbVideo.src = srcOf(v);
+    var source = srcOf(v);
+    if (lbVideo.src !== new URL(source, location.href).href) lbVideo.src = source;
     lbCap.textContent = v.title + ' · ' + v.meta;
     lb.setAttribute('data-open', '1');
     lb.setAttribute('aria-hidden', 'false');
@@ -890,6 +906,7 @@
     var a = document.createElement('button');
     a.className = 'feat';
     a.type = 'button';
+    a.dataset.warmSrc = 'showcase/videos/' + (v.srcFile || v.f) + '.mp4';
     a.innerHTML =
       '<div class="shot"><img src="showcase/videos/' + v.f.replace(/_00001_$/, '') + '-wide.webp" alt="' + v.title + '" loading="lazy"></div>' +
       '<h3>' + v.title + '</h3><span>' + v.meta + '</span>';
@@ -1017,6 +1034,48 @@
   box.addEventListener('mouseleave', start);
   document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
   start();
+})();
+</script>
+
+<script>
+(function () {
+  if (!window.__warmLightbox || !('IntersectionObserver' in window)) return;
+  document.querySelectorAll('.case-video').forEach(function (button) {
+    button.dataset.warmSrc = 'showcase/videos/' + button.dataset.video + '.mp4';
+  });
+  var candidates = Array.from(document.querySelectorAll('[data-warm-src]'));
+  var visible = new Set();
+  var timer = null;
+  function schedule(source) {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      if (!source) {
+        var center = innerHeight / 2;
+        var nearest = Array.from(visible).sort(function (a, b) {
+          var ar = a.getBoundingClientRect(), br = b.getBoundingClientRect();
+          return Math.abs((ar.top + ar.bottom) / 2 - center) - Math.abs((br.top + br.bottom) / 2 - center);
+        })[0];
+        source = nearest && nearest.dataset.warmSrc;
+      }
+      if (source) window.__warmLightbox(source);
+      else window.__cancelWarmLightbox();
+    }, 700);
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting && entry.intersectionRatio >= .25) visible.add(entry.target);
+      else visible.delete(entry.target);
+    });
+    schedule();
+  }, { threshold: [0, .25, .5, 1] });
+  candidates.forEach(function (element) {
+    observer.observe(element);
+    element.addEventListener('pointerenter', function (event) { if (event.pointerType === 'mouse') schedule(element.dataset.warmSrc); });
+    element.addEventListener('focusin', function () { schedule(element.dataset.warmSrc); });
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { clearTimeout(timer); window.__cancelWarmLightbox(); }
+  });
 })();
 </script>
 
