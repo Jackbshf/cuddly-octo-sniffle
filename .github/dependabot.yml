@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  # Without this, every SHA pin above ages out silently.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
