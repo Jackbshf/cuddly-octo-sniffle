@@ -1,0 +1,218 @@
+[
+  {
+    "name": "n8n",
+    "repo": "n8n-io/n8n",
+    "url": "https://github.com/n8n-io/n8n",
+    "category": "工作流自动化",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "已接入工具箱，必须绑定 127.0.0.1"
+  },
+  {
+    "name": "Flowise",
+    "repo": "FlowiseAI/Flowise",
+    "url": "https://github.com/FlowiseAI/Flowise",
+    "category": "工作流自动化",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "常需要模型 API Key"
+  },
+  {
+    "name": "Open WebUI",
+    "repo": "open-webui/open-webui",
+    "url": "https://github.com/open-webui/open-webui",
+    "category": "聊天/知识库",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "推荐 Docker，自托管常用"
+  },
+  {
+    "name": "AnythingLLM",
+    "repo": "Mintplex-Labs/anything-llm",
+    "url": "https://github.com/Mintplex-Labs/anything-llm",
+    "category": "聊天/知识库",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "常需要 Docker 或官方本地方案"
+  },
+  {
+    "name": "LibreChat",
+    "repo": "danny-avila/LibreChat",
+    "url": "https://github.com/danny-avila/LibreChat",
+    "category": "聊天/知识库",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "多服务，推荐 Docker"
+  },
+  {
+    "name": "Dify",
+    "repo": "langgenius/dify",
+    "url": "https://github.com/langgenius/dify",
+    "category": "可视化 Agent",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "服务较多，推荐 Docker Compose"
+  },
+  {
+    "name": "Langflow",
+    "repo": "langflow-ai/langflow",
+    "url": "https://github.com/langflow-ai/langflow",
+    "category": "可视化 Agent",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "Python 依赖较多"
+  },
+  {
+    "name": "browser-use web-ui",
+    "repo": "browser-use/web-ui",
+    "url": "https://github.com/browser-use/web-ui",
+    "category": "浏览器自动化",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "需要浏览器运行时和模型 API Key"
+  },
+  {
+    "name": "LiteLLM",
+    "repo": "BerriAI/litellm",
+    "url": "https://github.com/BerriAI/litellm",
+    "category": "模型网关",
+    "hasWebUi": true,
+    "localPressure": "低",
+    "installHint": "已接入工具箱，必须绑定 127.0.0.1"
+  },
+  {
+    "name": "NocoDB",
+    "repo": "nocodb/nocodb",
+    "url": "https://github.com/nocodb/nocodb",
+    "category": "数据/内部工具",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "需要确认数据目录和端口"
+  },
+  {
+    "name": "ToolJet",
+    "repo": "ToolJet/ToolJet",
+    "url": "https://github.com/ToolJet/ToolJet",
+    "category": "内部工具",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "安装前先安全审查"
+  },
+  {
+    "name": "Appsmith",
+    "repo": "appsmithorg/appsmith",
+    "url": "https://github.com/appsmithorg/appsmith",
+    "category": "内部工具",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "推荐 Docker，服务较重"
+  },
+  {
+    "name": "ILLA Builder",
+    "repo": "illacloud/illa-builder",
+    "url": "https://github.com/illacloud/illa-builder",
+    "category": "内部工具",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "安装前先安全审查"
+  },
+  {
+    "name": "Activepieces",
+    "repo": "activepieces/activepieces",
+    "url": "https://github.com/activepieces/activepieces",
+    "category": "工作流自动化",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "多服务，推荐 Docker"
+  },
+  {
+    "name": "PySpur",
+    "repo": "PySpur-Dev/pyspur",
+    "url": "https://github.com/PySpur-Dev/pyspur",
+    "category": "可视化 Agent",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "较新项目，安装前先看审查结果"
+  },
+  {
+    "name": "OpenHands",
+    "repo": "OpenHands/OpenHands",
+    "url": "https://github.com/OpenHands/OpenHands",
+    "category": "可视化 Agent",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "涉及容器、沙箱和模型 API"
+  },
+  {
+    "name": "Inkeep Agents",
+    "repo": "inkeep/agents",
+    "url": "https://github.com/inkeep/agents",
+    "category": "可视化 Agent",
+    "hasWebUi": true,
+    "localPressure": "低-中",
+    "installHint": "安装前先确认本地启动方式"
+  },
+  {
+    "name": "Vercel Workflow Builder Template",
+    "repo": "vercel-labs/workflow-builder-template",
+    "url": "https://github.com/vercel-labs/workflow-builder-template",
+    "category": "可视化 Agent",
+    "hasWebUi": true,
+    "localPressure": "低",
+    "installHint": "模板项目，适合学习或二次开发"
+  },
+  {
+    "name": "ComfyUI",
+    "repo": "Comfy-Org/ComfyUI",
+    "url": "https://github.com/Comfy-Org/ComfyUI",
+    "category": "AI 创作",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "需要 GPU、模型文件和磁盘空间"
+  },
+  {
+    "name": "Stable Diffusion WebUI",
+    "repo": "AUTOMATIC1111/stable-diffusion-webui",
+    "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+    "category": "AI 创作",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "需要 GPU、Python 依赖和模型权重"
+  },
+  {
+    "name": "Fooocus",
+    "repo": "lllyasviel/Fooocus",
+    "url": "https://github.com/lllyasviel/Fooocus",
+    "category": "AI 创作",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "首次模型下载较大"
+  },
+  {
+    "name": "InvokeAI",
+    "repo": "invoke-ai/InvokeAI",
+    "url": "https://github.com/invoke-ai/InvokeAI",
+    "category": "AI 创作",
+    "hasWebUi": true,
+    "localPressure": "高",
+    "installHint": "需要确认 GPU、模型和磁盘空间"
+  },
+  {
+    "name": "NextChat",
+    "repo": "ChatGPTNextWeb/NextChat",
+    "url": "https://github.com/ChatGPTNextWeb/NextChat",
+    "category": "聊天/知识库",
+    "hasWebUi": true,
+    "localPressure": "低",
+    "installHint": "通常需要模型 API Key"
+  },
+  {
+    "name": "LobeChat",
+    "repo": "lobehub/lobehub",
+    "url": "https://github.com/lobehub/lobehub",
+    "category": "聊天/知识库",
+    "hasWebUi": true,
+    "localPressure": "中",
+    "installHint": "通常需要模型 API Key"
+  }
+]
