@@ -84,6 +84,9 @@ jobs:
       - name: Prepare static bundle
         run: node scripts/prepare-static.mjs
 
+      - name: Verify exclusive and adaptive video playback
+        run: npm run qa:playback
+
       - name: Verify Wrangler
         run: npx wrangler --version
 

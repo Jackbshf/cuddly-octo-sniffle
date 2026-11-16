@@ -7,6 +7,7 @@
 <meta name="description" content="张玮，AIGC 视觉设计师。2 年经验，做商业视觉、AI 短视频与 ComfyUI 工作流。深圳，1 周内可到岗。">
 <meta name="theme-color" content="#070b12">
 <link rel="canonical" href="https://www.zhangweivisual.cn/">
+<link rel="stylesheet" href="showcase/player.css">
 <link rel="preload" as="image" href="showcase/assets/hero2-1600.avif" media="(max-width: 640px)" fetchpriority="high">
 <link rel="preload" as="image" href="showcase/assets/hero2-2560.avif" media="(min-width: 641px)" fetchpriority="high">
 <meta property="og:type" content="website">
@@ -284,53 +285,19 @@
   var backdrop = document.getElementById('pin-backdrop');
   var button = document.getElementById('pin-open');
   if (!media || !video || !backdrop || !button) return;
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var saveData = Boolean(navigator.connection?.saveData);
   var backdropMedia = matchMedia('(min-width:641px)');
-  var visibleEnough = false;
   var nearObserver = new IntersectionObserver(function (entries, observer) {
     if (!entries[0].isIntersecting) return;
     video.poster = video.dataset.poster;
     if (backdropMedia.matches) backdrop.poster = backdrop.dataset.poster;
-    if (!reduce && !saveData && !video.src) {
-      video.preload = 'auto';
-      video.src = video.dataset.src;
-      if (backdropMedia.matches) backdrop.src = backdrop.dataset.src;
-    }
     observer.disconnect();
   }, { rootMargin: '650px' });
-  function updatePlayback() {
-    if (reduce || saveData || document.hidden || !visibleEnough || document.getElementById('lb')?.getAttribute('data-open') === '1') {
-      video.pause();
-      backdrop.pause();
-      return;
-    }
-    if (!video.src) video.src = video.dataset.src;
-    if (!backdropMedia.matches) {
-      backdrop.pause();
-      video.play().catch(function () {});
-      return;
-    }
-    if (!backdrop.src) backdrop.src = backdrop.dataset.src;
-    video.play().then(function () {
-      if (backdrop.readyState >= 1 && Math.abs(backdrop.currentTime - video.currentTime) > .25) backdrop.currentTime = video.currentTime;
-      backdrop.play().catch(function () {});
-    }).catch(function () {});
-  }
-  var playbackObserver = new IntersectionObserver(function (entries) {
-    visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.4;
-    updatePlayback();
-  }, { threshold: [0, 0.4] });
   document.addEventListener('DOMContentLoaded', function () {
     nearObserver.observe(media);
-    playbackObserver.observe(media);
   }, { once: true });
-  document.addEventListener('visibilitychange', updatePlayback);
   backdropMedia.addEventListener('change', function () {
     if (backdropMedia.matches && !backdrop.poster) backdrop.poster = backdrop.dataset.poster;
-    updatePlayback();
   });
-  document.addEventListener('portfolio:video-viewer-closed', updatePlayback);
   button.addEventListener('click', function () {
     video.pause();
     backdrop.pause();
@@ -564,7 +531,7 @@
     art.setAttribute('aria-label', '播放视频：' + v.title);
     art.innerHTML =
       '<div class="frame">' +
-        '<video src="' + srcOf(v) + '" data-poster="' + posterOf(v) + '"' +
+        '<video data-src="' + srcOf(v) + '" data-poster="' + posterOf(v) + '"' +
         ' muted loop playsinline preload="none"></video>' +
         '<span class="badge">VIDEO</span><span class="dur">' + v.dur + '</span>' +
       '</div>' +
@@ -573,12 +540,6 @@
     posterObserver.observe(art);
     var frame = art.querySelector('.frame');
     art.style.width = (v.wide ? 533 : 236) + 'px';
-    art.addEventListener('mouseenter', function () {
-      if (v.wide || matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData || document.hidden) return;
-      video.muted = true;
-      var p = video.play(); if (p && p.catch) p.catch(function () {});
-    });
-    art.addEventListener('mouseleave', function () { video.pause(); });
     art.addEventListener('click', function () { openLightbox(v); });
     art.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLightbox(v); } });
     vg.appendChild(art);
@@ -630,60 +591,23 @@
   var lb = document.getElementById('lb');
   var lbVideo = document.getElementById('lb-video');
   var lbCap = document.getElementById('lb-cap');
-  var previousVideoFocus = null;
-
   function closeLightbox() {
-    if (lb.getAttribute('data-open') !== '1') return;
-    lb.removeAttribute('data-open');
-    lb.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('media-viewer-open');
-    lbVideo.pause();
-    lbVideo.removeAttribute('src');
-    lbVideo.load();
-    if (previousVideoFocus && previousVideoFocus.isConnected) previousVideoFocus.focus();
-    previousVideoFocus = null;
-    document.dispatchEvent(new Event('portfolio:video-viewer-closed'));
+    window.__pendingPortfolioVideo = null;
+    window.__portfolioPlayback?.close();
   }
 
   window.__openLightbox = openLightbox;
-  window.__warmLightbox = function (source) {
-    var connection = navigator.connection;
-    if (lb.getAttribute('data-open') === '1' || document.hidden || connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || '') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (!source || source.indexOf('showcase/videos/') !== 0) return;
-    var absolute = new URL(source, location.href).href;
-    if (lbVideo.src === absolute) return;
-    lbVideo.preload = 'auto';
-    lbVideo.src = absolute;
-  };
-  window.__cancelWarmLightbox = function () {
-    if (lb.getAttribute('data-open') === '1' || !lbVideo.getAttribute('src')) return;
-    lbVideo.removeAttribute('src');
-    lbVideo.load();
-  };
+  window.__warmLightbox = function (source) { window.__portfolioPlayback?.warm(source); };
+  window.__cancelWarmLightbox = function () { window.__portfolioPlayback?.cancelWarm(); };
   document.querySelectorAll('.case-video').forEach(function (button) {
-    var preview = button.querySelector('video');
-    button.addEventListener('pointerenter', function (event) {
-      if (event.pointerType !== 'mouse' || matchMedia('(prefers-reduced-motion: reduce)').matches || navigator.connection?.saveData) return;
-      if (!preview.src) preview.src = preview.dataset.src;
-      preview.play().catch(function () {});
-    });
-    button.addEventListener('pointerleave', function () { preview.pause(); });
+    button.dataset.warmSrc = 'showcase/videos/' + button.dataset.video + '.mp4';
     button.addEventListener('click', function () {
       openLightbox({ f: button.dataset.video, title: button.dataset.title, meta: '宠物产品短片 / 完整视频' });
     });
   });
   function openLightbox(v) {
-    previousVideoFocus = document.activeElement;
-    document.querySelectorAll('.vcard video, .case-video video, #pin-video, #pin-backdrop').forEach(function (preview) { preview.pause(); });
-    var source = srcOf(v);
-    if (lbVideo.src !== new URL(source, location.href).href) lbVideo.src = source;
-    lbCap.textContent = v.title + ' · ' + v.meta;
-    lb.setAttribute('data-open', '1');
-    lb.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('media-viewer-open');
-    lbVideo.muted = false;
-    document.getElementById('lb-close').focus();
-    var p = lbVideo.play(); if (p && p.catch) p.catch(function () {});
+    if (window.__portfolioPlayback) window.__portfolioPlayback.open(v);
+    else window.__pendingPortfolioVideo = v;
   }
 
   document.getElementById('lb-close').addEventListener('click', closeLightbox);
@@ -1038,47 +962,7 @@
 })();
 </script>
 
-<script>
-(function () {
-  if (!window.__warmLightbox || !('IntersectionObserver' in window)) return;
-  document.querySelectorAll('.case-video').forEach(function (button) {
-    button.dataset.warmSrc = 'showcase/videos/' + button.dataset.video + '.mp4';
-  });
-  var candidates = Array.from(document.querySelectorAll('[data-warm-src]'));
-  var visible = new Set();
-  var timer = null;
-  function schedule(source) {
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      if (!source) {
-        var center = innerHeight / 2;
-        var nearest = Array.from(visible).sort(function (a, b) {
-          var ar = a.getBoundingClientRect(), br = b.getBoundingClientRect();
-          return Math.abs((ar.top + ar.bottom) / 2 - center) - Math.abs((br.top + br.bottom) / 2 - center);
-        })[0];
-        source = nearest && nearest.dataset.warmSrc;
-      }
-      if (source) window.__warmLightbox(source);
-      else window.__cancelWarmLightbox();
-    }, 700);
-  }
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting && entry.intersectionRatio >= .25) visible.add(entry.target);
-      else visible.delete(entry.target);
-    });
-    schedule();
-  }, { threshold: [0, .25, .5, 1] });
-  candidates.forEach(function (element) {
-    observer.observe(element);
-    element.addEventListener('pointerenter', function (event) { if (event.pointerType === 'mouse') schedule(element.dataset.warmSrc); });
-    element.addEventListener('focusin', function () { schedule(element.dataset.warmSrc); });
-  });
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { clearTimeout(timer); window.__cancelWarmLightbox(); }
-  });
-})();
-</script>
+<script type="module" src="showcase/runtime/player.js" data-portfolio-playback data-manifest="showcase/media/manifest.json"></script>
 
 
 
@@ -1310,6 +1194,7 @@
 
   document.addEventListener('keydown', function (e) {
     if (lb.getAttribute('data-open') !== '1') return;
+    if (e.target.closest('button,select,input,textarea')) return;
     if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); video.paused ? video.play() : video.pause(); wake(); }
     if (e.key === 'ArrowRight') { video.currentTime = Math.min(video.duration || 0, video.currentTime + 5); wake(); }
     if (e.key === 'ArrowLeft') { video.currentTime = Math.max(0, video.currentTime - 5); wake(); }

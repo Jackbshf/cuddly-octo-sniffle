@@ -81,7 +81,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith("/showcase/videos/") && url.pathname.endsWith(".mp4")) {
+    if ((url.pathname.startsWith("/showcase/videos/") || url.pathname.startsWith("/showcase/media/")) && url.pathname.endsWith(".mp4")) {
       return serveShowcaseVideo(request, env);
     }
 

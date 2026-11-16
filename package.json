@@ -7,6 +7,7 @@
     "sync:portfolio": "node scripts/sync-portfolio-json.mjs",
     "sync:stream": "node scripts/media/sync-cloudflare-stream.mjs",
     "prepare:static": "node scripts/prepare-static.mjs",
+    "qa:playback": "node scripts/qa-playback.mjs",
     "deploy:worker": "wrangler deploy --config wrangler.jsonc --assets=./dist",
     "deploy:preview": "wrangler deploy --config wrangler.jsonc --assets=./dist --name floral-leaf-4e44-preview",
     "deploy:worker:version": "wrangler versions upload --config wrangler.jsonc --assets=./dist",

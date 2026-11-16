@@ -6,7 +6,7 @@ import { chromium } from "playwright";
 const root = path.resolve("dist");
 const output = path.resolve(process.env.QA_OUTPUT_DIR?.trim() || "output/playwright/showcase-release");
 const remote = process.argv[2];
-const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".jpg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".mp4": "video/mp4" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".jpg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".mp4": "video/mp4", ".json": "application/json", ".m3u8": "application/vnd.apple.mpegurl", ".ts": "video/mp2t" };
 const sizes = [{ name: "mobile-390", width: 390, height: 844 }, { name: "tablet-768", width: 768, height: 1024 }, { name: "desktop-1440", width: 1440, height: 1000 }];
 
 const server = remote ? null : http.createServer(async (request, response) => {
@@ -52,6 +52,7 @@ try {
     page.on("pageerror", (error) => errors.page.push(error.message));
     page.on("response", (response) => { if (response.status() >= 400 && new URL(response.url()).origin === new URL(base).origin) errors.http.push(`${response.status()} ${response.url()}`); });
     const response = await page.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await page.waitForFunction(() => window.__portfolioPlayback?.version === "exclusive-v1");
     await page.locator("#gallery-grid .gcard").first().waitFor();
     for (const selector of ["#videos", "#cases", "#gallery", "#workflow", "#contact"]) {
       await page.locator(selector).scrollIntoViewIfNeeded();
@@ -109,9 +110,9 @@ try {
       await button.click();
       const caseVideoReady = await page.waitForFunction(() => {
         const video = document.querySelector("#lb-video");
-        return video.videoWidth === 720 && video.videoHeight === 1280 && video.readyState >= 2;
+        return video.videoWidth > 0 && video.videoHeight > video.videoWidth && video.readyState >= 2;
       }, undefined, { timeout: 12000 }).then(() => true).catch(() => false);
-      caseVideoOpened.push(caseVideoReady && await page.locator("#lb-video").evaluate((video, expected) => video.src.endsWith(`${expected}-faststart.mp4`) && getComputedStyle(video).objectFit === "contain", name));
+      caseVideoOpened.push(caseVideoReady && await page.locator("#lb-video").evaluate((video, expected) => window.__portfolioPlayback.inspect().id === expected && video.src.includes("/showcase/media/") && getComputedStyle(video).objectFit === "contain", name));
       await page.locator("#lb-close").click();
     }
 
@@ -134,7 +135,7 @@ try {
     await page.locator("#lb-close").click();
 
     await page.locator("#pin-open").click();
-    const pinVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("lunar-rover-faststart.mp4") && getComputedStyle(video).objectFit === "contain");
+    const pinVideoOpen = await page.locator("#lb-video").evaluate((video) => window.__portfolioPlayback.inspect().id === "lunar-rover" && getComputedStyle(video).objectFit === "contain");
     const pinVideoPlaying = await page.waitForFunction(() => {
       const video = document.querySelector("#lb-video");
       return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
@@ -147,7 +148,7 @@ try {
     await page.locator("#lb-close").click();
 
     await page.locator("#vg-portrait .vcard[role='button']").last().click();
-    const longVideoOpen = await page.locator("#lb-video").evaluate((video) => video.src.includes("commercial-animated-street-story-faststart.mp4"));
+    const longVideoOpen = await page.locator("#lb-video").evaluate(() => window.__portfolioPlayback.inspect().id === "commercial-animated-street-story");
     const longVideoPlaying = await page.waitForFunction(() => {
       const video = document.querySelector("#lb-video");
       return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
@@ -171,12 +172,12 @@ try {
   const offscreenPaused = await motionPage.locator("#pin-media").evaluate((media) => [...media.querySelectorAll("video")].every((video) => video.paused));
   const offscreenUnloaded = await motionPage.locator("#pin-media").evaluate((media) => [...media.querySelectorAll("video")].every((video) => !video.currentSrc));
   await motionPage.locator("#pin-media").scrollIntoViewIfNeeded();
-  const onscreenPlaying = await motionPage.waitForFunction(() => [...document.querySelectorAll("#pin-media video")].every((video) => !video.paused && video.readyState >= 2), undefined, { timeout: 10000 }).then(() => true).catch(() => false);
+  const onscreenIdle = await motionPage.locator("#pin-media").evaluate(media => [...media.querySelectorAll("video")].every(video => video.paused && !video.getAttribute("src")));
   await motionPage.locator("#pin-media").screenshot({ path: path.join(output, "desktop-1440-lunar-rover-playing.png") });
   const previewSourceCorrect = await motionPage.locator("#pin-media").evaluate((media) => {
     const video = media.querySelector("#pin-video");
     const backdrop = media.querySelector("#pin-backdrop");
-    return video.currentSrc.includes("lunar-rover-faststart.mp4") && getComputedStyle(video).objectFit === "contain" && backdrop.currentSrc.includes("lunar-rover-backdrop.mp4") && getComputedStyle(backdrop).objectFit === "cover";
+    return video.poster.includes("lunar-rover.jpg") && getComputedStyle(video).objectFit === "contain" && backdrop.poster.includes("lunar-rover.jpg") && getComputedStyle(backdrop).objectFit === "cover";
   });
   await motionPage.locator("#contact").scrollIntoViewIfNeeded();
   const pausedAfterScroll = await motionPage.waitForFunction(() => [...document.querySelectorAll("#pin-media video")].every((video) => video.paused), undefined, { timeout: 3000 }).then(() => true).catch(() => false);
@@ -186,10 +187,10 @@ try {
   const mobileMotionPage = await mobileMotionContext.newPage();
   await mobileMotionPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
   await mobileMotionPage.locator("#pin-media").scrollIntoViewIfNeeded();
-  const mobilePlaying = await mobileMotionPage.waitForFunction(() => {
+  const mobileIdle = await mobileMotionPage.waitForFunction(() => {
     const video = document.querySelector("#pin-video");
-    return !video.paused && video.readyState >= 2 && video.currentTime > .3;
-  }, undefined, { timeout: 10000 }).then(() => true).catch(() => false);
+    return video.paused && !video.getAttribute("src") && video.poster.includes("lunar-rover.jpg");
+  }, undefined, { timeout: 3000 }).then(() => true).catch(() => false);
   const mobileBackdropUnloaded = await mobileMotionPage.locator("#pin-backdrop").evaluate((video) => !video.currentSrc);
   await mobileMotionPage.locator("#pin-media").screenshot({ path: path.join(output, "mobile-390-lunar-rover-playing.png") });
   await mobileMotionContext.close();
@@ -201,7 +202,7 @@ try {
   const warmItem = warmPage.locator('#featured .feat').first();
   await warmItem.scrollIntoViewIfNeeded();
   await warmItem.hover();
-  const visibleWarm = await warmPage.waitForFunction(() => document.querySelector('#lb-video').src.includes('01_air_fryer_wings_00001_.mp4'), undefined, { timeout: 5000 }).then(() => true).catch(() => false);
+  const visibleWarm = await warmPage.waitForFunction(() => window.__portfolioPlayback?.inspect().warmed === '01_air_fryer_wings_00001_', undefined, { timeout: 5000 }).then(() => true).catch(() => false);
   const warmPaused = await warmPage.locator('#lb-video').evaluate((video) => video.paused && video.currentTime === 0);
   const warmSrc = await warmPage.locator('#lb-video').evaluate((video) => video.src);
   await warmItem.click();
@@ -232,7 +233,7 @@ try {
   await saveDataPage.locator("#pin-open").click();
   const saveDataManualOpen = await saveDataPage.locator("#lb").getAttribute("data-open") === "1";
   await saveDataContext.close();
-  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, previewSourceCorrect, pausedAfterScroll, mobilePlaying, mobileBackdropUnloaded, saveDataPaused, saveDataManualOpen };
+  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenIdle, previewSourceCorrect, pausedAfterScroll, mobileIdle, mobileBackdropUnloaded, saveDataPaused, saveDataManualOpen };
   warmPolicy = { noWarmAtTop, visibleWarm, warmPaused, warmOpen, warmKept, reducedWarmBlocked, saveDataWarmBlocked };
 } finally {
   await browser.close();

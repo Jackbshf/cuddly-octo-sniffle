@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { buildAppAssets } from "./build-app.mjs";
+import { buildShowcasePlayback } from "./media/build-showcase-playback.mjs";
 import { syncPortfolioArtifacts } from "./sync-portfolio-json.mjs";
 import {
   isReadyStreamManifestEntry,
@@ -185,6 +186,16 @@ const writeDistHeaders = async () => {
     "/showcase/*",
     "  Cache-Control: public, max-age=3600",
     "  CDN-Cache-Control: public, max-age=86400",
+    "/showcase/media/*",
+    "  Cache-Control: public, max-age=31536000, immutable",
+    "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    "/showcase/runtime/*",
+    "  Cache-Control: public, max-age=31536000, immutable",
+    "  CDN-Cache-Control: public, max-age=31536000, immutable",
+    "/showcase/media/*.m3u8",
+    "  Content-Type: application/vnd.apple.mpegurl",
+    "/showcase/media/*.ts",
+    "  Content-Type: video/mp2t",
     ""
   ].join("\n");
 
@@ -566,6 +577,7 @@ async function main() {
   versionedAssets.version = versionedAssets.js.hash;
 
   await rewriteDistIndexHtml(versionedAssets);
+  await buildShowcasePlayback(root, distDir);
   await writeDistHeaders();
   await assertWorkerAssetSizes();
 
