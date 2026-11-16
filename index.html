@@ -286,17 +286,56 @@
   var button = document.getElementById('pin-open');
   if (!media || !video || !backdrop || !button) return;
   var backdropMedia = matchMedia('(min-width:641px)');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  var visibleEnough = false;
+  var viewerOpen = false;
+  var generation = 0;
+  function releasePreview(element) {
+    element.pause();
+    if (!element.getAttribute('src')) return;
+    element.removeAttribute('src');
+    element.load();
+  }
+  function updatePlayback() {
+    var current = ++generation;
+    if (!visibleEnough || viewerOpen || document.hidden || reduce.matches || navigator.connection?.saveData) {
+      releasePreview(video);
+      releasePreview(backdrop);
+      return;
+    }
+    if (!video.getAttribute('src')) video.src = video.dataset.src;
+    if (backdropMedia.matches) {
+      if (!backdrop.getAttribute('src')) backdrop.src = backdrop.dataset.src;
+    } else releasePreview(backdrop);
+    video.play().then(function () {
+      if (current !== generation || viewerOpen || document.hidden || !visibleEnough) return;
+      if (backdropMedia.matches) {
+        if (backdrop.readyState >= 1 && Math.abs(backdrop.currentTime - video.currentTime) > .25) backdrop.currentTime = video.currentTime;
+        backdrop.play().catch(function () {});
+      }
+    }).catch(function () {});
+  }
   var nearObserver = new IntersectionObserver(function (entries, observer) {
     if (!entries[0].isIntersecting) return;
     video.poster = video.dataset.poster;
     if (backdropMedia.matches) backdrop.poster = backdrop.dataset.poster;
     observer.disconnect();
   }, { rootMargin: '650px' });
+  var playbackObserver = new IntersectionObserver(function (entries) {
+    visibleEnough = entries[0].isIntersecting && entries[0].intersectionRatio >= .4;
+    updatePlayback();
+  }, { threshold: [0, .4] });
   document.addEventListener('DOMContentLoaded', function () {
     nearObserver.observe(media);
+    playbackObserver.observe(media);
   }, { once: true });
+  document.addEventListener('visibilitychange', updatePlayback);
+  reduce.addEventListener('change', updatePlayback);
+  document.addEventListener('portfolio:video-viewer-opening', function () { viewerOpen = true; updatePlayback(); });
+  document.addEventListener('portfolio:video-viewer-closed', function () { viewerOpen = false; updatePlayback(); });
   backdropMedia.addEventListener('change', function () {
     if (backdropMedia.matches && !backdrop.poster) backdrop.poster = backdrop.dataset.poster;
+    updatePlayback();
   });
   button.addEventListener('click', function () {
     video.pause();

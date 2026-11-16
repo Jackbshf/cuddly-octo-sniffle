@@ -52,7 +52,25 @@ try {
     await ready(page);
     for (const selector of ["#videos", "#pin-media", "#cases"]) await page.locator(selector).scrollIntoViewIfNeeded();
     await page.waitForTimeout(800);
-    assert.deepEqual(media, [], "Scrolling should load posters only");
+    assert.ok(media.every(url => /lunar-rover-(faststart|backdrop)\.mp4$/.test(url)), "Automatic loading should belong to the visible lunar screen");
+    await page.locator("#pin-media").scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => {
+      const video = document.querySelector("#pin-video");
+      return !video.paused && video.currentTime > .3;
+    }, undefined, { timeout: 30000 });
+    if (width > 640) await page.waitForFunction(() => !document.querySelector("#pin-backdrop").paused && document.querySelector("#pin-backdrop").currentTime > .1);
+    const lunarStart = await page.locator("#pin-video").evaluate(video => video.currentTime);
+    await page.waitForFunction(start => !document.querySelector("#pin-video").paused && Math.abs(document.querySelector("#pin-video").currentTime - start) > .15, lunarStart);
+    const lunarEnd = await page.locator("#pin-video").evaluate(video => video.currentTime);
+    await page.screenshot({ path: path.join(output, `lunar-autoplay-${width}.png`) });
+    await page.locator("#pin-open").click();
+    await playing(page);
+    assert.equal(await page.locator("#pin-media video[src]").count(), 0, "Modal playback should suspend lunar previews");
+    await page.locator("#lb-close").click();
+    await page.waitForFunction(() => !document.querySelector("#pin-video").paused && document.querySelector("#pin-video").currentTime > .2);
+    await page.locator("#contact").scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => [...document.querySelectorAll("#pin-media video")].every(video => video.paused && !video.getAttribute("src")));
+    media.length = 0;
     const manifestUrl = await page.locator("script[data-portfolio-playback]").getAttribute("data-manifest");
     const manifestResponse = await page.request.get(new URL(manifestUrl, base).href);
     const manifest = await manifestResponse.json();
@@ -61,13 +79,15 @@ try {
     const entry = manifest.videos["01_air_fryer_wings_00001_"];
     const card = page.locator("#featured .feat").first();
     await card.scrollIntoViewIfNeeded();
+    await page.locator(".feat-dot").first().click();
     await card.hover();
     await page.waitForFunction(() => window.__portfolioPlayback.inspect().warmed === "01_air_fryer_wings_00001_");
     const warmedSource = await page.locator("#lb-video").getAttribute("src");
+    media.length = 0;
     await card.click();
     await playing(page);
     assert.equal(await page.locator("#lb-video").getAttribute("src"), warmedSource, "Click should reuse prewarmed source");
-    assert.ok(media.every(url => url.includes(new URL(entry.variants[0].src, base).pathname)), "Only the selected video should load");
+    assert.ok(media.every(url => url.includes(new URL(warmedSource, base).pathname)), "Only the selected video should load");
     assert.equal(await page.locator("video[src]").count(), 1);
     const beforeSwitch = await page.locator("#lb-video").evaluate(video => video.currentTime);
     await page.locator(".pl-quality").selectOption(entry.variants.at(-1).label);
@@ -93,7 +113,7 @@ try {
     }
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.deepEqual(errors, []);
-    results.push({ width, posterOnlyScrolling: true, exclusivePlayback: true, warmReuse: true, qualitySwitch: afterSwitch, range206: true, pageErrors: errors });
+    results.push({ width, lunarAutoplay: true, lunarProgress: [lunarStart, lunarEnd], lunarBackdrop: width > 640, lunarOffscreenRelease: true, lunarModalSuspendResume: true, exclusivePlayback: true, warmReuse: true, qualitySwitch: afterSwitch, range206: true, pageErrors: errors });
     await context.close();
     console.log(`Passed viewport ${width}`);
   }

@@ -172,7 +172,7 @@ try {
   const offscreenPaused = await motionPage.locator("#pin-media").evaluate((media) => [...media.querySelectorAll("video")].every((video) => video.paused));
   const offscreenUnloaded = await motionPage.locator("#pin-media").evaluate((media) => [...media.querySelectorAll("video")].every((video) => !video.currentSrc));
   await motionPage.locator("#pin-media").scrollIntoViewIfNeeded();
-  const onscreenIdle = await motionPage.locator("#pin-media").evaluate(media => [...media.querySelectorAll("video")].every(video => video.paused && !video.getAttribute("src")));
+  const onscreenPlaying = await motionPage.waitForFunction(() => [...document.querySelectorAll("#pin-media video")].every(video => !video.paused && video.currentTime > .2), undefined, { timeout: 20000 }).then(() => true).catch(() => false);
   await motionPage.locator("#pin-media").screenshot({ path: path.join(output, "desktop-1440-lunar-rover-playing.png") });
   const previewSourceCorrect = await motionPage.locator("#pin-media").evaluate((media) => {
     const video = media.querySelector("#pin-video");
@@ -187,10 +187,10 @@ try {
   const mobileMotionPage = await mobileMotionContext.newPage();
   await mobileMotionPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
   await mobileMotionPage.locator("#pin-media").scrollIntoViewIfNeeded();
-  const mobileIdle = await mobileMotionPage.waitForFunction(() => {
+  const mobilePlaying = await mobileMotionPage.waitForFunction(() => {
     const video = document.querySelector("#pin-video");
-    return video.paused && !video.getAttribute("src") && video.poster.includes("lunar-rover.jpg");
-  }, undefined, { timeout: 3000 }).then(() => true).catch(() => false);
+    return !video.paused && video.currentTime > .3 && video.poster.includes("lunar-rover.jpg");
+  }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
   const mobileBackdropUnloaded = await mobileMotionPage.locator("#pin-backdrop").evaluate((video) => !video.currentSrc);
   await mobileMotionPage.locator("#pin-media").screenshot({ path: path.join(output, "mobile-390-lunar-rover-playing.png") });
   await mobileMotionContext.close();
@@ -233,7 +233,7 @@ try {
   await saveDataPage.locator("#pin-open").click();
   const saveDataManualOpen = await saveDataPage.locator("#lb").getAttribute("data-open") === "1";
   await saveDataContext.close();
-  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenIdle, previewSourceCorrect, pausedAfterScroll, mobileIdle, mobileBackdropUnloaded, saveDataPaused, saveDataManualOpen };
+  motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, previewSourceCorrect, pausedAfterScroll, mobilePlaying, mobileBackdropUnloaded, saveDataPaused, saveDataManualOpen };
   warmPolicy = { noWarmAtTop, visibleWarm, warmPaused, warmOpen, warmKept, reducedWarmBlocked, saveDataWarmBlocked };
 } finally {
   await browser.close();

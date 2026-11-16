@@ -182,6 +182,7 @@ async function open(item) {
   if (!active) previousFocus = document.activeElement;
   const record = { id: canonical(item.f), item, entry: null, selection: "auto", fallbackUsed: false, downgraded: false };
   active = record;
+  document.dispatchEvent(new Event("portfolio:video-viewer-opening"));
   destroyHls();
   document.querySelectorAll(".vcard video, .case-video video, #pin-video, #pin-backdrop").forEach(release);
   caption.textContent = `${item.title} · ${item.meta}`;
