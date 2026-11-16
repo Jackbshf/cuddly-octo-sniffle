@@ -100,7 +100,7 @@ function fallbackEntry(record) {
 }
 
 function play(record) {
-  if (active !== record) return;
+  if (active !== record || document.hidden) return;
   const promise = video.play();
   if (promise) promise.catch(error => {
     if (active !== record || error.name === "AbortError") return;
@@ -141,20 +141,20 @@ async function loadHls(record, position = 0, shouldPlay = true) {
   record.transport = "hls";
   video.dataset.quality = "auto";
   video.preload = "auto";
-  if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = record.entry.hls;
-    video.addEventListener("loadedmetadata", () => {
-      if (active !== record || generation !== loadGeneration) return;
-      if (position > 0) video.currentTime = position;
-      if (shouldPlay) play(record);
-    }, { once: true });
-    if (shouldPlay && position === 0) play(record);
-    return;
-  }
   try {
     const { default: Hls } = await import("hls.js");
     if (active !== record || generation !== loadGeneration) return;
-    if (!Hls.isSupported()) { useFallback(record); return; }
+    if (!Hls.isSupported()) {
+      if (!video.canPlayType("application/vnd.apple.mpegurl")) { useFallback(record); return; }
+      video.src = record.entry.hls;
+      video.addEventListener("loadedmetadata", () => {
+        if (active !== record || generation !== loadGeneration) return;
+        if (position > 0) video.currentTime = position;
+        if (shouldPlay) play(record);
+      }, { once: true });
+      if (shouldPlay && position === 0) play(record);
+      return;
+    }
     destroyHls();
     const instance = new Hls({
       startLevel: 0, startPosition: position, maxBufferLength: 8, maxMaxBufferLength: 16,

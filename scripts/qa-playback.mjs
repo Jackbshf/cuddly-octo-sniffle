@@ -86,6 +86,11 @@ try {
     assert.equal(range.status(), 206);
     assert.equal((await range.body()).length, 1024);
     assert.ok(range.headers()["content-range"].startsWith("bytes 0-1023/"));
+    if (remote) {
+      const cacheControl = range.headers()["cache-control"];
+      assert.equal((cacheControl.match(/max-age=/g) || []).length, 1);
+      assert.ok(cacheControl.includes("max-age=31536000"));
+    }
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.deepEqual(errors, []);
     results.push({ width, posterOnlyScrolling: true, exclusivePlayback: true, warmReuse: true, qualitySwitch: afterSwitch, range206: true, pageErrors: errors });
@@ -99,6 +104,7 @@ try {
   await page.locator('#vg-portrait .vcard[role="button"]').last().click();
   await playing(page);
   assert.equal(await page.evaluate(() => window.__portfolioPlayback.inspect().transport), "hls");
+  assert.ok(await page.locator("#lb-video").evaluate(video => video.currentSrc.startsWith("blob:")), "Chromium should use the verified MSE HLS path");
   await page.locator("#lb-video").evaluate(video => { video.currentTime = 50; });
   await page.waitForFunction(() => document.querySelector("#lb-video").currentTime >= 50 && document.querySelector("#lb-video").readyState >= 2);
   await page.locator(".pl-quality").selectOption("480p");
