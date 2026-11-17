@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "baseUrl": "",
+  "note": "音频/试听文件的公网地址。例：{\"baseUrl\":\"https://cdn.zhangweivisual.cn/lib\",\"media\":{\"samples/zh-CN-YunjianNeural.mp3\":\"https://cdn.zhangweivisual.cn/lib/samples/zh-CN-YunjianNeural.mp3\"}}",
+  "media": {}
+}
