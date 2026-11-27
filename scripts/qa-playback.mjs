@@ -137,9 +137,14 @@ try {
       return preview.muted && !preview.paused && preview.currentTime > .1;
     }, selector);
     const hoverPlayingMs = Date.now() - started;
+    const continuesAfterNetworkChange = await card.locator("video").evaluate(video => {
+      navigator.connection.dispatchEvent(new Event("change"));
+      return !video.paused && video.hasAttribute("src");
+    });
+    assert.ok(continuesAfterNetworkChange, "Network estimate updates should not stop hover playback");
     await hoverPage.mouse.move(0, 0);
     assert.equal(await card.locator("video").evaluate(video => video.paused && !video.hasAttribute("src")), true);
-    results.push({ selector, hoverPlayingMs, releasedOnLeave: true });
+    results.push({ selector, hoverPlayingMs, continuesAfterNetworkChange, releasedOnLeave: true });
   }
   await desktop.close();
 
