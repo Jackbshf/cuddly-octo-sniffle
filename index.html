@@ -526,8 +526,7 @@
     { f: '06_earbuds_unboxing_00001_', title: '耳机开箱 · 产品广告', meta: '产品 / 10s', dur: '00:10', wide: false, local: true },
     { f: 'ffcffe00a999d24e399f2eeb2fc45b73', title: '东方庭院 · 数字人', meta: '数字人 / 10s', dur: '00:10', wide: false, local: false },
     { f: 'commercial-mirror-beauty-routine', title: '镜前美妆 · 护肤氛围', meta: '美妆 / 10s', dur: '00:10', wide: false, local: false },
-    { f: 'commercial-sereni-story-product', title: '舒缓产品 · 剧情短片', meta: '剧情 / 10s', dur: '00:10', wide: false, local: false },
-    { f: 'commercial-animated-street-story', srcFile: 'commercial-animated-street-story-faststart', title: '动画街景 · 商业叙事', meta: '剧情 / 1′48″', dur: '01:48', wide: false, local: false }
+    { f: 'commercial-sereni-story-product', title: '舒缓产品 · 剧情短片', meta: '剧情 / 10s', dur: '00:10', wide: false, local: false }
   ];
 
   window.__DSH_VIDEOS__ = VIDEOS;
@@ -560,11 +559,11 @@
       observer.unobserve(entry.target);
     });
   }, { rootMargin: '250px' });
-  VIDEOS.forEach(function (v, i) {
+  VIDEOS.forEach(function (v) {
     var vg = v.wide ? vgL : vgP;
     var art = document.createElement('article');
     art.className = 'vcard';
-    if (v.dur !== '01:48') art.dataset.warmSrc = srcOf(v);
+    art.dataset.previewId = v.f;
     art.tabIndex = 0;
     art.setAttribute('role', 'button');
     art.setAttribute('aria-label', '播放视频：' + v.title);
@@ -575,9 +574,7 @@
         '<span class="badge">VIDEO</span><span class="dur">' + v.dur + '</span>' +
       '</div>' +
       '<div class="meta"><h3>' + v.title + '</h3><small>' + v.meta + '</small></div>';
-    var video = art.querySelector('video');
     posterObserver.observe(art);
-    var frame = art.querySelector('.frame');
     art.style.width = (v.wide ? 533 : 236) + 'px';
     art.addEventListener('click', function () { openLightbox(v); });
     art.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLightbox(v); } });
@@ -628,18 +625,14 @@
 
   // 灯箱：横向片按原比例播放，不做裁切
   var lb = document.getElementById('lb');
-  var lbVideo = document.getElementById('lb-video');
-  var lbCap = document.getElementById('lb-cap');
   function closeLightbox() {
     window.__pendingPortfolioVideo = null;
     window.__portfolioPlayback?.close();
   }
 
   window.__openLightbox = openLightbox;
-  window.__warmLightbox = function (source) { window.__portfolioPlayback?.warm(source); };
-  window.__cancelWarmLightbox = function () { window.__portfolioPlayback?.cancelWarm(); };
   document.querySelectorAll('.case-video').forEach(function (button) {
-    button.dataset.warmSrc = 'showcase/videos/' + button.dataset.video + '.mp4';
+    button.dataset.previewId = button.dataset.video;
     button.addEventListener('click', function () {
       openLightbox({ f: button.dataset.video, title: button.dataset.title, meta: '宠物产品短片 / 完整视频' });
     });
@@ -652,7 +645,6 @@
   document.getElementById('lb-close').addEventListener('click', closeLightbox);
   lb.addEventListener('click', function (e) { if (e.target === lb) closeLightbox(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) lbVideo.pause(); });
 })();
 </script>
 <style>
@@ -852,6 +844,9 @@
   .feat .shot{position:relative;aspect-ratio:16/9;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
   .feat .shot img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
   .feat:hover .shot img{transform:scale(1.03)}
+  .feat .shot{position:relative}
+  .feat .shot video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;visibility:hidden;pointer-events:none}
+  .feat .shot video[data-preview-playing]{visibility:visible}
   .feat h3{font-size:14px;font-weight:600;margin:10px 0 2px}
   .feat span{font-size:11.5px;color:#7e8ea3}
   @media (max-width:900px){.featured{grid-template-columns:1fr}}
@@ -870,9 +865,9 @@
     var a = document.createElement('button');
     a.className = 'feat';
     a.type = 'button';
-    a.dataset.warmSrc = 'showcase/videos/' + (v.srcFile || v.f) + '.mp4';
+    a.dataset.previewId = v.f;
     a.innerHTML =
-      '<div class="shot"><img src="showcase/videos/' + v.f.replace(/_00001_$/, '') + '-wide.webp" alt="' + v.title + '" loading="lazy"></div>' +
+      '<div class="shot"><img src="showcase/videos/' + v.f.replace(/_00001_$/, '') + '-wide.webp" alt="' + v.title + '" loading="lazy"><video muted loop playsinline preload="none" aria-hidden="true"></video></div>' +
       '<h3>' + v.title + '</h3><span>' + v.meta + '</span>';
     a.addEventListener('click', function () {
       if (window.__openLightbox) window.__openLightbox(v);

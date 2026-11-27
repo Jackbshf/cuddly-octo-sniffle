@@ -10,7 +10,7 @@ const sourceIds = [
   "05_healing_mattress_00001_", "d9c14d8520e106a0803087b55aaea7ad",
   "06_earbuds_unboxing_00001_", "ffcffe00a999d24e399f2eeb2fc45b73",
   "commercial-mirror-beauty-routine", "commercial-sereni-story-product",
-  "commercial-animated-street-story", "pet-cats-product",
+  "pet-cats-product",
   "pet-golden-product", "pet-orange-cat-product", "pet-dogs-product", "lunar-rover"
 ];
 const profiles = [
@@ -57,7 +57,6 @@ export async function buildShowcasePlayback(root, distDir) {
     if (!entry) {
       await mkdir(cache, { recursive: true });
       const duration = Number(probe.format.duration);
-      const longVideo = duration > 30;
       const variants = [];
       for (const profile of selectedProfiles) {
         const ratio = profile.height / shortSide;
@@ -78,21 +77,6 @@ export async function buildShowcasePlayback(root, distDir) {
         ]);
         const file = await stat(target);
         variants.push({ label: name, width, height, bitrate: (profile.bitrate + profile.audio) * 1000, bytes: file.size, src: `showcase/media/${recipe}/${name}.mp4` });
-        if (longVideo) {
-          await command("ffmpeg", [
-            "-hide_banner", "-loglevel", "error", "-y", "-i", target,
-            "-c", "copy", "-hls_time", "2", "-hls_playlist_type", "vod",
-            "-hls_flags", "independent_segments", "-hls_list_size", "0",
-            "-hls_segment_filename", path.join(cache, `${name}-%03d.ts`), path.join(cache, `${name}.m3u8`)
-          ]);
-        }
-      }
-      if (longVideo) {
-        const master = ["#EXTM3U", "#EXT-X-VERSION:3", "#EXT-X-INDEPENDENT-SEGMENTS"];
-        for (const variant of variants) {
-          master.push(`#EXT-X-STREAM-INF:BANDWIDTH=${Math.ceil(variant.bitrate * 1.15)},RESOLUTION=${variant.width}x${variant.height}`, `${variant.label}.m3u8`);
-        }
-        await writeFile(path.join(cache, "master.m3u8"), `${master.join("\n")}\n`);
       }
       const posterCandidates = [
         `showcase/images/_posters/${id}.webp`,
@@ -102,16 +86,16 @@ export async function buildShowcasePlayback(root, distDir) {
       for (const candidate of posterCandidates) {
         if (await stat(path.join(root, candidate)).then(() => true).catch(() => false)) { poster = candidate; break; }
       }
-      entry = { duration, poster, variants, hls: longVideo ? `showcase/media/${recipe}/master.m3u8` : null };
+      entry = { duration, poster, variants };
       await writeFile(marker, JSON.stringify(entry));
     }
     const targetDir = path.join(destination, recipe);
     await mkdir(targetDir, { recursive: true });
     for (const filename of await readdir(cache)) {
-      if (filename !== "complete.json") await cp(path.join(cache, filename), path.join(targetDir, filename));
+      if (filename.endsWith(".mp4")) await cp(path.join(cache, filename), path.join(targetDir, filename));
     }
-    manifest.videos[id] = entry;
-    console.log(`[playback] ${id}: ${entry.variants.map(variant => variant.label).join(", ")}${entry.hls ? " + HLS" : ""}`);
+    manifest.videos[id] = { duration: entry.duration, poster: entry.poster, variants: entry.variants };
+    console.log(`[playback] ${id}: ${entry.variants.map(variant => variant.label).join(", ")}`);
   }
 
   const manifestData = `${JSON.stringify(manifest)}\n`;
@@ -121,7 +105,7 @@ export async function buildShowcasePlayback(root, distDir) {
   const bundle = await build({
     entryPoints: { player: path.join(root, "src", "showcase-player.js") },
     outdir: runtimeDir, entryNames: "[name]-[hash]", chunkNames: "[name]-[hash]",
-    bundle: true, splitting: true, format: "esm", platform: "browser", target: "es2020",
+    bundle: true, format: "esm", platform: "browser", target: "es2020",
     minify: true, legalComments: "none", metafile: true
   });
   const player = Object.entries(bundle.metafile.outputs).find(([, info]) => info.entryPoint?.endsWith("showcase-player.js"))[0];

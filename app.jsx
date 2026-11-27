@@ -758,22 +758,6 @@ const HOMEPAGE_CURATED_WORKS = {
       { label: "输出内容", value: "床垫宣传短视频、详情页封面和社媒素材" }
     ]
   },
-  "video-animated-street-story": {
-    id: "video-animated-street-story",
-    kind: "video",
-    category: "video",
-    duration: "01:48",
-    label: "视频入口",
-    title: "动画街景短片：商业场景叙事镜头",
-    description: "横版动画街区与角色运动镜头，适合展示场景调度、镜头节奏和连续叙事画面组织能力。",
-    tags: ["场景短片", "动画街景", "镜头调度"],
-    media: { kind: "video", url: "videos/commercial-animated-street-story.mp4", poster: "images/_posters/commercial-animated-street-story.webp", alt: "动画街景商业场景叙事短片封面" },
-    detailRows: [
-      { label: "项目类型", value: "横版场景叙事短片" },
-      { label: "我的职责", value: "场景镜头筛选、节奏整理、封面输出" },
-      { label: "输出内容", value: "可播放横版场景短片和视频封面" }
-    ]
-  },
   "video-mirror-beauty-routine": {
     id: "video-mirror-beauty-routine",
     kind: "video",
@@ -1034,7 +1018,6 @@ const HOMEPAGE_CURATION = {
     "video-digital-human",
     "video-mirror-beauty-routine",
     "video-sereni-story-product",
-    "video-animated-street-story"
   ],
   commercialImageCaseIds: [
     "case-product-ad",

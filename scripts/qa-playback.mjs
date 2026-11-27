@@ -33,7 +33,7 @@ const isMedia = url => /\.(mp4|m3u8|ts)(\?|$)/.test(url);
 async function ready(page) {
   const response = await page.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
   assert.equal(response.status(), 200);
-  await page.waitForFunction(() => window.__portfolioPlayback?.version === "exclusive-v1");
+  await page.waitForFunction(() => window.__portfolioPlayback?.version === "hover-mp4-v2");
 }
 async function playing(page) {
   await page.waitForFunction(() => {
@@ -74,32 +74,28 @@ try {
     const manifestUrl = await page.locator("script[data-portfolio-playback]").getAttribute("data-manifest");
     const manifestResponse = await page.request.get(new URL(manifestUrl, base).href);
     const manifest = await manifestResponse.json();
-    assert.equal(Object.keys(manifest.videos).length, 16);
-    assert.ok(Object.values(manifest.videos).every(entry => entry.variants.length >= 2));
+    assert.equal(Object.keys(manifest.videos).length, 15);
+    assert.ok(!manifest.videos["commercial-animated-street-story"]);
     const entry = manifest.videos["01_air_fryer_wings_00001_"];
     const card = page.locator("#featured .feat").first();
     await card.scrollIntoViewIfNeeded();
     await page.locator(".feat-dot").first().click();
     await card.hover();
-    await page.waitForFunction(() => window.__portfolioPlayback.inspect().warmed === "01_air_fryer_wings_00001_");
-    const warmedSource = await page.locator("#lb-video").getAttribute("src");
-    media.length = 0;
+    await page.waitForFunction(() => {
+      const preview = document.querySelector("#featured .feat video");
+      return preview.muted && !preview.paused && preview.currentTime > .1;
+    });
+    const selectedSource = await card.locator("video").evaluate(video => video.currentSrc);
+    assert.equal(await page.locator("video[src]").count(), 1);
     await card.click();
     await playing(page);
-    assert.equal(await page.locator("#lb-video").getAttribute("src"), warmedSource, "Click should reuse prewarmed source");
-    assert.ok(media.every(url => url.includes(new URL(warmedSource, base).pathname)), "Only the selected video should load");
+    assert.equal(await page.locator("#lb-video").evaluate(video => video.currentSrc), selectedSource);
     assert.equal(await page.locator("video[src]").count(), 1);
-    const beforeSwitch = await page.locator("#lb-video").evaluate(video => video.currentTime);
-    await page.locator(".pl-quality").selectOption(entry.variants.at(-1).label);
-    await playing(page);
-    const afterSwitch = await page.locator("#lb-video").evaluate(video => ({ currentTime: video.currentTime, quality: video.dataset.quality, width: video.videoWidth, height: video.videoHeight }));
-    assert.ok(afterSwitch.currentTime >= beforeSwitch - 0.1, "Quality change should retain playback position");
-    assert.equal(afterSwitch.quality, entry.variants.at(-1).label);
-    assert.equal(afterSwitch.width, entry.variants.at(-1).width);
+    assert.equal(await page.locator(".pl-quality").count(), 0);
+    assert.equal(await page.getByText(/流畅版本|切换流畅档/).count(), 0);
     await page.screenshot({ path: path.join(output, `player-${width}.png`) });
     await page.locator("#lb-close").click();
     await page.mouse.move(0, 0);
-    await page.waitForTimeout(800);
     assert.equal(await page.locator("video[src]").count(), 0);
     assert.equal(await page.locator("#lb").getAttribute("aria-hidden"), "true");
     const range = await page.request.get(new URL(entry.variants[0].src, base).href, { headers: { Range: "bytes=0-1023" } });
@@ -113,39 +109,50 @@ try {
     }
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.deepEqual(errors, []);
-    results.push({ width, lunarAutoplay: true, lunarProgress: [lunarStart, lunarEnd], lunarBackdrop: width > 640, lunarOffscreenRelease: true, lunarModalSuspendResume: true, exclusivePlayback: true, warmReuse: true, qualitySwitch: afterSwitch, range206: true, pageErrors: errors });
+    results.push({ width, lunarAutoplay: true, lunarProgress: [lunarStart, lunarEnd], hoverPlaying: true, exclusivePlayback: true, unchangedSource: true, range206: true, pageErrors: errors });
     await context.close();
     console.log(`Passed viewport ${width}`);
   }
 
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "reduce" });
   const page = await context.newPage();
   await ready(page);
-  await page.locator('#vg-portrait .vcard[role="button"]').last().click();
+  await page.route("**/480p.mp4", route => route.abort("failed"));
+  await page.locator("#featured .feat").first().click();
   await playing(page);
-  assert.equal(await page.evaluate(() => window.__portfolioPlayback.inspect().transport), "hls");
-  assert.ok(await page.locator("#lb-video").evaluate(video => video.currentSrc.startsWith("blob:")), "Chromium should use the verified MSE HLS path");
-  await page.locator("#lb-video").evaluate(video => { video.currentTime = 50; });
-  await page.waitForFunction(() => document.querySelector("#lb-video").currentTime >= 50 && document.querySelector("#lb-video").readyState >= 2);
-  await page.locator(".pl-quality").selectOption("480p");
-  await playing(page);
-  await page.screenshot({ path: path.join(output, "long-hls-seek.png") });
+  assert.ok((await page.locator("#lb-video").evaluate(video => video.currentSrc)).endsWith("/360p.mp4"));
   await page.locator("#lb-close").click();
-  await page.evaluate(() => {
-    window.__openLightbox({ f: "commercial-skincare-elixir-water", title: "切换测试 A", meta: "QA" });
-    window.__openLightbox({ f: "pet-cats-product-faststart", title: "切换测试 B", meta: "QA" });
-    window.__portfolioPlayback.close();
-  });
-  await page.waitForTimeout(1000);
-  assert.equal(await page.locator("video[src]").count(), 0);
-  assert.equal(await page.evaluate(() => window.__portfolioPlayback.inspect().id), null);
-  await page.route("**/master.m3u8", route => route.fulfill({ status: 503, contentType: "text/plain", body: "QA controlled HLS failure" }));
-  await page.locator('#vg-portrait .vcard[role="button"]').last().click();
-  await playing(page);
-  assert.equal(await page.evaluate(() => window.__portfolioPlayback.inspect().transport), "mp4");
-  await page.screenshot({ path: path.join(output, "hls-mp4-fallback.png") });
-  results.push({ longHls: true, longSeek: true, rapidSwitchCleanup: true, hlsFailureFallback: true });
+  results.push({ automaticFallback: true });
   await context.close();
+
+  const desktop = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
+  const hoverPage = await desktop.newPage();
+  await ready(hoverPage);
+  for (const selector of ["#vg-portrait .vcard[role='button']", ".case-video"]) {
+    const card = hoverPage.locator(selector).first();
+    const started = Date.now();
+    await card.hover();
+    await hoverPage.waitForFunction(selector => {
+      const preview = document.querySelector(selector).querySelector("video");
+      return preview.muted && !preview.paused && preview.currentTime > .1;
+    }, selector);
+    const hoverPlayingMs = Date.now() - started;
+    await hoverPage.mouse.move(0, 0);
+    assert.equal(await card.locator("video").evaluate(video => video.paused && !video.hasAttribute("src")), true);
+    results.push({ selector, hoverPlayingMs, releasedOnLeave: true });
+  }
+  await desktop.close();
+
+  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const touchPage = await mobile.newPage();
+  await ready(touchPage);
+  const touchCard = touchPage.locator("#vg-portrait .vcard[role='button']").first();
+  await touchCard.scrollIntoViewIfNeeded();
+  assert.equal(await touchPage.locator("[data-preview-id] video[src]").count(), 0);
+  await touchCard.tap();
+  await playing(touchPage);
+  results.push({ touchTapPlaying: true });
+  await mobile.close();
   await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed: true, results }, null, 2));
   console.log(JSON.stringify({ passed: true, results }));
 } catch (error) {
