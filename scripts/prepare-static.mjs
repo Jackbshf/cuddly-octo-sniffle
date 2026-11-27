@@ -538,9 +538,12 @@ async function main() {
     }
 
     await mkdir(path.dirname(destination), { recursive: true });
-    await cp(source, destination, { recursive: true });
+    await cp(source, destination, {
+      recursive: true,
+      filter: (file) => !/^commercial-animated-street-story(?:-faststart)?\.(mp4|webp)$/.test(path.basename(file))
+    });
   }
-  for (const name of ["03_electric_suv_studio_00001_", "03_electric_suv_studio_2x", "commercial-animated-street-story", "pet-cats-product", "pet-golden-product", "pet-orange-cat-product", "pet-dogs-product", "lunar-rover"]) {
+  for (const name of ["03_electric_suv_studio_00001_", "03_electric_suv_studio_2x", "pet-cats-product", "pet-golden-product", "pet-orange-cat-product", "pet-dogs-product", "lunar-rover"]) {
     const videoDir = path.join(distDir, "showcase", "videos");
     await runCommand("ffmpeg", [
       "-hide_banner", "-loglevel", "error", "-y",

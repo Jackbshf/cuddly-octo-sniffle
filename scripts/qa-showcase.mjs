@@ -52,7 +52,7 @@ try {
     page.on("pageerror", (error) => errors.page.push(error.message));
     page.on("response", (response) => { if (response.status() >= 400 && new URL(response.url()).origin === new URL(base).origin) errors.http.push(`${response.status()} ${response.url()}`); });
     const response = await page.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
-    await page.waitForFunction(() => window.__portfolioPlayback?.version === "exclusive-v1");
+    await page.waitForFunction(() => window.__portfolioPlayback?.version === "hover-mp4-v2");
     await page.locator("#gallery-grid .gcard").first().waitFor();
     for (const selector of ["#videos", "#cases", "#gallery", "#workflow", "#contact"]) {
       await page.locator(selector).scrollIntoViewIfNeeded();
@@ -147,22 +147,22 @@ try {
     await page.screenshot({ path: path.join(output, `${size.name}-video-viewer.png`) });
     await page.locator("#lb-close").click();
 
-    await page.locator("#vg-portrait .vcard[role='button']").last().click();
-    const longVideoOpen = await page.locator("#lb-video").evaluate(() => window.__portfolioPlayback.inspect().id === "commercial-animated-street-story");
-    const longVideoPlaying = await page.waitForFunction(() => {
+    await page.getByRole("button", { name: "播放视频：舒缓产品 · 剧情短片" }).click();
+    const shelfVideoPlaying = await page.waitForFunction(() => {
       const video = document.querySelector("#lb-video");
-      return video.videoWidth > 0 && video.readyState >= 2 && video.currentTime > 0;
+      return !video.paused && video.readyState >= 2 && video.currentTime > .1;
     }, undefined, { timeout: 20000 }).then(() => true).catch(() => false);
     await page.locator("#lb-video").hover({ position: { x: 30, y: 30 } });
     await page.locator("#lb .bar").click();
-    const longVideoSeek = await page.waitForFunction(() => {
+    const shelfVideoSeek = await page.waitForFunction(() => {
       const video = document.querySelector("#lb-video");
       return video.duration > 0 && video.currentTime >= video.duration * 0.45 && video.readyState >= 2;
     }, undefined, { timeout: 10000 }).then(() => true).catch(() => false);
-    const longVideoSeekState = await page.locator("#lb-video").evaluate((video) => ({ currentTime: video.currentTime, duration: video.duration, readyState: video.readyState, seeking: video.seeking }));
+    const retiredCardGone = await page.getByText("动画街景 · 商业叙事", { exact: true }).count() === 0;
+    const playbackControlsSimplified = await page.locator("#lb .pl-quality, #lb .video-feedback button:not([hidden])").count() === 0;
     await page.locator("#lb-close").click();
 
-    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseVideoOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, playerIconGone, playerTapWorks, longVideoOpen, longVideoPlaying, longVideoSeek, longVideoSeekState, errors });
+    results.push({ size: size.name, status: response.status(), ...metrics, imageViewer, gallerySource, zoomEnabled, imageFocusRestored, longImageScrollable, escapeClosesImage, caseVideoOpened, shelfDragWorks, lightboxOpen, cardVideoOpen, pinVideoOpen, pinVideoPlaying, playerIconGone, playerTapWorks, shelfVideoPlaying, shelfVideoSeek, retiredCardGone, playbackControlsSimplified, errors });
     await context.close();
   }
 
@@ -198,13 +198,20 @@ try {
   const warmContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
   const warmPage = await warmContext.newPage();
   await warmPage.goto(base, { waitUntil: "domcontentloaded", timeout: 45000 });
-  const noWarmAtTop = await warmPage.locator('#lb-video').evaluate((video) => !video.getAttribute('src'));
+  await warmPage.waitForFunction(() => window.__portfolioPlayback?.version === "hover-mp4-v2");
+  const noWarmAtTop = await warmPage.locator('video[src]').count() === 0;
   const warmItem = warmPage.locator('#featured .feat').first();
   await warmItem.scrollIntoViewIfNeeded();
   await warmItem.hover();
-  const visibleWarm = await warmPage.waitForFunction(() => window.__portfolioPlayback?.inspect().warmed === '01_air_fryer_wings_00001_', undefined, { timeout: 5000 }).then(() => true).catch(() => false);
-  const warmPaused = await warmPage.locator('#lb-video').evaluate((video) => video.paused && video.currentTime === 0);
-  const warmSrc = await warmPage.locator('#lb-video').evaluate((video) => video.src);
+  const visibleWarm = await warmPage.waitForFunction(() => {
+    const video = document.querySelector('#featured .feat video');
+    return video.muted && !video.paused && video.currentTime > .1 && video.hasAttribute('data-preview-playing');
+  }, undefined, { timeout: 12000 }).then(() => true).catch(() => false);
+  const warmSrc = await warmItem.locator('video').evaluate(video => video.currentSrc);
+  await warmPage.screenshot({ path: path.join(output, "desktop-1440-video-hover.png") });
+  await warmPage.mouse.move(0, 0);
+  const warmPaused = await warmItem.locator('video').evaluate(video => video.paused && !video.hasAttribute('src'));
+  const otherCardsUnloaded = await warmPage.locator('[data-preview-id] video[src]').count() === 0;
   await warmItem.click();
   const warmOpen = await warmPage.waitForFunction(() => document.querySelector('#lb-video').currentTime > 0, undefined, { timeout: 12000 }).then(() => true).catch(() => false);
   const warmKept = await warmPage.locator('#lb-video').evaluate((video, src) => video.src === src, warmSrc);
@@ -216,7 +223,7 @@ try {
   await reducedPage.locator('#featured .feat').first().scrollIntoViewIfNeeded();
   await reducedPage.locator('#featured .feat').first().hover();
   await reducedPage.waitForTimeout(1000);
-  const reducedWarmBlocked = await reducedPage.locator('#lb-video').evaluate((video) => !video.getAttribute('src'));
+  const reducedWarmBlocked = await reducedPage.locator('[data-preview-id] video[src]').count() === 0;
   await reducedContext.close();
 
   const saveDataContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
@@ -226,7 +233,7 @@ try {
   await saveDataPage.locator('#featured .feat').first().scrollIntoViewIfNeeded();
   await saveDataPage.locator('#featured .feat').first().hover();
   await saveDataPage.waitForTimeout(1000);
-  const saveDataWarmBlocked = await saveDataPage.locator('#lb-video').evaluate((video) => !video.getAttribute('src'));
+  const saveDataWarmBlocked = await saveDataPage.locator('[data-preview-id] video[src]').count() === 0;
   await saveDataPage.locator("#pin-media").scrollIntoViewIfNeeded();
   await saveDataPage.waitForTimeout(400);
   const saveDataPaused = await saveDataPage.locator("#pin-media").evaluate((media) => navigator.connection?.saveData === true && [...media.querySelectorAll("video")].every((video) => video.paused && !video.currentSrc));
@@ -234,7 +241,7 @@ try {
   const saveDataManualOpen = await saveDataPage.locator("#lb").getAttribute("data-open") === "1";
   await saveDataContext.close();
   motionPolicy = { offscreenPaused, offscreenUnloaded, onscreenPlaying, previewSourceCorrect, pausedAfterScroll, mobilePlaying, mobileBackdropUnloaded, saveDataPaused, saveDataManualOpen };
-  warmPolicy = { noWarmAtTop, visibleWarm, warmPaused, warmOpen, warmKept, reducedWarmBlocked, saveDataWarmBlocked };
+  warmPolicy = { noWarmAtTop, visibleWarm, warmPaused, otherCardsUnloaded, warmOpen, warmKept, reducedWarmBlocked, saveDataWarmBlocked };
 } finally {
   await browser.close();
   if (server) await new Promise((resolve) => server.close(resolve));
@@ -242,7 +249,7 @@ try {
 let rangeDelivery = null;
 if (remote) {
   rangeDelivery = {};
-  for (const [name, filename] of Object.entries({ cats: "pet-cats-product-faststart.mp4", golden: "pet-golden-product-faststart.mp4", orangeCat: "pet-orange-cat-product-faststart.mp4", dogs: "pet-dogs-product-faststart.mp4", rover: "lunar-rover-faststart.mp4", roverBackdrop: "lunar-rover-backdrop.mp4", long: "commercial-animated-street-story-faststart.mp4" })) {
+  for (const [name, filename] of Object.entries({ cats: "pet-cats-product-faststart.mp4", golden: "pet-golden-product-faststart.mp4", orangeCat: "pet-orange-cat-product-faststart.mp4", dogs: "pet-dogs-product-faststart.mp4", rover: "lunar-rover-faststart.mp4", roverBackdrop: "lunar-rover-backdrop.mp4" })) {
     try {
       const response = await fetch(new URL(`showcase/videos/${filename}`, base), {
         headers: { Range: "bytes=0-1023" }, signal: AbortSignal.timeout(20000)
@@ -253,7 +260,7 @@ if (remote) {
     }
   }
 }
-const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.pinFullBleed && r.playIconsGone && r.qrVisible && r.qrToneApplied && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.longVideoOpen && r.longVideoPlaying && r.longVideoSeek && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && Object.values(warmPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
+const passed = results.every((r) => r.status === 200 && r.width <= r.viewport && r.galleryCount >= 7 && !r.brokenImages.length && !r.emptyAlts && r.navVisible && r.contactLinkGone && r.pinPaused && r.pinCopyGone && r.pinOpenVisible && r.pinFullBleed && r.playIconsGone && r.qrVisible && r.qrToneApplied && r.cases.length === 4 && r.caseSourcesUnloaded && r.cases.every((item) => item.height > 0 && item.videoWidth > 0 && item.poster) && r.imageViewer.open && r.imageViewer.imageFits && r.imageViewer.source === r.gallerySource && r.zoomEnabled && r.imageFocusRestored && r.longImageScrollable && r.escapeClosesImage && r.caseVideoOpened.length === 4 && r.caseVideoOpened.every(Boolean) && r.shelfDragWorks && r.lightboxOpen && r.cardVideoOpen && r.pinVideoOpen && r.pinVideoPlaying && r.playerIconGone && r.playerTapWorks && r.shelfVideoPlaying && r.shelfVideoSeek && r.retiredCardGone && r.playbackControlsSimplified && !r.errors.console.length && !r.errors.page.length && !r.errors.http.length) && Object.values(motionPolicy).every(Boolean) && Object.values(warmPolicy).every(Boolean) && (!remote || Object.values(rangeDelivery).every(Boolean));
 await writeFile(path.join(output, "report.json"), JSON.stringify({ base, passed, motionPolicy, warmPolicy, rangeDelivery, results }, null, 2));
 console.log(JSON.stringify({ base, passed, motionPolicy, warmPolicy, rangeDelivery, results }, null, 2));
 if (!passed) process.exitCode = 1;
