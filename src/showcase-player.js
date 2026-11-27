@@ -203,7 +203,9 @@ document.querySelectorAll("[data-preview-id]").forEach(card => {
 });
 reduceMotion.addEventListener("change", stopPreview);
 hoverPointer.addEventListener("change", stopPreview);
-connection?.addEventListener?.("change", stopPreview);
+connection?.addEventListener?.("change", () => {
+  if (connection.saveData) stopPreview();
+});
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) return;
   stopPreview();
